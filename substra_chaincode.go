@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
+	"strings"
 )
 
-// Receiver for Chaincode shim functions
+// SubstraChaincode is a Receiver for Chaincode shim functions
 type SubstraChaincode struct {
 }
 
-// Define Struct used for the ledger
+// Problem is one of the element type stored in the ledger
 type Problem struct {
 	name                      string   `json:"name"`
 	descriptionStorageAddress string   `json:"descriptionStorageAddress"`
@@ -23,6 +24,7 @@ type Problem struct {
 	permissions               string   `json:"permissions"`
 }
 
+// Data is one of the element type stored in the ledger
 type Data struct {
 	name        string   `json:"name"`
 	dataOpener  string   `json:"dataOpener"`
@@ -31,6 +33,7 @@ type Data struct {
 	permissions string   `json:permissions`
 }
 
+// Algo is one of the element type stored in the ledger
 type Algo struct {
 	name           string `json:"name"`
 	storageAddress string `json:"storageAddress"`
@@ -86,33 +89,34 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	// Extract the function and args from the transaction proposal
 	fn, args := stub.GetFunctionAndParameters()
 
-	var result string
+	var result []byte
 	var err error
 	switch fn {
 	case "addData":
-		result, err = set(stub, args)
+		result, err = addData(stub, args)
 	case "addAlgo":
-		result, err = get(stub, args)
+		result, err = addAlgo(stub, args)
 	default:
-		err = "function not implemented"
+		err = fmt.Errorf("function not implemented")
 	}
 	// Return the result as success payload
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	return shim.Success([]byte(result))
+	return shim.Success(result)
 }
 
 // addData stores a new data in the ledger.
 // If the key exists, it will override the value with the new one
 // TODO check if args 0 or args 1
-func addData(stub shim.ChaincodeStubInterface, args []string) (string, error) {
+func addData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 5 {
-		return "", fmt.Errorf("incorrect arguments, expecting 5 args: " +
+		return nil, fmt.Errorf("incorrect arguments, expecting 5 args: " +
 			"data hash, name, data opener hash, associated problems, permissions")
 	}
 
 	// TODO check input types
+	problems := strings.Split(strings.Replace(args[3], " ", "", -1), ",")
 	// create data key
 	key := "data_" + args[0]
 	// find associated owner
@@ -123,24 +127,24 @@ func addData(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 		name:        args[1],
 		dataOpener:  args[2],
 		owner:       owner,
-		problems:    args[3],
+		problems:    problems,
 		permissions: args[4]}
 	dataBytes, _ := json.Marshal(data)
 	err := stub.PutState(key, dataBytes)
 	if err != nil {
-		return "", fmt.Errorf("failed to add data with hash %s", args[0])
+		return nil, fmt.Errorf("failed to add data with hash %s", args[0])
 	}
 	// create composite keys (one for each associated problem)
 	indexName := "data~problem~key"
 	for _, problem := range data.problems {
 		compositeKey, err := stub.CreateCompositeKey(indexName, []string{"data", problem, key})
 		if err != nil {
-			return shim.Error(err.Error())
+			return nil, err
 		}
 		value := []byte{0x00}
-		err := stub.PutState(compositeKey, value)
+		err = stub.PutState(compositeKey, value)
 		if err != nil {
-			return "", fmt.Errorf("failed to add composite key for data with hash %s", args[0])
+			return nil, fmt.Errorf("failed to add composite key for data with hash %s", args[0])
 		}
 	}
 	return dataBytes, nil
@@ -149,9 +153,9 @@ func addData(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 // addAlgo stores a new algo in the ledger.
 // If the key exists, it will override the value with the new one
 // TODO check if args 0 or args 1
-func addAlgo(stub shim.ChaincodeStubInterface, args []string) (string, error) {
+func addAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 5 {
-		return "", fmt.Errorf("incorrect arguments, expecting 5 args: " +
+		return nil, fmt.Errorf("incorrect arguments, expecting 5 args: " +
 			"algo hash, name, storage address, associated problem, permissions")
 	}
 
@@ -172,18 +176,18 @@ func addAlgo(stub shim.ChaincodeStubInterface, args []string) (string, error) {
 	algoBytes, _ := json.Marshal(algo)
 	err := stub.PutState(key, algoBytes)
 	if err != nil {
-		return "", fmt.Errorf("failed to add algo with hash %s", args[0])
+		return nil, fmt.Errorf("failed to add algo with hash %s", args[0])
 	}
 	// create composite key
 	indexName := "algo~problem~key"
 	compositeKey, err := stub.CreateCompositeKey(indexName, []string{"algo", problem, key})
 	if err != nil {
-		return shim.Error(err.Error())
+		return nil, err
 	}
 	value := []byte{0x00}
-	err := stub.PutState(compositeKey, value)
+	err = stub.PutState(compositeKey, value)
 	if err != nil {
-		return "", fmt.Errorf("failed to add composite key for algo with hash %s", args[0])
+		return nil, fmt.Errorf("failed to add composite key for algo with hash %s", args[0])
 	}
 	return algoBytes, nil
 }
