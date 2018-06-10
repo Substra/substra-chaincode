@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"encoding/json"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/hyperledger/fabric/protos/peer"
-	"strings"
+	peer "github.com/hyperledger/fabric/protos/peer"
 )
 
 // SubstraChaincode is a Receiver for Chaincode shim functions
@@ -96,6 +96,10 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = addData(stub, args)
 	case "addAlgo":
 		result, err = addAlgo(stub, args)
+	case "query":
+		result, err = query(stub, args)
+	case "queryData":
+		result, err = queryData(stub, args)
 	default:
 		err = fmt.Errorf("function not implemented")
 	}
@@ -134,7 +138,7 @@ func addData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to add data with hash %s", args[0])
 	}
-	// create composite keys (one for each associated problem)
+	// create composite keys (one for each associated problem) to find data associated with a problem
 	indexName := "data~problem~key"
 	for _, problem := range data.problems {
 		compositeKey, err := stub.CreateCompositeKey(indexName, []string{"data", problem, key})
@@ -147,6 +151,7 @@ func addData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 			return nil, fmt.Errorf("failed to add composite key for data with hash %s", args[0])
 		}
 	}
+	// create composite key to find data of a same dataset (= same data opener)
 	return dataBytes, nil
 }
 
@@ -190,6 +195,59 @@ func addAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to add composite key for algo with hash %s", args[0])
 	}
 	return algoBytes, nil
+}
+
+// query returns an element of the ledger given its key
+// For now, ok for everything. Later returns if the requester has permission to see it
+func query(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var key string
+
+	if len(args) != 1 {
+		return nil, fmt.Errorf("incorrect number of arguments, expecting the key of the element to query")
+	}
+
+	key = args[0]
+	valAsbytes, err := stub.GetState(key)
+	if err != nil {
+		return nil, err
+	} else if valAsbytes == nil {
+		return nil, fmt.Errorf("no element with this key %s", key)
+	}
+
+	return valAsbytes, nil
+}
+
+// query returns an element of the ledger given its key
+// For now, ok for everything. Later returns if the requester has permission to see it
+func queryData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
+	}
+
+	elementsIterator, err := stub.GetStateByRange("data_", "dataa")
+	if err != nil {
+		return nil, err
+	}
+	var elements []map[string]interface{}
+	for elementsIterator.HasNext() {
+		queryResponse, err := elementsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+		var element map[string]interface{}
+		err = json.Unmarshal(queryResponse.GetValue(), &elements)
+		if err != nil {
+			return nil, err
+		}
+		element["key"] = queryResponse.GetKey()
+		elements = append(elements, element)
+	}
+	payload, err := json.Marshal(elements)
+	if err != nil {
+		return nil, err
+	}
+
+	return payload, nil
 }
 
 // main function starts up the chaincode in the container during instantiate

@@ -1,8 +1,9 @@
 Using dev mode
 ==============
 
-> **Copyright 06/08/2018 Hyperledger Fabric** 
-> Hyperledger Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0).
+> **Copyright before 06/08/2018 Hyperledger Fabric** [Link to source code](https://github.com/hyperledger/fabric-samples/tree/release-1.1/chaincode-docker-devmode) 
+> Licensed under Creative Commons Attribution 4.0 International License 
+> **Copyright after 06/08/2018 Owkin, Substra project**, licensed under the Apache-2.0. 
 
 Normally chaincodes are started and maintained by peer. However in “dev
 mode", chaincode is built and started by the user. This mode is useful
@@ -89,14 +90,13 @@ Now, compile your chaincode:
 
 .. code:: bash
 
-  cd chaincode_example02/go
-  go build -o chaincode_example02
+  go build -o substra_chaincode
 
 Now run the chaincode:
 
 .. code:: bash
 
-  CORE_PEER_ADDRESS=peer:7052 CORE_CHAINCODE_ID_NAME=mycc:0 ./chaincode_example02
+  CORE_PEER_ADDRESS=peer:7052 CORE_CHAINCODE_ID_NAME=mycc:0 ./substra_chaincode
 
 The chaincode is started with peer and chaincode logs indicating successful registration with the peer.
 Note that at this stage the chaincode is not associated with any channel. This is done in subsequent steps
@@ -117,7 +117,7 @@ We'll leverage the CLI container to drive these calls.
 
 .. code:: bash
 
-  peer chaincode install -p chaincodedev/chaincode/chaincode_example02/go -n mycc -v 0
+  peer chaincode install -p chaincodedev/chaincode/ -n mycc -v 0
   peer chaincode instantiate -n mycc -v 0 -c '{"Args":["init","a","100","b","200"]}' -C myc
 
 Now issue an invoke to move ``10`` from ``a`` to ``b``.
@@ -132,12 +132,6 @@ Finally, query ``a``.  We should see a value of ``90``.
 
   peer chaincode query -n mycc -c '{"Args":["query","a"]}' -C myc
 
-Testing new chaincode
----------------------
-
-By default, we mount only ``chaincode_example02``.  However, you can easily test different
-chaincodes by adding them to the ``chaincode`` subdirectory and relaunching
-your network.  At this point they will be accessible in your ``chaincode`` container.
 
 .. Licensed under Creative Commons Attribution 4.0 International License
      https://creativecommons.org/licenses/by/4.0/
