@@ -15,49 +15,49 @@ type SubstraChaincode struct {
 
 // Problem is one of the element type stored in the ledger
 type Problem struct {
-	name                      string   `json:"name"`
-	descriptionStorageAddress string   `json:"descriptionStorageAddress"`
-	metricsStorageAddress     string   `json:"metricsStorageAddress"`
-	metricsHash               string   `json:"metricsHash"`
-	owner                     string   `json:"owner"`
-	testData                  []string `json:"testData"`
-	permissions               string   `json:"permissions"`
+	Name                      string   `json:"name"`
+	DescriptionStorageAddress string   `json:"descriptionStorageAddress"`
+	MetricsStorageAddress     string   `json:"metricsStorageAddress"`
+	MetricsHash               string   `json:"metricsHash"`
+	Owner                     string   `json:"owner"`
+	TestData                  []string `json:"testData"`
+	Permissions               string   `json:"permissions"`
 }
 
 // Data is one of the element type stored in the ledger
 type Data struct {
-	name        string   `json:"name"`
-	dataOpener  string   `json:"dataOpener"`
-	owner       string   `json:"owner"`
-	problems    []string `json:problems`
-	permissions string   `json:permissions`
+	Name        string   `json:"name"`
+	DataOpener  string   `json:"dataOpener"`
+	Owner       string   `json:"owner"`
+	Problems    []string `json:problems`
+	Permissions string   `json:permissions`
 }
 
 // Algo is one of the element type stored in the ledger
 type Algo struct {
-	name           string `json:"name"`
-	storageAddress string `json:"storageAddress"`
-	owner          string `json:"owner"`
-	problem        string `json:problem`
-	permissions    string `json:permissions`
+	Name           string `json:"name"`
+	StorageAddress string `json:"storageAddress"`
+	Owner          string `json:"owner"`
+	Problem        string `json:problem`
+	Permissions    string `json:permissions`
 }
 
 type TrainTuple struct {
-	problem         map[string][2]string `json:"problem"`
-	algo            map[string]string    `json:"algo"`
-	startModel      map[string]string    `json:"startModel"`
-	endModel        map[string]string    `json:"endModel"`
-	trainData       []string             `json:"trainData"`
-	trainDataOpener string               `json:"trainDataOpener"`
-	trainWorker     string               `json:"trainWorker"`
-	testWorker      string               `json:"testWorker"`
-	status          string               `json:"status"`
-	rank            int                  `json:"rank"`
-	perf            float32              `json:"perf"`
-	trainPerf       map[string]float32   `json:"trainPerf"`
-	testPerf        map[string]float32   `json:"testPerf"`
-	log             string               `json:"log"`
-	permissions     string               `json:"permissions"`
+	Problem         map[string][2]string `json:"problem"`
+	Algo            map[string]string    `json:"algo"`
+	StartModel      map[string]string    `json:"startModel"`
+	EndModel        map[string]string    `json:"endModel"`
+	TrainData       []string             `json:"trainData"`
+	TrainDataOpener string               `json:"trainDataOpener"`
+	TrainWorker     string               `json:"trainWorker"`
+	TestWorker      string               `json:"testWorker"`
+	Status          string               `json:"status"`
+	Rank            int                  `json:"rank"`
+	Perf            float32              `json:"perf"`
+	TrainPerf       map[string]float32   `json:"trainPerf"`
+	TestPerf        map[string]float32   `json:"testPerf"`
+	Log             string               `json:"log"`
+	Permissions     string               `json:"permissions"`
 }
 
 // Init is called during chaincode instantiation to initialize any
@@ -67,17 +67,17 @@ type TrainTuple struct {
 func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	// Get the args from the transaction proposal
 	args := stub.GetStringArgs()
-	if len(args) != 2 {
-		return shim.Error("Incorrect arguments. Expecting a key and a value")
+	if len(args) != 1 {
+		return shim.Error("Incorrect arguments. Expecting nothing...")
 	}
 
 	// Set up any variables or assets here by calling stub.PutState()
 
 	// We store the key and the value on the ledger
-	err := stub.PutState(args[0], []byte(args[1]))
-	if err != nil {
-		return shim.Error(fmt.Sprintf("Failed to create asset: %s", args[0]))
-	}
+	// err := stub.PutState(args[0], []byte(args[1]))
+	// if err != nil {
+	// 	return shim.Error(fmt.Sprintf("Failed to create asset: %s", args[0]))
+	// }
 	return shim.Success(nil)
 }
 
@@ -128,11 +128,11 @@ func addData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	owner := "TODO"
 	// create data object
 	var data = Data{
-		name:        args[1],
-		dataOpener:  args[2],
-		owner:       owner,
-		problems:    problems,
-		permissions: args[4]}
+		Name:        args[1],
+		DataOpener:  args[2],
+		Owner:       owner,
+		Problems:    problems,
+		Permissions: args[4]}
 	dataBytes, _ := json.Marshal(data)
 	err := stub.PutState(key, dataBytes)
 	if err != nil {
@@ -140,7 +140,7 @@ func addData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	}
 	// create composite keys (one for each associated problem) to find data associated with a problem
 	indexName := "data~problem~key"
-	for _, problem := range data.problems {
+	for _, problem := range data.Problems {
 		compositeKey, err := stub.CreateCompositeKey(indexName, []string{"data", problem, key})
 		if err != nil {
 			return nil, err
@@ -173,11 +173,11 @@ func addAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	owner := "TODO"
 	// create data object
 	var algo = Algo{
-		name:           args[1],
-		storageAddress: args[2],
-		owner:          owner,
-		problem:        problem,
-		permissions:    args[4]}
+		Name:           args[1],
+		StorageAddress: args[2],
+		Owner:          owner,
+		Problem:        problem,
+		Permissions:    args[4]}
 	algoBytes, _ := json.Marshal(algo)
 	err := stub.PutState(key, algoBytes)
 	if err != nil {
@@ -235,7 +235,7 @@ func queryData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) 
 			return nil, err
 		}
 		var element map[string]interface{}
-		err = json.Unmarshal(queryResponse.GetValue(), &elements)
+		err = json.Unmarshal(queryResponse.GetValue(), &element)
 		if err != nil {
 			return nil, err
 		}
