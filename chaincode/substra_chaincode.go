@@ -50,6 +50,8 @@ type TrainTuple struct {
 	TrainData       []string             `json:"trainData"`
 	TrainDataOpener string               `json:"trainDataOpener"`
 	TrainWorker     string               `json:"trainWorker"`
+	TestData        []string             `json:"testData"`
+	TestDataOpener  string               `json:"testDataOpener"`
 	TestWorker      string               `json:"testWorker"`
 	Status          string               `json:"status"`
 	Rank            int                  `json:"rank"`
@@ -58,6 +60,7 @@ type TrainTuple struct {
 	TestPerf        map[string]float32   `json:"testPerf"`
 	Log             string               `json:"log"`
 	Permissions     string               `json:"permissions"`
+	Creator         string               `json:"creator"`
 }
 
 // Init is called during chaincode instantiation to initialize any
@@ -92,14 +95,20 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	var result []byte
 	var err error
 	switch fn {
+	case "addProblem":
+		result, err = addProblem(stub, args)
 	case "addData":
 		result, err = addData(stub, args)
 	case "addAlgo":
 		result, err = addAlgo(stub, args)
 	case "query":
 		result, err = query(stub, args)
+	case "queryProblem":
+		result, err = queryAll(stub, args, "problem")
 	case "queryData":
-		result, err = queryData(stub, args)
+		result, err = queryAll(stub, args, "data")
+	case "queryAlgo":
+		result, err = queryAll(stub, args, "algo")
 	default:
 		err = fmt.Errorf("function not implemented")
 	}
@@ -110,16 +119,48 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	return shim.Success(result)
 }
 
+// addProblema stores a new problem in the ledger.
+// If the key exists, it will override the value with the new one
+func addProblem(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 7 {
+		return nil, fmt.Errorf("incorrect arguments, expecting 7 args: " +
+			"description hash, name, description storage address, metrics storage address, " +
+			"metrics hash, list of test data, permissions")
+	}
+
+	// TODO check input types and check if data exist and are from the same center
+	testData := strings.Split(strings.Replace(args[5], " ", "", -1), ",")
+	// create problem key
+	key := "problem_" + args[0]
+	// find associated owner
+	// TODO
+	owner := "TODO"
+	// create data object
+	var problem = Problem{
+		Name: args[1],
+		DescriptionStorageAddress: args[2],
+		MetricsStorageAddress:     args[3],
+		MetricsHash:               args[4],
+		Owner:                     owner,
+		TestData:                  testData,
+		Permissions:               args[6]}
+	problemBytes, _ := json.Marshal(problem)
+	err := stub.PutState(key, problemBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to add problem with description hash %s", args[0])
+	}
+	return problemBytes, nil
+}
+
 // addData stores a new data in the ledger.
 // If the key exists, it will override the value with the new one
-// TODO check if args 0 or args 1
 func addData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 5 {
 		return nil, fmt.Errorf("incorrect arguments, expecting 5 args: " +
 			"data hash, name, data opener hash, associated problems, permissions")
 	}
 
-	// TODO check input types
+	// TODO check input types + check if problems are in the ledger
 	problems := strings.Split(strings.Replace(args[3], " ", "", -1), ",")
 	// create data key
 	key := "data_" + args[0]
@@ -157,7 +198,6 @@ func addData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 
 // addAlgo stores a new algo in the ledger.
 // If the key exists, it will override the value with the new one
-// TODO check if args 0 or args 1
 func addAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 5 {
 		return nil, fmt.Errorf("incorrect arguments, expecting 5 args: " +
@@ -197,6 +237,163 @@ func addAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	return algoBytes, nil
 }
 
+// addTrainTuple add a Train Tuple in the ledger
+// ....
+func addTrainTuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 1 {
+		return nil, fmt.Errorf("incorrect number of arguments, expecting the key of the element to query")
+	}
+
+	// find associated creator and check permissions (TODO later)
+	creator := "TODO"
+
+	problemKey := args[0]
+	startModelKey := args[1]
+	trainDataKeys := strings.Split(strings.Replace(args[2], " ", "", -1), ",")
+
+	// check if train data exist and are from the same center with the same data opener
+	// derive trainDataOpener and trainWorker
+	var trainWorker, trainDataOpener string
+	for i, dataKey := range trainDataKeys {
+		dataBytes, err := stub.GetState(dataKey)
+		if err != nil {
+			return nil, err
+		} else if dataBytes == nil {
+			return nil, fmt.Errorf("no data with this key %s", dataKey)
+		}
+		data := Data{}
+		err = json.Unmarshal(dataBytes, &data)
+		if i == 0 {
+			trainWorker = data.Owner
+			trainDataOpener = data.DataOpener
+		}
+		if data.Owner != trainWorker {
+			return nil, fmt.Errorf("data do not come from the same center...")
+		}
+	}
+
+	// get algo key of start model from previous learnuplets
+	// TODO
+	compositeIterator, err := stub.GetStateByPartialCompositeKey("trainTuple~endModel~key", []string{"trainTuple", startModelKey})
+	if err != nil {
+		return nil, err
+	}
+	defer compositeIterator.Close()
+	var i, rank int
+	var parentTrainTupleKey string
+	var testDataKeys []string
+	problem := make(map[string][2]string)
+	algo := make(map[string]string)
+	startModel := make(map[string]string)
+	for i = 0; compositeIterator.HasNext(); i++ {
+		compositeKey, err := compositeIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+		// get the color and name from color~name composite key
+		_, compositeKeyParts, err := stub.SplitCompositeKey(compositeKey.Key)
+		if err != nil {
+			return nil, err
+		}
+		parentTrainTupleKey = compositeKeyParts[2]
+		fmt.Printf("- found %s with endModel %s\n", parentTrainTupleKey, startModelKey)
+	}
+	if i > 2 {
+		return nil, fmt.Errorf("several models associated with start model hash")
+	} else if i == 1 {
+		// model derives from a previous TrainTuple
+		parentTrainTuple := TrainTuple{}
+		trainTupleBytes, err := stub.GetState(parentTrainTupleKey)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(trainTupleBytes, &parentTrainTuple)
+		if err != nil {
+			return nil, err
+		}
+		algo = parentTrainTuple.Algo
+		startModel = parentTrainTuple.EndModel
+		rank = parentTrainTuple.Rank + 1
+		problem = parentTrainTuple.Problem
+		testDataKeys = parentTrainTuple.TestData
+	} else {
+		// first time algo is trained
+		rank = 0
+		// get problem to derive metrics info and test data keys
+		problemBytes, err := stub.GetState(problemKey)
+		if err != nil {
+			return nil, err
+		} else if problemBytes == nil {
+			return nil, fmt.Errorf("no problem with this key %s", problemKey)
+		}
+		retrievedProblem := Problem{}
+		err = json.Unmarshal(problemBytes, &retrievedProblem)
+		if err != nil {
+			return nil, err
+		}
+		testDataKeys = retrievedProblem.TestData
+		problem[problemKey] = [2]string{retrievedProblem.MetricsHash, retrievedProblem.MetricsStorageAddress}
+		// get algo
+		algoBytes, err := stub.GetState(startModelKey)
+		if err != nil {
+			return nil, err
+		} else if algoBytes == nil {
+			return nil, fmt.Errorf("no algo with this key %s", startModelKey)
+		}
+		retrievedAlgo := Algo{}
+		err = json.Unmarshal(algoBytes, &retrievedAlgo)
+		if err != nil {
+			return nil, err
+		}
+		algo[startModelKey] = retrievedAlgo.StorageAddress
+	}
+
+	// get testWorker given test data and test data opener
+	// for now, we assume that test data of a problem are all located in the same center
+	// and have the same data opener
+	testDataBytes, err := stub.GetState(testDataKeys[0])
+	if err != nil {
+		return nil, err
+	}
+	testData := Data{}
+	err = json.Unmarshal(testDataBytes, &testData)
+	if err != nil {
+		return nil, err
+	}
+	testWorker := testData.Owner
+	testDataOpener := testData.DataOpener
+
+	// create learnuplet and add it to ledger
+	var trainTuple = TrainTuple{
+		Problem:         problem,
+		Algo:            algo,
+		StartModel:      startModel,
+		EndModel:        make(map[string]string),
+		TrainData:       trainDataKeys,
+		TrainDataOpener: trainDataOpener,
+		TrainWorker:     trainWorker,
+		TestData:        testDataKeys,
+		TestDataOpener:  testDataOpener,
+		TestWorker:      testWorker,
+		Status:          "todo",
+		Rank:            rank,
+		Perf:            0.0,
+		TrainPerf:       make(map[string]float32),
+		TestPerf:        make(map[string]float32),
+		Log:             "",
+		Permissions:     "all",
+		Creator:         creator,
+	}
+	// TODO create key
+	key := "todo"
+	trainTupleBytes, _ := json.Marshal(trainTuple)
+	err = stub.PutState(key, trainTupleBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to add trainTuple with startModel %s and problem %s", startModelKey, problemKey)
+	}
+	return trainTupleBytes, nil
+}
+
 // query returns an element of the ledger given its key
 // For now, ok for everything. Later returns if the requester has permission to see it
 func query(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -207,24 +404,24 @@ func query(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	}
 
 	key = args[0]
-	valAsbytes, err := stub.GetState(key)
+	valBytes, err := stub.GetState(key)
 	if err != nil {
 		return nil, err
-	} else if valAsbytes == nil {
+	} else if valBytes == nil {
 		return nil, fmt.Errorf("no element with this key %s", key)
 	}
 
-	return valAsbytes, nil
+	return valBytes, nil
 }
 
-// query returns an element of the ledger given its key
+// queryAll returns all elements of the ledger given its type
 // For now, ok for everything. Later returns if the requester has permission to see it
-func queryData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func queryAll(stub shim.ChaincodeStubInterface, args []string, elementType string) ([]byte, error) {
 	if len(args) != 0 {
 		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
 	}
 
-	elementsIterator, err := stub.GetStateByRange("data_", "dataa")
+	elementsIterator, err := stub.GetStateByRange(elementType+"_", elementType+"a")
 	if err != nil {
 		return nil, err
 	}
