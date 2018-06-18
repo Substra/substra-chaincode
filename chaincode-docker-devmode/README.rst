@@ -118,20 +118,18 @@ We'll leverage the CLI container to drive these calls.
 .. code:: bash
 
   peer chaincode install -p chaincodedev/chaincode/ -n mycc -v 0
-  peer chaincode instantiate -n mycc -v 0 -c '{"Args":["init","a","100","b","200"]}' -C myc
+  peer chaincode instantiate -n mycc -v 0 -c '{"Args":["init"]}' -C myc
 
-Now issue an invoke to move ``10`` from ``a`` to ``b``.
-
-.. code:: bash
-
-  peer chaincode invoke -n mycc -c '{"Args":["invoke","a","b","10"]}' -C myc
-
-Finally, query ``a``.  We should see a value of ``90``.
+Now issue an invoke to create a problem.
 
 .. code:: bash
 
-  peer chaincode query -n mycc -c '{"Args":["query","a"]}' -C myc
+  peer chaincode invoke -n mycc -c '{"Args":["addProblem","5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379", "msi classification","https://toto/problem/222/description","https://toto/problem/222/metrics", "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482d8d","data_fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482d8a, data_fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482d8e","all"]}' -C myc
+
+Finally, query all problems.  We should see the newly added problem.
+
+.. code:: bash
+
+  peer chaincode query -n mycc -c '{"Args":["queryProblem"]}' -C myc
 
 
-.. Licensed under Creative Commons Attribution 4.0 International License
-     https://creativecommons.org/licenses/by/4.0/

@@ -240,8 +240,8 @@ func addAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 // addTrainTuple add a Train Tuple in the ledger
 // ....
 func addTrainTuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 1 {
-		return nil, fmt.Errorf("incorrect number of arguments, expecting the key of the element to query")
+	if len(args) != 3 {
+		return nil, fmt.Errorf("incorrect number of arguments, expecting 3: problem key, startModel key, and keys of train data")
 	}
 
 	// find associated creator and check permissions (TODO later)
@@ -272,51 +272,54 @@ func addTrainTuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, err
 		}
 	}
 
-	// get algo key of start model from previous learnuplets
-	// TODO
-	compositeIterator, err := stub.GetStateByPartialCompositeKey("trainTuple~endModel~key", []string{"trainTuple", startModelKey})
-	if err != nil {
-		return nil, err
-	}
-	defer compositeIterator.Close()
+	// define algo and startModel of to-betraintuple
 	var i, rank int
 	var parentTrainTupleKey string
 	var testDataKeys []string
 	problem := make(map[string][2]string)
 	algo := make(map[string]string)
 	startModel := make(map[string]string)
-	for i = 0; compositeIterator.HasNext(); i++ {
-		compositeKey, err := compositeIterator.Next()
+	switch startObject := strings.Split(startModelKey, "_"); startObject {
+	case "model":
+		// get algo key of start model from previous traintupless
+		compositeIterator, err := stub.GetStateByPartialCompositeKey("trainTuple~endModel~key", []string{"trainTuple", startModelKey})
 		if err != nil {
 			return nil, err
 		}
-		// get the color and name from color~name composite key
-		_, compositeKeyParts, err := stub.SplitCompositeKey(compositeKey.Key)
-		if err != nil {
-			return nil, err
+		defer compositeIterator.Close()
+		for i = 0; compositeIterator.HasNext(); i++ {
+			compositeKey, err := compositeIterator.Next()
+			if err != nil {
+				return nil, err
+			}
+			// get the color and name from color~name composite key
+			_, compositeKeyParts, err := stub.SplitCompositeKey(compositeKey.Key)
+			if err != nil {
+				return nil, err
+			}
+			parentTrainTupleKey = compositeKeyParts[2]
+			fmt.Printf("- found %s with endModel %s\n", parentTrainTupleKey, startModelKey)
 		}
-		parentTrainTupleKey = compositeKeyParts[2]
-		fmt.Printf("- found %s with endModel %s\n", parentTrainTupleKey, startModelKey)
-	}
-	if i > 2 {
-		return nil, fmt.Errorf("several models associated with start model hash")
-	} else if i == 1 {
-		// model derives from a previous TrainTuple
-		parentTrainTuple := TrainTuple{}
-		trainTupleBytes, err := stub.GetState(parentTrainTupleKey)
-		if err != nil {
-			return nil, err
+		if i > 2 {
+			return nil, fmt.Errorf("several models associated with start model hash")
+		} else if i == 1 {
+			// model derives from a previous TrainTuple
+			parentTrainTuple := TrainTuple{}
+			trainTupleBytes, err := stub.GetState(parentTrainTupleKey)
+			if err != nil {
+				return nil, err
+			}
+			err = json.Unmarshal(trainTupleBytes, &parentTrainTuple)
+			if err != nil {
+				return nil, err
+			}
+			algo = parentTrainTuple.Algo
+			startModel = parentTrainTuple.EndModel
+			rank = parentTrainTuple.Rank + 1
+			problem = parentTrainTuple.Problem
+			testDataKeys = parentTrainTuple.TestData
 		}
-		err = json.Unmarshal(trainTupleBytes, &parentTrainTuple)
-		if err != nil {
-			return nil, err
-		}
-		algo = parentTrainTuple.Algo
-		startModel = parentTrainTuple.EndModel
-		rank = parentTrainTuple.Rank + 1
-		problem = parentTrainTuple.Problem
-		testDataKeys = parentTrainTuple.TestData
-	} else {
+	case "algo":
 		// first time algo is trained
 		rank = 0
 		// get problem to derive metrics info and test data keys
