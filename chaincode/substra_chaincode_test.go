@@ -85,10 +85,12 @@ func TestAddTrainTuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
+	// Preparation: add problem, data, and algo
+
 	fn := []byte("addTrainTuple")
 	problemKey := []byte("problem_5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379")
 	startModelKey := []byte("algo_fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc")
-	associatedProblems := []byte("problem_5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379")
+	trainData := []byte("data_xx5c1d9cd1c2c1082dde0921b56d110")
 	args := [][]byte{fn, problemKey, startModelKey, trainData}
 
 	resp := mockStub.MockInvoke("42", args)
