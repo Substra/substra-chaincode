@@ -30,6 +30,7 @@ type Data struct {
 	DataOpener  string   `json:"dataOpener"`
 	Owner       string   `json:"owner"`
 	Problems    []string `json:problems`
+	TestOnly    bool     `json:testOnly`
 	Permissions string   `json:permissions`
 }
 
@@ -119,6 +120,29 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	return shim.Success(result)
 }
 
+// checkSameOwner checks if data in a slices all have the same owner and dataOpener
+func checkSameOwner(stub shim.ChaincodeStubInterface, trainDataKeys []string) error {
+	var trainWorker, trainDataOpener string
+	for i, dataKey := range trainDataKeys {
+		dataBytes, err := stub.GetState(dataKey)
+		if err != nil {
+			return nil, nil, err
+		} else if dataBytes == nil {
+			return nil, nil, fmt.Errorf("no data with this key %s", dataKey)
+		}
+		data := Data{}
+		err = json.Unmarshal(dataBytes, &data)
+		if i == 0 {
+			trainWorker = data.Owner
+			trainDataOpener = data.DataOpener
+		}
+		if data.Owner != trainWorker {
+			return nil, nil, fmt.Errorf("data do not come from the same center...")
+		}
+	}
+	return trainWorker, trainDataOpener, nil
+}
+
 // addProblema stores a new problem in the ledger.
 // If the key exists, it will override the value with the new one
 func addProblem(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -129,7 +153,14 @@ func addProblem(stub shim.ChaincodeStubInterface, args []string) ([]byte, error)
 	}
 
 	// TODO check input types and check if data exist and are from the same center
-	testData := strings.Split(strings.Replace(args[5], " ", "", -1), ",")
+	testDataKeys := strings.Split(strings.Replace(args[5], " ", "", -1), ",")
+	// check data exist and are all in the same center
+	// nb1: for now testData must be located in the same center,this might change in the next version
+	// nb2: for scalability purposes, this might move to substrabac
+	err, trainWorker, trainDataOpener := checkSameOwner(testDataKeys)
+	if err != nil {
+		return nil, err
+	}
 	// create problem key
 	key := "problem_" + args[0]
 	// find associated owner
@@ -142,7 +173,7 @@ func addProblem(stub shim.ChaincodeStubInterface, args []string) ([]byte, error)
 		MetricsStorageAddress:     args[3],
 		MetricsHash:               args[4],
 		Owner:                     owner,
-		TestData:                  testData,
+		TestData:                  testDataKeys,
 		Permissions:               args[6]}
 	problemBytes, _ := json.Marshal(problem)
 	err := stub.PutState(key, problemBytes)
@@ -155,9 +186,14 @@ func addProblem(stub shim.ChaincodeStubInterface, args []string) ([]byte, error)
 // addData stores a new data in the ledger.
 // If the key exists, it will override the value with the new one
 func addData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	if len(args) != 5 {
-		return nil, fmt.Errorf("incorrect arguments, expecting 5 args: " +
-			"data hash, name, data opener hash, associated problems, permissions")
+	if nbArgs := len(args); nbArgs < 5 || nbArgs > 6 {
+		return nil, fmt.Errorf("incorrect arguments, expecting 5 or 6 args: " +
+			"data hash, name, data opener hash, associated problems, permissions, " +
+			"and optionally a boolean indicating if the data is dedicate to test")
+	} else if nbArgs == 6 {
+		testOnly := args[5]
+	} else {
+		testOnly := false
 	}
 
 	// TODO check input types + check if problems are in the ledger
@@ -173,7 +209,8 @@ func addData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 		DataOpener:  args[2],
 		Owner:       owner,
 		Problems:    problems,
-		Permissions: args[4]}
+		Permissions: args[4],
+		TestOnly:    testOnly}
 	dataBytes, _ := json.Marshal(data)
 	err := stub.PutState(key, dataBytes)
 	if err != nil {
@@ -253,23 +290,9 @@ func addTrainTuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, err
 
 	// check if train data exist and are from the same center with the same data opener
 	// derive trainDataOpener and trainWorker
-	var trainWorker, trainDataOpener string
-	for i, dataKey := range trainDataKeys {
-		dataBytes, err := stub.GetState(dataKey)
-		if err != nil {
-			return nil, err
-		} else if dataBytes == nil {
-			return nil, fmt.Errorf("no data with this key %s", dataKey)
-		}
-		data := Data{}
-		err = json.Unmarshal(dataBytes, &data)
-		if i == 0 {
-			trainWorker = data.Owner
-			trainDataOpener = data.DataOpener
-		}
-		if data.Owner != trainWorker {
-			return nil, fmt.Errorf("data do not come from the same center...")
-		}
+	trainWorker, trainDataOpener, err := checkSameOwner(testDataKeys)
+	if err != nil {
+		return nil, err
 	}
 
 	// define algo and startModel of to-betraintuple
