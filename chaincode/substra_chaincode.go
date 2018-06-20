@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"encoding/json"
@@ -121,14 +122,14 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 }
 
 // checkSameOwner checks if data in a slices all have the same owner and dataOpener
-func checkSameOwner(stub shim.ChaincodeStubInterface, trainDataKeys []string) error {
+func checkSameOwner(stub shim.ChaincodeStubInterface, trainDataKeys []string) (string, string, error) {
 	var trainWorker, trainDataOpener string
 	for i, dataKey := range trainDataKeys {
 		dataBytes, err := stub.GetState(dataKey)
 		if err != nil {
-			return nil, nil, err
+			return "", "", err
 		} else if dataBytes == nil {
-			return nil, nil, fmt.Errorf("no data with this key %s", dataKey)
+			return "", "", fmt.Errorf("no data with this key %s", dataKey)
 		}
 		data := Data{}
 		err = json.Unmarshal(dataBytes, &data)
@@ -137,7 +138,7 @@ func checkSameOwner(stub shim.ChaincodeStubInterface, trainDataKeys []string) er
 			trainDataOpener = data.DataOpener
 		}
 		if data.Owner != trainWorker {
-			return nil, nil, fmt.Errorf("data do not come from the same center...")
+			return "", "", fmt.Errorf("data do not come from the same center...")
 		}
 	}
 	return trainWorker, trainDataOpener, nil
@@ -157,7 +158,7 @@ func addProblem(stub shim.ChaincodeStubInterface, args []string) ([]byte, error)
 	// check data exist and are all in the same center
 	// nb1: for now testData must be located in the same center,this might change in the next version
 	// nb2: for scalability purposes, this might move to substrabac
-	err, trainWorker, trainDataOpener := checkSameOwner(testDataKeys)
+	_, _, err := checkSameOwner(stub, testDataKeys)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +177,7 @@ func addProblem(stub shim.ChaincodeStubInterface, args []string) ([]byte, error)
 		TestData:                  testDataKeys,
 		Permissions:               args[6]}
 	problemBytes, _ := json.Marshal(problem)
-	err := stub.PutState(key, problemBytes)
+	err = stub.PutState(key, problemBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add problem with description hash %s", args[0])
 	}
@@ -186,14 +187,19 @@ func addProblem(stub shim.ChaincodeStubInterface, args []string) ([]byte, error)
 // addData stores a new data in the ledger.
 // If the key exists, it will override the value with the new one
 func addData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var testOnly bool
+	var err error
 	if nbArgs := len(args); nbArgs < 5 || nbArgs > 6 {
 		return nil, fmt.Errorf("incorrect arguments, expecting 5 or 6 args: " +
 			"data hash, name, data opener hash, associated problems, permissions, " +
 			"and optionally a boolean indicating if the data is dedicate to test")
 	} else if nbArgs == 6 {
-		testOnly := args[5]
+		testOnly, err = strconv.ParseBool(args[4])
+		if err != nil {
+			return nil, err
+		}
 	} else {
-		testOnly := false
+		testOnly = false
 	}
 
 	// TODO check input types + check if problems are in the ledger
@@ -209,10 +215,10 @@ func addData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 		DataOpener:  args[2],
 		Owner:       owner,
 		Problems:    problems,
-		Permissions: args[4],
-		TestOnly:    testOnly}
+		TestOnly:    testOnly,
+		Permissions: args[5]}
 	dataBytes, _ := json.Marshal(data)
-	err := stub.PutState(key, dataBytes)
+	err = stub.PutState(key, dataBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to add data with hash %s", args[0])
 	}
@@ -290,7 +296,7 @@ func addTrainTuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, err
 
 	// check if train data exist and are from the same center with the same data opener
 	// derive trainDataOpener and trainWorker
-	trainWorker, trainDataOpener, err := checkSameOwner(testDataKeys)
+	trainWorker, trainDataOpener, err := checkSameOwner(stub, trainDataKeys)
 	if err != nil {
 		return nil, err
 	}
@@ -302,7 +308,7 @@ func addTrainTuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, err
 	problem := make(map[string][2]string)
 	algo := make(map[string]string)
 	startModel := make(map[string]string)
-	switch startObject := strings.Split(startModelKey, "_"); startObject {
+	switch startObject := strings.Split(startModelKey, "_")[0]; startObject {
 	case "model":
 		// get algo key of start model from previous traintupless
 		compositeIterator, err := stub.GetStateByPartialCompositeKey("trainTuple~endModel~key", []string{"trainTuple", startModelKey})
