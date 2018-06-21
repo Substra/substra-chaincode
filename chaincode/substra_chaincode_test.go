@@ -15,13 +15,13 @@ func TestInit(t *testing.T) {
 	resp := mockStub.MockInit("42", [][]byte{[]byte("init")})
 	status := resp.Status
 	if status != 200 {
-		t.Errorf("init failed with status %d", status)
+		t.Errorf("init failed with status %d and message %s", status, resp.Message)
 	}
 }
 
 func createSampleData(dataHash, name, dataOpenerHash, associatedProblems, testOnly string) (args [][]byte) {
 	if dataHash == "" {
-		dataHash = "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+		dataHash = "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 	}
 	if name == "" {
 		name = "liver slide"
@@ -98,6 +98,24 @@ func createSampleAlgo(algoHash, name, storageAddress, associatedProblem string) 
 	return args
 }
 
+func createSampleTrainTuple(problemKey, startModelKey, trainDataKeys string) (args [][]byte) {
+	if problemKey == "" {
+		problemKey = "problem_5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
+	}
+	if startModelKey == "" {
+		startModelKey = "algo_fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+	}
+	if trainDataKeys == "" {
+		trainDataKeys = "data_aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+	}
+	bFn := []byte("addTrainTuple")
+	bProblemKey := []byte(problemKey)
+	bStartModelKey := []byte(startModelKey)
+	bTrainDataKeys := []byte(trainDataKeys)
+	args = [][]byte{bFn, bProblemKey, bStartModelKey, bTrainDataKeys}
+	return args
+}
+
 func TestAddData(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
@@ -105,9 +123,9 @@ func TestAddData(t *testing.T) {
 	args := createSampleData("", "", "", "", "")
 	resp := mockStub.MockInvoke("42", args)
 	status := resp.Status
-	fmt.Println(resp.Message)
+	fmt.Println(resp.Payload)
 	if status != 200 {
-		t.Errorf("testAddData failed with status %d", status)
+		t.Errorf("testAddData failed with status %d and message %s", status, resp.Message)
 	}
 	// TODO ADD CHECK resp.Message
 }
@@ -116,50 +134,46 @@ func TestAdd(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 	// Add test data
-	args := createSampleData("", "", "", "", "true")
+	args := createSampleData("da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc", "", "", "", "true")
 	resp := mockStub.MockInvoke("42", args)
+	fmt.Println(resp.Payload)
 	status := resp.Status
 	if status != 200 {
-		t.Errorf("testAdd failed when adding test data with status %d", status)
+		t.Errorf("testAdd failed when adding test data with status %d and message %s", status, resp.Message)
 	}
 	// Add problem
 	args = createSampleProblem("", "", "", "", "", "")
 	resp = mockStub.MockInvoke("42", args)
-	fmt.Println(resp.Message)
+	fmt.Println(resp.Payload)
 	status = resp.Status
 	if status != 200 {
-		t.Errorf("testAdd failed when adding problem with status %d", status)
+		t.Errorf("testAdd failed when adding problem with status %d and message %s", status, resp.Message)
 	}
 	// Add algo
 	args = createSampleAlgo("", "", "", "")
 	resp = mockStub.MockInvoke("42", args)
-	fmt.Println(resp.Message)
+	fmt.Println(resp.Payload)
 	status = resp.Status
 	if status != 200 {
-		t.Errorf("testAdd failed when adding algo with status %d", status)
+		t.Errorf("testAdd failed when adding algo with status %d and message %s", status, resp.Message)
 	}
 	// Add train data
+	args = createSampleData("",
+		"", "", "problem_5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379", "")
+	resp = mockStub.MockInvoke("42", args)
+	fmt.Println(resp.Payload)
+	status = resp.Status
+	if status != 200 {
+		t.Errorf("testAdd failed when adding train data with status %d and message %s", status, resp.Message)
+	}
 
 	// Add trainTuple
-	// TODO ADD CHECK resp.Message
-}
-
-func TestAddTrainTuple(t *testing.T) {
-	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
-
-	// Preparation: add problem, data, and algo
-
-	fn := []byte("addTrainTuple")
-	problemKey := []byte("problem_5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379")
-	startModelKey := []byte("algo_fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc")
-	trainData := []byte("data_xx5c1d9cd1c2c1082dde0921b56d110")
-	args := [][]byte{fn, problemKey, startModelKey, trainData}
-
-	resp := mockStub.MockInvoke("42", args)
-	status := resp.Status
+	args = createSampleTrainTuple("", "", "")
+	resp = mockStub.MockInvoke("42", args)
+	fmt.Println(resp.Payload)
+	status = resp.Status
 	if status != 200 {
-		t.Errorf("addData failed with status %d", status)
+		t.Errorf("testAdd failed when adding traintuple with status %d and message %s", status, resp.Message)
 	}
 	// TODO ADD CHECK resp.Message
 }
