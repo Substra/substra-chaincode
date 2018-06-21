@@ -10,6 +10,8 @@ import (
 	peer "github.com/hyperledger/fabric/protos/peer"
 )
 
+// TODO Harmonize names and types
+
 // SubstraChaincode is a Receiver for Chaincode shim functions
 type SubstraChaincode struct {
 }

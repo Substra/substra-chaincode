@@ -7,6 +7,36 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+type SubmittedData struct {
+	Hash        string
+	Name        string
+	OpenerHash  string
+	ProblemKeys string
+	TestOnly    string
+}
+
+type SubmittedAlgo struct {
+	Hash           string
+	Name           string
+	StorageAddress string
+	ProblemKey     string
+}
+
+type SubmittedProblem struct {
+	DescriptionHash           string
+	Name                      string
+	DescriptionStorageAddress string
+	MetricsStorageAddress     string
+	MetricsHash               string
+	TestDataKeys              string
+}
+
+type SubmittedTrainTuple struct {
+	ProblemKey    string
+	StartModelKey string
+	TrainDataKeys string
+}
+
 func TestInit(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
@@ -19,99 +49,100 @@ func TestInit(t *testing.T) {
 	}
 }
 
-func createSampleData(dataHash, name, dataOpenerHash, associatedProblems, testOnly string) (args [][]byte) {
-	if dataHash == "" {
-		dataHash = "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+// func createSampleData(dataHash, name, dataOpenerHash, associatedProblems, testOnly string) (args [][]byte) {
+func createSampleData(data SubmittedData) (args [][]byte) {
+	if data.Hash == "" {
+		data.Hash = "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 	}
-	if name == "" {
-		name = "liver slide"
+	if data.Name == "" {
+		data.Name = "liver slide"
 	}
-	if dataOpenerHash == "" {
-		dataOpenerHash = "do4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+	if data.OpenerHash == "" {
+		data.OpenerHash = "do4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 	}
-	if testOnly == "" {
-		testOnly = "false"
+	if data.TestOnly == "" {
+		data.TestOnly = "false"
 	}
 	bFn := []byte("addData")
-	bDataHash := []byte(dataHash)
-	bName := []byte(name)
-	bDataOpenerHash := []byte(dataOpenerHash)
-	bAssociatedProblems := []byte(associatedProblems)
-	bTestOnly := []byte(testOnly)
+	bDataHash := []byte(data.Hash)
+	bName := []byte(data.Name)
+	bDataOpenerHash := []byte(data.OpenerHash)
+	bAssociatedProblems := []byte(data.ProblemKeys)
+	bTestOnly := []byte(data.TestOnly)
 	bPermissions := []byte("all")
 	args = [][]byte{bFn, bDataHash, bName, bDataOpenerHash, bAssociatedProblems, bTestOnly, bPermissions}
 	return args
 }
 
-func createSampleProblem(descriptionHash, name, descriptionStorageAddress, metricsStorageAddress, metricsHash, testData string) (args [][]byte) {
-	if descriptionHash == "" {
-		descriptionHash = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
+func createSampleProblem(problem SubmittedProblem) (args [][]byte) {
+	if problem.DescriptionHash == "" {
+		problem.DescriptionHash = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 	}
-	if name == "" {
-		name = "MSI classification"
+	if problem.Name == "" {
+		problem.Name = "MSI classification"
 	}
-	if descriptionStorageAddress == "" {
-		descriptionStorageAddress = "https://toto/problem/222/description"
+	if problem.DescriptionStorageAddress == "" {
+		problem.DescriptionStorageAddress = "https://toto/problem/222/description"
 	}
-	if metricsStorageAddress == "" {
-		metricsStorageAddress = "https://toto/problem/222/metrics"
+	if problem.MetricsStorageAddress == "" {
+		problem.MetricsStorageAddress = "https://toto/problem/222/metrics"
 	}
-	if metricsHash == "" {
-		metricsHash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482d8d"
+	if problem.MetricsHash == "" {
+		problem.MetricsHash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482d8d"
 	}
-	if testData == "" {
-		testData = "data_da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+	if problem.TestDataKeys == "" {
+		problem.TestDataKeys = "data_da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 	}
 	bFn := []byte("addProblem")
-	bDescriptionHash := []byte(descriptionHash)
-	bName := []byte(name)
-	bDescriptionStorageAddress := []byte(descriptionStorageAddress)
-	bMetricsStorageAddress := []byte(metricsStorageAddress)
-	bMetricsHash := []byte(metricsHash)
-	bTestData := []byte(testData)
+	bDescriptionHash := []byte(problem.DescriptionHash)
+	bName := []byte(problem.Name)
+	bDescriptionStorageAddress := []byte(problem.DescriptionStorageAddress)
+	bMetricsStorageAddress := []byte(problem.MetricsStorageAddress)
+	bMetricsHash := []byte(problem.MetricsHash)
+	bTestData := []byte(problem.TestDataKeys)
 	bPermissions := []byte("all")
 	args = [][]byte{bFn, bDescriptionHash, bName, bDescriptionStorageAddress,
 		bMetricsStorageAddress, bMetricsHash, bTestData, bPermissions}
 	return args
 }
 
-func createSampleAlgo(algoHash, name, storageAddress, associatedProblem string) (args [][]byte) {
-	if algoHash == "" {
-		algoHash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+func createSampleAlgo(algo SubmittedAlgo) (args [][]byte) {
+	if algo.Hash == "" {
+		algo.Hash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 	}
-	if name == "" {
-		name = "hog + svm"
+	if algo.Name == "" {
+		algo.Name = "hog + svm"
 	}
-	if storageAddress == "" {
-		storageAddress = "https://toto/algo/222/algo"
+	if algo.StorageAddress == "" {
+		algo.StorageAddress = "https://toto/algo/222/algo"
 	}
-	if associatedProblem == "" {
-		associatedProblem = "problem_5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
+	if algo.ProblemKey == "" {
+		algo.ProblemKey = "problem_5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 	}
 	bFn := []byte("addAlgo")
-	bAlgoHash := []byte(algoHash)
-	bName := []byte(name)
-	bStorageAddress := []byte(storageAddress)
-	bAssociatedProblem := []byte(associatedProblem)
+	bAlgoHash := []byte(algo.Hash)
+	bName := []byte(algo.Name)
+	bStorageAddress := []byte(algo.StorageAddress)
+	bAssociatedProblem := []byte(algo.ProblemKey)
 	bPermissions := []byte("all")
 	args = [][]byte{bFn, bAlgoHash, bName, bStorageAddress, bAssociatedProblem, bPermissions}
 	return args
 }
 
-func createSampleTrainTuple(problemKey, startModelKey, trainDataKeys string) (args [][]byte) {
-	if problemKey == "" {
-		problemKey = "problem_5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
+func createSampleTrainTuple(trainTuple SubmittedTrainTuple) (args [][]byte) {
+	if trainTuple.ProblemKey == "" {
+		trainTuple.ProblemKey = "problem_5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 	}
-	if startModelKey == "" {
-		startModelKey = "algo_fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+	if trainTuple.StartModelKey == "" {
+		trainTuple.StartModelKey = "algo_fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 	}
-	if trainDataKeys == "" {
-		trainDataKeys = "data_aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+	if trainTuple.TrainDataKeys == "" {
+		trainTuple.TrainDataKeys = "data_aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 	}
 	bFn := []byte("addTrainTuple")
-	bProblemKey := []byte(problemKey)
-	bStartModelKey := []byte(startModelKey)
-	bTrainDataKeys := []byte(trainDataKeys)
+	bProblemKey := []byte(trainTuple.ProblemKey)
+	bStartModelKey := []byte(trainTuple.StartModelKey)
+	bTrainDataKeys := []byte(trainTuple.TrainDataKeys)
 	args = [][]byte{bFn, bProblemKey, bStartModelKey, bTrainDataKeys}
 	return args
 }
@@ -120,60 +151,71 @@ func TestAddData(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	args := createSampleData("", "", "", "", "")
+	submittedData := SubmittedData{}
+	args := createSampleData(submittedData)
 	resp := mockStub.MockInvoke("42", args)
 	status := resp.Status
-	fmt.Println(resp.Payload)
+	fmt.Println(string(resp.Payload))
 	if status != 200 {
 		t.Errorf("testAddData failed with status %d and message %s", status, resp.Message)
 	}
-	// TODO ADD CHECK resp.Message
+	// TODO check content of payload := resp.Payload
 }
 
-func TestAdd(t *testing.T) {
+func TestPipeline(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 	// Add test data
-	args := createSampleData("da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc", "", "", "", "true")
+	submittedData := SubmittedData{
+		Hash:     "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+		TestOnly: "true",
+	}
+	args := createSampleData(submittedData)
 	resp := mockStub.MockInvoke("42", args)
-	fmt.Println(resp.Payload)
 	status := resp.Status
 	if status != 200 {
-		t.Errorf("testAdd failed when adding test data with status %d and message %s", status, resp.Message)
+		t.Errorf("testPipeline failed when adding test data with status %d and message %s", status, resp.Message)
 	}
 	// Add problem
-	args = createSampleProblem("", "", "", "", "", "")
+	submittedProblem := SubmittedProblem{}
+	args = createSampleProblem(submittedProblem)
 	resp = mockStub.MockInvoke("42", args)
-	fmt.Println(resp.Payload)
 	status = resp.Status
 	if status != 200 {
-		t.Errorf("testAdd failed when adding problem with status %d and message %s", status, resp.Message)
+		t.Errorf("testPipeline failed when adding problem with status %d and message %s", status, resp.Message)
 	}
 	// Add algo
-	args = createSampleAlgo("", "", "", "")
+	submittedAlgo := SubmittedAlgo{}
+	args = createSampleAlgo(submittedAlgo)
 	resp = mockStub.MockInvoke("42", args)
-	fmt.Println(resp.Payload)
 	status = resp.Status
 	if status != 200 {
-		t.Errorf("testAdd failed when adding algo with status %d and message %s", status, resp.Message)
+		t.Errorf("testPipeline failed when adding algo with status %d and message %s", status, resp.Message)
 	}
 	// Add train data
-	args = createSampleData("",
-		"", "", "problem_5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379", "")
+	submittedData = SubmittedData{
+		ProblemKeys: "problem_5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+	}
+	args = createSampleData(submittedData)
 	resp = mockStub.MockInvoke("42", args)
-	fmt.Println(resp.Payload)
 	status = resp.Status
 	if status != 200 {
-		t.Errorf("testAdd failed when adding train data with status %d and message %s", status, resp.Message)
+		t.Errorf("testPipeline failed when adding train data with status %d and message %s", status, resp.Message)
+	}
+	// Query all data
+	resp = mockStub.MockInvoke("42", [][]byte{[]byte("queryData")})
+	status = resp.Status
+	if status != 200 {
+		t.Errorf("testPipeline failed when adding train data with status %d and message %s", status, resp.Message)
 	}
 
 	// Add trainTuple
-	args = createSampleTrainTuple("", "", "")
+	trainTuple := SubmittedTrainTuple{}
+	args = createSampleTrainTuple(trainTuple)
 	resp = mockStub.MockInvoke("42", args)
-	fmt.Println(resp.Payload)
 	status = resp.Status
 	if status != 200 {
-		t.Errorf("testAdd failed when adding traintuple with status %d and message %s", status, resp.Message)
+		t.Errorf("testPipeline failed when adding traintuple with status %d and message %s", status, resp.Message)
 	}
-	// TODO ADD CHECK resp.Message
+	// TODO ADD CHECK content of resp.Payload
 }
