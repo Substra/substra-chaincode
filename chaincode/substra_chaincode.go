@@ -103,6 +103,8 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = addData(stub, args)
 	case "addAlgo":
 		result, err = addAlgo(stub, args)
+	case "addTrainTuple":
+		result, err = addTrainTuple(stub, args)
 	case "query":
 		result, err = query(stub, args)
 	case "queryProblem":
