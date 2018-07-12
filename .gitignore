@@ -16,3 +16,7 @@
 
 # OSX
 .DS_Store
+
+
+# IDE config files
+.idea
