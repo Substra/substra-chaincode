@@ -124,12 +124,12 @@ Now issue an invoke to create a problem.
 
 .. code:: bash
 
-  peer chaincode invoke -n mycc -c '{"Args":["addProblem","5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379", "msi classification","https://toto/problem/222/description","https://toto/problem/222/metrics", "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482d8d","data_fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482d8a, data_fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482d8e","all"]}' -C myc
+  peer chaincode invoke -n mycc -c '{"Args":["addDataset","liver slides","5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","https://toto/dataset/222/opener","images","fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482d8d","https://toto/dataset/222/description","","all"]}' -C myc
 
-Finally, query all problems.  We should see the newly added problem.
+Finally, query all datasets.  We should see the newly added dataset.
 
 .. code:: bash
 
-  peer chaincode query -n mycc -c '{"Args":["queryProblem"]}' -C myc
+  peer chaincode query -n mycc -c '{"Args":["queryAllDatasets"]}' -C myc
 
 
