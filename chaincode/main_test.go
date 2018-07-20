@@ -234,6 +234,16 @@ func TestPipeline(t *testing.T) {
 	}
 	fmt.Println(">  " + string(resp.Payload))
 
+	// Query all challenges
+	fmt.Println("#### ------------ Query Challenges ------------")
+	args = [][]byte{[]byte("queryChallenges")}
+	printArgs(args, "query")
+	resp = mockStub.MockInvoke("42", args)
+	if status := resp.Status; status != 200 {
+		t.Errorf("testPipeline failed when querying challenge with status %d and message %s", status, resp.Message)
+	}
+	fmt.Println(">  " + string(resp.Payload))
+
 	// Add trainTuple
 	fmt.Println("#### ------------ Add Traintuple ------------")
 	inpTraintuple := inputTraintuple{}
