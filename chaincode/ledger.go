@@ -14,12 +14,12 @@ import (
 
 // Challenge is the representation of one of the element type stored in the ledger
 type Challenge struct {
-	Name                      string   `json:"name"`
-	DescriptionStorageAddress string   `json:"descriptionStorageAddress"`
-	Metrics                   *Metrics `json:"metrics"`
-	Owner                     string   `json:"owner"`
-	TestDataKeys              []string `json:"testDataKeys"`
-	Permissions               string   `json:"permissions"`
+	Name         string     `json:"name"`
+	Description  *HashDress `json:"description"`
+	Metrics      *Metrics   `json:"metrics"`
+	Owner        string     `json:"owner"`
+	TestDataKeys []string   `json:"testDataKeys"`
+	Permissions  string     `json:"permissions"`
 }
 
 // Dataset is the representation of one of the elements type stored in the ledger
@@ -132,7 +132,10 @@ func (challenge *Challenge) Set(stub shim.ChaincodeStubInterface, inp inputChall
 		return
 	}
 	challenge.Name = inp.Name
-	challenge.DescriptionStorageAddress = inp.DescriptionStorageAddress
+	challenge.Description = &HashDress{
+		Hash:           inp.DescriptionHash,
+		StorageAddress: inp.DescriptionStorageAddress,
+	}
 	challenge.Metrics = &Metrics{
 		Name:           inp.MetricsName,
 		Hash:           inp.MetricsHash,
