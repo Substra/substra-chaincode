@@ -226,35 +226,49 @@ func updateStatusTraintuple(stub shim.ChaincodeStubInterface, traintupleKey stri
 
 	traintuple := Traintuple{}
 
-	if !stringInSlice(status, []string{"training", "testing"}) {
-		return traintuple, fmt.Errorf("status %s is not implemented, expecting training or testing", status)
-	}
-
-	// get the agent submitting the transaction
-	owner, err := getTxCreator(stub)
-	if err != nil {
-		return traintuple, err
-	}
 	// get traintuple
-	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
-		return traintuple, err
+	if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
+		return Traintuple{}, err
 	}
-	// check transaction requester is the train or test worker
-	if (status == "training" && traintuple.TrainData.Worker != owner) || (status == "testing" && traintuple.TestData.Worker != owner) {
-		return traintuple, fmt.Errorf("%s is not allowed to update traintuple", owner)
+	// check the validity of traintuple update: consistent status and worker
+	var worker string
+	if status == "training" {
+		worker = traintuple.TrainData.Worker
+	} else if status == "testing" {
+		worker = traintuple.TestData.Worker
+	} else {
+		return Traintuple{}, fmt.Errorf("status %s is not implemented, expecting training or testing", status)
 	}
-	// check new status is consistent with current status
-	if (status == "training" && traintuple.Status != "todo") || (status == "testing" && traintuple.Status != "trained") {
-		return traintuple, fmt.Errorf("not possible to change traintuple status from %s to %s", traintuple.Status, status)
+	if err := checkUpdateTraintuple(stub, worker, traintuple.Status, status); err != nil {
+		return Traintuple{}, err
 	}
 	// update traintuple
 	traintuple.Status = status
 	traintupleBytes, _ := json.Marshal(traintuple)
-	err = stub.PutState(traintupleKey, traintupleBytes)
-	if err != nil {
+	if err := stub.PutState(traintupleKey, traintupleBytes); err != nil {
 		return traintuple, fmt.Errorf("failed to update traintuple status to %s with key %s", status, traintupleKey)
 	}
 	return traintuple, nil
+}
+
+// check validity of traintuple update: consistent status and agent submitting the transaction
+func checkUpdateTraintuple(stub shim.ChaincodeStubInterface, worker string, oldStatus string, newStatus string) error {
+	txCreator, err := getTxCreator(stub)
+	if err != nil {
+		return err
+	}
+	if txCreator != worker {
+		return fmt.Errorf("%s is not allowed to update traintuple", txCreator)
+	}
+	statusPossibilities := map[string]string{
+		"todo":     "training",
+		"training": "trained",
+		"trained":  "testing",
+		"testing":  "done"}
+	if statusPossibilities[oldStatus] != newStatus {
+		return fmt.Errorf("cannot change status from %s to %s", oldStatus, newStatus)
+	}
+	return nil
 }
 
 // updateCompositeKey modifies composite keys
