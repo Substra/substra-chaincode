@@ -288,6 +288,7 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 	}
 	algo.Owner = owner
 	algo.ChallengeKey = inp.ChallengeKey
+	algo.Permissions = inp.Permissions
 	return
 }
 
