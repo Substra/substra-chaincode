@@ -145,8 +145,7 @@ func (challenge *Challenge) Set(stub shim.ChaincodeStubInterface, inp inputChall
 	challenge.Owner = owner
 	challenge.TestDataKeys = testDataKeys
 	challenge.Permissions = inp.Permissions
-	// create challenge key
-	challengeKey = "challenge_" + inp.DescriptionHash
+	challengeKey = inp.DescriptionHash
 	return
 }
 
@@ -198,15 +197,14 @@ func (dataset *Dataset) Set(stub shim.ChaincodeStubInterface, inp inputDataset) 
 	dataset.Owner = owner
 	dataset.ChallengeKeys = challengeKeys
 	dataset.Permissions = inp.Permissions
-	// create datasetKey
-	datasetKey := "dataset_" + inp.OpenerHash
+	datasetKey := inp.OpenerHash
 	return datasetKey, challengeKeys, nil
 }
 
 // inputData is the representation of input args to register a Data
 type inputData struct {
 	Hashes     string `validate:"required"`
-	DatasetKey string `validate:"required,gte=72,lte=72"`
+	DatasetKey string `validate:"required,gte=64,lte=64"`
 	Size       string `validate:"required"`
 	TestOnly   string `validate:"required,oneof=true false"`
 }
@@ -253,7 +251,7 @@ type inputAlgo struct {
 	StorageAddress            string `validate:"required,url"`
 	DescriptionHash           string `validate:"required,gte=64,lte=64"`
 	DescriptionStorageAddress string `validate:"required,url"`
-	ChallengeKey              string `validate:"required,gte=74,lte=74"`
+	ChallengeKey              string `validate:"required,gte=64,lte=64"`
 	Permissions               string `validate:"required,oneof=all"`
 }
 
@@ -272,8 +270,7 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 	if err != nil {
 		return
 	}
-	// create algo key
-	algoKey = "algo_" + inp.Hash
+	algoKey = inp.Hash
 	// find associated owner
 	owner, err := getTxCreator(stub)
 	if err != nil {
@@ -294,8 +291,8 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 
 // inputTraintuple is the representation of input args to register a Traintuple
 type inputTraintuple struct {
-	ChallengeKey  string `validate:"required,gte=74,lte=74"`
-	AlgoKey       string `validate:"required,gte=69,lte=69"`
+	ChallengeKey  string `validate:"required,gte=64,lte=64"`
+	AlgoKey       string `validate:"required,gte=64,lte=64"`
 	StartModelKey string `validate:"required"`
 	TrainDataKeys string `validate:"required"`
 }

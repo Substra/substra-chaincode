@@ -106,8 +106,7 @@ func registerData(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 	// store each added data in the ledger
 	var dataKeys []byte
 	for _, dataHash := range dataHashes {
-		// create data key
-		key := "data_" + dataHash
+		key := dataHash
 		dataKeys = append(dataKeys, []byte(key+", ")...)
 		// create data object
 		var data = Data{
@@ -199,7 +198,7 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	traintuple.TrainData = &TtData{
 		Worker:     trainDataset.Owner,
 		Keys:       trainDataKeys,
-		OpenerHash: strings.Split(trainDatasetKey, "_")[1],
+		OpenerHash: trainDatasetKey,
 	}
 
 	// get algo
@@ -208,7 +207,7 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 		return nil, err
 	}
 	traintuple.Algo = &HashDress{
-		Hash:           strings.Split(algoKey, "_")[1],
+		Hash:           algoKey,
 		StorageAddress: algo.StorageAddress}
 	// define for the to-be-traintuple: Challenge, StartModel, TestDataKeys, TestDataOpenerHash, TestWorker, Rank
 	if algoKey != startModelKey {
@@ -225,7 +224,7 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	// create key: has of challenge + algo + start model + train data + creator (keys)
 	// certainly not be the most efficient key... but let's make it work and them try to make it better...
 	tKey := sha256.Sum256([]byte(challengeKey + algoKey + traintuple.StartModel.Hash + strings.Join(trainDataKeys, ",") + creator))
-	key := "traintuple_" + hex.EncodeToString(tKey[:])
+	key := hex.EncodeToString(tKey[:])
 	traintupleBytes, _ := json.Marshal(traintuple)
 	err = stub.PutState(key, traintupleBytes)
 	if err != nil {
@@ -475,24 +474,30 @@ func queryAll(stub shim.ChaincodeStubInterface, args []string, elementType strin
 	if len(args) != 0 {
 		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
 	}
-
-	elementsIterator, err := stub.GetStateByRange(elementType+"_", elementType+"a")
-	if err != nil {
-		return nil, err
+	var indexName string
+	switch elementType {
+	case "challenge":
+		indexName = "challenge~owner~key"
+	case "dataset":
+		indexName = "dataset~owner~key"
+	case "algo":
+		indexName = "algo~challenge~key"
+	case "traintuple":
+		indexName = "traintuple~algo~key"
+	default:
+		return nil, fmt.Errorf("no element type %s", elementType)
 	}
+	elementsKeys, err := getKeysFromComposite(stub, indexName, []string{elementType})
 	var elements []map[string]interface{}
-	for elementsIterator.HasNext() {
-		queryResponse, err := elementsIterator.Next()
-		if err != nil {
-			return nil, err
-		}
+	for _, key := range elementsKeys {
 		var element map[string]interface{}
-		err = json.Unmarshal(queryResponse.GetValue(), &element)
+		err = getElementStruct(stub, key, &element)
 		if err != nil {
 			return nil, err
 		}
-		element["key"] = queryResponse.GetKey()
+		element["key"] = key
 		elements = append(elements, element)
+
 	}
 	payload, err := json.Marshal(elements)
 	if err != nil {
@@ -530,7 +535,7 @@ func queryModelTraintuples(stub shim.ChaincodeStubInterface, args []string) ([]b
 		return nil, err
 	}
 	// get associated algo
-	algoKey := "algo_" + traintuple.Algo.Hash
+	algoKey := traintuple.Algo.Hash
 	mPayload := make(map[string]interface{})
 	algo := Algo{}
 	if err := getElementStruct(stub, algoKey, &algo); err != nil {

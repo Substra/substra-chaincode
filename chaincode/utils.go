@@ -336,7 +336,7 @@ func fillTraintupleFromModel(stub shim.ChaincodeStubInterface, traintuple *Train
 // Challenge, StartModel, TestDataKeys, TestDataOpenerHash, TestWorker, Rank
 func fillTraintupleFromAlgo(stub shim.ChaincodeStubInterface, traintuple *Traintuple, algoKey string, challengeKey string) error {
 	// startModel corresponds to the algo itself. Check algo field corresponds to algoKey
-	if traintupleAlgoKey := "algo_" + traintuple.Algo.Hash; traintupleAlgoKey != algoKey {
+	if traintupleAlgoKey := traintuple.Algo.Hash; traintupleAlgoKey != algoKey {
 		return fmt.Errorf("input algoKey %s does not correspond to algoKey of traintuple %s",
 			algoKey, traintupleAlgoKey)
 	}
@@ -351,7 +351,7 @@ func fillTraintupleFromAlgo(stub shim.ChaincodeStubInterface, traintuple *Traint
 		StorageAddress: retrievedChallenge.Metrics.StorageAddress,
 	}
 	traintuple.Challenge = &TtChallenge{
-		Hash:    strings.Split(challengeKey, "_")[1],
+		Hash:    challengeKey,
 		Metrics: &metrics,
 	}
 
@@ -368,7 +368,7 @@ func fillTraintupleFromAlgo(stub shim.ChaincodeStubInterface, traintuple *Traint
 	traintuple.TestData = &TtData{
 		Worker:     testDataset.Owner,
 		Keys:       retrievedChallenge.TestDataKeys,
-		OpenerHash: strings.Split(testDatasetKey, "_")[1],
+		OpenerHash: testDatasetKey,
 	}
 	// first time algo is trained
 	traintuple.Rank = 0
