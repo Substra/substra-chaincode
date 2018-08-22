@@ -75,7 +75,7 @@ func createSampleData(data inputData) [][]byte {
 		data.Hashes = trainDataHash1 + ", " + trainDataHash2
 	}
 	if data.DatasetKey == "" {
-		data.DatasetKey = "dataset_" + datasetOpenerHash
+		data.DatasetKey = datasetOpenerHash
 	}
 	if data.Size == "" {
 		data.Size = "100"
@@ -109,7 +109,7 @@ func createSampleChallenge(challenge inputChallenge) [][]byte {
 		challenge.MetricsStorageAddress = "https://toto/challenge/222/metrics"
 	}
 	if challenge.TestDataKeys == "" {
-		challenge.TestDataKeys = "data_da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+		challenge.TestDataKeys = "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 	}
 	challenge.Permissions = "all"
 	args, _ := inputStructToBytes(&challenge)
@@ -135,7 +135,7 @@ func createSampleAlgo(algo inputAlgo) [][]byte {
 		algo.DescriptionStorageAddress = "https://toto/algo/222/description"
 	}
 	if algo.ChallengeKey == "" {
-		algo.ChallengeKey = "challenge_" + challengeDescriptionHash
+		algo.ChallengeKey = challengeDescriptionHash
 	}
 	algo.Permissions = "all"
 	args, _ := inputStructToBytes(&algo)
@@ -146,16 +146,16 @@ func createSampleAlgo(algo inputAlgo) [][]byte {
 
 func createSampleTraintuple(traintuple inputTraintuple) [][]byte {
 	if traintuple.ChallengeKey == "" {
-		traintuple.ChallengeKey = "challenge_" + challengeDescriptionHash
+		traintuple.ChallengeKey = challengeDescriptionHash
 	}
 	if traintuple.AlgoKey == "" {
-		traintuple.AlgoKey = "algo_" + algoHash
+		traintuple.AlgoKey = algoHash
 	}
 	if traintuple.StartModelKey == "" {
-		traintuple.StartModelKey = "algo_" + algoHash
+		traintuple.StartModelKey = algoHash
 	}
 	if traintuple.TrainDataKeys == "" {
-		traintuple.TrainDataKeys = "data_" + trainDataHash1 + ", data_" + trainDataHash2
+		traintuple.TrainDataKeys = trainDataHash1 + ", " + trainDataHash2
 	}
 	args, _ := inputStructToBytes(&traintuple)
 	args = append([][]byte{[]byte("createTraintuple")}, args...)
@@ -166,7 +166,7 @@ func createSampleTraintuple(traintuple inputTraintuple) [][]byte {
 func createSamplePerf(dataHashes []string) []byte {
 	dataPerf := ""
 	for i, dataHash := range dataHashes {
-		dataPerf += "data_" + dataHash + ":0.9" + strconv.Itoa(i)
+		dataPerf += dataHash + ":0.9" + strconv.Itoa(i)
 		if i < len(dataHashes)-1 {
 			dataPerf += ", "
 		}
@@ -224,6 +224,7 @@ func TestPipeline(t *testing.T) {
 	if status := resp.Status; status != 200 {
 		t.Errorf("testPipeline failed when adding train data with status %d and message %s", status, resp.Message)
 	}
+	fmt.Println(">  " + string(resp.Payload))
 	// Query all dataset
 	fmt.Println("#### ------------ Query Datasets ------------")
 	args = [][]byte{[]byte("queryDatasets")}
@@ -243,7 +244,6 @@ func TestPipeline(t *testing.T) {
 		t.Errorf("testPipeline failed when querying challenge with status %d and message %s", status, resp.Message)
 	}
 	fmt.Println(">  " + string(resp.Payload))
-
 	// Add trainTuple
 	fmt.Println("#### ------------ Add Traintuple ------------")
 	inpTraintuple := inputTraintuple{}
@@ -358,7 +358,7 @@ func TestPipeline(t *testing.T) {
 	fmt.Println(">  " + string(resp.Payload))
 	// Query dataset data
 	fmt.Println("#### ------------ Query Dataset Data ------------")
-	args = [][]byte{[]byte("queryDatasetData"), []byte("dataset_" + datasetOpenerHash)}
+	args = [][]byte{[]byte("queryDatasetData"), []byte(datasetOpenerHash)}
 	printArgs(args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
@@ -366,7 +366,7 @@ func TestPipeline(t *testing.T) {
 	}
 	payload = make(map[string]interface{})
 	json.Unmarshal(resp.Payload, &payload)
-	if _, ok := payload["dataset_"+datasetOpenerHash]; !ok {
+	if _, ok := payload[datasetOpenerHash]; !ok {
 		t.Errorf("testPipeline failed when querying dataset data, payload should contain the dataset info")
 	}
 	if _, ok := payload["trainDataKeys"]; !ok {
