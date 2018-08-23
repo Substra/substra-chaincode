@@ -186,6 +186,20 @@ func TestPipeline(t *testing.T) {
 		t.Errorf("testPipeline failed when adding dataset with status %d and message %s", status, resp.Message)
 	}
 	fmt.Println(">  " + string(resp.Payload))
+	// Get dataset key from Payload
+	datasetKey := string(resp.Payload)
+	if datasetKey != datasetOpenerHash {
+		t.Errorf("dataset key does not correspond to dataset opener hash: %s - %s", datasetKey, datasetOpenerHash)
+	}
+	// Query Dataset
+	fmt.Println("#### ------------ Query Dataset From key ------------")
+	args = [][]byte{[]byte("query"), []byte(datasetKey)}
+	printArgs(args, "query")
+	resp = mockStub.MockInvoke("42", args)
+	if status := resp.Status; status != 200 {
+		t.Errorf("testPipeline failed when querying a dataset with status %d and message %s", status, resp.Message)
+	}
+	fmt.Println(">  " + string(resp.Payload))
 	// Add test data
 	fmt.Println("#### ------------ Add test Data ------------")
 	inpData := inputData{

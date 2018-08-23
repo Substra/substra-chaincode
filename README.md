@@ -43,7 +43,12 @@ Note for internal use only: See the [technical specifications](https://github.co
 ```
 peer chaincode invoke -n mycc -c '{"Args":["registerDataset","liver slide","do1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","https://toto/dataset/42234/opener","images","8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","https://toto/dataset/42234/description","","all"]}' -C myc
 ```
->  {"name":"liver slide","size":0,"nbData":0,"type":"images","description":{"hash":"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","storageAddress":"https://toto/dataset/42234/description"},"owner":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","challengeKeys":null,"permissions":"all"}
+>  do1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc
+#### ------------ Query Dataset From key ------------
+```
+peer chaincode query -n mycc -c '{"Args":["query","do1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]}' -C myc
+```
+>  {"name":"liver slide","openerStorageAddress":"https://toto/dataset/42234/opener","size":0,"nbData":0,"type":"images","description":{"hash":"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","storageAddress":"https://toto/dataset/42234/description"},"owner":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","challengeKeys":null,"permissions":"all"}
 #### ------------ Add test Data ------------
 ```
 peer chaincode invoke -n mycc -c '{"Args":["registerData","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, da2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","do1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","100","true"]}' -C myc
@@ -53,12 +58,12 @@ peer chaincode invoke -n mycc -c '{"Args":["registerData","da1bb7c31f62244c0f3a7
 ```
 peer chaincode invoke -n mycc -c '{"Args":["registerChallenge","MSI classification","5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","https://toto/challenge/222/description","accuracy","fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482d8d","https://toto/challenge/222/metrics","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","all"]}' -C myc
 ```
->  {"name":"MSI classification","descriptionStorageAddress":"https://toto/challenge/222/description","metrics":{"name":"accuracy","hash":"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482d8d","storageAddress":"https://toto/challenge/222/metrics"},"owner":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","testDataKeys":["da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"],"permissions":"all"}
+>  5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379
 #### ------------ Add Algo ------------
 ```
 peer chaincode invoke -n mycc -c '{"Args":["registerAlgo","hog + svm","fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","https://toto/algo/222/algo","e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dca","https://toto/algo/222/description","5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","all"]}' -C myc
 ```
->  {"name":"hog + svm","storageAddress":"https://toto/algo/222/algo","description":{"hash":"e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dca","storageAddress":"https://toto/algo/222/description"},"owner":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","challengeKey":"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","permissions":"all"}
+>  fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc
 #### ------------ Add Train Data ------------
 ```
 peer chaincode invoke -n mycc -c '{"Args":["registerData","aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","do1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","100","false"]}' -C myc
@@ -68,7 +73,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerData","aa1bb7c31f62244c0f3a7
 ```
 peer chaincode query -n mycc -c '{"Args":["queryDatasets"]}' -C myc
 ```
->  [{"challengeKeys":["5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"],"description":{"hash":"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","storageAddress":"https://toto/dataset/42234/description"},"key":"do1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","name":"liver slide","nbData":4,"owner":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","permissions":"all","size":200,"type":"images"}]
+>  [{"challengeKeys":["5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"],"description":{"hash":"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","storageAddress":"https://toto/dataset/42234/description"},"key":"do1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","name":"liver slide","nbData":4,"openerStorageAddress":"https://toto/dataset/42234/opener","owner":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","permissions":"all","size":200,"type":"images"}]
 #### ------------ Query Challenges ------------
 ```
 peer chaincode query -n mycc -c '{"Args":["queryChallenges"]}' -C myc
@@ -118,6 +123,4 @@ peer chaincode query -n mycc -c '{"Args":["queryModelTraintuples","modbb7c31f622
 ```
 peer chaincode query -n mycc -c '{"Args":["queryDatasetData","do1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]}' -C myc
 ```
->  {"do1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc":{"name":"liver slide","size":200,"nbData":4,"type":"images","description":{"hash":"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","storageAddress":"https://toto/dataset/42234/description"},"owner":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","challengeKeys":["5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"],"permissions":"all"},"trainDataKeys":["aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]}
-PASS
-ok  	github.com/SubstraFoundation/substra-chaincode/chaincode	0.027s
+>  {"do1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc":{"name":"liver slide","openerStorageAddress":"https://toto/dataset/42234/opener","size":200,"nbData":4,"type":"images","description":{"hash":"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","storageAddress":"https://toto/dataset/42234/description"},"owner":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","challengeKeys":["5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"],"permissions":"all"},"trainDataKeys":["aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]}

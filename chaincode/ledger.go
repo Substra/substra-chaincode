@@ -24,14 +24,15 @@ type Challenge struct {
 
 // Dataset is the representation of one of the elements type stored in the ledger
 type Dataset struct {
-	Name          string     `json:"name"`
-	Size          float32    `json:"size"`
-	NbData        int        `json:"nbData"`
-	Type          string     `json:"type"`
-	Description   *HashDress `json:"description"`
-	Owner         string     `json:"owner"`
-	ChallengeKeys []string   `json:"challengeKeys"`
-	Permissions   string     `json:"permissions"`
+	Name                 string     `json:"name"`
+	OpenerStorageAddress string     `json:"openerStorageAddress"`
+	Size                 float32    `json:"size"`
+	NbData               int        `json:"nbData"`
+	Type                 string     `json:"type"`
+	Description          *HashDress `json:"description"`
+	Owner                string     `json:"owner"`
+	ChallengeKeys        []string   `json:"challengeKeys"`
+	Permissions          string     `json:"permissions"`
 }
 
 // Data is the representation of one of the element type stored in the ledger
@@ -85,7 +86,7 @@ type HashDress struct {
 
 // TtChallenge stores info about a challenge in a Traintuple
 type TtChallenge struct {
-	Hash    string     `json:"hash"`
+	Key     string     `json:"hash"`
 	Metrics *HashDress `json:"metrics"`
 }
 
@@ -185,6 +186,7 @@ func (dataset *Dataset) Set(stub shim.ChaincodeStubInterface, inp inputDataset) 
 		challengeKeys = nil
 	}
 	dataset.Name = inp.Name
+	dataset.OpenerStorageAddress = inp.OpenerStorageAddress
 	dataset.Type = inp.Type
 	dataset.Description = &HashDress{
 		Hash:           inp.DescriptionHash,

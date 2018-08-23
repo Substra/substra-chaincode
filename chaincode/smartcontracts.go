@@ -39,7 +39,7 @@ func registerChallenge(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	}
 	// add challenge to dataset
 	err = addChallengeDataset(stub, datasetKey, challengeKey)
-	return challengeBytes, err
+	return []byte(challengeKey), err
 }
 
 // registerDataset stores a new dataset in the ledger.
@@ -77,7 +77,7 @@ func registerDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	if err != nil {
 		return nil, err
 	}
-	return datasetBytes, nil
+	return []byte(datasetKey), nil
 }
 
 // registerData stores new data in the ledger (one or more).
@@ -156,7 +156,7 @@ func registerAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 	if err != nil {
 		return nil, err
 	}
-	return algoBytes, nil
+	return []byte(algoKey), nil
 }
 
 // createTraintuple add a Traintuple in the ledger
@@ -575,10 +575,6 @@ func queryDatasetData(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	dataset := Dataset{}
 	if err := getElementStruct(stub, datasetKey, &dataset); err != nil {
 		return nil, err
-	}
-	// check requester is allowed to see this dataset and data
-	if txCreator, _ := getTxCreator(stub); dataset.Owner != txCreator {
-		return nil, fmt.Errorf("user is not allowed to see this dataset")
 	}
 	mPayload := make(map[string]interface{})
 	mPayload[datasetKey] = dataset
