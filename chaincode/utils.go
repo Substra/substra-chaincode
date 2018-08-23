@@ -351,7 +351,7 @@ func fillTraintupleFromAlgo(stub shim.ChaincodeStubInterface, traintuple *Traint
 		StorageAddress: retrievedChallenge.Metrics.StorageAddress,
 	}
 	traintuple.Challenge = &TtChallenge{
-		Hash:    challengeKey,
+		Key:     challengeKey,
 		Metrics: &metrics,
 	}
 
