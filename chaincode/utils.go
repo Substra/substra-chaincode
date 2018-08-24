@@ -294,8 +294,8 @@ func getModel(stub shim.ChaincodeStubInterface, modelHash string) ([]byte, error
 
 	traintupleKeys, err := getKeysFromComposite(stub, "traintuple~endModel~key",
 		[]string{"traintuple", modelHash})
-	if len(traintupleKeys) > 1 {
-		return nil, fmt.Errorf("more than one traintuple with endModel hash %s", modelHash)
+	if len(traintupleKeys) != 1 {
+		return nil, fmt.Errorf("no traintuple or more than one traintuple with endModel hash %s", modelHash)
 	}
 	traintupleKey := traintupleKeys[0]
 	traintupleBytes, err := getElementBytes(stub, traintupleKey)

@@ -391,3 +391,15 @@ func TestPipeline(t *testing.T) {
 	// TODO ADD CHECK content of resp.Payload
 
 }
+
+func TestFails(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+	fmt.Println("#### ------------ TO FAIL - Query Model Traintuples with unexisting model hash ------------")
+	unexistingModelHash := "modbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482tot"
+	args := [][]byte{[]byte("queryModelTraintuples"), []byte(unexistingModelHash)}
+	resp := mockStub.MockInvoke("42", args)
+	if status := resp.Status; status != 500 {
+		t.Errorf("testFails did not fail when querying model traintuples, got status %d", status)
+	}
+}
