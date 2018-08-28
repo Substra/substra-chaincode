@@ -107,10 +107,10 @@ type TtData struct {
 // inputChallenge is the representation of input args to register a Challenge
 type inputChallenge struct {
 	Name                      string `validate:"required,gte=1,lte=100"`
-	DescriptionHash           string `validate:"required,gte=64,lte=64"`
+	DescriptionHash           string `validate:"required,gte=64,lte=64,hexadecimal"`
 	DescriptionStorageAddress string `validate:"required,url"`
 	MetricsName               string `validate:"required,gte=1,lte=100"`
-	MetricsHash               string `validate:"required,gte=64,lte=64"`
+	MetricsHash               string `validate:"required,gte=64,lte=64,hexadecimal"`
 	MetricsStorageAddress     string `validate:"required,url"`
 	TestDataKeys              string `validate:"required"`
 	Permissions               string `validate:"required,oneof=all"`
@@ -121,9 +121,8 @@ type inputChallenge struct {
 func (challenge *Challenge) Set(stub shim.ChaincodeStubInterface, inp inputChallenge) (challengeKey string, datasetKey string, err error) {
 	// checking validity of submitted fields
 	validate := validator.New()
-	err = validate.Struct(inp)
-	if err != nil {
-		err = fmt.Errorf("invalid inputs %s", err.Error())
+	if err = validate.Struct(inp); err != nil {
+		err = fmt.Errorf("invalid challenge inputs %s", err.Error())
 		return
 	}
 	testDataKeys := strings.Split(strings.Replace(inp.TestDataKeys, " ", "", -1), ",")
@@ -153,10 +152,10 @@ func (challenge *Challenge) Set(stub shim.ChaincodeStubInterface, inp inputChall
 // inputDataset is the representation of input args to register a Dataset
 type inputDataset struct {
 	Name                      string `validate:"required,gte=1,lte=100"`
-	OpenerHash                string `validate:"required,gte=64,lte=64"`
+	OpenerHash                string `validate:"required,gte=64,lte=64,hexadecimal"`
 	OpenerStorageAddress      string `validate:"required,url"`
 	Type                      string `validate:"required,gte=1,lte=30"`
-	DescriptionHash           string `validate:"required,gte=64,lte=64"`
+	DescriptionHash           string `validate:"required,gte=64,lte=64,hexadecimal"`
 	DescriptionStorageAddress string `validate:"required,url"`
 	ChallengeKeys             string //`validate:"required"`
 	Permissions               string `validate:"required,oneof=all"`
@@ -167,16 +166,15 @@ type inputDataset struct {
 func (dataset *Dataset) Set(stub shim.ChaincodeStubInterface, inp inputDataset) (string, []string, error) {
 	// checking validity of submitted fields
 	validate := validator.New()
-	err := validate.Struct(inp)
-	if err != nil {
-		err = fmt.Errorf("invalid inputs %s", err.Error())
-		return "", nil, nil
+	if err := validate.Struct(inp); err != nil {
+		err = fmt.Errorf("invalid dataset inputs %s", err.Error())
+		return "", nil, err
 	}
 	var challengeKeys []string
 	if len(inp.ChallengeKeys) > 0 {
 		challengeKeys := strings.Split(strings.Replace(inp.ChallengeKeys, " ", "", -1), ",")
 		for _, challengeKey := range challengeKeys {
-			_, err = getElementBytes(stub, challengeKey)
+			_, err := getElementBytes(stub, challengeKey)
 			if err != nil {
 				err = fmt.Errorf("error checking associated challenge(s) %s", err.Error())
 				return "", nil, nil
@@ -206,7 +204,7 @@ func (dataset *Dataset) Set(stub shim.ChaincodeStubInterface, inp inputDataset) 
 // inputData is the representation of input args to register a Data
 type inputData struct {
 	Hashes     string `validate:"required"`
-	DatasetKey string `validate:"required,gte=64,lte=64"`
+	DatasetKey string `validate:"required,gte=64,lte=64,hexadecimal"`
 	Size       string `validate:"required"`
 	TestOnly   string `validate:"required,oneof=true false"`
 }
@@ -214,11 +212,15 @@ type inputData struct {
 // update is a method of the receiver Dataset. It checks the validity of inputData
 // and uses its fields to update the associated dataset
 func (dataset *Dataset) Update(stub shim.ChaincodeStubInterface, inp inputData) (datasetKey string, dataHashes []string, testOnly bool, err error) {
-
+	// validate input data
+	validate := validator.New()
+	if err = validate.Struct(inp); err != nil {
+		err = fmt.Errorf("invalid data inputs %s", err.Error())
+		return
+	}
 	// check if associated dataset exists
 	datasetKey = inp.DatasetKey
-	err = getElementStruct(stub, datasetKey, &dataset)
-	if err != nil {
+	if err = getElementStruct(stub, datasetKey, &dataset); err != nil {
 		return
 	}
 	// check data size can be converted to float
@@ -249,11 +251,11 @@ func (dataset *Dataset) Update(stub shim.ChaincodeStubInterface, inp inputData) 
 // inputAlgo is the representation of input args to register an Algo
 type inputAlgo struct {
 	Name                      string `validate:"required,gte=1,lte=100"`
-	Hash                      string `validate:"required,gte=64,lte=64"`
+	Hash                      string `validate:"required,gte=64,lte=64,hexadecimal"`
 	StorageAddress            string `validate:"required,url"`
-	DescriptionHash           string `validate:"required,gte=64,lte=64"`
+	DescriptionHash           string `validate:"required,gte=64,lte=64,hexadecimal"`
 	DescriptionStorageAddress string `validate:"required,url"`
-	ChallengeKey              string `validate:"required,gte=64,lte=64"`
+	ChallengeKey              string `validate:"required,gte=64,lte=64,hexadecimal"`
 	Permissions               string `validate:"required,oneof=all"`
 }
 
@@ -262,9 +264,8 @@ type inputAlgo struct {
 func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey string, err error) {
 	// checking validity of submitted fields
 	validate := validator.New()
-	err = validate.Struct(inp)
-	if err != nil {
-		err = fmt.Errorf("invalid inputs %s", err.Error())
+	if err = validate.Struct(inp); err != nil {
+		err = fmt.Errorf("invalid algo inputs %s", err.Error())
 		return
 	}
 	// check associated challenge exists
@@ -293,8 +294,8 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 
 // inputTraintuple is the representation of input args to register a Traintuple
 type inputTraintuple struct {
-	ChallengeKey  string `validate:"required,gte=64,lte=64"`
-	AlgoKey       string `validate:"required,gte=64,lte=64"`
+	ChallengeKey  string `validate:"required,gte=64,lte=64,hexadecimal"`
+	AlgoKey       string `validate:"required,gte=64,lte=64,hexadecimal"`
 	StartModelKey string `validate:"required"`
 	TrainDataKeys string `validate:"required"`
 }

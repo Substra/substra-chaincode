@@ -39,7 +39,8 @@ func registerChallenge(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	}
 	// add challenge to dataset
 	err = addChallengeDataset(stub, datasetKey, challengeKey)
-	return []byte(challengeKey), err
+	// return []byte(challengeKey), err
+	return []byte(datasetKey), err
 }
 
 // registerDataset stores a new dataset in the ledger.
@@ -106,24 +107,21 @@ func registerData(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 	// store each added data in the ledger
 	var dataKeys []byte
 	for _, dataHash := range dataHashes {
-		key := dataHash
-		dataKeys = append(dataKeys, []byte(key+", ")...)
+		dataKeys = append(dataKeys, []byte(dataHash+", ")...)
 		// create data object
 		var data = Data{
 			DatasetKey: datasetKey,
 			TestOnly:   testOnly}
 		dataBytes, _ := json.Marshal(data)
-		err = stub.PutState(key, dataBytes)
+		err = stub.PutState(dataHash, dataBytes)
 		if err != nil {
 			return nil, fmt.Errorf("failed to add data with hash %s", dataHash)
 		}
 		// create composite keys to find all data associated with a dataset and only test or train data
-		err = createCompositeKey(stub, "data~dataset~key", []string{"data", datasetKey, key})
-		if err != nil {
+		if err = createCompositeKey(stub, "data~dataset~key", []string{"data", datasetKey, dataHash}); err != nil {
 			return nil, err
 		}
-		err = createCompositeKey(stub, "data~dataset~testOnly~key", []string{"data", datasetKey, strconv.FormatBool(testOnly), key})
-		if err != nil {
+		if err = createCompositeKey(stub, "data~dataset~testOnly~key", []string{"data", datasetKey, strconv.FormatBool(testOnly), dataHash}); err != nil {
 			return nil, err
 		}
 	}
@@ -193,6 +191,7 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	// check dataset exists and get trainWorker and trainDataOpener
 	trainDataset := Dataset{}
 	if err = getElementStruct(stub, trainDatasetKey, &trainDataset); err != nil {
+		err = fmt.Errorf("could not retrieve dataset with key %s - %s", trainDatasetKey, err.Error())
 		return nil, err
 	}
 	traintuple.TrainData = &TtData{
@@ -204,6 +203,7 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	// get algo
 	algo := Algo{}
 	if err = getElementStruct(stub, algoKey, &algo); err != nil {
+		err = fmt.Errorf("could not retrieve algo with key %s - %s", algoKey, err.Error())
 		return nil, err
 	}
 	traintuple.Algo = &HashDress{
@@ -228,19 +228,23 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	traintupleBytes, _ := json.Marshal(traintuple)
 	err = stub.PutState(key, traintupleBytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to add traintuple with startModel %s and challenge %s", startModelKey, challengeKey)
+		err = fmt.Errorf("could not put in ledger traintuple with startModel %s and challenge %s - %s", startModelKey, challengeKey, err.Error())
+		return nil, err
 	}
 	// create composite keys
 	err = createCompositeKey(stub, "traintuple~algo~key", []string{"traintuple", algoKey, key})
 	if err != nil {
+		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
 		return nil, err
 	}
 	err = createCompositeKey(stub, "traintuple~trainWorker~status~key", []string{"traintuple", traintuple.TrainData.Worker, "todo", key})
 	if err != nil {
+		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
 		return nil, err
 	}
 	err = createCompositeKey(stub, "traintuple~testWorker~status~key", []string{"traintuple", traintuple.TestData.Worker, "todo", key})
 	if err != nil {
+		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
 		return nil, err
 	}
 	return []byte(key), nil
@@ -537,24 +541,28 @@ func queryModelTraintuples(stub shim.ChaincodeStubInterface, args []string) ([]b
 	// get associated algo
 	algoKey := traintuple.Algo.Hash
 	mPayload := make(map[string]interface{})
-	algo := Algo{}
+	var algo map[string]interface{}
 	if err := getElementStruct(stub, algoKey, &algo); err != nil {
 		return nil, err
 	}
-	mPayload[algoKey] = algo
+	algo["key"] = algoKey
+	mPayload["algo"] = algo
 	// get traintuples related to algo, whose permissions match the requester
 	traintupleKeys, err := getKeysFromComposite(stub, "traintuple~algo~key", []string{"traintuple", algoKey})
 	if err != nil {
 		return nil, err
 	}
 	// get all traintuples and serialize them
+	var traintuples []map[string]interface{}
 	for _, traintupleKey := range traintupleKeys {
-		traintuple := Traintuple{}
+		var traintuple map[string]interface{} // Traintuple{}
 		if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 			return nil, err
 		}
-		mPayload[traintupleKey] = traintuple
+		traintuple["key"] = traintupleKey
+		traintuples = append(traintuples, traintuple)
 	}
+	mPayload["traintuples"] = traintuples
 	// Marshal payload
 	payload, err := json.Marshal(mPayload)
 	if err != nil {
@@ -572,12 +580,13 @@ func queryDatasetData(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	datasetKey := args[0]
 
 	// get dataset info
-	dataset := Dataset{}
+	var dataset map[string]interface{} // Traintuple{}
 	if err := getElementStruct(stub, datasetKey, &dataset); err != nil {
 		return nil, err
 	}
+	dataset["key"] = datasetKey
 	mPayload := make(map[string]interface{})
-	mPayload[datasetKey] = dataset
+	mPayload["dataset"] = dataset
 	// get related train data
 	trainDataKeys, err := getDatasetData(stub, datasetKey, true)
 	if err != nil {
