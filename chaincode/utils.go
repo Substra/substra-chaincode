@@ -30,7 +30,7 @@ func inputStructToBytes(v interface{}) (sb [][]byte, err error) {
 	for i := 0; i < e.NumField(); i++ {
 		v := e.Field(i)
 		if v.Type().Name() != "string" {
-			err = fmt.Errorf("struc should contain only string values")
+			err = fmt.Errorf("struct should contain only string values")
 			return
 		}
 		varValue := v.String()
@@ -305,7 +305,7 @@ func getModel(stub shim.ChaincodeStubInterface, modelHash string) ([]byte, error
 	return traintupleBytes, err
 }
 
-// fillTraintupleChallengeFromModel fills the following fields of the pointed traintuple, given a startModel key:
+// fillTraintupleFromModel fills the following fields of the pointed traintuple, given a startModel key:
 // Challenge, StartModel, TestDataKeys, TestDataOpenerHash, TestWorker, Rank
 func fillTraintupleFromModel(stub shim.ChaincodeStubInterface, traintuple *Traintuple, startModelKey string) error {
 	// get parent traintuple
@@ -320,9 +320,8 @@ func fillTraintupleFromModel(stub shim.ChaincodeStubInterface, traintuple *Train
 	parentTraintupleKey := parentTraintupleKeys[0]
 	// model derives from a previous Traintuple
 	parentTraintuple := Traintuple{}
-	err = getElementStruct(stub, parentTraintupleKey, &parentTraintuple)
-	if err != nil {
-		return err
+	if err = getElementStruct(stub, parentTraintupleKey, &parentTraintuple); err != nil {
+		return fmt.Errorf("issue getting parent traintuple - %s", err.Error())
 	}
 	// fill traintuple
 	traintuple.Challenge = parentTraintuple.Challenge
@@ -332,7 +331,7 @@ func fillTraintupleFromModel(stub shim.ChaincodeStubInterface, traintuple *Train
 	return nil
 }
 
-// fillTraintupleChallengeFromAlgo fills the following fields of the pointed traintuple, given an algo key:
+// fillTraintupleFromAlgo fills the following fields of the pointed traintuple, given an algo key:
 // Challenge, StartModel, TestDataKeys, TestDataOpenerHash, TestWorker, Rank
 func fillTraintupleFromAlgo(stub shim.ChaincodeStubInterface, traintuple *Traintuple, algoKey string, challengeKey string) error {
 	// startModel corresponds to the algo itself. Check algo field corresponds to algoKey
@@ -344,7 +343,7 @@ func fillTraintupleFromAlgo(stub shim.ChaincodeStubInterface, traintuple *Traint
 	// get challenge to derive metrics info and test data keys
 	retrievedChallenge := Challenge{}
 	if err := getElementStruct(stub, challengeKey, &retrievedChallenge); err != nil {
-		return err
+		return fmt.Errorf("issue getting associated challenge - %s", err.Error())
 	}
 	metrics := HashDress{
 		Hash:           retrievedChallenge.Metrics.Hash,
@@ -358,12 +357,12 @@ func fillTraintupleFromAlgo(stub shim.ChaincodeStubInterface, traintuple *Traint
 	// get test worker and test data openerHas from associated dataset
 	testData := Data{}
 	if err := getElementStruct(stub, retrievedChallenge.TestDataKeys[0], &testData); err != nil {
-		return err
+		return fmt.Errorf("issue getting associated test data - %s", err.Error())
 	}
 	testDatasetKey := testData.DatasetKey
 	testDataset := Dataset{}
 	if err := getElementStruct(stub, testDatasetKey, &testDataset); err != nil {
-		return err
+		return fmt.Errorf("issue getting associated test dataset - %s", err.Error())
 	}
 	traintuple.TestData = &TtData{
 		Worker:     testDataset.Owner,
