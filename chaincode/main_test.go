@@ -285,6 +285,24 @@ func TestPipeline(t *testing.T) {
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 	// Get traintuple key from Payload
 	traintupleKey := resp.Payload
+	// Get owner of the traintuple
+	args = [][]byte{[]byte("query"), traintupleKey}
+	resp = mockStub.MockInvoke("42", args)
+	respTraintuple := resp.Payload
+	traintuple := Traintuple{}
+	if err := bytesToStruct(respTraintuple, &traintuple); err != nil {
+		t.Errorf("when unmarshalling queried traintuple with error %s", err)
+	}
+	trainWorker := traintuple.TrainData.Worker
+
+	fmt.Println("#### ------------ Query Traintuples of worker with todo status ------------")
+	args = [][]byte{[]byte("queryFilter"), []byte("traintuple~trainWorker~status"), []byte(trainWorker + ", todo")}
+	printArgs(args, "invoke")
+	resp = mockStub.MockInvoke("42", args)
+	if status := resp.Status; status != 200 {
+		t.Errorf("when querying traintuple of worker with todo status - with status %d and message %s", status, resp.Message)
+	}
+	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
 	fmt.Println("#### ------------ Log Start Training ------------")
 	args = [][]byte{[]byte("logStartTrainTest"), traintupleKey, []byte("training")}
@@ -340,10 +358,9 @@ func TestPipeline(t *testing.T) {
 		t.Errorf("when querying traintuple with status %d and message %s",
 			status, resp.Message)
 	}
-	respTraintuple := resp.Payload
-	traintuple := Traintuple{}
-	err := bytesToStruct(respTraintuple, &traintuple)
-	if err != nil {
+	respTraintuple = resp.Payload
+	traintuple = Traintuple{}
+	if err := bytesToStruct(respTraintuple, &traintuple); err != nil {
 		t.Errorf("when unmarshalling queried traintuple with error %s", err)
 	}
 	if traintuple.Log != logTrain+logTest {

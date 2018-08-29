@@ -56,10 +56,12 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = queryAll(stub, args, "challenge")
 	case "queryAlgos":
 		result, err = queryAll(stub, args, "algo")
-	case "queryModels":
+	case "queryTraintuples":
 		result, err = queryAll(stub, args, "traintuple")
 	case "queryDatasets":
 		result, err = queryAll(stub, args, "dataset")
+	case "queryFilter":
+		result, err = queryFilter(stub, args)
 	case "queryModel":
 		result, err = queryModel(stub, args)
 	case "queryModelTraintuples":

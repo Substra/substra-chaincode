@@ -131,8 +131,7 @@ func createCompositeKey(stub shim.ChaincodeStubInterface, indexName string, attr
 }
 
 // getKeysFromComposite returns element keys associated with a composite key specified by its indexName and attributes
-func getKeysFromComposite(stub shim.ChaincodeStubInterface, indexName string,
-	attributes []string) ([]string, error) {
+func getKeysFromComposite(stub shim.ChaincodeStubInterface, indexName string, attributes []string) ([]string, error) {
 	var elementKeys []string
 	compositeIterator, err := stub.GetStateByPartialCompositeKey(indexName, attributes)
 	if err != nil {
