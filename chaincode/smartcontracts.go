@@ -11,6 +11,8 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+const lenKey int = 64
+
 // registerChallenge stores a new challenge in the ledger.
 // If the key exists, it will override the value with the new one
 func registerChallenge(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
@@ -174,6 +176,9 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	challengeKey := args[0]
 	algoKey := args[1]
 	startModelKey := args[2]
+	if len(challengeKey) != lenKey || len(algoKey) != lenKey || len(startModelKey) != lenKey {
+		return nil, fmt.Errorf("invalid challenge, algo, or start model key")
+	}
 	trainDataKeys := strings.Split(strings.Replace(args[3], " ", "", -1), ",")
 
 	// initiate traintuple
@@ -225,6 +230,10 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	// certainly not be the most efficient key... but let's make it work and them try to make it better...
 	tKey := sha256.Sum256([]byte(challengeKey + algoKey + traintuple.StartModel.Hash + strings.Join(trainDataKeys, ",") + creator))
 	key := hex.EncodeToString(tKey[:])
+	// check if traintuple key already exist
+	if elementBytes, _ := stub.GetState(key); elementBytes != nil {
+		return nil, fmt.Errorf("traintuple with these challenge, algo, start model, and train data already exist")
+	}
 	traintupleBytes, _ := json.Marshal(traintuple)
 	err = stub.PutState(key, traintupleBytes)
 	if err != nil {
@@ -258,6 +267,9 @@ func logStartTrainTest(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	}
 
 	traintupleKey := args[0]
+	if len(traintupleKey) != lenKey {
+		return nil, fmt.Errorf("invalid traintuple key")
+	}
 	traintupleStatus := args[1]
 	traintuple, err := updateStatusTraintuple(stub, traintupleKey, traintupleStatus)
 	if err != nil {
@@ -290,6 +302,9 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	}
 	// get traintuple
 	traintupleKey := args[0]
+	if len(traintupleKey) != lenKey {
+		return nil, fmt.Errorf("invalid traintuple key")
+	}
 	traintuple := Traintuple{}
 	if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 		return nil, err
@@ -354,6 +369,9 @@ func logFailTrainTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	}
 	// get input args
 	traintupleKey := args[0]
+	if len(traintupleKey) != lenKey {
+		return nil, fmt.Errorf("invalid traintuple key")
+	}
 	log := args[1]
 	if err := checkLog(log); err != nil {
 		return nil, err
@@ -405,6 +423,9 @@ func logSuccessTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, er
 	}
 	// get traintuple
 	traintupleKey := args[0]
+	if len(traintupleKey) != lenKey {
+		return nil, fmt.Errorf("invalid traintuple key")
+	}
 	traintuple := Traintuple{}
 	if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 		return nil, err
@@ -455,21 +476,53 @@ func logSuccessTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, er
 // query returns an element of the ledger given its key
 // For now, ok for everything. Later returns if the requester has permission to see it
 func query(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	var key string
 	expectedArgs := [1]string{"element key"}
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
 		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
 	}
 
-	key = args[0]
-	valBytes, err := stub.GetState(key)
+	key := args[0]
+	if len(key) != 64 {
+		return nil, fmt.Errorf("invalid key")
+	}
+	return getElementBytes(stub, key)
+}
+
+// queryFilter returns all elements of the ledger matching some filters
+// For now, ok for everything. Later returns if the requester has permission to see it
+func queryFilter(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	expectedArgs := [2]string{"indexName", "attributes"}
+	if nbArgs := len(expectedArgs); nbArgs != len(args) {
+		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+	}
+	// check validity of inputs
+	indexName := args[0]
+	validIndexNames := []string{"traintuple~trainWorker~status", "traintuple~testWorker~status"}
+	if !stringInSlice(indexName, validIndexNames) {
+		return nil, fmt.Errorf("invalid indexName filter query: %s", indexName)
+	}
+	indexName = indexName + "~key"
+	attributes := strings.Split(strings.Replace(args[1], " ", "", -1), ",")
+	attributes = append([]string{strings.Split(indexName, "~")[0]}, attributes...)
+
+	filteredKeys, err := getKeysFromComposite(stub, indexName, attributes)
+	if err != nil {
+		return nil, fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
+	}
+	//TODO get elements with filtererd keys
+	var elements []map[string]interface{}
+	for _, key := range filteredKeys {
+		var element map[string]interface{}
+		if err := getElementStruct(stub, key, &element); err != nil {
+			return nil, fmt.Errorf("issue getting element with key %s - %s", key, err.Error())
+		}
+		elements = append(elements, element)
+	}
+	payload, err := json.Marshal(elements)
 	if err != nil {
 		return nil, err
-	} else if valBytes == nil {
-		return nil, fmt.Errorf("no element with this key %s", key)
 	}
-
-	return valBytes, nil
+	return payload, nil
 }
 
 // queryAll returns all elements of the ledger given its type
