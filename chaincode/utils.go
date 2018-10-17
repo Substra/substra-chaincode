@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"encoding/json"
@@ -26,7 +25,7 @@ func getFieldNames(v interface{}) (fieldNames []string) {
 // inputStructToBytes converts fields of a struct (with string fields only, such as input struct defined in ledger.go) to a [][]byte
 func inputStructToBytes(v interface{}) (sb [][]byte, err error) {
 
-	e := reflect.ValueOf(v).Elem()
+	e := reflect.Indirect(reflect.ValueOf(v))
 	for i := 0; i < e.NumField(); i++ {
 		v := e.Field(i)
 		if v.Type().Name() != "string" {
@@ -57,7 +56,18 @@ func getTxCreator(stub shim.ChaincodeStubInterface) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	tt := sha256.Sum256(bCreator)
+	// get pem certificate only. This might be slightly dirty, but this is to avoid installing external packages
+	// change it once github.com/hyperledger/fabric/core/chaincode/lib/cid is in fabric chaincode docker
+	cert_prefix := "-----BEGIN CERTIFICATE-----"
+	cert_suffix := "-----END CERTIFICATE-----\n"
+	var creator string
+	if sCreator := strings.Split(string(bCreator), cert_prefix); len(sCreator) > 1 {
+		creator = strings.Split(sCreator[1], cert_suffix)[0]
+	} else {
+		creator = "test"
+	}
+	creator = cert_prefix + creator + cert_suffix
+	tt := sha256.Sum256([]byte(creator))
 	return hex.EncodeToString(tt[:]), nil
 }
 
@@ -132,7 +142,7 @@ func createCompositeKey(stub shim.ChaincodeStubInterface, indexName string, attr
 
 // getKeysFromComposite returns element keys associated with a composite key specified by its indexName and attributes
 func getKeysFromComposite(stub shim.ChaincodeStubInterface, indexName string, attributes []string) ([]string, error) {
-	var elementKeys []string
+	elementKeys := make([]string, 0)
 	compositeIterator, err := stub.GetStateByPartialCompositeKey(indexName, attributes)
 	if err != nil {
 		return elementKeys, err
@@ -168,37 +178,6 @@ func getDatasetData(stub shim.ChaincodeStubInterface, datasetKey string, trainOn
 		return nil, err
 	}
 	return dataKeys, nil
-}
-
-// strToPerf checks if a string such as dataKey1:perf1, dataKey2:perf2, dataKey3:perf3, ...
-// has same data keys as those in dataKeys and returns a []float32 with perf in same order as dataKeys
-func strToPerf(stub shim.ChaincodeStubInterface, strDataPerf string, dataKeys []string) ([]float32, error) {
-	var perf []float32
-	var err error
-	m := make(map[string]float32)
-	// split each dataKey:perf pair
-	sliceDataPerf := strings.Split(strings.Replace(strDataPerf, " ", "", -1), ",")
-	// check data is part of the traintuple and fill mapDataPerf
-	for _, dataPerf := range sliceDataPerf {
-		sdp := strings.Split(dataPerf, ":")
-		dataKey := sdp[0]
-		// convert perf to float
-		perfValue, err := strconv.ParseFloat(sdp[1], 32)
-		if err != nil {
-			return perf, err
-		}
-		m[dataKey] = float32(perfValue)
-	}
-	// check if data keys in maps correspond to dataKeys
-	for _, dataKey := range dataKeys {
-		value, ok := m[dataKey]
-		if !ok {
-			err = fmt.Errorf("dataKey %s referenced in slice is not in map", dataKey)
-			return perf, err
-		}
-		perf = append(perf, value)
-	}
-	return perf, err
 }
 
 // checkLog checks the validity of logs
@@ -242,11 +221,26 @@ func updateStatusTraintuple(stub shim.ChaincodeStubInterface, traintupleKey stri
 		return Traintuple{}, err
 	}
 	// update traintuple
+	oldStatus := traintuple.Status
 	traintuple.Status = status
 	traintupleBytes, _ := json.Marshal(traintuple)
 	if err := stub.PutState(traintupleKey, traintupleBytes); err != nil {
 		return traintuple, fmt.Errorf("failed to update traintuple status to %s with key %s", status, traintupleKey)
 	}
+	// update associated composite keys
+	indexName := "traintuple~trainWorker~status~key"
+	oldAttributes := []string{"traintuple", traintuple.TrainData.Worker, oldStatus, traintupleKey}
+	newAttributes := []string{"traintuple", traintuple.TrainData.Worker, status, traintupleKey}
+	if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
+		return Traintuple{}, err
+	}
+	indexName = "traintuple~testWorker~status~key"
+	oldAttributes = []string{"traintuple", traintuple.TestData.Worker, oldStatus, traintupleKey}
+	newAttributes = []string{"traintuple", traintuple.TestData.Worker, status, traintupleKey}
+	if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
+		return Traintuple{}, err
+	}
+
 	return traintuple, nil
 }
 
@@ -264,7 +258,7 @@ func checkUpdateTraintuple(stub shim.ChaincodeStubInterface, worker string, oldS
 		"training": "trained",
 		"trained":  "testing",
 		"testing":  "done"}
-	if statusPossibilities[oldStatus] != newStatus {
+	if statusPossibilities[oldStatus] != newStatus && newStatus != "failed" {
 		return fmt.Errorf("cannot change status from %s to %s", oldStatus, newStatus)
 	}
 	return nil
@@ -276,8 +270,10 @@ func updateCompositeKey(stub shim.ChaincodeStubInterface, indexName string, oldA
 	if err != nil {
 		return err
 	}
-	err = stub.DelState(oldCompositeKey)
-	if err != nil {
+	if element, _ := stub.GetState(oldCompositeKey); element == nil {
+		return fmt.Errorf("old composite key does not exist - %s", oldCompositeKey)
+	}
+	if err = stub.DelState(oldCompositeKey); err != nil {
 		return err
 	}
 	newCompositeKey, err := stub.CreateCompositeKey(indexName, newAttributes)
@@ -305,8 +301,8 @@ func getModel(stub shim.ChaincodeStubInterface, modelHash string) ([]byte, error
 }
 
 // fillTraintupleFromModel fills the following fields of the pointed traintuple, given a startModel key:
-// Challenge, StartModel, TestDataKeys, TestDataOpenerHash, TestWorker, Rank
-func fillTraintupleFromModel(stub shim.ChaincodeStubInterface, traintuple *Traintuple, startModelKey string) error {
+// Challenge, StartModel, TestDataKeys, TestDataOpenerHash, TestWorker
+func fillTraintupleFromModel(stub shim.ChaincodeStubInterface, traintuple *Traintuple, startModelKey string, challengeKey string) error {
 	// get parent traintuple
 	parentTraintupleKeys, err := getKeysFromComposite(stub, "traintuple~endModel~key",
 		[]string{"traintuple", startModelKey})
@@ -314,7 +310,7 @@ func fillTraintupleFromModel(stub shim.ChaincodeStubInterface, traintuple *Train
 		return err
 	}
 	if len(parentTraintupleKeys) != 1 {
-		return fmt.Errorf("several models associated with start model hash")
+		return fmt.Errorf("several models or no model associated with start model hash")
 	}
 	parentTraintupleKey := parentTraintupleKeys[0]
 	// model derives from a previous Traintuple
@@ -322,23 +318,20 @@ func fillTraintupleFromModel(stub shim.ChaincodeStubInterface, traintuple *Train
 	if err = getElementStruct(stub, parentTraintupleKey, &parentTraintuple); err != nil {
 		return fmt.Errorf("issue getting parent traintuple - %s", err.Error())
 	}
+	// check parent traintuple is associated to the same challenge as the to-betraintuple
+	if parentTraintuple.Challenge.Key != challengeKey {
+		return fmt.Errorf("not possible to create a traintuple with a model and an algo, which are not associated with the same challenge")
+	}
 	// fill traintuple
 	traintuple.Challenge = parentTraintuple.Challenge
 	traintuple.StartModel = parentTraintuple.EndModel
 	traintuple.TestData = parentTraintuple.TestData
-	traintuple.Rank = parentTraintuple.Rank + 1
 	return nil
 }
 
-// fillTraintupleFromAlgo fills the following fields of the pointed traintuple, given an algo key:
-// Challenge, StartModel, TestDataKeys, TestDataOpenerHash, TestWorker, Rank
-func fillTraintupleFromAlgo(stub shim.ChaincodeStubInterface, traintuple *Traintuple, algoKey string, challengeKey string) error {
-	// startModel corresponds to the algo itself. Check algo field corresponds to algoKey
-	if traintupleAlgoKey := traintuple.Algo.Hash; traintupleAlgoKey != algoKey {
-		return fmt.Errorf("input algoKey %s does not correspond to algoKey of traintuple %s",
-			algoKey, traintupleAlgoKey)
-	}
-	traintuple.StartModel = traintuple.Algo
+// fillTraintupleChallenge fills information about a challenge in a traintuple:
+// ChallengeTestDataKeys, TestDataOpenerHash, TestWorker
+func fillTraintupleChallenge(stub shim.ChaincodeStubInterface, traintuple *Traintuple, challengeKey string) error {
 	// get challenge to derive metrics info and test data keys
 	retrievedChallenge := Challenge{}
 	if err := getElementStruct(stub, challengeKey, &retrievedChallenge); err != nil {
@@ -368,7 +361,5 @@ func fillTraintupleFromAlgo(stub shim.ChaincodeStubInterface, traintuple *Traint
 		Keys:       retrievedChallenge.TestDataKeys,
 		OpenerHash: testDatasetKey,
 	}
-	// first time algo is trained
-	traintuple.Rank = 0
 	return nil
 }
