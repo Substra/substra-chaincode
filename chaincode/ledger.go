@@ -14,12 +14,12 @@ import (
 
 // Challenge is the representation of one of the element type stored in the ledger
 type Challenge struct {
-	Name                      string   `json:"name"`
-	DescriptionStorageAddress string   `json:"descriptionStorageAddress"`
-	Metrics                   *Metrics `json:"metrics"`
-	Owner                     string   `json:"owner"`
-	TestDataKeys              []string `json:"testDataKeys"`
-	Permissions               string   `json:"permissions"`
+	Name                      string         `json:"name"`
+	DescriptionStorageAddress string         `json:"descriptionStorageAddress"`
+	Metrics                   *HashDressName `json:"metrics"`
+	Owner                     string         `json:"owner"`
+	TestDataKeys              []string       `json:"testDataKeys"`
+	Permissions               string         `json:"permissions"`
 }
 
 // Dataset is the representation of one of the elements type stored in the ledger
@@ -53,26 +53,24 @@ type Algo struct {
 
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
-	Challenge   *TtChallenge `json:"challenge"`
-	Algo        *HashDress   `json:"algo"`
-	StartModel  *HashDress   `json:"startModel"`
-	EndModel    *HashDress   `json:"endModel"`
-	TrainData   *TtData      `json:"trainData"`
-	TestData    *TtData      `json:"testData"`
-	Status      string       `json:"status"`
-	Rank        int          `json:"rank"`
-	Perf        float32      `json:"perf"`
-	Log         string       `json:"log"`
-	Permissions string       `json:"permissions"`
-	Creator     string       `json:"creator"`
+	Challenge   *TtChallenge   `json:"challenge"`
+	Algo        *HashDressName `json:"algo"`
+	StartModel  *HashDress     `json:"startModel"`
+	EndModel    *HashDress     `json:"endModel"`
+	TrainData   *TtData        `json:"trainData"`
+	TestData    *TtData        `json:"testData"`
+	Status      string         `json:"status"`
+	Log         string         `json:"log"`
+	Permissions string         `json:"permissions"`
+	Creator     string         `json:"creator"`
 }
 
 // ---------------------------------------------------------------------------------
 // Struct used in the representation of elements stored in the ledger
 // ---------------------------------------------------------------------------------
 
-// Metrics stores info about a metrics
-type Metrics struct {
+// HashDressName stores a hash, storage address and a name
+type HashDressName struct {
 	Name           string `json:"name"`
 	Hash           string `json:"hash"`
 	StorageAddress string `json:"storageAddress"`
@@ -92,10 +90,10 @@ type TtChallenge struct {
 
 // TtData stores info about data in a Traintyple (train or test data) and in a PredTuple (later)
 type TtData struct {
-	Worker     string    `json:"worker"`
-	Keys       []string  `json:"keys"`
-	OpenerHash string    `json:"openerHash"`
-	Perf       []float32 `json:"perf"`
+	Worker     string   `json:"worker"`
+	Keys       []string `json:"keys"`
+	OpenerHash string   `json:"openerHash"`
+	Perf       float32  `json:"perf"`
 }
 
 // ---------------------------------------------------------------------------------
@@ -133,7 +131,7 @@ func (challenge *Challenge) Set(stub shim.ChaincodeStubInterface, inp inputChall
 	}
 	challenge.Name = inp.Name
 	challenge.DescriptionStorageAddress = inp.DescriptionStorageAddress
-	challenge.Metrics = &Metrics{
+	challenge.Metrics = &HashDressName{
 		Name:           inp.MetricsName,
 		Hash:           inp.MetricsHash,
 		StorageAddress: inp.MetricsStorageAddress,
@@ -170,7 +168,7 @@ func (dataset *Dataset) Set(stub shim.ChaincodeStubInterface, inp inputDataset) 
 		err = fmt.Errorf("invalid dataset inputs %s", err.Error())
 		return "", nil, err
 	}
-	var challengeKeys []string
+	challengeKeys := make([]string, 0)
 	if len(inp.ChallengeKeys) > 0 {
 		challengeKeys := strings.Split(strings.Replace(inp.ChallengeKeys, " ", "", -1), ",")
 		for _, challengeKey := range challengeKeys {
@@ -180,8 +178,6 @@ func (dataset *Dataset) Set(stub shim.ChaincodeStubInterface, inp inputDataset) 
 				return "", nil, nil
 			}
 		}
-	} else {
-		challengeKeys = nil
 	}
 	dataset.Name = inp.Name
 	dataset.OpenerStorageAddress = inp.OpenerStorageAddress
@@ -222,6 +218,14 @@ func (dataset *Dataset) Update(stub shim.ChaincodeStubInterface, inp inputData) 
 	datasetKey = inp.DatasetKey
 	if err = getElementStruct(stub, datasetKey, &dataset); err != nil {
 		return
+	}
+	// check transaction requester is the dataset owner
+	txCreator, err := getTxCreator(stub)
+	if err != nil {
+		return
+	}
+	if txCreator != dataset.Owner {
+		err = fmt.Errorf("%s is not allowed to register data associated to this dataset", txCreator)
 	}
 	// check data size can be converted to float
 	size64, err := strconv.ParseFloat(inp.Size, 32)
@@ -294,7 +298,6 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 
 // inputTraintuple is the representation of input args to register a Traintuple
 type inputTraintuple struct {
-	ChallengeKey  string `validate:"required,gte=64,lte=64,hexadecimal"`
 	AlgoKey       string `validate:"required,gte=64,lte=64,hexadecimal"`
 	StartModelKey string `validate:"required"`
 	TrainDataKeys string `validate:"required"`

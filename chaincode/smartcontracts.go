@@ -30,6 +30,10 @@ func registerChallenge(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	if err != nil {
 		return nil, err
 	}
+	// check challenge is not already in ledger
+	if elementBytes, _ := stub.GetState(challengeKey); elementBytes != nil {
+		return nil, fmt.Errorf("challenge with this description already exists - %s", string(elementBytes))
+	}
 	// submit to ledger
 	challengeBytes, _ := json.Marshal(challenge)
 	if err := stub.PutState(challengeKey, challengeBytes); err != nil {
@@ -42,7 +46,7 @@ func registerChallenge(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	// add challenge to dataset
 	err = addChallengeDataset(stub, datasetKey, challengeKey)
 	// return []byte(challengeKey), err
-	return []byte(datasetKey), err
+	return []byte(challengeKey), err
 }
 
 // registerDataset stores a new dataset in the ledger.
@@ -60,6 +64,10 @@ func registerDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	datasetKey, challengeKeys, err := dataset.Set(stub, inp)
 	if err != nil {
 		return nil, err
+	}
+	// check dataset is not already in ledger
+	if elementBytes, _ := stub.GetState(datasetKey); elementBytes != nil {
+		return nil, fmt.Errorf("dataset with this opener already exists")
 	}
 	// submit to ledger
 	datasetBytes, _ := json.Marshal(dataset)
@@ -107,9 +115,14 @@ func registerData(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 		return nil, fmt.Errorf("failed to update %s size and nb data", datasetKey)
 	}
 	// store each added data in the ledger
-	var dataKeys []byte
+	var dataKeys string
+	suffix := ", "
 	for _, dataHash := range dataHashes {
-		dataKeys = append(dataKeys, []byte(dataHash+", ")...)
+		dataKeys = dataKeys + dataHash + suffix
+		// check data is not already in ledgert
+		if elementBytes, _ := stub.GetState(dataHash); elementBytes != nil {
+			return nil, fmt.Errorf("data with this hash already exists")
+		}
 		// create data object
 		var data = Data{
 			DatasetKey: datasetKey,
@@ -128,7 +141,8 @@ func registerData(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 		}
 	}
 	// return added data keys
-	return dataKeys, nil
+	dataKeys = strings.TrimSuffix(dataKeys, suffix)
+	return []byte(dataKeys), nil
 }
 
 // registerAlgo stores a new algo in the ledger.
@@ -145,6 +159,13 @@ func registerAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 	// check validity of input args and convert it to Algo
 	algo := Algo{}
 	algoKey, err := algo.Set(stub, inp)
+	if err != nil {
+		return nil, err
+	}
+	// check data is not already in ledgert
+	if elementBytes, _ := stub.GetState(algoKey); elementBytes != nil {
+		return nil, fmt.Errorf("algo with this hash already exists")
+	}
 	// submit to ledger
 	algoBytes, _ := json.Marshal(algo)
 	err = stub.PutState(algoKey, algoBytes)
@@ -173,13 +194,12 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 		return nil, err
 	}
 
-	challengeKey := args[0]
-	algoKey := args[1]
-	startModelKey := args[2]
-	if len(challengeKey) != lenKey || len(algoKey) != lenKey || len(startModelKey) != lenKey {
-		return nil, fmt.Errorf("invalid challenge, algo, or start model key")
+	algoKey := args[0]
+	startModelKey := args[1]
+	if len(algoKey) != lenKey || !(len(startModelKey) == lenKey || len(startModelKey) == 0) {
+		return nil, fmt.Errorf("invalid algo, or start model key")
 	}
-	trainDataKeys := strings.Split(strings.Replace(args[3], " ", "", -1), ",")
+	trainDataKeys := strings.Split(strings.Replace(args[2], " ", "", -1), ",")
 
 	// initiate traintuple
 	traintuple := Traintuple{
@@ -211,55 +231,53 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 		err = fmt.Errorf("could not retrieve algo with key %s - %s", algoKey, err.Error())
 		return nil, err
 	}
-	traintuple.Algo = &HashDress{
+	traintuple.Algo = &HashDressName{
+		Name:           algo.Name,
 		Hash:           algoKey,
 		StorageAddress: algo.StorageAddress}
-	// define for the to-be-traintuple: Challenge, StartModel, TestDataKeys, TestDataOpenerHash, TestWorker, Rank
-	if algoKey != startModelKey {
-		// traintuple derives from a parent traintuple
-		if err = fillTraintupleFromModel(stub, &traintuple, startModelKey); err != nil {
+	// get challenge key
+	challengeKey := algo.ChallengeKey
+	// define for the to-be-traintuple: Challenge, StartModel, TestDataKeys, TestDataOpenerHash, TestWorker
+	if startModelKey == "" { // first time algo is trained
+		if err = fillTraintupleChallenge(stub, &traintuple, challengeKey); err != nil {
 			return nil, err
 		}
-	} else { // first time algo is trained
-		if err = fillTraintupleFromAlgo(stub, &traintuple, algoKey, challengeKey); err != nil {
+	} else { // use parent traintuple associated to model
+		if err = fillTraintupleFromModel(stub, &traintuple, startModelKey, challengeKey); err != nil {
 			return nil, err
 		}
 	}
 
-	// create key: has of challenge + algo + start model + train data + creator (keys)
+	// create key: hash of challenge + algo + start model + train data + creator (keys)
 	// certainly not be the most efficient key... but let's make it work and them try to make it better...
-	tKey := sha256.Sum256([]byte(challengeKey + algoKey + traintuple.StartModel.Hash + strings.Join(trainDataKeys, ",") + creator))
+	tKey := sha256.Sum256([]byte(challengeKey + algoKey + startModelKey + strings.Join(trainDataKeys, ",") + creator))
 	key := hex.EncodeToString(tKey[:])
 	// check if traintuple key already exist
 	if elementBytes, _ := stub.GetState(key); elementBytes != nil {
 		return nil, fmt.Errorf("traintuple with these challenge, algo, start model, and train data already exist")
 	}
 	traintupleBytes, _ := json.Marshal(traintuple)
-	err = stub.PutState(key, traintupleBytes)
-	if err != nil {
+	if err = stub.PutState(key, traintupleBytes); err != nil {
 		err = fmt.Errorf("could not put in ledger traintuple with startModel %s and challenge %s - %s", startModelKey, challengeKey, err.Error())
 		return nil, err
 	}
 	// create composite keys
-	err = createCompositeKey(stub, "traintuple~algo~key", []string{"traintuple", algoKey, key})
-	if err != nil {
+	if err = createCompositeKey(stub, "traintuple~algo~key", []string{"traintuple", algoKey, key}); err != nil {
 		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
 		return nil, err
 	}
-	err = createCompositeKey(stub, "traintuple~trainWorker~status~key", []string{"traintuple", traintuple.TrainData.Worker, "todo", key})
-	if err != nil {
+	if err = createCompositeKey(stub, "traintuple~trainWorker~status~key", []string{"traintuple", traintuple.TrainData.Worker, "todo", key}); err != nil {
 		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
 		return nil, err
 	}
-	err = createCompositeKey(stub, "traintuple~testWorker~status~key", []string{"traintuple", traintuple.TestData.Worker, "todo", key})
-	if err != nil {
+	if err = createCompositeKey(stub, "traintuple~testWorker~status~key", []string{"traintuple", traintuple.TestData.Worker, "todo", key}); err != nil {
 		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
 		return nil, err
 	}
 	return []byte(key), nil
 }
 
-// logStartTrain modifies a traintuple by changing its status from todo to training
+// logStartTrainTest modifies a traintuple by changing its status from todo to training
 func logStartTrainTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	expectedArgs := [2]string{"key of the traintuple to update", "new status (training or testing)"}
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
@@ -275,19 +293,6 @@ func logStartTrainTest(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	if err != nil {
 		return nil, err
 	}
-	// update associated composite keys
-	indexName := "traintuple~trainWorker~status~key"
-	oldAttributes := []string{"traintuple", traintuple.TrainData.Worker, "todo", traintupleKey}
-	newAttributes := []string{"traintuple", traintuple.TrainData.Worker, traintupleStatus, traintupleKey}
-	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
-		return nil, err
-	}
-	indexName = "traintuple~testWorker~status~key"
-	oldAttributes = []string{"traintuple", traintuple.TestData.Worker, "todo", traintupleKey}
-	newAttributes = []string{"traintuple", traintuple.TestData.Worker, traintupleStatus, traintupleKey}
-	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
-		return nil, err
-	}
 	traintupleBytes, _ := json.Marshal(traintuple)
 	return traintupleBytes, nil
 }
@@ -296,7 +301,7 @@ func logStartTrainTest(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 // reports logs and associated performances
 func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	expectedArgs := [4]string{"key of the traintuple to update", "end model hash and storage address (endModelHash, endModelStorageAddress)",
-		"train perf (perfTrainData1, perfTrainData2, ...)", "logs"}
+		"train perf (float)", "logs"}
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
 		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
 	}
@@ -319,7 +324,7 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 		return nil, fmt.Errorf("invalid len of hash of model %d", lenModelHash)
 	}
 	// get train perf, check validity
-	perf, err := strToPerf(stub, args[2], traintuple.TrainData.Keys)
+	perf, err := strconv.ParseFloat(args[2], 32)
 	if err != nil {
 		return nil, err
 	}
@@ -329,7 +334,7 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 		return nil, err
 	}
 	// update traintuple
-	traintuple.TrainData.Perf = perf
+	traintuple.TrainData.Perf = float32(perf)
 	traintuple.Status = "trained"
 	traintuple.EndModel = &HashDress{
 		Hash:           endModel[0],
@@ -383,17 +388,19 @@ func logFailTrainTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	}
 	// check validity of worker and change of status
 	var worker string
-	if stringInSlice(traintuple.Status, []string{"todo", "training"}) {
+	oldStatus := traintuple.Status
+	if stringInSlice(oldStatus, []string{"todo", "training"}) {
 		worker = traintuple.TrainData.Worker
-	} else if stringInSlice(traintuple.Status, []string{"trained", "testing"}) {
+	} else if stringInSlice(oldStatus, []string{"trained", "testing"}) {
 		worker = traintuple.TestData.Worker
 	} else {
-		return nil, fmt.Errorf("not possible to change status from %s to failed", traintuple.Status)
+		return nil, fmt.Errorf("not possible to change status from %s to failed", oldStatus)
 	}
-	if err := checkUpdateTraintuple(stub, worker, traintuple.Status, "failed"); err != nil {
+	if err := checkUpdateTraintuple(stub, worker, oldStatus, "failed"); err != nil {
 		return nil, err
 	}
 	// update traintuple
+	traintuple.Status = "failed"
 	traintuple.Log += log
 	traintupleBytes, _ := json.Marshal(traintuple)
 	if err := stub.PutState(traintupleKey, traintupleBytes); err != nil {
@@ -401,13 +408,13 @@ func logFailTrainTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	}
 	// update associated composite keys
 	indexName := "traintuple~trainWorker~status~key"
-	oldAttributes := []string{"traintuple", traintuple.TrainData.Worker, traintuple.Status, traintupleKey}
+	oldAttributes := []string{"traintuple", traintuple.TrainData.Worker, oldStatus, traintupleKey}
 	newAttributes := []string{"traintuple", traintuple.TrainData.Worker, "failed", traintupleKey}
 	if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
 		return nil, err
 	}
 	indexName = "traintuple~testWorker~status~key"
-	oldAttributes = []string{"traintuple", traintuple.TestData.Worker, traintuple.Status, traintupleKey}
+	oldAttributes = []string{"traintuple", traintuple.TestData.Worker, oldStatus, traintupleKey}
 	newAttributes = []string{"traintuple", traintuple.TestData.Worker, "failed", traintupleKey}
 	if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
 		return nil, err
@@ -417,7 +424,7 @@ func logFailTrainTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 
 // logSuccessTest modifies a traintuple by changing its status to done, reports perf and logs
 func logSuccessTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	expectedArgs := [4]string{"key of the traintuple to update", "test perf (testData1:perf1, testData2:perf2, ...)", "perf", "logs"}
+	expectedArgs := [3]string{"key of the traintuple to update", "test perf (float)", "logs"}
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
 		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
 	}
@@ -435,23 +442,17 @@ func logSuccessTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, er
 		return nil, err
 	}
 	// get test perf, check validity
-	testPerf, err := strToPerf(stub, args[1], traintuple.TestData.Keys)
-	if err != nil {
-		return nil, err
-	}
-	// get perf
-	perf, err := strconv.ParseFloat(args[2], 32)
+	perf, err := strconv.ParseFloat(args[1], 32)
 	if err != nil {
 		return nil, err
 	}
 	// get logs and check validity
-	log := args[3]
+	log := args[2]
 	if err = checkLog(log); err != nil {
 		return nil, err
 	}
 	traintuple.Status = "done"
-	traintuple.TestData.Perf = testPerf
-	traintuple.Perf = float32(perf)
+	traintuple.TestData.Perf = float32(perf)
 	traintuple.Log += log
 	traintupleBytes, _ := json.Marshal(traintuple)
 	if err = stub.PutState(traintupleKey, traintupleBytes); err != nil {
@@ -516,6 +517,7 @@ func queryFilter(stub shim.ChaincodeStubInterface, args []string) ([]byte, error
 		if err := getElementStruct(stub, key, &element); err != nil {
 			return nil, fmt.Errorf("issue getting element with key %s - %s", key, err.Error())
 		}
+		element["key"] = key
 		elements = append(elements, element)
 	}
 	payload, err := json.Marshal(elements)
@@ -633,13 +635,11 @@ func queryDatasetData(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	datasetKey := args[0]
 
 	// get dataset info
-	var dataset map[string]interface{} // Traintuple{}
-	if err := getElementStruct(stub, datasetKey, &dataset); err != nil {
+	var mPayload map[string]interface{}
+	if err := getElementStruct(stub, datasetKey, &mPayload); err != nil {
 		return nil, err
 	}
-	dataset["key"] = datasetKey
-	mPayload := make(map[string]interface{})
-	mPayload["dataset"] = dataset
+	mPayload["key"] = datasetKey
 	// get related train data
 	trainDataKeys, err := getDatasetData(stub, datasetKey, true)
 	if err != nil {
