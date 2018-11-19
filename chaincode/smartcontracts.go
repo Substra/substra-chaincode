@@ -118,7 +118,7 @@ func registerData(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 	var dataKeys string
 	suffix := ", "
 	for _, dataHash := range dataHashes {
-		dataKeys = dataKeys + dataHash + suffix
+		dataKeys = dataKeys + "\"" + dataHash + "\"" + suffix
 		// check data is not already in ledgert
 		if elementBytes, _ := stub.GetState(dataHash); elementBytes != nil {
 			return nil, fmt.Errorf("data with this hash already exists")
@@ -141,7 +141,7 @@ func registerData(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 		}
 	}
 	// return added data keys
-	dataKeys = strings.TrimSuffix(dataKeys, suffix)
+	dataKeys = "{\"keys\": [" + strings.TrimSuffix(dataKeys, suffix) + "]}"
 	return []byte(dataKeys), nil
 }
 
