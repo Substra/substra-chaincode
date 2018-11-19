@@ -352,8 +352,8 @@ func TestData(t *testing.T) {
 	}
 	// check payload correspond to input data keys
 	dataKeys := string(resp.Payload)
-	if dataKeys != inpData.Hashes {
-		t.Errorf("when adding data: data keys does not correspond to data hashes: %s - %s", dataKeys, inpData.Hashes)
+	if expectedResp := "{\"keys\": [\"" + strings.Replace(inpData.Hashes, ", ", "\", \"", -1) + "\"]}"; dataKeys != expectedResp {
+		t.Errorf("when adding data: data keys does not correspond to data hashes: %s - %s", dataKeys, expectedResp)
 	}
 
 	// Add data which already exist
