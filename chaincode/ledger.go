@@ -1,12 +1,80 @@
 package main
 
-import (
-	"fmt"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"gopkg.in/go-playground/validator.v9"
-	"strconv"
-	"strings"
-)
+// -------------------------------------------------------------------------------------------
+// Struct used to represent inputs for smart contracts. In Hyperledger Fabric, we get as input
+// arg  [][]byte or []string, and it is not possible to input a string looking like a json
+// -------------------------------------------------------------------------------------------
+
+// inputChallenge is the representation of input args to register a Challenge
+type inputChallenge struct {
+	Name                      string `validate:"required,gte=1,lte=100"`
+	DescriptionHash           string `validate:"required,gte=64,lte=64,hexadecimal"`
+	DescriptionStorageAddress string `validate:"required,url"`
+	MetricsName               string `validate:"required,gte=1,lte=100"`
+	MetricsHash               string `validate:"required,gte=64,lte=64,hexadecimal"`
+	MetricsStorageAddress     string `validate:"required,url"`
+	TestData                  string `validate:"required"`
+	Permissions               string `validate:"required,oneof=all"`
+}
+
+// inputAlgo is the representation of input args to register an Algo
+type inputAlgo struct {
+	Name                      string `validate:"required,gte=1,lte=100"`
+	Hash                      string `validate:"required,gte=64,lte=64,hexadecimal"`
+	StorageAddress            string `validate:"required,url"`
+	DescriptionHash           string `validate:"required,gte=64,lte=64,hexadecimal"`
+	DescriptionStorageAddress string `validate:"required,url"`
+	ChallengeKey              string `validate:"required,gte=64,lte=64,hexadecimal"`
+	Permissions               string `validate:"required,oneof=all"`
+}
+
+// inputDataset is the representation of input args to register a Dataset
+type inputDataset struct {
+	Name                      string `validate:"required,gte=1,lte=100"`
+	OpenerHash                string `validate:"required,gte=64,lte=64,hexadecimal"`
+	OpenerStorageAddress      string `validate:"required,url"`
+	Type                      string `validate:"required,gte=1,lte=30"`
+	DescriptionHash           string `validate:"required,gte=64,lte=64,hexadecimal"`
+	DescriptionStorageAddress string `validate:"required,url"`
+	ChallengeKey              string //`validate:"required"`
+	Permissions               string `validate:"required,oneof=all"`
+}
+
+// inputUpdateDataset is the representation of input args to update a dataset with a challenge
+type inputUpdateDataset struct {
+	DatasetKey   string `validate:"required,gte=64,lte=64,hexadecimal"`
+	ChallengeKey string `validate:"required,gte=64,lte=64,hexadecimal"`
+}
+
+// inputData is the representation of input args to register one or more data
+type inputData struct {
+	Hashes      string `validate:"required"`
+	DatasetKeys string
+	TestOnly    string `validate:"required,oneof=true false"`
+}
+
+// inputUpdateData is the representation of input args to update one or more data
+type inputUpdateData struct {
+	Hashes      string `validate:"required"`
+	DatasetKeys string `validate:"required"`
+}
+
+// inputTraintuple is the representation of input args to register a Traintuple
+type inputTraintuple struct {
+	AlgoKey    string `validate:"required,gte=64,lte=64,hexadecimal"`
+	InModels   string //`validate:"omitEmpty"
+	DatasetKey string `validate:"required,gte=64,lte=64,hexadecimal"`
+	DataKeys   string `validate:"required"`
+	FLtask     string //`validate:"omitEmpty"`
+	Rank       string //`validate:"omitEmpty"`
+}
+
+// inputTestuple is the representation of input args to register a Testtuple
+// For now, testtuple can only be against test data associated to a dataset
+// Later, we'll have the possibility to create certified testtuple (=on challenge test data) and uncertified testtuple
+type inputTesttuple struct {
+	TraintupleKey string `validate:"required,gte=64,lte=64,hexadecimal"`
+}
 
 // ---------------------------------------------------------------------------------
 // Representation of elements stored in the ledger
@@ -18,7 +86,7 @@ type Challenge struct {
 	DescriptionStorageAddress string         `json:"descriptionStorageAddress"`
 	Metrics                   *HashDressName `json:"metrics"`
 	Owner                     string         `json:"owner"`
-	TestDataKeys              []string       `json:"testDataKeys"`
+	TestData                  *DatasetData   `json:"testData"`
 	Permissions               string         `json:"permissions"`
 }
 
@@ -26,19 +94,17 @@ type Challenge struct {
 type Dataset struct {
 	Name                 string     `json:"name"`
 	OpenerStorageAddress string     `json:"openerStorageAddress"`
-	Size                 float32    `json:"size"`
-	NbData               int        `json:"nbData"`
 	Type                 string     `json:"type"`
 	Description          *HashDress `json:"description"`
 	Owner                string     `json:"owner"`
-	ChallengeKeys        []string   `json:"challengeKeys"`
+	ChallengeKey         string     `json:"challengeKey"`
 	Permissions          string     `json:"permissions"`
 }
 
 // Data is the representation of one of the element type stored in the ledger
 type Data struct {
-	DatasetKey string `json:"datasetKey"`
-	TestOnly   bool   `json:"testOnly"`
+	DatasetKeys []string `json:"datasetKeys"`
+	TestOnly    bool     `json:"testOnly"`
 }
 
 // Algo is the representation of one of the element type stored in the ledger
@@ -53,12 +119,25 @@ type Algo struct {
 
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
+	AlgoKey     string       `json:"algoKey"`
+	InModelKeys []string     `json:"inModels"`
+	OutModel    *HashDress   `json:"outModel"`
+	Data        *DatasetData `json:"data"`
+	Perf        float32      `json:"perf"`
+	FLtask      string       `json:"fltask"`
+	Rank        int          `json:"rank"`
+	Status      string       `json:"status"`
+	Log         string       `json:"log"`
+	Permissions string       `json:"permissions"`
+	Creator     string       `json:"creator"`
+}
+
+// Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
+type Testtuple struct {
 	Challenge   *TtChallenge   `json:"challenge"`
 	Algo        *HashDressName `json:"algo"`
-	StartModel  *HashDress     `json:"startModel"`
-	EndModel    *HashDress     `json:"endModel"`
-	TrainData   *TtData        `json:"trainData"`
-	TestData    *TtData        `json:"testData"`
+	Model       *Model         `json:"model"`
+	Data        *TtData        `json:"data"`
 	Status      string         `json:"status"`
 	Log         string         `json:"log"`
 	Permissions string         `json:"permissions"`
@@ -69,6 +148,12 @@ type Traintuple struct {
 // Struct used in the representation of elements stored in the ledger
 // ---------------------------------------------------------------------------------
 
+// HashDress stores a hash and a Storage Address
+type HashDress struct {
+	Hash           string `json:"hash"`
+	StorageAddress string `json:"storageAddress"`
+}
+
 // HashDressName stores a hash, storage address and a name
 type HashDressName struct {
 	Name           string `json:"name"`
@@ -76,17 +161,41 @@ type HashDressName struct {
 	StorageAddress string `json:"storageAddress"`
 }
 
-// HashDress stores a hash and a Storage Address
-type HashDress struct {
+// Model stores the traintupleKey leading to the model, its hash and storage addressl
+type Model struct {
+	TraintupleKey  string `json:"traintupleKey"`
 	Hash           string `json:"hash"`
 	StorageAddress string `json:"storageAddress"`
 }
 
-// TtChallenge stores info about a challenge in a Traintuple
-type TtChallenge struct {
-	Key     string     `json:"hash"`
-	Metrics *HashDress `json:"metrics"`
+// DatasetData stores info about a datasetKey and a list of associated data
+type DatasetData struct {
+	DatasetKey string   `json:"datasetKey"`
+	DataKeys   []string `json:"dataKeys"`
 }
+
+// ----------------------------------------------------------------------------------------------
+// Representation of output when querying elements if different from what is stored in the ledger
+// ----------------------------------------------------------------------------------------------
+
+// outputTraintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
+type outputTraintuple struct {
+	Challenge   *TtChallenge   `json:"challenge"`
+	Algo        *HashDressName `json:"algo"`
+	InModels    []*Model       `json:"inModels"`
+	OutModel    *HashDress     `json:"outModel"`
+	Data        *TtData        `json:"data"`
+	FLtask      string         `json:"fltask"`
+	Rank        int            `json:"rank"`
+	Status      string         `json:"status"`
+	Log         string         `json:"log"`
+	Permissions string         `json:"permissions"`
+	Creator     string         `json:"creator"`
+}
+
+// ---------------------------------------------------------------------------------
+// Struct used in the representation of outputs when querying some elements
+// ---------------------------------------------------------------------------------
 
 // TtData stores info about data in a Traintyple (train or test data) and in a PredTuple (later)
 type TtData struct {
@@ -96,209 +205,8 @@ type TtData struct {
 	Perf       float32  `json:"perf"`
 }
 
-// ---------------------------------------------------------------------------------
-// Struct used to represent inputs for smart contracts. In Hyperledger Fabric, we
-// get as input arg  [][]byte or []string, and it is not possible to input a string
-//looking like a json
-// ---------------------------------------------------------------------------------
-
-// inputChallenge is the representation of input args to register a Challenge
-type inputChallenge struct {
-	Name                      string `validate:"required,gte=1,lte=100"`
-	DescriptionHash           string `validate:"required,gte=64,lte=64,hexadecimal"`
-	DescriptionStorageAddress string `validate:"required,url"`
-	MetricsName               string `validate:"required,gte=1,lte=100"`
-	MetricsHash               string `validate:"required,gte=64,lte=64,hexadecimal"`
-	MetricsStorageAddress     string `validate:"required,url"`
-	TestDataKeys              string `validate:"required"`
-	Permissions               string `validate:"required,oneof=all"`
-}
-
-// set is a method of the receiver Challenge. It checks the validity of inputChallenge and uses its fields to set the Challenge.
-// Returns the challengeKey and the datasetKey associated to test data
-func (challenge *Challenge) Set(stub shim.ChaincodeStubInterface, inp inputChallenge) (challengeKey string, datasetKey string, err error) {
-	// checking validity of submitted fields
-	validate := validator.New()
-	if err = validate.Struct(inp); err != nil {
-		err = fmt.Errorf("invalid challenge inputs %s", err.Error())
-		return
-	}
-	testDataKeys := strings.Split(strings.Replace(inp.TestDataKeys, " ", "", -1), ",")
-	datasetKey, err = checkSameDataset(stub, testDataKeys)
-	if err != nil {
-		err = fmt.Errorf("invalid test data %s", err.Error())
-		return
-	}
-	challenge.Name = inp.Name
-	challenge.DescriptionStorageAddress = inp.DescriptionStorageAddress
-	challenge.Metrics = &HashDressName{
-		Name:           inp.MetricsName,
-		Hash:           inp.MetricsHash,
-		StorageAddress: inp.MetricsStorageAddress,
-	}
-	owner, err := getTxCreator(stub)
-	if err != nil {
-		return
-	}
-	challenge.Owner = owner
-	challenge.TestDataKeys = testDataKeys
-	challenge.Permissions = inp.Permissions
-	challengeKey = inp.DescriptionHash
-	return
-}
-
-// inputDataset is the representation of input args to register a Dataset
-type inputDataset struct {
-	Name                      string `validate:"required,gte=1,lte=100"`
-	OpenerHash                string `validate:"required,gte=64,lte=64,hexadecimal"`
-	OpenerStorageAddress      string `validate:"required,url"`
-	Type                      string `validate:"required,gte=1,lte=30"`
-	DescriptionHash           string `validate:"required,gte=64,lte=64,hexadecimal"`
-	DescriptionStorageAddress string `validate:"required,url"`
-	ChallengeKeys             string //`validate:"required"`
-	Permissions               string `validate:"required,oneof=all"`
-}
-
-// set is a method of the receiver Dataset. It checks the validity of inputDataset and uses its fields to set the Dataset
-// Returns the datasetKey and associated challengeKeys
-func (dataset *Dataset) Set(stub shim.ChaincodeStubInterface, inp inputDataset) (string, []string, error) {
-	// checking validity of submitted fields
-	validate := validator.New()
-	if err := validate.Struct(inp); err != nil {
-		err = fmt.Errorf("invalid dataset inputs %s", err.Error())
-		return "", nil, err
-	}
-	challengeKeys := make([]string, 0)
-	if len(inp.ChallengeKeys) > 0 {
-		challengeKeys := strings.Split(strings.Replace(inp.ChallengeKeys, " ", "", -1), ",")
-		for _, challengeKey := range challengeKeys {
-			_, err := getElementBytes(stub, challengeKey)
-			if err != nil {
-				err = fmt.Errorf("error checking associated challenge(s) %s", err.Error())
-				return "", nil, nil
-			}
-		}
-	}
-	dataset.Name = inp.Name
-	dataset.OpenerStorageAddress = inp.OpenerStorageAddress
-	dataset.Type = inp.Type
-	dataset.Description = &HashDress{
-		Hash:           inp.DescriptionHash,
-		StorageAddress: inp.DescriptionStorageAddress,
-	}
-	owner, err := getTxCreator(stub)
-	if err != nil {
-		return "", nil, err
-	}
-	dataset.Owner = owner
-	dataset.ChallengeKeys = challengeKeys
-	dataset.Permissions = inp.Permissions
-	datasetKey := inp.OpenerHash
-	return datasetKey, challengeKeys, nil
-}
-
-// inputData is the representation of input args to register a Data
-type inputData struct {
-	Hashes     string `validate:"required"`
-	DatasetKey string `validate:"required,gte=64,lte=64,hexadecimal"`
-	Size       string `validate:"required"`
-	TestOnly   string `validate:"required,oneof=true false"`
-}
-
-// update is a method of the receiver Dataset. It checks the validity of inputData
-// and uses its fields to update the associated dataset
-func (dataset *Dataset) Update(stub shim.ChaincodeStubInterface, inp inputData) (datasetKey string, dataHashes []string, testOnly bool, err error) {
-	// validate input data
-	validate := validator.New()
-	if err = validate.Struct(inp); err != nil {
-		err = fmt.Errorf("invalid data inputs %s", err.Error())
-		return
-	}
-	// check if associated dataset exists
-	datasetKey = inp.DatasetKey
-	if err = getElementStruct(stub, datasetKey, &dataset); err != nil {
-		return
-	}
-	// check transaction requester is the dataset owner
-	txCreator, err := getTxCreator(stub)
-	if err != nil {
-		return
-	}
-	if txCreator != dataset.Owner {
-		err = fmt.Errorf("%s is not allowed to register data associated to this dataset", txCreator)
-	}
-	// check data size can be converted to float
-	size64, err := strconv.ParseFloat(inp.Size, 32)
-	if err != nil {
-		return
-	}
-	size := float32(size64)
-	// convert input testOnly to boolean
-	testOnly, err = strconv.ParseBool(inp.TestOnly)
-	if err != nil {
-		return
-	}
-
-	dataHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
-	dataset.NbData += len(dataHashes)
-	dataset.Size += size
-	// check validity of dataHashes
-	for _, dataHash := range dataHashes {
-		// create data key
-		if len(dataHash) != 64 {
-			err = fmt.Errorf("invalid data hash %s", dataHash)
-		}
-	}
-	return
-}
-
-// inputAlgo is the representation of input args to register an Algo
-type inputAlgo struct {
-	Name                      string `validate:"required,gte=1,lte=100"`
-	Hash                      string `validate:"required,gte=64,lte=64,hexadecimal"`
-	StorageAddress            string `validate:"required,url"`
-	DescriptionHash           string `validate:"required,gte=64,lte=64,hexadecimal"`
-	DescriptionStorageAddress string `validate:"required,url"`
-	ChallengeKey              string `validate:"required,gte=64,lte=64,hexadecimal"`
-	Permissions               string `validate:"required,oneof=all"`
-}
-
-// set is a method of the receiver Algo. It checks the validity of inputAlgo and uses its fields to set the Algo
-// Returns the algoKey
-func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey string, err error) {
-	// checking validity of submitted fields
-	validate := validator.New()
-	if err = validate.Struct(inp); err != nil {
-		err = fmt.Errorf("invalid algo inputs %s", err.Error())
-		return
-	}
-	// check associated challenge exists
-	_, err = getElementBytes(stub, inp.ChallengeKey)
-	if err != nil {
-		return
-	}
-	algoKey = inp.Hash
-	// find associated owner
-	owner, err := getTxCreator(stub)
-	if err != nil {
-		return
-	}
-	// set algo
-	algo.Name = inp.Name
-	algo.StorageAddress = inp.StorageAddress
-	algo.Description = &HashDress{
-		Hash:           inp.DescriptionHash,
-		StorageAddress: inp.DescriptionStorageAddress,
-	}
-	algo.Owner = owner
-	algo.ChallengeKey = inp.ChallengeKey
-	algo.Permissions = inp.Permissions
-	return
-}
-
-// inputTraintuple is the representation of input args to register a Traintuple
-type inputTraintuple struct {
-	AlgoKey       string `validate:"required,gte=64,lte=64,hexadecimal"`
-	StartModelKey string `validate:"required"`
-	TrainDataKeys string `validate:"required"`
+// TtChallenge stores info about a challenge in a Traintuple
+type TtChallenge struct {
+	Key     string     `json:"hash"`
+	Metrics *HashDress `json:"metrics"`
 }

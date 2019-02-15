@@ -36,36 +36,50 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = registerChallenge(stub, args)
 	case "registerDataset":
 		result, err = registerDataset(stub, args)
+	case "updateDataset":
+		result, err = updateDataset(stub, args)
 	case "registerData":
 		result, err = registerData(stub, args)
+	case "updateData":
+		result, err = updateData(stub, args)
 	case "registerAlgo":
 		result, err = registerAlgo(stub, args)
 	case "createTraintuple":
 		result, err = createTraintuple(stub, args)
-	case "logStartTrainTest":
-		result, err = logStartTrainTest(stub, args)
+	case "createTesttuple":
+		result, err = createTesttuple(stub, args)
+	case "logStartTrain":
+		result, err = logStartTrain(stub, args)
+	case "logStartTest":
+		result, err = logStartTest(stub, args)
 	case "logSuccessTrain":
 		result, err = logSuccessTrain(stub, args)
 	case "logSuccessTest":
 		result, err = logSuccessTest(stub, args)
-	case "logFailTrainTest":
-		result, err = logFailTrainTest(stub, args)
+	case "logFailTrain":
+		result, err = logFailTrain(stub, args)
+	case "logFailTest":
+		result, err = logFailTest(stub, args)
 	case "query":
 		result, err = query(stub, args)
+	case "queryTraintuple":
+		result, err = queryTraintuple(stub, args)
 	case "queryChallenges":
 		result, err = queryAll(stub, args, "challenge")
 	case "queryAlgos":
 		result, err = queryAll(stub, args, "algo")
 	case "queryTraintuples":
-		result, err = queryAll(stub, args, "traintuple")
+		result, err = queryTraintuples(stub, args)
+	case "queryTesttuples":
+		result, err = queryAll(stub, args, "testtuple")
 	case "queryDatasets":
 		result, err = queryAll(stub, args, "dataset")
 	case "queryFilter":
 		result, err = queryFilter(stub, args)
-	case "queryModel":
-		result, err = queryModel(stub, args)
-	case "queryModelTraintuples":
-		result, err = queryModelTraintuples(stub, args)
+	case "queryModelDetails":
+		result, err = queryModelDetails(stub, args)
+	case "queryModels":
+		result, err = queryModels(stub, args)
 	case "queryDatasetData":
 		result, err = queryDatasetData(stub, args)
 	default:
