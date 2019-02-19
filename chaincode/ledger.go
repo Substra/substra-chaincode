@@ -74,6 +74,8 @@ type inputTraintuple struct {
 // Later, we'll have the possibility to create certified testtuple (=on challenge test data) and uncertified testtuple
 type inputTesttuple struct {
 	TraintupleKey string `validate:"required,gte=64,lte=64,hexadecimal"`
+	DatasetKey    string `validate:"omitempty,gte=64,lte=64,hexadecimal"`
+	DataKeys      string
 }
 
 // ---------------------------------------------------------------------------------
@@ -138,6 +140,7 @@ type Testtuple struct {
 	Algo        *HashDressName `json:"algo"`
 	Model       *Model         `json:"model"`
 	Data        *TtData        `json:"data"`
+	Certified   bool           `json:"certified"`
 	Status      string         `json:"status"`
 	Log         string         `json:"log"`
 	Permissions string         `json:"permissions"`

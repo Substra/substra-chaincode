@@ -58,7 +58,7 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	traintupleKey = hex.EncodeToString(tKey[:])
 	// check if traintuple key already exist
 	if elementBytes, _ := stub.GetState(traintupleKey); elementBytes != nil {
-		err = fmt.Errorf("traintuple with these algo, in models, and train data already exist")
+		err = fmt.Errorf("traintuple with these algo, in models, and train data already exist - %s", traintupleKey)
 		return
 	}
 
@@ -229,19 +229,39 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	default:
 		testtuple.Status = "waiting"
 	}
-	// Get test data from challenge
-	challenge := Challenge{}
-	if err = getElementStruct(stub, testtuple.Challenge.Key, &challenge); err != nil {
-		return testtupleKey, fmt.Errorf("could not retrieve challenge with key %s - %s", testtuple.Challenge.Key, err.Error())
+
+	var datasetKey string
+	var dataKeys []string
+	if len(inp.DatasetKey) > 0 {
+		// non-certified testtuple
+		// test data are specified by the user
+		dataKeys = strings.Split(strings.Replace(inp.DataKeys, " ", "", -1), ",")
+		_, _, err = checkSameDataset(stub, inp.DatasetKey, dataKeys)
+		if err != nil {
+			return testtupleKey, err
+		}
+		datasetKey = inp.DatasetKey
+		testtuple.Certified = false
+	} else {
+		// Certified testtuple
+		// Get test data from challenge
+		challenge := Challenge{}
+		if err = getElementStruct(stub, testtuple.Challenge.Key, &challenge); err != nil {
+			return testtupleKey, fmt.Errorf("could not retrieve challenge with key %s - %s", testtuple.Challenge.Key, err.Error())
+		}
+		dataKeys = challenge.TestData.DataKeys
+		datasetKey = challenge.TestData.DatasetKey
+		testtuple.Certified = true
 	}
+	// retrieve dataset owner
 	dataset := Dataset{}
-	if err = getElementStruct(stub, challenge.TestData.DatasetKey, &dataset); err != nil {
-		return testtupleKey, fmt.Errorf("could not retrieve dataset with key %s - %s", challenge.TestData.DatasetKey, err.Error())
+	if err = getElementStruct(stub, datasetKey, &dataset); err != nil {
+		return testtupleKey, fmt.Errorf("could not retrieve dataset with key %s - %s", datasetKey, err.Error())
 	}
 	testtuple.Data = &TtData{
 		Worker:     dataset.Owner,
-		Keys:       challenge.TestData.DataKeys,
-		OpenerHash: challenge.TestData.DatasetKey,
+		Keys:       dataKeys,
+		OpenerHash: datasetKey,
 	}
 
 	return testtupleKey, err
