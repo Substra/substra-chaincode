@@ -169,6 +169,12 @@ func (testtuple *inputTesttuple) createSample() [][]byte {
 	if testtuple.TraintupleKey == "" {
 		testtuple.TraintupleKey = traintupleKey
 	}
+	//	if testtuple.DatasetKey == "" {
+	//		testtuple.DatasetKey = datasetOpenerHash
+	//	}
+	//	if testtuple.DataKeys == "" {
+	//		testtuple.DataKeys = trainDataHash1 + ", " + trainDataHash2
+	//	}
 	args, _ := inputStructToBytes(testtuple)
 	args = append([][]byte{[]byte("createTesttuple")}, args...)
 	return args
