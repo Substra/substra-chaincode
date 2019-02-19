@@ -169,12 +169,6 @@ func (testtuple *inputTesttuple) createSample() [][]byte {
 	if testtuple.TraintupleKey == "" {
 		testtuple.TraintupleKey = traintupleKey
 	}
-	//	if testtuple.DatasetKey == "" {
-	//		testtuple.DatasetKey = datasetOpenerHash
-	//	}
-	//	if testtuple.DataKeys == "" {
-	//		testtuple.DataKeys = trainDataHash1 + ", " + trainDataHash2
-	//	}
 	args, _ := inputStructToBytes(testtuple)
 	args = append([][]byte{[]byte("createTesttuple")}, args...)
 	return args
@@ -412,8 +406,22 @@ func TestPipeline(t *testing.T) {
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
-	fmt.Println("#### ------------ Add Testtuple ------------")
-	inpTesttuple := inputTesttuple{}
+	fmt.Println("#### ------------ Add Non-Certified Testtuple ------------")
+	inpTesttuple := inputTesttuple{
+		DatasetKey: datasetOpenerHash,
+		DataKeys:   trainDataHash1 + ", " + trainDataHash2,
+	}
+	printArgsNames("createTesttuple", getFieldNames(&inpTesttuple))
+	args = inpTesttuple.createSample()
+	printArgs(args, "invoke")
+	resp = mockStub.MockInvoke("42", args)
+	if status := resp.Status; status != 200 {
+		t.Errorf("when adding testtuple with status %d and message %s", status, resp.Message)
+	}
+	fmt.Printf(">  %s \n\n", string(resp.Payload))
+
+	fmt.Println("#### ------------ Add Certified Testtuple ------------")
+	inpTesttuple = inputTesttuple{}
 	printArgsNames("createTesttuple", getFieldNames(&inpTesttuple))
 	args = inpTesttuple.createSample()
 	printArgs(args, "invoke")
