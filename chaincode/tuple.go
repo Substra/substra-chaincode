@@ -185,7 +185,7 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	}
 
 	// create testtuple key and check if already exist
-	tKey := sha256.Sum256([]byte("testtuple" + inp.TraintupleKey))
+	tKey := sha256.Sum256([]byte("testtuple" + inp.TraintupleKey + inp.DatasetKey))
 	testtupleKey = hex.EncodeToString(tKey[:])
 	if testtupleBytes, err := stub.GetState(testtupleKey); testtupleBytes != nil {
 		return testtupleKey, fmt.Errorf("this testtuple already exist")
@@ -343,7 +343,7 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	if err = createCompositeKey(stub, "testtuple~worker~status~key", []string{"testtuple", testtuple.Data.Worker, testtuple.Status, testtupleKey}); err != nil {
 		return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
 	}
-	if err = createCompositeKey(stub, "testtuple~traintuple~key", []string{"testtuple", inp.TraintupleKey, testtupleKey}); err != nil {
+	if err = createCompositeKey(stub, "testtuple~traintuple~certified~key", []string{"testtuple", inp.TraintupleKey, strconv.FormatBool(testtuple.Certified), testtupleKey}); err != nil {
 		return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
 	}
 	return []byte(testtupleKey), nil
@@ -681,20 +681,25 @@ func queryModelDetails(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	json.Unmarshal(oo, &element)
 	element["key"] = traintupleKey
 	mPayload["traintuple"] = element
-	// get testtuple related to traintuple
-	testtupleKeys, err := getKeysFromComposite(stub, "testtuple~traintuple~key", []string{"testtuple", traintupleKey})
+	// get certified and non-certified testtuples related to traintuple
+	var nonCertifiedTesttuples []map[string]interface{}
+	testtupleKeys, err := getKeysFromComposite(stub, "testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey})
 	if err != nil {
 		return nil, err
 	}
-	if len(testtupleKeys) == 1 {
+	for _, testtupleKey := range testtupleKeys {
 		// get testtuple and serialize it
-		testtupleKey := testtupleKeys[0]
 		var testtuple map[string]interface{}
 		if err = getElementStruct(stub, testtupleKey, &testtuple); err != nil {
 			return nil, err
 		}
 		testtuple["key"] = testtupleKey
-		mPayload["testtuple"] = testtuple
+		if testtuple["certified"] == true {
+			mPayload["testtuple"] = testtuple
+		} else {
+			nonCertifiedTesttuples = append(nonCertifiedTesttuples, testtuple)
+		}
+		mPayload["nonCertifiedTesttuples"] = nonCertifiedTesttuples
 	}
 	// Marshal payload
 	payload, err := json.Marshal(mPayload)
@@ -728,7 +733,7 @@ func queryModels(stub shim.ChaincodeStubInterface, args []string) ([]byte, error
 		element["traintuple"] = traintuple
 
 		// get testtuple related to traintuple
-		testtupleKeys, err := getKeysFromComposite(stub, "testtuple~traintuple~key", []string{"testtuple", traintupleKey})
+		testtupleKeys, err := getKeysFromComposite(stub, "testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey, "true"})
 		if err != nil {
 			return nil, err
 		}
@@ -931,7 +936,7 @@ func updateWaitingTesttuples(stub shim.ChaincodeStubInterface, traintupleKey str
 		return fmt.Errorf("invalid status of associated traintuple")
 	}
 
-	indexName := "testtuple~traintuple~key"
+	indexName := "testtuple~traintuple~certified~key"
 	// get testtuple associated with this traintuple and updates its status
 	testtupleKeys, err := getKeysFromComposite(stub, indexName, []string{"testtuple", traintupleKey})
 	if err != nil || len(testtupleKeys) == 0 {
