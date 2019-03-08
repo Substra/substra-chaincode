@@ -93,6 +93,9 @@ func TestDataset(t *testing.T) {
 	if !strings.Contains(string(resp.Payload), "\"trainDataKeys\":[]") {
 		t.Errorf("when querying dataset data, trainDataKeys should be []")
 	}
+	if !strings.Contains(string(resp.Payload), "\"testDataKeys\":[]") {
+		t.Errorf("when querying dataset data, testDataKeys should be []")
+	}
 }
 
 func TestData(t *testing.T) {
