@@ -135,7 +135,7 @@ func TestTraintuple(t *testing.T) {
 			[]byte(perf), []byte(log)},
 	}
 	traintupleStatus := []string{"doing", "done"}
-	for i, _ := range traintupleStatus {
+	for i := range traintupleStatus {
 		resp = mockStub.MockInvoke("42", argsSlice[i])
 		if status := resp.Status; status != 200 {
 			t.Errorf("when logging start %s with status %d and message %s",
