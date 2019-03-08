@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"encoding/json"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -279,6 +280,12 @@ func queryDatasetData(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 		return nil, err
 	}
 	mPayload["trainDataKeys"] = trainDataKeys
+	// get related test data
+	testDataKeys, err := getDatasetData(stub, datasetKey, false)
+	if err != nil {
+		return nil, err
+	}
+	mPayload["testDataKeys"] = testDataKeys
 	// Marshal payload
 	payload, err := json.Marshal(mPayload)
 	if err != nil {
