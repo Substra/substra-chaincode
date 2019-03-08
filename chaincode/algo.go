@@ -5,11 +5,12 @@ import (
 	"strings"
 
 	"encoding/json"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"gopkg.in/go-playground/validator.v9"
 )
 
-// set is a method of the receiver Algo. It checks the validity of inputAlgo and uses its fields to set the Algo
+// Set is a method of the receiver Algo. It checks the validity of inputAlgo and uses its fields to set the Algo
 // Returns the algoKey
 func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey string, err error) {
 	// checking validity of submitted fields

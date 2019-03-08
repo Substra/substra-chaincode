@@ -5,11 +5,12 @@ import (
 	"strings"
 
 	"encoding/json"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"gopkg.in/go-playground/validator.v9"
 )
 
-// set is a method of the receiver Challenge. It checks the validity of inputChallenge and uses its fields to set the Challenge.
+// Set is a method of the receiver Challenge. It checks the validity of inputChallenge and uses its fields to set the Challenge.
 // Returns the challengeKey and the datasetKey associated to test data
 func (challenge *Challenge) Set(stub shim.ChaincodeStubInterface, inp inputChallenge) (challengeKey string, datasetKey string, err error) {
 	// checking validity of submitted fields
