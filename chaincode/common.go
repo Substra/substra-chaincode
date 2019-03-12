@@ -70,7 +70,7 @@ func queryAll(stub shim.ChaincodeStubInterface, args []string, elementType strin
 	case "algo":
 		indexName = "algo~challenge~key"
 	case "testtuple":
-		indexName = "testtuple~traintuple~key"
+		indexName = "testtuple~traintuple~certified~key"
 	default:
 		return nil, fmt.Errorf("no element type %s", elementType)
 	}
