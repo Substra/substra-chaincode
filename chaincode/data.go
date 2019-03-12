@@ -326,26 +326,20 @@ func checkDatasetOwner(stub shim.ChaincodeStubInterface, datasetKeys []string) (
 // checkSameDataset checks if data in a slice exist and are from the same dataset.
 // If yes, returns two boolean indicating if data are testOnly and trainOnly
 func checkSameDataset(stub shim.ChaincodeStubInterface, datasetKey string, dataKeys []string) (testOnly bool, trainOnly bool, err error) {
-	for i, dataKey := range dataKeys {
+	testOnly = true
+	trainOnly = true
+	for _, dataKey := range dataKeys {
 		data := Data{}
 		if err = getElementStruct(stub, dataKey, &data); err != nil {
 			err = fmt.Errorf("could not retrieve data with key %s - %s", dataKey, err.Error())
 			return
 		}
-		if i == 0 {
-			testOnly = data.TestOnly
-			trainOnly = !testOnly
-			continue
-		}
 		if !stringInSlice(datasetKey, data.DatasetKeys) {
 			err = fmt.Errorf("data do not belong to the same dataset")
 			return
 		}
-		if !data.TestOnly && testOnly {
-			testOnly = false
-		} else if data.TestOnly && trainOnly {
-			trainOnly = false
-		}
+		testOnly = testOnly && data.TestOnly
+		trainOnly = trainOnly && !data.TestOnly
 	}
 	return
 }
