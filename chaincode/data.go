@@ -275,13 +275,13 @@ func queryDatasetData(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	}
 	mPayload["key"] = datasetKey
 	// get related train data
-	trainDataKeys, err := getDatasetData(stub, datasetKey, true)
+	trainDataKeys, err := getDatasetData(stub, datasetKey, false)
 	if err != nil {
 		return nil, err
 	}
 	mPayload["trainDataKeys"] = trainDataKeys
 	// get related test data
-	testDataKeys, err := getDatasetData(stub, datasetKey, false)
+	testDataKeys, err := getDatasetData(stub, datasetKey, true)
 	if err != nil {
 		return nil, err
 	}
@@ -351,16 +351,9 @@ func checkSameDataset(stub shim.ChaincodeStubInterface, datasetKey string, dataK
 }
 
 // getDatasetData returns all data keys associated to a dataset
-func getDatasetData(stub shim.ChaincodeStubInterface, datasetKey string, trainOnly bool) ([]string, error) {
-	var indexName string
-	var attributes []string
-	if trainOnly {
-		indexName = "data~dataset~testOnly~key"
-		attributes = []string{"data", datasetKey, "false"}
-	} else {
-		indexName = "data~dataset~testOnly~key"
-		attributes = []string{"data", datasetKey, "true"}
-	}
+func getDatasetData(stub shim.ChaincodeStubInterface, datasetKey string, testOnly bool) ([]string, error) {
+	indexName := "data~dataset~testOnly~key"
+	attributes := []string{"data", datasetKey, strconv.FormatBool(testOnly)}
 	dataKeys, err := getKeysFromComposite(stub, indexName, attributes)
 	if err != nil {
 		return nil, err
