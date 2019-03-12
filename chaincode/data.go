@@ -358,8 +358,8 @@ func getDatasetData(stub shim.ChaincodeStubInterface, datasetKey string, trainOn
 		indexName = "data~dataset~testOnly~key"
 		attributes = []string{"data", datasetKey, "false"}
 	} else {
-		indexName = "data~dataset~key"
-		attributes = []string{"data", datasetKey}
+		indexName = "data~dataset~testOnly~key"
+		attributes = []string{"data", datasetKey, "true"}
 	}
 	dataKeys, err := getKeysFromComposite(stub, indexName, attributes)
 	if err != nil {

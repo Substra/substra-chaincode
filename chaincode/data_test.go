@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
@@ -98,6 +100,37 @@ func TestDataset(t *testing.T) {
 	}
 }
 
+func TestGetTestDataKeys(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	// Input Dataset
+	inpDataset := inputDataset{}
+	args := inpDataset.createSample()
+	mockStub.MockInvoke("42", args)
+
+	// Add both train and test data
+	inpData := inputData{Hashes: testDataHash1}
+	args = inpData.createSample()
+	mockStub.MockInvoke("42", args)
+	inpData.Hashes = testDataHash2
+	inpData.TestOnly = "true"
+	args = inpData.createSample()
+	mockStub.MockInvoke("42", args)
+
+	// Querry the Dataset
+	args = [][]byte{[]byte("queryDatasetData"), []byte(inpDataset.OpenerHash)}
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "querrying the dataset should return an ok status")
+	payload := map[string]interface{}{}
+	err := json.Unmarshal(resp.Payload, &payload)
+	assert.NoError(t, err)
+
+	v, ok := payload["testDataKeys"]
+	assert.True(t, ok, "payload should contains the test data keys")
+	assert.Contains(t, v, testDataHash2, "testDataKeys should contain the test dataHash")
+	assert.NotContains(t, v, testDataHash1, "testDataKeys should not contains the train dataHash")
+}
 func TestData(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
