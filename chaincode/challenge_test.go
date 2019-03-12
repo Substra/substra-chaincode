@@ -5,9 +5,41 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+func TestRegisterChallengeWithDataKeyNotDatasetKey(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	// Add a dataset and some data successfuly
+	inpDataset := inputDataset{}
+	args := inpDataset.createSample()
+	mockStub.MockInvoke("42", args)
+	inpData := inputData{
+		Hashes:      testDataHash1,
+		DatasetKeys: datasetOpenerHash,
+		TestOnly:    "true",
+	}
+	args = inpData.createSample()
+	mockStub.MockInvoke("42", args)
+	inpData = inputData{
+		Hashes:      testDataHash2,
+		DatasetKeys: datasetOpenerHash,
+		TestOnly:    "true",
+	}
+	args = inpData.createSample()
+	r := mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, r.Status)
+
+	// Fail to insert the challenge
+	inpChallenge := inputChallenge{TestData: testDataHash1 + ":" + testDataHash2}
+	args = inpChallenge.createSample()
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 500, resp.Status, "status should indicate an error since the dataset key is a data key")
+}
 func TestChallenge(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
