@@ -10,6 +10,26 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+func TestTesttupleOnFailedTraintuple(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	// Add a some dataset, data and traintuple
+	err, resp, _ := registerItem(*mockStub, "traintuple")
+	assert.NoError(t, err)
+	// Mark the traintuple as failed
+	args := [][]byte{[]byte("logFailTrain"), resp.Payload, []byte("pas glop")}
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "should be able to log traintuple as failed")
+
+	// Fail to add a testtuple to this failed traintuple
+	inpTesttuple := inputTesttuple{}
+	args = inpTesttuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 500, resp.Status, "status should show an error since the traintuple is failed")
+	assert.Contains(t, resp.Message, "could not register this testtuple")
+}
+
 func TestCertifiedExplicitTesttuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
@@ -74,6 +94,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	assert.EqualValues(t, 500, resp.Status)
 	assert.Contains(t, resp.Message, "this testtuple already exists")
 }
+
 func TestTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
