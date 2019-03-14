@@ -70,8 +70,6 @@ type inputTraintuple struct {
 }
 
 // inputTestuple is the representation of input args to register a Testtuple
-// For now, testtuple can only be against test data associated to a dataset
-// Later, we'll have the possibility to create certified testtuple (=on challenge test data) and uncertified testtuple
 type inputTesttuple struct {
 	TraintupleKey string `validate:"required,gte=64,lte=64,hexadecimal"`
 	DatasetKey    string `validate:"omitempty,gte=64,lte=64,hexadecimal"`
