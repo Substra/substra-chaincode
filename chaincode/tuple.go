@@ -219,8 +219,10 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	case "done":
 		testtuple.Status = "todo"
 	case "failed":
-		testtuple.Status = "failed"
-		testtuple.Log = "failed traintuple"
+		err = fmt.Errorf(
+			"could not register this testtuple, the traintuple %s has a failed status",
+			inp.TraintupleKey)
+		return
 	default:
 		testtuple.Status = "waiting"
 	}
