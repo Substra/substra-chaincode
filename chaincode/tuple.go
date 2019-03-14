@@ -4,10 +4,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 
 	"encoding/json"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -184,14 +187,6 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 		return "", fmt.Errorf("invalid inputs to update data %s", err.Error())
 	}
 
-	// create testtuple key and check if already exist
-	tKey := sha256.Sum256([]byte("testtuple" + inp.TraintupleKey + inp.DatasetKey))
-	testtupleKey = hex.EncodeToString(tKey[:])
-	if testtupleBytes, err := stub.GetState(testtupleKey); testtupleBytes != nil {
-		return testtupleKey, fmt.Errorf("this testtuple already exist")
-	} else if err != nil {
-		return testtupleKey, err
-	}
 	// check associated traintuple
 	traintuple := Traintuple{}
 	if err = getElementStruct(stub, inp.TraintupleKey, &traintuple); err != nil {
@@ -230,9 +225,20 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 		testtuple.Status = "waiting"
 	}
 
+	// Get test data from challenge
+	challenge := Challenge{}
+	if err = getElementStruct(stub, testtuple.Challenge.Key, &challenge); err != nil {
+		return testtupleKey, fmt.Errorf("could not retrieve challenge with key %s - %s", testtuple.Challenge.Key, err.Error())
+	}
+	challengeDatasetKey := challenge.TestData.DatasetKey
+	challengeDataKeys := challenge.TestData.DataKeys
+	// For now we need to sort it but in fine it should be save sorted
+	// TODO
+	sort.Strings(challengeDataKeys)
+
 	var datasetKey string
 	var dataKeys []string
-	if len(inp.DatasetKey) > 0 {
+	if len(inp.DatasetKey) > 0 && len(inp.DataKeys) > 0 {
 		// non-certified testtuple
 		// test data are specified by the user
 		dataKeys = strings.Split(strings.Replace(inp.DataKeys, " ", "", -1), ",")
@@ -241,16 +247,13 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 			return testtupleKey, err
 		}
 		datasetKey = inp.DatasetKey
-		testtuple.Certified = false
+		sort.Strings(dataKeys)
+		testtuple.Certified = challengeDatasetKey == datasetKey && reflect.DeepEqual(challengeDataKeys, dataKeys)
+	} else if len(inp.DatasetKey) > 0 || len(inp.DataKeys) > 0 {
+		return testtupleKey, fmt.Errorf("invalid input: datasetKey and dataKey should be provided together")
 	} else {
-		// Certified testtuple
-		// Get test data from challenge
-		challenge := Challenge{}
-		if err = getElementStruct(stub, testtuple.Challenge.Key, &challenge); err != nil {
-			return testtupleKey, fmt.Errorf("could not retrieve challenge with key %s - %s", testtuple.Challenge.Key, err.Error())
-		}
-		dataKeys = challenge.TestData.DataKeys
-		datasetKey = challenge.TestData.DatasetKey
+		dataKeys = challengeDataKeys
+		datasetKey = challengeDatasetKey
 		testtuple.Certified = true
 	}
 	// retrieve dataset owner
@@ -262,6 +265,18 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 		Worker:     dataset.Owner,
 		Keys:       dataKeys,
 		OpenerHash: datasetKey,
+	}
+
+	// create testtuple key and check if it already exists
+	toHash := "testtuple"
+	toHash += testtuple.Model.TraintupleKey
+	toHash += strings.Join(dataKeys, ",")
+	tKey := sha256.Sum256([]byte(toHash))
+	testtupleKey = hex.EncodeToString(tKey[:])
+	if testtupleBytes, err := stub.GetState(testtupleKey); testtupleBytes != nil {
+		return testtupleKey, fmt.Errorf("this testtuple already exist")
+	} else if err != nil {
+		return testtupleKey, err
 	}
 
 	return testtupleKey, err

@@ -5,9 +5,75 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+func TestCertifiedExplicitTesttuple(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	// Add a some dataset, data and traintuple
+	err, resp, _ := registerItem(*mockStub, "traintuple")
+	assert.NoError(t, err)
+
+	// Add a testtuple that shoulb be certified since it's the same dataset and
+	// data than the challenge but explicitly pass as arguments and in disorder
+	inpTesttuple := inputTesttuple{
+		DataKeys:   testDataHash2 + "," + testDataHash1,
+		DatasetKey: datasetOpenerHash}
+	args := inpTesttuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status)
+
+	args = [][]byte{[]byte("queryTesttuples")}
+	resp = mockStub.MockInvoke("42", args)
+	testtuples := [](map[string]interface{}){}
+	err = json.Unmarshal(resp.Payload, &testtuples)
+	assert.NoError(t, err, "should be unmarshaled")
+	assert.Len(t, testtuples, 1, "there should be only one testtuple...")
+	assert.True(t, testtuples[0]["certified"].(bool), "... and it should be certified")
+
+}
+func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	// Add a some dataset, data and traintuple
+	err, resp, _ := registerItem(*mockStub, "traintuple")
+	assert.NoError(t, err)
+
+	// Add a certified testtuple
+	inpTesttuple1 := inputTesttuple{}
+	args := inpTesttuple1.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status)
+
+	// Fail to add an incomplete uncertified testtuple
+	inpTesttuple2 := inputTesttuple{DataKeys: trainDataHash1}
+	args = inpTesttuple2.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 500, resp.Status)
+	assert.Contains(t, resp.Message, "invalid input: datasetKey and dataKey should be provided together")
+
+	// Add an uncertified testtuple successfully
+	inpTesttuple3 := inputTesttuple{
+		DataKeys:   trainDataHash1 + "," + trainDataHash2,
+		DatasetKey: datasetOpenerHash}
+	args = inpTesttuple3.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status)
+
+	// Fail to add the same testtuple with a different order for dataKeys
+	inpTesttuple4 := inputTesttuple{
+		DataKeys:   trainDataHash2 + "," + trainDataHash1,
+		DatasetKey: datasetOpenerHash}
+	args = inpTesttuple4.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 500, resp.Status)
+	assert.Contains(t, resp.Message, "this testtuple already exist")
+}
 func TestTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
