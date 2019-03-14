@@ -274,7 +274,7 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	tKey := sha256.Sum256([]byte(toHash))
 	testtupleKey = hex.EncodeToString(tKey[:])
 	if testtupleBytes, err := stub.GetState(testtupleKey); testtupleBytes != nil {
-		return testtupleKey, fmt.Errorf("this testtuple already exist")
+		return testtupleKey, fmt.Errorf("this testtuple already exists (tkey: %s)", testtupleKey)
 	} else if err != nil {
 		return testtupleKey, err
 	}
