@@ -72,7 +72,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	args = inpTesttuple4.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status)
-	assert.Contains(t, resp.Message, "this testtuple already exist")
+	assert.Contains(t, resp.Message, "this testtuple already exists")
 }
 func TestTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
