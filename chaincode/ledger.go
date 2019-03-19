@@ -104,6 +104,7 @@ type Dataset struct {
 // Data is the representation of one of the element type stored in the ledger
 type Data struct {
 	DatasetKeys []string `json:"datasetKeys"`
+	Owner       string   `json:"owner"`
 	TestOnly    bool     `json:"testOnly"`
 }
 

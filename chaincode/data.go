@@ -51,35 +51,47 @@ func (dataset *Dataset) Set(stub shim.ChaincodeStubInterface, inp inputDataset) 
 
 // setData is a method checking the validity of inputData to be registered in the ledger
 // and returning corresponding data hashes, associated datasets, testOnly and errors
-func setData(stub shim.ChaincodeStubInterface, inp inputData) ([]string, []string, bool, error) {
+func setData(stub shim.ChaincodeStubInterface, inp inputData) (dataHashes []string, data Data, err error) {
 	// validate input data
 	validate := validator.New()
-	if err := validate.Struct(inp); err != nil {
+	if err = validate.Struct(inp); err != nil {
 		err = fmt.Errorf("invalid data inputs %s", err.Error())
-		return nil, nil, false, err
+		return
 	}
 	// Get data keys (=hashes)
-	dataHashes := strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
+	dataHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
 	// check validity of dataHashes
-	if err := checkHashes(dataHashes); err != nil {
-		return nil, nil, false, err
+	if err = checkHashes(dataHashes); err != nil {
+		return
 	}
 	// check data is not already in the ledger
 	if existingKeys := checkExist(stub, dataHashes); existingKeys != nil {
-		err := fmt.Errorf("data with these hashes already exist - %s", existingKeys)
-		return nil, nil, false, err
+		err = fmt.Errorf("data with these hashes already exist - %s", existingKeys)
+		return
+	}
+
+	// get transaction owner
+	owner, err := getTxCreator(stub)
+	if err != nil {
+		return
 	}
 	// check if associated dataset(s) exists
 	var datasetKeys []string
 	if len(inp.DatasetKeys) > 0 {
 		datasetKeys = strings.Split(strings.Replace(inp.DatasetKeys, " ", "", -1), ",")
-		if err := checkDatasetOwner(stub, datasetKeys); err != nil {
-			return nil, nil, false, err
+		if err = checkDatasetOwner(stub, datasetKeys); err != nil {
+			return
 		}
 	}
 	// convert input testOnly to boolean
 	testOnly, err := strconv.ParseBool(inp.TestOnly)
-	return dataHashes, datasetKeys, testOnly, err
+
+	data = Data{
+		DatasetKeys: datasetKeys,
+		TestOnly:    testOnly,
+		Owner:       owner}
+
+	return
 }
 
 // validateUpdateData is a method checking the validity of elements sent to update
@@ -158,15 +170,12 @@ func registerData(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 	inp := inputData{}
 	stringToInputStruct(args, &inp)
 	// check validity of input args
-	dataHashes, datasetKeys, testOnly, err := setData(stub, inp)
+	dataHashes, data, err := setData(stub, inp)
 	if err != nil {
 		return nil, err
 	}
 
-	// create data object
-	var data = Data{
-		DatasetKeys: datasetKeys,
-		TestOnly:    testOnly}
+	// Serialized Data object
 	dataBytes, _ := json.Marshal(data)
 
 	// store data in the ledger
@@ -177,16 +186,13 @@ func registerData(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 		if err = stub.PutState(dataHash, dataBytes); err != nil {
 			return nil, fmt.Errorf("failed to add data with hash %s", dataHash)
 		}
-		for _, datasetKey := range datasetKeys {
-			// create composite keys to find all data associated with a dataset and only test or train data
+		for _, datasetKey := range data.DatasetKeys {
+			// create composite keys to find all data associated with a dataset and both test and train data
 			if err = createCompositeKey(stub, "data~dataset~key", []string{"data", datasetKey, dataHash}); err != nil {
 				return nil, err
 			}
-		}
-	}
-	for _, dataHash := range dataHashes {
-		for _, datasetKey := range datasetKeys {
-			if err = createCompositeKey(stub, "data~dataset~testOnly~key", []string{"data", datasetKey, strconv.FormatBool(testOnly), dataHash}); err != nil {
+			// create composite keys to find all data associated with a dataset and only test or train data
+			if err = createCompositeKey(stub, "data~dataset~testOnly~key", []string{"data", datasetKey, strconv.FormatBool(data.TestOnly), dataHash}); err != nil {
 				return nil, err
 			}
 		}
@@ -219,6 +225,9 @@ func updateData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error)
 		data := Data{}
 		if err = getElementStruct(stub, dataHash, &data); err != nil {
 			err = fmt.Errorf("could not retrieve data with key %s - %s", dataHash, err.Error())
+			return nil, err
+		}
+		if err = checkDataOwner(stub, data); err != nil {
 			return nil, err
 		}
 		for _, datasetKey := range datasetKeys {
@@ -319,6 +328,18 @@ func checkDatasetOwner(stub shim.ChaincodeStubInterface, datasetKeys []string) (
 			err = fmt.Errorf("%s is not the owner of the dataset %s", txCreator, datasetKey)
 			return
 		}
+	}
+	return
+}
+
+//  checkDataOwner checks if the transaction requester is the owner of the data
+func checkDataOwner(stub shim.ChaincodeStubInterface, data Data) (err error) {
+	txRequester, err := getTxCreator(stub)
+	if err != nil {
+		return
+	}
+	if txRequester != data.Owner {
+		err = fmt.Errorf("%s is not the data's owner", txRequester)
 	}
 	return
 }
