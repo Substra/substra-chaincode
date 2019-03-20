@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -74,40 +73,34 @@ func TestChallenge(t *testing.T) {
 	}
 
 	// Query challenge from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("query"), []byte(challengeKey)}
+	args = [][]byte{[]byte("queryChallenge"), []byte(challengeKey)}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying a dataset with status %d and message %s", status, resp.Message)
 	}
-	challenge := make(map[string]interface{})
-	if err := bytesToStruct(resp.Payload, &challenge); err != nil {
-		t.Errorf("when unmarshalling queried challenge with error %s", err)
+	challenge := outputChallenge{}
+	err = bytesToStruct(resp.Payload, &challenge)
+	assert.NoError(t, err, "when unmarshalling queried challenge")
+	expectedChallenge := outputChallenge{
+		Key:   challengeKey,
+		Owner: "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
+		TestData: &DatasetData{
+			DatasetKey: datasetOpenerHash,
+			DataKeys:   []string{testDataHash1, testDataHash2},
+		},
+		Name: inpChallenge.Name,
+		Description: challengeDescription{
+			StorageAddress: inpChallenge.DescriptionStorageAddress,
+			Hash:           challengeKey,
+		},
+		Permissions: inpChallenge.Permissions,
+		Metrics: &HashDressName{
+			Hash:           inpChallenge.MetricsHash,
+			Name:           inpChallenge.MetricsName,
+			StorageAddress: inpChallenge.MetricsStorageAddress,
+		},
 	}
-	if challenge["name"] != inpChallenge.Name {
-		t.Errorf("ledger challenge name does not correspond to what was input: %s - %s", challenge["name"], inpChallenge.Name)
-	}
-	if challenge["descriptionStorageAddress"] != inpChallenge.DescriptionStorageAddress {
-		t.Errorf("ledger challenge description storage address does not correspond to what was input: %s - %s", challenge["descriptionStorageAddress"], inpChallenge.DescriptionStorageAddress)
-	}
-	if challenge["permissions"] != inpChallenge.Permissions {
-		t.Errorf("ledger challenge permissions does not correspond to what was input: %s - %s", challenge["permissions"], inpChallenge.Permissions)
-	}
-	if challenge["metrics"].(map[string]interface{})["hash"] != inpChallenge.MetricsHash {
-		t.Errorf("ledger challenge metrics hash does not correspond to what was input")
-	}
-	if challenge["metrics"].(map[string]interface{})["name"] != inpChallenge.MetricsName {
-		t.Errorf("ledger challenge metrics name does not correspond to what was input")
-	}
-	if challenge["metrics"].(map[string]interface{})["storageAddress"] != inpChallenge.MetricsStorageAddress {
-		t.Errorf("ledger challenge metrics address does not correspond to what was input")
-	}
-	testData := &DatasetData{
-		DatasetKey: datasetOpenerHash,
-		DataKeys:   []string{testDataHash1, testDataHash2},
-	}
-	if reflect.DeepEqual(challenge["testData"], testData) {
-		t.Errorf("ledger challenge test data does not correspond to what was input")
-	}
+	assert.Exactly(t, expectedChallenge, challenge)
 
 	// Query all challenges and check consistency
 	args = [][]byte{[]byte("queryChallenges")}
@@ -115,13 +108,9 @@ func TestChallenge(t *testing.T) {
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying challenges - status %d and message %s", status, resp.Message)
 	}
-	var sPayload []map[string]interface{}
-	if err := json.Unmarshal(resp.Payload, &sPayload); err != nil {
-		t.Errorf("when unmarshalling queried challenges")
-	}
-	payload := sPayload[0]
-	delete(payload, "key")
-	if !reflect.DeepEqual(payload, challenge) {
-		t.Errorf("when querying challenges, dataset does not correspond to the input challenge")
-	}
+	var challenges []outputChallenge
+	err = json.Unmarshal(resp.Payload, &challenges)
+	assert.NoError(t, err, "while unmarshalling challenges")
+	assert.Len(t, challenges, 1)
+	assert.Exactly(t, expectedChallenge, challenges[0], "return challenge different from registered one")
 }
