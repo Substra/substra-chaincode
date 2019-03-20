@@ -90,6 +90,44 @@ func registerChallenge(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	return []byte(challengeKey), err
 }
 
+// queryChallenge returns a challenge of the ledger given its key
+func queryChallenge(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 1 || len(args[0]) != 64 {
+		return nil, fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+	}
+	key := args[0]
+	var challenge Challenge
+	if err := getElementStruct(stub, key, &challenge); err != nil {
+		return nil, err
+	}
+	var out outputChallenge
+	out.Fill(key, challenge)
+	return json.Marshal(out)
+}
+
+// queryChallenges returns all challenges of the ledger
+func queryChallenges(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
+	}
+	var indexName = "challenge~owner~key"
+	elementsKeys, err := getKeysFromComposite(stub, indexName, []string{"challenge"})
+	if err != nil {
+		return nil, fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
+	}
+	var outChallenges []outputChallenge
+	for _, key := range elementsKeys {
+		var challenge Challenge
+		if err := getElementStruct(stub, key, &challenge); err != nil {
+			return nil, err
+		}
+		var out outputChallenge
+		out.Fill(key, challenge)
+		outChallenges = append(outChallenges, out)
+	}
+	return json.Marshal(outChallenges)
+}
+
 // -------------------------------------------------------------------------------------------
 // Utils for challengess
 // -------------------------------------------------------------------------------------------
