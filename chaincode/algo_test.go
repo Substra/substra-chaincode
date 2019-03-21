@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"reflect"
 	"testing"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAlgo(t *testing.T) {
@@ -47,28 +47,26 @@ func TestAlgo(t *testing.T) {
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying an algo with status %d and message %s", status, resp.Message)
 	}
-	algo := make(map[string]interface{})
-	if err := bytesToStruct(resp.Payload, &algo); err != nil {
-		t.Errorf("when unmarshalling queried algo with error %s", err)
+	algo := outputAlgo{}
+	err = bytesToStruct(resp.Payload, &algo)
+	assert.NoError(t, err, "when unmarshalling queried challenge")
+	expectedAlgo := outputAlgo{
+		Key:  algoKey,
+		Name: inpAlgo.Name,
+		Storage: algoStorage{
+			Hash:    algoKey,
+			Address: inpAlgo.StorageAddress,
+		},
+		Description: &HashDress{
+			Hash:           inpAlgo.DescriptionHash,
+			StorageAddress: inpAlgo.DescriptionStorageAddress,
+		},
+		Owner:        "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
+		ChallengeKey: inpAlgo.ChallengeKey,
+		Permissions:  inpAlgo.Permissions,
 	}
-	if algo["name"] != inpAlgo.Name {
-		t.Errorf("ledger algo name does not correspond to what was input: %s - %s", algo["name"], inpAlgo.Name)
-	}
-	if algo["storageAddress"] != inpAlgo.StorageAddress {
-		t.Errorf("ledger algo description storage address does not correspond to what was input: %s - %s", algo["storageAddress"], inpAlgo.StorageAddress)
-	}
-	if algo["challengeKey"] != inpAlgo.ChallengeKey {
-		t.Errorf("ledger algo challenge key does not correspond to what was input: %s - %s", algo["challengeKey"], inpAlgo.ChallengeKey)
-	}
-	if algo["permissions"] != inpAlgo.Permissions {
-		t.Errorf("ledger algo permissions does not correspond to what was input: %s - %s", algo["permissions"], inpAlgo.Permissions)
-	}
-	if algo["description"].(map[string]interface{})["hash"] != inpAlgo.DescriptionHash {
-		t.Errorf("ledger algo metrics hash does not correspond to what was input")
-	}
-	if algo["description"].(map[string]interface{})["storageAddress"] != inpAlgo.DescriptionStorageAddress {
-		t.Errorf("ledger algo metrics address does not correspond to what was input")
-	}
+	assert.Equal(t, expectedAlgo.Key, algo.Key)
+	assert.Exactly(t, expectedAlgo, algo)
 
 	// Query all algo and check consistency
 	args = [][]byte{[]byte("queryAlgos")}
@@ -76,13 +74,9 @@ func TestAlgo(t *testing.T) {
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying algos - status %d and message %s", status, resp.Message)
 	}
-	var sPayload []map[string]interface{}
-	if err := json.Unmarshal(resp.Payload, &sPayload); err != nil {
-		t.Errorf("when unmarshalling queried algos")
-	}
-	payload := sPayload[0]
-	delete(payload, "key")
-	if !reflect.DeepEqual(payload, algo) {
-		t.Errorf("when querying algos, dataset does not correspond to the input algo")
-	}
+	var algos []outputAlgo
+	err = json.Unmarshal(resp.Payload, &algos)
+	assert.NoError(t, err, "while unmarshalling algos")
+	assert.Len(t, algos, 1)
+	assert.Exactly(t, expectedAlgo, algos[0], "return algo different from registered one")
 }
