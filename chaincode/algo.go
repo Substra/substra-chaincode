@@ -80,3 +80,41 @@ func registerAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 	}
 	return []byte(algoKey), nil
 }
+
+// queryAlgo returns an algo of the ledger given its key
+func queryAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 1 || len(args[0]) != 64 {
+		return nil, fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+	}
+	key := args[0]
+	var algo Algo
+	if err := getElementStruct(stub, key, &algo); err != nil {
+		return nil, err
+	}
+	var out outputAlgo
+	out.Fill(key, algo)
+	return json.Marshal(out)
+}
+
+// queryAlgos returns all algos of the ledger
+func queryAlgos(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
+	}
+	var indexName = "algo~challenge~key"
+	elementsKeys, err := getKeysFromComposite(stub, indexName, []string{"algo"})
+	if err != nil {
+		return nil, fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
+	}
+	var outAlgos []outputAlgo
+	for _, key := range elementsKeys {
+		var algo Algo
+		if err := getElementStruct(stub, key, &algo); err != nil {
+			return nil, err
+		}
+		var out outputAlgo
+		out.Fill(key, algo)
+		outAlgos = append(outAlgos, out)
+	}
+	return json.Marshal(outAlgos)
+}
