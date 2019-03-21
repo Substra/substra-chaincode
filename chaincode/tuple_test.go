@@ -247,7 +247,7 @@ func TestTraintuple(t *testing.T) {
 	}
 
 	// Query Traintuple From key
-	args = [][]byte{[]byte("query"), []byte(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying traintuple with status %d and message %s",

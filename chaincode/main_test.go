@@ -252,9 +252,9 @@ func TestPipeline(t *testing.T) {
 	datasetKey := string(resp.Payload)
 
 	fmt.Println("#### ------------ Query Dataset From key ------------")
-	printArgsNames("query", []string{"elementKey"})
-	args = [][]byte{[]byte("query"), []byte(datasetKey)}
-	printArgs(args, "query")
+	printArgsNames("queryDataset", []string{"elementKey"})
+	args = [][]byte{[]byte("queryDataset"), []byte(datasetKey)}
+	printArgs(args, "queryDataset")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying a dataset with status %d and message %s", status, resp.Message)
@@ -344,7 +344,7 @@ func TestPipeline(t *testing.T) {
 		t.Errorf("when adding same traintuple with status %d and message %s", status, resp.Message)
 	}
 	// Get owner of the traintuple
-	args = [][]byte{[]byte("query"), traintupleKey}
+	args = [][]byte{[]byte("queryTraintuple"), traintupleKey}
 	resp = mockStub.MockInvoke("42", args)
 	respTraintuple := resp.Payload
 	traintuple := outputTraintuple{}
@@ -398,8 +398,8 @@ func TestPipeline(t *testing.T) {
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
 	fmt.Println("#### ------------ Query Traintuple From key ------------")
-	args = [][]byte{[]byte("query"), traintupleKey}
-	printArgs(args, "query")
+	args = [][]byte{[]byte("queryTraintuple"), traintupleKey}
+	printArgs(args, "queryTraintuple")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying traintuple with status %d and message %s", status, resp.Message)
@@ -438,7 +438,7 @@ func TestPipeline(t *testing.T) {
 		t.Errorf("when adding same testtuple with status %d and message %s", status, resp.Message)
 	}
 	// Get owner of the testtuple
-	args = [][]byte{[]byte("query"), testtupleKey}
+	args = [][]byte{[]byte("queryTesttuple"), testtupleKey}
 	resp = mockStub.MockInvoke("42", args)
 	respTesttuple := resp.Payload
 	testtuple := Testtuple{}
@@ -490,8 +490,8 @@ func TestPipeline(t *testing.T) {
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
 	fmt.Println("#### ------------ Query Testtuple from its key ------------")
-	args = [][]byte{[]byte("query"), testtupleKey}
-	printArgs(args, "query")
+	args = [][]byte{[]byte("queryTesttuple"), testtupleKey}
+	printArgs(args, "queryTesttuple")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying testtuple with status %d and message %s", status, resp.Message)
@@ -500,7 +500,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Println("#### ------------ Query all Testtuples ------------")
 	args = [][]byte{[]byte("queryTesttuples")}
-	printArgs(args, "query")
+	printArgs(args, "queryTesttuples")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying testtuple with status %d and message %s", status, resp.Message)

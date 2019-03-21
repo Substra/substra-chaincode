@@ -679,6 +679,40 @@ func queryTraintuples(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	return json.Marshal(elements)
 }
 
+// queryTesttuple returns a testtuple of the ledger given its key
+func queryTesttuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 1 || len(args[0]) != 64 {
+		return nil, fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+	}
+	key := args[0]
+	var testtuple Testtuple
+	if err := getElementStruct(stub, key, &testtuple); err != nil {
+		return nil, err
+	}
+	return json.Marshal(testtuple)
+}
+
+// queryTesttuples returns all testtuples of the ledger
+func queryTesttuples(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
+	}
+	var indexName = "testtuple~traintuple~certified~key"
+	elementsKeys, err := getKeysFromComposite(stub, indexName, []string{"testtuple"})
+	if err != nil {
+		return nil, fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
+	}
+	var outTesttuples []Testtuple
+	for _, key := range elementsKeys {
+		var testtuple Testtuple
+		if err := getElementStruct(stub, key, &testtuple); err != nil {
+			return nil, err
+		}
+		outTesttuples = append(outTesttuples, testtuple)
+	}
+	return json.Marshal(outTesttuples)
+}
+
 // queryModelDetails returns info about the testtuple and algo related to a traintuple
 func queryModelDetails(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	expectedArgs := [1]string{"traintuple key"}
