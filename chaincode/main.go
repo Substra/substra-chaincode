@@ -60,10 +60,6 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = logFailTrain(stub, args)
 	case "logFailTest":
 		result, err = logFailTest(stub, args)
-	case "query":
-		result, err = query(stub, args)
-	case "queryTraintuple":
-		result, err = queryTraintuple(stub, args)
 	case "queryChallenge":
 		result, err = queryChallenge(stub, args)
 	case "queryChallenges":
@@ -72,10 +68,14 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = queryAlgo(stub, args)
 	case "queryAlgos":
 		result, err = queryAlgos(stub, args)
+	case "queryTraintuple":
+		result, err = queryTraintuple(stub, args)
 	case "queryTraintuples":
 		result, err = queryTraintuples(stub, args)
+	case "queryTesttuple":
+		result, err = queryTesttuple(stub, args)
 	case "queryTesttuples":
-		result, err = queryAll(stub, args, "testtuple")
+		result, err = queryTesttuples(stub, args)
 	case "queryDataset":
 		result, err = queryDataset(stub, args)
 	case "queryDatasets":
