@@ -32,8 +32,8 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	var result []byte
 	var err error
 	switch fn {
-	case "registerChallenge":
-		result, err = registerChallenge(stub, args)
+	case "registerObjective":
+		result, err = registerObjective(stub, args)
 	case "registerDataset":
 		result, err = registerDataset(stub, args)
 	case "updateDataset":
@@ -60,10 +60,10 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = logFailTrain(stub, args)
 	case "logFailTest":
 		result, err = logFailTest(stub, args)
-	case "queryChallenge":
-		result, err = queryChallenge(stub, args)
-	case "queryChallenges":
-		result, err = queryChallenges(stub, args)
+	case "queryObjective":
+		result, err = queryObjective(stub, args)
+	case "queryObjectives":
+		result, err = queryObjectives(stub, args)
 	case "queryAlgo":
 		result, err = queryAlgo(stub, args)
 	case "queryAlgos":

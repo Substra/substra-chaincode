@@ -22,12 +22,12 @@ func TestAlgo(t *testing.T) {
 		t.Errorf("when adding algo with invalid hash, status %d and message %s", status, resp.Message)
 	}
 
-	// Add algo with unexisting challenge
+	// Add algo with unexisting objective
 	inpAlgo = inputAlgo{}
 	args = inpAlgo.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
-		t.Errorf("when adding algo with unexisting challenge, status %d and message %s", status, resp.Message)
+		t.Errorf("when adding algo with unexisting objective, status %d and message %s", status, resp.Message)
 	}
 
 	// Properly add algo
@@ -49,7 +49,7 @@ func TestAlgo(t *testing.T) {
 	}
 	algo := outputAlgo{}
 	err = bytesToStruct(resp.Payload, &algo)
-	assert.NoError(t, err, "when unmarshalling queried challenge")
+	assert.NoError(t, err, "when unmarshalling queried objective")
 	expectedAlgo := outputAlgo{
 		Key:  algoKey,
 		Name: inpAlgo.Name,
@@ -62,7 +62,7 @@ func TestAlgo(t *testing.T) {
 			StorageAddress: inpAlgo.DescriptionStorageAddress,
 		},
 		Owner:        "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
-		ChallengeKey: inpAlgo.ChallengeKey,
+		ObjectiveKey: inpAlgo.ObjectiveKey,
 		Permissions:  inpAlgo.Permissions,
 	}
 	assert.Exactly(t, expectedAlgo, algo)

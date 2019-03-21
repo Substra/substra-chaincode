@@ -9,7 +9,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-func TestRegisterChallengeWithDataKeyNotDatasetKey(t *testing.T) {
+func TestRegisterObjectiveWithDataKeyNotDatasetKey(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
@@ -33,84 +33,84 @@ func TestRegisterChallengeWithDataKeyNotDatasetKey(t *testing.T) {
 	r := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, r.Status)
 
-	// Fail to insert the challenge
-	inpChallenge := inputChallenge{TestData: testDataHash1 + ":" + testDataHash2}
-	args = inpChallenge.createSample()
+	// Fail to insert the objective
+	inpObjective := inputObjective{TestData: testDataHash1 + ":" + testDataHash2}
+	args = inpObjective.createSample()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status, "status should indicate an error since the dataset key is a data key")
 }
-func TestChallenge(t *testing.T) {
+func TestObjective(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	// Add challenge with invalid field
-	inpChallenge := inputChallenge{
+	// Add objective with invalid field
+	inpObjective := inputObjective{
 		DescriptionHash: "aaa",
 	}
-	args := inpChallenge.createSample()
+	args := inpObjective.createSample()
 	resp := mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
-		t.Errorf("when adding challenge with invalid hash, status %d and message %s", status, resp.Message)
+		t.Errorf("when adding objective with invalid hash, status %d and message %s", status, resp.Message)
 	}
 
-	// Add challenge with unexisting test data
-	inpChallenge = inputChallenge{}
-	args = inpChallenge.createSample()
+	// Add objective with unexisting test data
+	inpObjective = inputObjective{}
+	args = inpObjective.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
-		t.Errorf("when adding challenge with unexisting test data, status %d and message %s", status, resp.Message)
+		t.Errorf("when adding objective with unexisting test data, status %d and message %s", status, resp.Message)
 	}
 
-	// Properly add challenge
-	err, resp, tt := registerItem(*mockStub, "challenge")
+	// Properly add objective
+	err, resp, tt := registerItem(*mockStub, "objective")
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-	inpChallenge = tt.(inputChallenge)
-	challengeKey := string(resp.Payload)
-	if challengeKey != inpChallenge.DescriptionHash {
-		t.Errorf("when adding challenge: unexpected returned challenge key - %s / %s", challengeKey, inpChallenge.DescriptionHash)
+	inpObjective = tt.(inputObjective)
+	objectiveKey := string(resp.Payload)
+	if objectiveKey != inpObjective.DescriptionHash {
+		t.Errorf("when adding objective: unexpected returned objective key - %s / %s", objectiveKey, inpObjective.DescriptionHash)
 	}
 
-	// Query challenge from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryChallenge"), []byte(challengeKey)}
+	// Query objective from key and check the consistency of returned arguments
+	args = [][]byte{[]byte("queryObjective"), []byte(objectiveKey)}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying a dataset with status %d and message %s", status, resp.Message)
 	}
-	challenge := outputChallenge{}
-	err = bytesToStruct(resp.Payload, &challenge)
-	assert.NoError(t, err, "when unmarshalling queried challenge")
-	expectedChallenge := outputChallenge{
-		Key:   challengeKey,
+	objective := outputObjective{}
+	err = bytesToStruct(resp.Payload, &objective)
+	assert.NoError(t, err, "when unmarshalling queried objective")
+	expectedObjective := outputObjective{
+		Key:   objectiveKey,
 		Owner: "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
 		TestData: &DatasetData{
 			DatasetKey: datasetOpenerHash,
 			DataKeys:   []string{testDataHash1, testDataHash2},
 		},
-		Name: inpChallenge.Name,
+		Name: inpObjective.Name,
 		Description: HashDress{
-			StorageAddress: inpChallenge.DescriptionStorageAddress,
-			Hash:           challengeKey,
+			StorageAddress: inpObjective.DescriptionStorageAddress,
+			Hash:           objectiveKey,
 		},
-		Permissions: inpChallenge.Permissions,
+		Permissions: inpObjective.Permissions,
 		Metrics: &HashDressName{
-			Hash:           inpChallenge.MetricsHash,
-			Name:           inpChallenge.MetricsName,
-			StorageAddress: inpChallenge.MetricsStorageAddress,
+			Hash:           inpObjective.MetricsHash,
+			Name:           inpObjective.MetricsName,
+			StorageAddress: inpObjective.MetricsStorageAddress,
 		},
 	}
-	assert.Exactly(t, expectedChallenge, challenge)
+	assert.Exactly(t, expectedObjective, objective)
 
-	// Query all challenges and check consistency
-	args = [][]byte{[]byte("queryChallenges")}
+	// Query all objectives and check consistency
+	args = [][]byte{[]byte("queryObjectives")}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying challenges - status %d and message %s", status, resp.Message)
+		t.Errorf("when querying objectives - status %d and message %s", status, resp.Message)
 	}
-	var challenges []outputChallenge
-	err = json.Unmarshal(resp.Payload, &challenges)
-	assert.NoError(t, err, "while unmarshalling challenges")
-	assert.Len(t, challenges, 1)
-	assert.Exactly(t, expectedChallenge, challenges[0], "return challenge different from registered one")
+	var objectives []outputObjective
+	err = json.Unmarshal(resp.Payload, &objectives)
+	assert.NoError(t, err, "while unmarshalling objectives")
+	assert.Len(t, objectives, 1)
+	assert.Exactly(t, expectedObjective, objectives[0], "return objective different from registered one")
 }

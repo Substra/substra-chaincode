@@ -5,8 +5,8 @@ package main
 // arg  [][]byte or []string, and it is not possible to input a string looking like a json
 // -------------------------------------------------------------------------------------------
 
-// inputChallenge is the representation of input args to register a Challenge
-type inputChallenge struct {
+// inputObjective is the representation of input args to register a Objective
+type inputObjective struct {
 	Name                      string `validate:"required,gte=1,lte=100"`
 	DescriptionHash           string `validate:"required,gte=64,lte=64,hexadecimal"`
 	DescriptionStorageAddress string `validate:"required,url"`
@@ -24,7 +24,7 @@ type inputAlgo struct {
 	StorageAddress            string `validate:"required,url"`
 	DescriptionHash           string `validate:"required,gte=64,lte=64,hexadecimal"`
 	DescriptionStorageAddress string `validate:"required,url"`
-	ChallengeKey              string `validate:"required,gte=64,lte=64,hexadecimal"`
+	ObjectiveKey              string `validate:"required,gte=64,lte=64,hexadecimal"`
 	Permissions               string `validate:"required,oneof=all"`
 }
 
@@ -36,14 +36,14 @@ type inputDataset struct {
 	Type                      string `validate:"required,gte=1,lte=30"`
 	DescriptionHash           string `validate:"required,gte=64,lte=64,hexadecimal"`
 	DescriptionStorageAddress string `validate:"required,url"`
-	ChallengeKey              string //`validate:"required"`
+	ObjectiveKey              string //`validate:"required"`
 	Permissions               string `validate:"required,oneof=all"`
 }
 
-// inputUpdateDataset is the representation of input args to update a dataset with a challenge
+// inputUpdateDataset is the representation of input args to update a dataset with a objective
 type inputUpdateDataset struct {
 	DatasetKey   string `validate:"required,gte=64,lte=64,hexadecimal"`
-	ChallengeKey string `validate:"required,gte=64,lte=64,hexadecimal"`
+	ObjectiveKey string `validate:"required,gte=64,lte=64,hexadecimal"`
 }
 
 // inputData is the representation of input args to register one or more data

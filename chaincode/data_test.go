@@ -49,7 +49,7 @@ func TestDataset(t *testing.T) {
 	err = bytesToStruct(resp.Payload, &dataset)
 	assert.NoError(t, err, "when unmarshalling queried dataset")
 	expectedDataset := outputDataset{
-		ChallengeKey: inpDataset.ChallengeKey,
+		ObjectiveKey: inpDataset.ObjectiveKey,
 		Key:          datasetKey,
 		Owner:        "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
 		Name:         inpDataset.Name,
@@ -76,7 +76,7 @@ func TestDataset(t *testing.T) {
 	err = json.Unmarshal(resp.Payload, &datasets)
 	assert.NoError(t, err, "while unmarshalling datasets")
 	assert.Len(t, datasets, 1)
-	assert.Exactly(t, expectedDataset, datasets[0], "return challenge different from registered one")
+	assert.Exactly(t, expectedDataset, datasets[0], "return objective different from registered one")
 
 	args = [][]byte{[]byte("queryDatasetData"), []byte(inpDataset.OpenerHash)}
 	resp = mockStub.MockInvoke("42", args)

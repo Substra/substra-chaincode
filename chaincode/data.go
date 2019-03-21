@@ -12,7 +12,7 @@ import (
 )
 
 // Set is a method of the receiver Dataset. It checks the validity of inputDataset and uses its fields to set the Dataset
-// Returns the datasetKey and associated challengeKeys
+// Returns the datasetKey and associated objectiveKeys
 func (dataset *Dataset) Set(stub shim.ChaincodeStubInterface, inp inputDataset) (string, string, error) {
 	// check validity of submitted fields
 	validate := validator.New()
@@ -25,13 +25,13 @@ func (dataset *Dataset) Set(stub shim.ChaincodeStubInterface, inp inputDataset) 
 	if elementBytes, _ := stub.GetState(datasetKey); elementBytes != nil {
 		return datasetKey, "", fmt.Errorf("dataset with this opener already exists")
 	}
-	// check validity of associated challenge
-	if len(inp.ChallengeKey) > 0 {
-		if _, err := getElementBytes(stub, inp.ChallengeKey); err != nil {
-			err = fmt.Errorf("error checking associated challenge %s", err.Error())
+	// check validity of associated objective
+	if len(inp.ObjectiveKey) > 0 {
+		if _, err := getElementBytes(stub, inp.ObjectiveKey); err != nil {
+			err = fmt.Errorf("error checking associated objective %s", err.Error())
 			return "", "", nil
 		}
-		dataset.ChallengeKey = inp.ChallengeKey
+		dataset.ObjectiveKey = inp.ObjectiveKey
 	}
 	dataset.Name = inp.Name
 	dataset.OpenerStorageAddress = inp.OpenerStorageAddress
@@ -46,7 +46,7 @@ func (dataset *Dataset) Set(stub shim.ChaincodeStubInterface, inp inputDataset) 
 	}
 	dataset.Owner = owner
 	dataset.Permissions = inp.Permissions
-	return datasetKey, dataset.ChallengeKey, nil
+	return datasetKey, dataset.ObjectiveKey, nil
 }
 
 // setData is a method checking the validity of inputData to be registered in the ledger
@@ -135,7 +135,7 @@ func registerDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	stringToInputStruct(args, &inp)
 	// check validity of input args and convert it to a Dataset
 	dataset := Dataset{}
-	datasetKey, challengeKey, err := dataset.Set(stub, inp)
+	datasetKey, objectiveKey, err := dataset.Set(stub, inp)
 	if err != nil {
 		return nil, err
 	}
@@ -145,9 +145,9 @@ func registerDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	if err != nil {
 		return nil, fmt.Errorf("failed to add dataset with opener hash %s, error is %s", inp.OpenerHash, err.Error())
 	}
-	// create composite keys (one for each associated challenge) to find data associated with a challenge
-	indexName := "dataset~challenge~key"
-	err = createCompositeKey(stub, indexName, []string{"dataset", challengeKey, datasetKey})
+	// create composite keys (one for each associated objective) to find data associated with a objective
+	indexName := "dataset~objective~key"
+	err = createCompositeKey(stub, indexName, []string{"dataset", objectiveKey, datasetKey})
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +247,7 @@ func updateData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error)
 	return []byte(dataKeys), nil
 }
 
-// updateDataset associates a challengeKey to an existing dataset
+// updateDataset associates a objectiveKey to an existing dataset
 func updateDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	inp := inputUpdateDataset{}
 	expectedArgs := getFieldNames(&inp)
@@ -262,14 +262,14 @@ func updateDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, err
 		err = fmt.Errorf("invalid update dataset inputs %s", err.Error())
 		return nil, err
 	}
-	// update dataset.ChallengeKey
-	if err := addChallengeDataset(stub, inp.DatasetKey, inp.ChallengeKey); err != nil {
+	// update dataset.ObjectiveKey
+	if err := addObjectiveDataset(stub, inp.DatasetKey, inp.ObjectiveKey); err != nil {
 		return nil, err
 	}
 	return []byte(inp.DatasetKey), nil
 }
 
-// queryChallenge returns a challenge of the ledger given its key
+// queryObjective returns a objective of the ledger given its key
 func queryDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 1 || len(args[0]) != 64 {
 		return nil, fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
@@ -284,7 +284,7 @@ func queryDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 	return json.Marshal(out)
 }
 
-// queryChallenges returns all challenges of the ledger
+// queryObjectives returns all objectives of the ledger
 func queryDatasets(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	if len(args) != 0 {
 		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
@@ -296,12 +296,12 @@ func queryDatasets(stub shim.ChaincodeStubInterface, args []string) ([]byte, err
 	}
 	var outDatasets []outputDataset
 	for _, key := range elementsKeys {
-		var challenge Dataset
-		if err := getElementStruct(stub, key, &challenge); err != nil {
+		var objective Dataset
+		if err := getElementStruct(stub, key, &objective); err != nil {
 			return nil, err
 		}
 		var out outputDataset
-		out.Fill(key, challenge)
+		out.Fill(key, objective)
 		outDatasets = append(outDatasets, out)
 	}
 	return json.Marshal(outDatasets)
