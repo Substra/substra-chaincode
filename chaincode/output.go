@@ -3,18 +3,13 @@ package main
 // Struct use as return representation of ledger data
 
 type outputChallenge struct {
-	Key         string               `json:"key"`
-	Name        string               `json:"name"`
-	Description challengeDescription `json:"description"`
-	Metrics     *HashDressName       `json:"metrics"`
-	Owner       string               `json:"owner"`
-	TestData    *DatasetData         `json:"testData"`
-	Permissions string               `json:"permissions"`
-}
-
-type challengeDescription struct {
-	Hash           string `json:"hash"`
-	StorageAddress string `json:"storageAddress"`
+	Key         string         `json:"key"`
+	Name        string         `json:"name"`
+	Description HashDress      `json:"description"`
+	Metrics     *HashDressName `json:"metrics"`
+	Owner       string         `json:"owner"`
+	TestData    *DatasetData   `json:"testData"`
+	Permissions string         `json:"permissions"`
 }
 
 func (out *outputChallenge) Fill(key string, in Challenge) {
@@ -30,19 +25,14 @@ func (out *outputChallenge) Fill(key string, in Challenge) {
 
 // outputDataset is the return representation of the Dataset type stored in the ledger
 type outputDataset struct {
-	ChallengeKey string        `json:"challengeKey"`
-	Description  *HashDress    `json:"description"`
-	Key          string        `json:"key"`
-	Name         string        `json:"name"`
-	Opener       datasetOpener `json:"opener"`
-	Owner        string        `json:"owner"`
-	Permissions  string        `json:"permissions"`
-	Type         string        `json:"type"`
-}
-
-type datasetOpener struct {
-	Hash           string `json:"hash"`
-	StorageAddress string `json:"strotageAddress"`
+	ChallengeKey string     `json:"challengeKey"`
+	Description  *HashDress `json:"description"`
+	Key          string     `json:"key"`
+	Name         string     `json:"name"`
+	Opener       HashDress  `json:"opener"`
+	Owner        string     `json:"owner"`
+	Permissions  string     `json:"permissions"`
+	Type         string     `json:"type"`
 }
 
 func (out *outputDataset) Fill(key string, in Dataset) {
