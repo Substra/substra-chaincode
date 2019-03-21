@@ -42,7 +42,7 @@ func TestAlgo(t *testing.T) {
 	}
 
 	// Query algo from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("query"), []byte(algoKey)}
+	args = [][]byte{[]byte("queryAlgo"), []byte(algoKey)}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying an algo with status %d and message %s", status, resp.Message)
@@ -65,7 +65,6 @@ func TestAlgo(t *testing.T) {
 		ChallengeKey: inpAlgo.ChallengeKey,
 		Permissions:  inpAlgo.Permissions,
 	}
-	assert.Equal(t, expectedAlgo.Key, algo.Key)
 	assert.Exactly(t, expectedAlgo, algo)
 
 	// Query all algo and check consistency
