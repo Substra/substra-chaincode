@@ -58,7 +58,7 @@ func TestDataset(t *testing.T) {
 			Hash:           inpDataset.DescriptionHash,
 		},
 		Permissions: inpDataset.Permissions,
-		Opener: datasetOpener{
+		Opener: HashDress{
 			Hash:           datasetKey,
 			StorageAddress: inpDataset.OpenerStorageAddress,
 		},

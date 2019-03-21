@@ -89,7 +89,7 @@ func TestChallenge(t *testing.T) {
 			DataKeys:   []string{testDataHash1, testDataHash2},
 		},
 		Name: inpChallenge.Name,
-		Description: challengeDescription{
+		Description: HashDress{
 			StorageAddress: inpChallenge.DescriptionStorageAddress,
 			Hash:           challengeKey,
 		},
