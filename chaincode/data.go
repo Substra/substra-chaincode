@@ -269,6 +269,44 @@ func updateDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, err
 	return []byte(inp.DatasetKey), nil
 }
 
+// queryChallenge returns a challenge of the ledger given its key
+func queryDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 1 || len(args[0]) != 64 {
+		return nil, fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+	}
+	key := args[0]
+	var dataset Dataset
+	if err := getElementStruct(stub, key, &dataset); err != nil {
+		return nil, err
+	}
+	var out outputDataset
+	out.Fill(key, dataset)
+	return json.Marshal(out)
+}
+
+// queryChallenges returns all challenges of the ledger
+func queryDatasets(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
+	}
+	var indexName = "dataset~owner~key"
+	elementsKeys, err := getKeysFromComposite(stub, indexName, []string{"dataset"})
+	if err != nil {
+		return nil, fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
+	}
+	var outDatasets []outputDataset
+	for _, key := range elementsKeys {
+		var challenge Dataset
+		if err := getElementStruct(stub, key, &challenge); err != nil {
+			return nil, err
+		}
+		var out outputDataset
+		out.Fill(key, challenge)
+		outDatasets = append(outDatasets, out)
+	}
+	return json.Marshal(outDatasets)
+}
+
 // queryDatasetData returns info about a dataset and all related data
 func queryDatasetData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	expectedArgs := [1]string{"dataset key"}
