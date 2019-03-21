@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -41,51 +40,43 @@ func TestDataset(t *testing.T) {
 		t.Errorf("when adding dataset which already exists, status %d and message %s", status, resp.Message)
 	}
 	// Query dataset and check fields match expectations
-	args = [][]byte{[]byte("query"), []byte(datasetKey)}
+	args = [][]byte{[]byte("queryDataset"), []byte(datasetKey)}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying the dataset, status %d and message %s", status, resp.Message)
 	}
-	dataset := make(map[string]interface{})
-	if err := bytesToStruct(resp.Payload, &dataset); err != nil {
-		t.Errorf("when unmarshalling queried dataset with error %s", err)
+	dataset := outputDataset{}
+	err = bytesToStruct(resp.Payload, &dataset)
+	assert.NoError(t, err, "when unmarshalling queried dataset")
+	expectedDataset := outputDataset{
+		ChallengeKey: inpDataset.ChallengeKey,
+		Key:          datasetKey,
+		Owner:        "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
+		Name:         inpDataset.Name,
+		Description: &HashDress{
+			StorageAddress: inpDataset.DescriptionStorageAddress,
+			Hash:           inpDataset.DescriptionHash,
+		},
+		Permissions: inpDataset.Permissions,
+		Opener: datasetOpener{
+			Hash:           datasetKey,
+			StorageAddress: inpDataset.OpenerStorageAddress,
+		},
+		Type: inpDataset.Type,
 	}
-	if dataset["name"] != inpDataset.Name {
-		t.Errorf("ledger dataset name does not correspond to what was input: %s - %s", dataset["name"], inpDataset.Name)
-	}
-	if dataset["openerStorageAddress"] != inpDataset.OpenerStorageAddress {
-		t.Errorf("ledger dataset opener storage address does not correspond to what was input")
-	}
-	if dataset["type"] != inpDataset.Type {
-		t.Errorf("ledger dataset type does not correspond to what was input")
-	}
-	if dataset["description"].(map[string]interface{})["hash"] != inpDataset.DescriptionHash {
-		t.Errorf("ledger dataset description hash does not correspond to what was input")
-	}
-	if dataset["description"].(map[string]interface{})["storageAddress"] != inpDataset.DescriptionStorageAddress {
-		t.Errorf("ledger dataset description storage address does not correspond to what was input")
-	}
-	if dataset["challengeKey"] != "" {
-		t.Errorf("ledger dataset challenge keys does not correspond to what was input")
-	}
-	if dataset["permissions"] != inpDataset.Permissions {
-		t.Errorf("ledger dataset challenge keys does not correspond to what was input")
-	}
+	assert.Exactly(t, expectedDataset, dataset)
+
 	// Query all datasets and check fields match expectations
 	args = [][]byte{[]byte("queryDatasets")}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying datasets - status %d and message %s", status, resp.Message)
 	}
-	var sPayload []map[string]interface{}
-	if err := json.Unmarshal(resp.Payload, &sPayload); err != nil {
-		t.Errorf("when unmarshalling queried datasets")
-	}
-	payload := sPayload[0]
-	delete(payload, "key")
-	if !reflect.DeepEqual(payload, dataset) {
-		t.Errorf("when querying datasets, dataset does not correspond to the input dataset")
-	}
+	var datasets []outputDataset
+	err = json.Unmarshal(resp.Payload, &datasets)
+	assert.NoError(t, err, "while unmarshalling datasets")
+	assert.Len(t, datasets, 1)
+	assert.Exactly(t, expectedDataset, datasets[0], "return challenge different from registered one")
 
 	args = [][]byte{[]byte("queryDatasetData"), []byte(inpDataset.OpenerHash)}
 	resp = mockStub.MockInvoke("42", args)
