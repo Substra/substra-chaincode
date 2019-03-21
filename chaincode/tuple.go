@@ -128,18 +128,18 @@ func (outputTraintuple *outputTraintuple) Set(stub shim.ChaincodeStubInterface, 
 		Hash:           traintuple.AlgoKey,
 		StorageAddress: algo.StorageAddress}
 
-	// fill challenge
-	challenge := Challenge{}
-	if err = getElementStruct(stub, algo.ChallengeKey, &challenge); err != nil {
-		err = fmt.Errorf("could not retrieve associated challenge with key %s- %s", algo.ChallengeKey, err.Error())
+	// fill objective
+	objective := Objective{}
+	if err = getElementStruct(stub, algo.ObjectiveKey, &objective); err != nil {
+		err = fmt.Errorf("could not retrieve associated objective with key %s- %s", algo.ObjectiveKey, err.Error())
 		return
 	}
 	metrics := HashDress{
-		Hash:           challenge.Metrics.Hash,
-		StorageAddress: challenge.Metrics.StorageAddress,
+		Hash:           objective.Metrics.Hash,
+		StorageAddress: objective.Metrics.StorageAddress,
 	}
-	outputTraintuple.Challenge = &TtChallenge{
-		Key:     algo.ChallengeKey,
+	outputTraintuple.Objective = &TtObjective{
+		Key:     algo.ObjectiveKey,
 		Metrics: &metrics,
 	}
 
@@ -205,7 +205,7 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	// fill info from associated traintuple
 	outputTraintuple := &outputTraintuple{}
 	outputTraintuple.Set(stub, traintuple)
-	testtuple.Challenge = outputTraintuple.Challenge
+	testtuple.Objective = outputTraintuple.Objective
 	testtuple.Algo = outputTraintuple.Algo
 	testtuple.Model = &Model{
 		TraintupleKey: inp.TraintupleKey,
@@ -227,16 +227,16 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 		testtuple.Status = "waiting"
 	}
 
-	// Get test data from challenge
-	challenge := Challenge{}
-	if err = getElementStruct(stub, testtuple.Challenge.Key, &challenge); err != nil {
-		return testtupleKey, fmt.Errorf("could not retrieve challenge with key %s - %s", testtuple.Challenge.Key, err.Error())
+	// Get test data from objective
+	objective := Objective{}
+	if err = getElementStruct(stub, testtuple.Objective.Key, &objective); err != nil {
+		return testtupleKey, fmt.Errorf("could not retrieve objective with key %s - %s", testtuple.Objective.Key, err.Error())
 	}
-	challengeDatasetKey := challenge.TestData.DatasetKey
-	challengeDataKeys := challenge.TestData.DataKeys
+	objectiveDatasetKey := objective.TestData.DatasetKey
+	objectiveDataKeys := objective.TestData.DataKeys
 	// For now we need to sort it but in fine it should be save sorted
 	// TODO
-	sort.Strings(challengeDataKeys)
+	sort.Strings(objectiveDataKeys)
 
 	var datasetKey string
 	var dataKeys []string
@@ -250,12 +250,12 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 		}
 		datasetKey = inp.DatasetKey
 		sort.Strings(dataKeys)
-		testtuple.Certified = challengeDatasetKey == datasetKey && reflect.DeepEqual(challengeDataKeys, dataKeys)
+		testtuple.Certified = objectiveDatasetKey == datasetKey && reflect.DeepEqual(objectiveDataKeys, dataKeys)
 	} else if len(inp.DatasetKey) > 0 || len(inp.DataKeys) > 0 {
 		return testtupleKey, fmt.Errorf("invalid input: datasetKey and dataKey should be provided together")
 	} else {
-		dataKeys = challengeDataKeys
-		datasetKey = challengeDatasetKey
+		dataKeys = objectiveDataKeys
+		datasetKey = objectiveDatasetKey
 		testtuple.Certified = true
 	}
 	// retrieve dataset owner

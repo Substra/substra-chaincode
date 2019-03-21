@@ -2,7 +2,7 @@ package main
 
 // Struct use as return representation of ledger data
 
-type outputChallenge struct {
+type outputObjective struct {
 	Key         string         `json:"key"`
 	Name        string         `json:"name"`
 	Description HashDress      `json:"description"`
@@ -12,7 +12,7 @@ type outputChallenge struct {
 	Permissions string         `json:"permissions"`
 }
 
-func (out *outputChallenge) Fill(key string, in Challenge) {
+func (out *outputObjective) Fill(key string, in Objective) {
 	out.Key = key
 	out.Name = in.Name
 	out.Description.StorageAddress = in.DescriptionStorageAddress
@@ -25,7 +25,7 @@ func (out *outputChallenge) Fill(key string, in Challenge) {
 
 // outputDataset is the return representation of the Dataset type stored in the ledger
 type outputDataset struct {
-	ChallengeKey string     `json:"challengeKey"`
+	ObjectiveKey string     `json:"objectiveKey"`
 	Description  *HashDress `json:"description"`
 	Key          string     `json:"key"`
 	Name         string     `json:"name"`
@@ -36,7 +36,7 @@ type outputDataset struct {
 }
 
 func (out *outputDataset) Fill(key string, in Dataset) {
-	out.ChallengeKey = in.ChallengeKey
+	out.ObjectiveKey = in.ObjectiveKey
 	out.Description = in.Description
 	out.Key = key
 	out.Name = in.Name
@@ -53,7 +53,7 @@ type outputAlgo struct {
 	Content      HashDress  `json:"content"`
 	Description  *HashDress `json:"description"`
 	Owner        string     `json:"owner"`
-	ChallengeKey string     `json:"challengeKey"`
+	ObjectiveKey string     `json:"objectiveKey"`
 	Permissions  string     `json:"permissions"`
 }
 
@@ -64,6 +64,6 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 	out.Content.StorageAddress = in.StorageAddress
 	out.Description = in.Description
 	out.Owner = in.Owner
-	out.ChallengeKey = in.ChallengeKey
+	out.ObjectiveKey = in.ObjectiveKey
 	out.Permissions = in.Permissions
 }

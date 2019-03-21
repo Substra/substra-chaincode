@@ -39,7 +39,7 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Add a testtuple that shoulb be certified since it's the same dataset and
-	// data than the challenge but explicitly pass as arguments and in disorder
+	// data than the objective but explicitly pass as arguments and in disorder
 	inpTesttuple := inputTesttuple{
 		DataKeys:   testDataHash2 + "," + testDataHash1,
 		DatasetKey: datasetOpenerHash}
@@ -106,7 +106,7 @@ func TestTraintuple(t *testing.T) {
 	args := inpTraintuple.createSample()
 	resp := mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
-		t.Errorf("when adding challenge with invalid hash, status %d and message %s", status, resp.Message)
+		t.Errorf("when adding objective with invalid hash, status %d and message %s", status, resp.Message)
 	}
 
 	// Add traintuple with unexisting algo
@@ -144,14 +144,14 @@ func TestTraintuple(t *testing.T) {
 	if a, b := traintuple["log"], ""; a != b {
 		t.Errorf("wrong ledger traintuple log: %s - %s", a, b)
 	}
-	if a, b := traintuple["challenge"].(map[string]interface{})["hash"], challengeDescriptionHash; a != b {
-		t.Errorf("ledger traintuple challenge hash does not corresponds to what was input: %s - %s", a, b)
+	if a, b := traintuple["objective"].(map[string]interface{})["hash"], objectiveDescriptionHash; a != b {
+		t.Errorf("ledger traintuple objective hash does not corresponds to what was input: %s - %s", a, b)
 	}
-	if a, b := traintuple["challenge"].(map[string]interface{})["metrics"].(map[string]interface{})["hash"], challengeMetricsHash; a != b {
-		t.Errorf("ledger traintuple challenge hash does not corresponds to what was input: %s - %s", a, b)
+	if a, b := traintuple["objective"].(map[string]interface{})["metrics"].(map[string]interface{})["hash"], objectiveMetricsHash; a != b {
+		t.Errorf("ledger traintuple objective hash does not corresponds to what was input: %s - %s", a, b)
 	}
-	if a, b := traintuple["challenge"].(map[string]interface{})["metrics"].(map[string]interface{})["storageAddress"], challengeMetricsStorageAddress; a != b {
-		t.Errorf("ledger traintuple challenge hash does not corresponds to what was input: %s - %s", a, b)
+	if a, b := traintuple["objective"].(map[string]interface{})["metrics"].(map[string]interface{})["storageAddress"], objectiveMetricsStorageAddress; a != b {
+		t.Errorf("ledger traintuple objective hash does not corresponds to what was input: %s - %s", a, b)
 	}
 	algo := make(map[string]interface{})
 	algo["hash"] = algoHash
@@ -177,7 +177,7 @@ func TestTraintuple(t *testing.T) {
 	}
 	var sPayload []map[string]interface{}
 	if err := json.Unmarshal(resp.Payload, &sPayload); err != nil {
-		t.Errorf("when unmarshalling queried challenges")
+		t.Errorf("when unmarshalling queried objectives")
 	}
 	payload := sPayload[0]
 	delete(payload, "key")
@@ -308,7 +308,7 @@ func TestTesttuple(t *testing.T) {
 	args := inpTesttuple.createSample()
 	resp := mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
-		t.Errorf("when adding challenge with invalid hash, status %d and message %s", status, resp.Message)
+		t.Errorf("when adding objective with invalid hash, status %d and message %s", status, resp.Message)
 	}
 
 	// Add traintuple with unexisting algo
@@ -346,14 +346,14 @@ func TestTesttuple(t *testing.T) {
 	if a, b := traintuple["log"], ""; a != b {
 		t.Errorf("wrong ledger traintuple log: %s - %s", a, b)
 	}
-	if a, b := traintuple["challenge"].(map[string]interface{})["hash"], challengeDescriptionHash; a != b {
-		t.Errorf("ledger traintuple challenge hash does not corresponds to what was input: %s - %s", a, b)
+	if a, b := traintuple["objective"].(map[string]interface{})["hash"], objectiveDescriptionHash; a != b {
+		t.Errorf("ledger traintuple objective hash does not corresponds to what was input: %s - %s", a, b)
 	}
-	if a, b := traintuple["challenge"].(map[string]interface{})["metrics"].(map[string]interface{})["hash"], challengeMetricsHash; a != b {
-		t.Errorf("ledger traintuple challenge hash does not corresponds to what was input: %s - %s", a, b)
+	if a, b := traintuple["objective"].(map[string]interface{})["metrics"].(map[string]interface{})["hash"], objectiveMetricsHash; a != b {
+		t.Errorf("ledger traintuple objective hash does not corresponds to what was input: %s - %s", a, b)
 	}
-	if a, b := traintuple["challenge"].(map[string]interface{})["metrics"].(map[string]interface{})["storageAddress"], challengeMetricsStorageAddress; a != b {
-		t.Errorf("ledger traintuple challenge hash does not corresponds to what was input: %s - %s", a, b)
+	if a, b := traintuple["objective"].(map[string]interface{})["metrics"].(map[string]interface{})["storageAddress"], objectiveMetricsStorageAddress; a != b {
+		t.Errorf("ledger traintuple objective hash does not corresponds to what was input: %s - %s", a, b)
 	}
 	algo := make(map[string]interface{})
 	algo["hash"] = algoHash
@@ -379,12 +379,12 @@ func TestTesttuple(t *testing.T) {
 	}
 	var sPayload []map[string]interface{}
 	if err := json.Unmarshal(resp.Payload, &sPayload); err != nil {
-		t.Errorf("when unmarshalling queried challenges")
+		t.Errorf("when unmarshalling queried objectives")
 	}
 	payload := sPayload[0]
 	delete(payload, "key")
 	if !reflect.DeepEqual(payload, traintuple) {
-		t.Errorf("when querying challenges, dataset does not correspond to the input challenge")
+		t.Errorf("when querying objectives, dataset does not correspond to the input objective")
 	}
 
 	// Query traintuple with status todo and worker as trainworker and check consistency

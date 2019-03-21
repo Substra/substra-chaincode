@@ -4,8 +4,8 @@ package main
 // Representation of elements stored in the ledger
 // ---------------------------------------------------------------------------------
 
-// Challenge is the representation of one of the element type stored in the ledger
-type Challenge struct {
+// Objective is the representation of one of the element type stored in the ledger
+type Objective struct {
 	Name                      string         `json:"name"`
 	DescriptionStorageAddress string         `json:"descriptionStorageAddress"`
 	Metrics                   *HashDressName `json:"metrics"`
@@ -21,7 +21,7 @@ type Dataset struct {
 	Type                 string     `json:"type"`
 	Description          *HashDress `json:"description"`
 	Owner                string     `json:"owner"`
-	ChallengeKey         string     `json:"challengeKey"`
+	ObjectiveKey         string     `json:"objectiveKey"`
 	Permissions          string     `json:"permissions"`
 }
 
@@ -38,7 +38,7 @@ type Algo struct {
 	StorageAddress string     `json:"storageAddress"`
 	Description    *HashDress `json:"description"`
 	Owner          string     `json:"owner"`
-	ChallengeKey   string     `json:"challengeKey"`
+	ObjectiveKey   string     `json:"objectiveKey"`
 	Permissions    string     `json:"permissions"`
 }
 
@@ -59,7 +59,7 @@ type Traintuple struct {
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Testtuple struct {
-	Challenge   *TtChallenge   `json:"challenge"`
+	Objective   *TtObjective   `json:"objective"`
 	Algo        *HashDressName `json:"algo"`
 	Model       *Model         `json:"model"`
 	Data        *TtData        `json:"data"`
@@ -106,7 +106,7 @@ type DatasetData struct {
 
 // outputTraintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type outputTraintuple struct {
-	Challenge   *TtChallenge   `json:"challenge"`
+	Objective   *TtObjective   `json:"objective"`
 	Algo        *HashDressName `json:"algo"`
 	InModels    []*Model       `json:"inModels"`
 	OutModel    *HashDress     `json:"outModel"`
@@ -131,8 +131,8 @@ type TtData struct {
 	Perf       float32  `json:"perf"`
 }
 
-// TtChallenge stores info about a challenge in a Traintuple
-type TtChallenge struct {
+// TtObjective stores info about a objective in a Traintuple
+type TtObjective struct {
 	Key     string     `json:"hash"`
 	Metrics *HashDress `json:"metrics"`
 }

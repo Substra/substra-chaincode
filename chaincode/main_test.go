@@ -9,10 +9,10 @@ import (
 	peer "github.com/hyperledger/fabric/protos/peer"
 )
 
-const challengeDescriptionHash = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
-const challengeDescriptionStorageAddress = "https://toto/challenge/222/description"
-const challengeMetricsHash = "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
-const challengeMetricsStorageAddress = "https://toto/challenge/222/metrics"
+const objectiveDescriptionHash = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
+const objectiveDescriptionStorageAddress = "https://toto/objective/222/description"
+const objectiveMetricsHash = "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
+const objectiveMetricsStorageAddress = "https://toto/objective/222/metrics"
 const datasetOpenerHash = "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const trainDataHash1 = "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const trainDataHash2 = "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
@@ -94,31 +94,31 @@ func (data *inputData) createSample() [][]byte {
 	return args
 }
 
-func (challenge *inputChallenge) createSample() [][]byte {
-	if challenge.Name == "" {
-		challenge.Name = "MSI classification"
+func (objective *inputObjective) createSample() [][]byte {
+	if objective.Name == "" {
+		objective.Name = "MSI classification"
 	}
-	if challenge.DescriptionHash == "" {
-		challenge.DescriptionHash = challengeDescriptionHash
+	if objective.DescriptionHash == "" {
+		objective.DescriptionHash = objectiveDescriptionHash
 	}
-	if challenge.DescriptionStorageAddress == "" {
-		challenge.DescriptionStorageAddress = "https://toto/challenge/222/description"
+	if objective.DescriptionStorageAddress == "" {
+		objective.DescriptionStorageAddress = "https://toto/objective/222/description"
 	}
-	if challenge.MetricsName == "" {
-		challenge.MetricsName = "accuracy"
+	if objective.MetricsName == "" {
+		objective.MetricsName = "accuracy"
 	}
-	if challenge.MetricsHash == "" {
-		challenge.MetricsHash = challengeMetricsHash
+	if objective.MetricsHash == "" {
+		objective.MetricsHash = objectiveMetricsHash
 	}
-	if challenge.MetricsStorageAddress == "" {
-		challenge.MetricsStorageAddress = challengeMetricsStorageAddress
+	if objective.MetricsStorageAddress == "" {
+		objective.MetricsStorageAddress = objectiveMetricsStorageAddress
 	}
-	if challenge.TestData == "" {
-		challenge.TestData = datasetOpenerHash + ":" + testDataHash1 + ", " + testDataHash2
+	if objective.TestData == "" {
+		objective.TestData = datasetOpenerHash + ":" + testDataHash1 + ", " + testDataHash2
 	}
-	challenge.Permissions = "all"
-	args, _ := inputStructToBytes(challenge)
-	args = append([][]byte{[]byte("registerChallenge")}, args...)
+	objective.Permissions = "all"
+	args, _ := inputStructToBytes(objective)
+	args = append([][]byte{[]byte("registerObjective")}, args...)
 	return args
 }
 
@@ -138,8 +138,8 @@ func (algo *inputAlgo) createSample() [][]byte {
 	if algo.DescriptionStorageAddress == "" {
 		algo.DescriptionStorageAddress = "https://toto/algo/222/description"
 	}
-	if algo.ChallengeKey == "" {
-		algo.ChallengeKey = challengeDescriptionHash
+	if algo.ObjectiveKey == "" {
+		algo.ObjectiveKey = objectiveDescriptionHash
 	}
 	algo.Permissions = "all"
 	args, _ := inputStructToBytes(algo)
@@ -197,14 +197,14 @@ func registerItem(mockStub shim.MockStub, itemType string) (error, peer.Response
 	} else if itemType == "testData" {
 		return nil, resp, inpData
 	}
-	// 3. add challenge
-	inpChallenge := inputChallenge{}
-	args = inpChallenge.createSample()
+	// 3. add objective
+	inpObjective := inputObjective{}
+	args = inpObjective.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	if resp.Status != 200 {
-		return fmt.Errorf("when adding challenge with status %d and message %s", resp.Status, resp.Message), resp, inpChallenge
-	} else if itemType == "challenge" {
-		return nil, resp, inpChallenge
+		return fmt.Errorf("when adding objective with status %d and message %s", resp.Status, resp.Message), resp, inpObjective
+	} else if itemType == "objective" {
+		return nil, resp, inpObjective
 	}
 	// 4. Add train data
 	inpData = inputData{}
@@ -275,14 +275,14 @@ func TestPipeline(t *testing.T) {
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
-	fmt.Println("#### ------------ Add Challenge ------------")
-	inpChallenge := inputChallenge{}
-	printArgsNames("registerChallenge", getFieldNames(&inpChallenge))
-	args = inpChallenge.createSample()
+	fmt.Println("#### ------------ Add Objective ------------")
+	inpObjective := inputObjective{}
+	printArgsNames("registerObjective", getFieldNames(&inpObjective))
+	args = inpObjective.createSample()
 	printArgs(args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when adding challenge with status %d and message %s", status, resp.Message)
+		t.Errorf("when adding objective with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
@@ -317,12 +317,12 @@ func TestPipeline(t *testing.T) {
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
-	fmt.Println("#### ------------ Query Challenges ------------")
-	args = [][]byte{[]byte("queryChallenges")}
+	fmt.Println("#### ------------ Query Objectives ------------")
+	args = [][]byte{[]byte("queryObjectives")}
 	printArgs(args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying challenge with status %d and message %s", status, resp.Message)
+		t.Errorf("when querying objective with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
