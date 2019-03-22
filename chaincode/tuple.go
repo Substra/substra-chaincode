@@ -84,9 +84,9 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	}
 	traintuple.Status = status
 
-	// check if DataKeys are from the same dataset and if they are not test only data
+	// check if DataKeys are from the same dataManager and if they are not test only data
 	dataKeys := strings.Split(strings.Replace(inp.DataKeys, " ", "", -1), ",")
-	_, trainOnly, err := checkSameDataset(stub, inp.DatasetKey, dataKeys)
+	_, trainOnly, err := checkSameDataManager(stub, inp.DataManagerKey, dataKeys)
 	if err != nil {
 		return
 	}
@@ -95,13 +95,13 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 		return
 	}
 
-	// fill traintuple.Data from dataset and data
-	if _, err = getElementBytes(stub, inp.DatasetKey); err != nil {
-		err = fmt.Errorf("could not retrieve dataset with key %s - %s", inp.DatasetKey, err.Error())
+	// fill traintuple.Data from dataManager and data
+	if _, err = getElementBytes(stub, inp.DataManagerKey); err != nil {
+		err = fmt.Errorf("could not retrieve dataManager with key %s - %s", inp.DataManagerKey, err.Error())
 		return
 	}
-	traintuple.Data = &DatasetData{
-		DatasetKey: inp.DatasetKey,
+	traintuple.Data = &Dataset{
+		DataManagerKey: inp.DataManagerKey,
 		DataKeys:   dataKeys,
 	}
 	return
@@ -163,16 +163,16 @@ func (outputTraintuple *outputTraintuple) Set(stub shim.ChaincodeStubInterface, 
 		outputTraintuple.InModels = append(outputTraintuple.InModels, inModel)
 	}
 
-	// fill data from dataset and data
-	dataset := Dataset{}
-	if err = getElementStruct(stub, traintuple.Data.DatasetKey, &dataset); err != nil {
-		err = fmt.Errorf("could not retrieve dataset with key %s - %s", traintuple.Data.DatasetKey, err.Error())
+	// fill data from dataManager and data
+	dataManager := DataManager{}
+	if err = getElementStruct(stub, traintuple.Data.DataManagerKey, &dataManager); err != nil {
+		err = fmt.Errorf("could not retrieve dataManager with key %s - %s", traintuple.Data.DataManagerKey, err.Error())
 		return
 	}
 	outputTraintuple.Data = &TtData{
-		Worker:     dataset.Owner,
+		Worker:     dataManager.Owner,
 		Keys:       traintuple.Data.DataKeys,
-		OpenerHash: traintuple.Data.DatasetKey,
+		OpenerHash: traintuple.Data.DataManagerKey,
 		Perf:       traintuple.Perf,
 	}
 
@@ -232,41 +232,41 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	if err = getElementStruct(stub, testtuple.Objective.Key, &objective); err != nil {
 		return testtupleKey, fmt.Errorf("could not retrieve objective with key %s - %s", testtuple.Objective.Key, err.Error())
 	}
-	objectiveDatasetKey := objective.TestData.DatasetKey
+	objectiveDataManagerKey := objective.TestData.DataManagerKey
 	objectiveDataKeys := objective.TestData.DataKeys
 	// For now we need to sort it but in fine it should be save sorted
 	// TODO
 	sort.Strings(objectiveDataKeys)
 
-	var datasetKey string
+	var dataManagerKey string
 	var dataKeys []string
-	if len(inp.DatasetKey) > 0 && len(inp.DataKeys) > 0 {
+	if len(inp.DataManagerKey) > 0 && len(inp.DataKeys) > 0 {
 		// non-certified testtuple
 		// test data are specified by the user
 		dataKeys = strings.Split(strings.Replace(inp.DataKeys, " ", "", -1), ",")
-		_, _, err = checkSameDataset(stub, inp.DatasetKey, dataKeys)
+		_, _, err = checkSameDataManager(stub, inp.DataManagerKey, dataKeys)
 		if err != nil {
 			return testtupleKey, err
 		}
-		datasetKey = inp.DatasetKey
+		dataManagerKey = inp.DataManagerKey
 		sort.Strings(dataKeys)
-		testtuple.Certified = objectiveDatasetKey == datasetKey && reflect.DeepEqual(objectiveDataKeys, dataKeys)
-	} else if len(inp.DatasetKey) > 0 || len(inp.DataKeys) > 0 {
-		return testtupleKey, fmt.Errorf("invalid input: datasetKey and dataKey should be provided together")
+		testtuple.Certified = objectiveDataManagerKey == dataManagerKey && reflect.DeepEqual(objectiveDataKeys, dataKeys)
+	} else if len(inp.DataManagerKey) > 0 || len(inp.DataKeys) > 0 {
+		return testtupleKey, fmt.Errorf("invalid input: dataManagerKey and dataKey should be provided together")
 	} else {
 		dataKeys = objectiveDataKeys
-		datasetKey = objectiveDatasetKey
+		dataManagerKey = objectiveDataManagerKey
 		testtuple.Certified = true
 	}
-	// retrieve dataset owner
-	dataset := Dataset{}
-	if err = getElementStruct(stub, datasetKey, &dataset); err != nil {
-		return testtupleKey, fmt.Errorf("could not retrieve dataset with key %s - %s", datasetKey, err.Error())
+	// retrieve dataManager owner
+	dataManager := DataManager{}
+	if err = getElementStruct(stub, dataManagerKey, &dataManager); err != nil {
+		return testtupleKey, fmt.Errorf("could not retrieve dataManager with key %s - %s", dataManagerKey, err.Error())
 	}
 	testtuple.Data = &TtData{
-		Worker:     dataset.Owner,
+		Worker:     dataManager.Owner,
 		Keys:       dataKeys,
-		OpenerHash: datasetKey,
+		OpenerHash: dataManagerKey,
 	}
 
 	// create testtuple key and check if it already exists
@@ -312,7 +312,7 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 		return nil, fmt.Errorf("could not put in ledger traintuple with algo %s inModels %s - %s", inp.AlgoKey, inp.InModels, err.Error())
 	}
 	// get worker
-	worker, err := getDatasetOwner(stub, traintuple.Data.DatasetKey)
+	worker, err := getDataManagerOwner(stub, traintuple.Data.DataManagerKey)
 	if err != nil {
 		return nil, err
 	}
@@ -387,7 +387,7 @@ func logStartTrain(stub shim.ChaincodeStubInterface, args []string) ([]byte, err
 		return traintupleBytes, fmt.Errorf("failed to update traintuple status to %s with key %s", status, traintupleKey)
 	}
 	// get worker
-	worker, err := getDatasetOwner(stub, traintuple.Data.DatasetKey)
+	worker, err := getDataManagerOwner(stub, traintuple.Data.DataManagerKey)
 	if err != nil {
 		return nil, err
 	}
@@ -479,7 +479,7 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 		return nil, fmt.Errorf("failed to update traintuple status to trained with key %s", traintupleKey)
 	}
 	// get worker
-	worker, err := getDatasetOwner(stub, traintuple.Data.DatasetKey)
+	worker, err := getDataManagerOwner(stub, traintuple.Data.DataManagerKey)
 	if err != nil {
 		return nil, err
 	}
@@ -577,7 +577,7 @@ func logFailTrain(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 		return nil, fmt.Errorf("failed to update traintuple status to failed with key %s", traintupleKey)
 	}
 	// get worker
-	worker, err := getDatasetOwner(stub, traintuple.Data.DatasetKey)
+	worker, err := getDataManagerOwner(stub, traintuple.Data.DataManagerKey)
 	if err != nil {
 		return nil, err
 	}
@@ -862,7 +862,7 @@ func updateStatusTraintuple(stub shim.ChaincodeStubInterface, traintupleKey stri
 	}
 	oldStatus = traintuple.Status
 	// get worker
-	worker, err := getDatasetOwner(stub, traintuple.Data.DatasetKey)
+	worker, err := getDataManagerOwner(stub, traintuple.Data.DataManagerKey)
 	if err != nil {
 		return traintuple, oldStatus, err
 	}
@@ -938,7 +938,7 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 				return fmt.Errorf("failed to update traintuple %s with inModel %s - %s", traintupleKey, modelTraintupleKey, err.Error())
 			}
 			// get worker
-			worker, err := getDatasetOwner(stub, traintuple.Data.DatasetKey)
+			worker, err := getDataManagerOwner(stub, traintuple.Data.DataManagerKey)
 			if err != nil {
 				return err
 			}

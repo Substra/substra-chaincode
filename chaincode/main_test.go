@@ -13,7 +13,7 @@ const objectiveDescriptionHash = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb519327
 const objectiveDescriptionStorageAddress = "https://toto/objective/222/description"
 const objectiveMetricsHash = "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 const objectiveMetricsStorageAddress = "https://toto/objective/222/metrics"
-const datasetOpenerHash = "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+const dataManagerOpenerHash = "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const trainDataHash1 = "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const trainDataHash2 = "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const testDataHash1 = "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
@@ -54,28 +54,28 @@ func printArgsNames(fnName string, argsNames []string) {
 	fmt.Println(s)
 }
 
-func (dataset *inputDataset) createSample() [][]byte {
-	if dataset.Name == "" {
-		dataset.Name = "liver slide"
+func (dataManager *inputDataManager) createSample() [][]byte {
+	if dataManager.Name == "" {
+		dataManager.Name = "liver slide"
 	}
-	if dataset.OpenerHash == "" {
-		dataset.OpenerHash = datasetOpenerHash
+	if dataManager.OpenerHash == "" {
+		dataManager.OpenerHash = dataManagerOpenerHash
 	}
-	if dataset.OpenerStorageAddress == "" {
-		dataset.OpenerStorageAddress = "https://toto/dataset/42234/opener"
+	if dataManager.OpenerStorageAddress == "" {
+		dataManager.OpenerStorageAddress = "https://toto/dataManager/42234/opener"
 	}
-	if dataset.Type == "" {
-		dataset.Type = "images"
+	if dataManager.Type == "" {
+		dataManager.Type = "images"
 	}
-	if dataset.DescriptionHash == "" {
-		dataset.DescriptionHash = "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee"
+	if dataManager.DescriptionHash == "" {
+		dataManager.DescriptionHash = "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee"
 	}
-	if dataset.DescriptionStorageAddress == "" {
-		dataset.DescriptionStorageAddress = "https://toto/dataset/42234/description"
+	if dataManager.DescriptionStorageAddress == "" {
+		dataManager.DescriptionStorageAddress = "https://toto/dataManager/42234/description"
 	}
-	dataset.Permissions = "all"
-	args, _ := inputStructToBytes(dataset)
-	args = append([][]byte{[]byte("registerDataset")}, args...)
+	dataManager.Permissions = "all"
+	args, _ := inputStructToBytes(dataManager)
+	args = append([][]byte{[]byte("registerDataManager")}, args...)
 	return args
 }
 
@@ -83,8 +83,8 @@ func (data *inputData) createSample() [][]byte {
 	if data.Hashes == "" {
 		data.Hashes = trainDataHash1 + ", " + trainDataHash2
 	}
-	if data.DatasetKeys == "" {
-		data.DatasetKeys = datasetOpenerHash
+	if data.DataManagerKeys == "" {
+		data.DataManagerKeys = dataManagerOpenerHash
 	}
 	if data.TestOnly == "" {
 		data.TestOnly = "false"
@@ -114,7 +114,7 @@ func (objective *inputObjective) createSample() [][]byte {
 		objective.MetricsStorageAddress = objectiveMetricsStorageAddress
 	}
 	if objective.TestData == "" {
-		objective.TestData = datasetOpenerHash + ":" + testDataHash1 + ", " + testDataHash2
+		objective.TestData = dataManagerOpenerHash + ":" + testDataHash1 + ", " + testDataHash2
 	}
 	objective.Permissions = "all"
 	args, _ := inputStructToBytes(objective)
@@ -154,8 +154,8 @@ func (traintuple *inputTraintuple) createSample() [][]byte {
 	if traintuple.InModels == "" {
 		traintuple.InModels = ""
 	}
-	if traintuple.DatasetKey == "" {
-		traintuple.DatasetKey = datasetOpenerHash
+	if traintuple.DataManagerKey == "" {
+		traintuple.DataManagerKey = dataManagerOpenerHash
 	}
 	if traintuple.DataKeys == "" {
 		traintuple.DataKeys = trainDataHash1 + ", " + trainDataHash2
@@ -175,19 +175,19 @@ func (testtuple *inputTesttuple) createSample() [][]byte {
 }
 
 func registerItem(mockStub shim.MockStub, itemType string) (error, peer.Response, interface{}) {
-	// 1. add dataset
-	inpDataset := inputDataset{}
-	args := inpDataset.createSample()
+	// 1. add dataManager
+	inpDataManager := inputDataManager{}
+	args := inpDataManager.createSample()
 	resp := mockStub.MockInvoke("42", args)
 	if resp.Status != 200 {
-		return fmt.Errorf("when adding dataset with status %d and message %s", resp.Status, resp.Message), resp, inpDataset
-	} else if itemType == "dataset" {
-		return nil, resp, inpDataset
+		return fmt.Errorf("when adding dataManager with status %d and message %s", resp.Status, resp.Message), resp, inpDataManager
+	} else if itemType == "dataManager" {
+		return nil, resp, inpDataManager
 	}
 	// 2. add test data
 	inpData := inputData{
 		Hashes:      testDataHash1 + ", " + testDataHash2,
-		DatasetKeys: datasetOpenerHash,
+		DataManagerKeys: dataManagerOpenerHash,
 		TestOnly:    "true",
 	}
 	args = inpData.createSample()
@@ -238,26 +238,26 @@ func TestPipeline(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	fmt.Println("#### ------------ Add Dataset ------------")
-	inpDataset := inputDataset{}
-	printArgsNames("registerDataset", getFieldNames(&inpDataset))
-	args := inpDataset.createSample()
+	fmt.Println("#### ------------ Add DataManager ------------")
+	inpDataManager := inputDataManager{}
+	printArgsNames("registerDataManager", getFieldNames(&inpDataManager))
+	args := inpDataManager.createSample()
 	printArgs(args, "invoke")
 	resp := mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when adding dataset with status %d and message %s", status, resp.Message)
+		t.Errorf("when adding dataManager with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
-	// Get dataset key from Payload
-	datasetKey := string(resp.Payload)
+	// Get dataManager key from Payload
+	dataManagerKey := string(resp.Payload)
 
-	fmt.Println("#### ------------ Query Dataset From key ------------")
-	printArgsNames("queryDataset", []string{"elementKey"})
-	args = [][]byte{[]byte("queryDataset"), []byte(datasetKey)}
-	printArgs(args, "queryDataset")
+	fmt.Println("#### ------------ Query DataManager From key ------------")
+	printArgsNames("queryDataManager", []string{"elementKey"})
+	args = [][]byte{[]byte("queryDataManager"), []byte(dataManagerKey)}
+	printArgs(args, "queryDataManager")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying a dataset with status %d and message %s", status, resp.Message)
+		t.Errorf("when querying a dataManager with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
@@ -308,12 +308,12 @@ func TestPipeline(t *testing.T) {
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
-	fmt.Println("#### ------------ Query Datasets ------------")
-	args = [][]byte{[]byte("queryDatasets")}
+	fmt.Println("#### ------------ Query DataManagers ------------")
+	args = [][]byte{[]byte("queryDataManagers")}
 	printArgs(args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying dataset with status %d and message %s", status, resp.Message)
+		t.Errorf("when querying dataManager with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
@@ -408,7 +408,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Println("#### ------------ Add Non-Certified Testtuple ------------")
 	inpTesttuple := inputTesttuple{
-		DatasetKey: datasetOpenerHash,
+		DataManagerKey: dataManagerOpenerHash,
 		DataKeys:   trainDataHash1 + ", " + trainDataHash2,
 	}
 	printArgsNames("createTesttuple", getFieldNames(&inpTesttuple))
@@ -525,12 +525,12 @@ func TestPipeline(t *testing.T) {
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
-	fmt.Println("#### ------------ Query Dataset Data ------------")
-	args = [][]byte{[]byte("queryDatasetData"), []byte(datasetOpenerHash)}
+	fmt.Println("#### ------------ Query DataManager Data ------------")
+	args = [][]byte{[]byte("queryDataset"), []byte(dataManagerOpenerHash)}
 	printArgs(args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying dataset data with status %d and message %s", status, resp.Message)
+		t.Errorf("when querying dataManager data with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 }

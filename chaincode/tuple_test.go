@@ -14,7 +14,7 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	// Add a some dataset, data and traintuple
+	// Add a some dataManager, data and traintuple
 	err, resp, _ := registerItem(*mockStub, "traintuple")
 	assert.NoError(t, err)
 	// Mark the traintuple as failed
@@ -34,15 +34,15 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	// Add a some dataset, data and traintuple
+	// Add a some dataManager, data and traintuple
 	err, resp, _ := registerItem(*mockStub, "traintuple")
 	assert.NoError(t, err)
 
-	// Add a testtuple that shoulb be certified since it's the same dataset and
+	// Add a testtuple that shoulb be certified since it's the same dataManager and
 	// data than the objective but explicitly pass as arguments and in disorder
 	inpTesttuple := inputTesttuple{
 		DataKeys:   testDataHash2 + "," + testDataHash1,
-		DatasetKey: datasetOpenerHash}
+		DataManagerKey: dataManagerOpenerHash}
 	args := inpTesttuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
@@ -60,7 +60,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	// Add a some dataset, data and traintuple
+	// Add a some dataManager, data and traintuple
 	err, resp, _ := registerItem(*mockStub, "traintuple")
 	assert.NoError(t, err)
 
@@ -75,12 +75,12 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	args = inpTesttuple2.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status)
-	assert.Contains(t, resp.Message, "invalid input: datasetKey and dataKey should be provided together")
+	assert.Contains(t, resp.Message, "invalid input: dataManagerKey and dataKey should be provided together")
 
 	// Add an uncertified testtuple successfully
 	inpTesttuple3 := inputTesttuple{
 		DataKeys:   trainDataHash1 + "," + trainDataHash2,
-		DatasetKey: datasetOpenerHash}
+		DataManagerKey: dataManagerOpenerHash}
 	args = inpTesttuple3.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
@@ -88,7 +88,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	// Fail to add the same testtuple with a different order for dataKeys
 	inpTesttuple4 := inputTesttuple{
 		DataKeys:   trainDataHash2 + "," + trainDataHash1,
-		DatasetKey: datasetOpenerHash}
+		DataManagerKey: dataManagerOpenerHash}
 	args = inpTesttuple4.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status)
@@ -163,7 +163,7 @@ func TestTraintuple(t *testing.T) {
 	data := make(map[string]interface{})
 	data["worker"] = worker
 	data["keys"] = []interface{}{trainDataHash1, trainDataHash2}
-	data["openerHash"] = datasetOpenerHash
+	data["openerHash"] = dataManagerOpenerHash
 	data["perf"] = 0.0
 	if a, b := traintuple["data"], data; !reflect.DeepEqual(a, b) {
 		t.Errorf("wrong ledger traintuple train data: %s - %s", a, b)
@@ -365,7 +365,7 @@ func TestTesttuple(t *testing.T) {
 	data := make(map[string]interface{})
 	data["worker"] = worker
 	data["keys"] = []interface{}{trainDataHash1, trainDataHash2}
-	data["openerHash"] = datasetOpenerHash
+	data["openerHash"] = dataManagerOpenerHash
 	data["perf"] = 0.0
 	if a, b := traintuple["data"], data; !reflect.DeepEqual(a, b) {
 		t.Errorf("wrong ledger traintuple train data: %s - %s", a, b)
@@ -384,7 +384,7 @@ func TestTesttuple(t *testing.T) {
 	payload := sPayload[0]
 	delete(payload, "key")
 	if !reflect.DeepEqual(payload, traintuple) {
-		t.Errorf("when querying objectives, dataset does not correspond to the input objective")
+		t.Errorf("when querying objectives, dataManager does not correspond to the input objective")
 	}
 
 	// Query traintuple with status todo and worker as trainworker and check consistency

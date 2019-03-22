@@ -9,24 +9,24 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-func TestRegisterObjectiveWithDataKeyNotDatasetKey(t *testing.T) {
+func TestRegisterObjectiveWithDataKeyNotDataManagerKey(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	// Add a dataset and some data successfuly
-	inpDataset := inputDataset{}
-	args := inpDataset.createSample()
+	// Add a dataManager and some data successfuly
+	inpDataManager := inputDataManager{}
+	args := inpDataManager.createSample()
 	mockStub.MockInvoke("42", args)
 	inpData := inputData{
 		Hashes:      testDataHash1,
-		DatasetKeys: datasetOpenerHash,
+		DataManagerKeys: dataManagerOpenerHash,
 		TestOnly:    "true",
 	}
 	args = inpData.createSample()
 	mockStub.MockInvoke("42", args)
 	inpData = inputData{
 		Hashes:      testDataHash2,
-		DatasetKeys: datasetOpenerHash,
+		DataManagerKeys: dataManagerOpenerHash,
 		TestOnly:    "true",
 	}
 	args = inpData.createSample()
@@ -37,7 +37,7 @@ func TestRegisterObjectiveWithDataKeyNotDatasetKey(t *testing.T) {
 	inpObjective := inputObjective{TestData: testDataHash1 + ":" + testDataHash2}
 	args = inpObjective.createSample()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 500, resp.Status, "status should indicate an error since the dataset key is a data key")
+	assert.EqualValues(t, 500, resp.Status, "status should indicate an error since the dataManager key is a data key")
 }
 func TestObjective(t *testing.T) {
 	scc := new(SubstraChaincode)
@@ -76,7 +76,7 @@ func TestObjective(t *testing.T) {
 	args = [][]byte{[]byte("queryObjective"), []byte(objectiveKey)}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying a dataset with status %d and message %s", status, resp.Message)
+		t.Errorf("when querying a dataManager with status %d and message %s", status, resp.Message)
 	}
 	objective := outputObjective{}
 	err = bytesToStruct(resp.Payload, &objective)
@@ -84,8 +84,8 @@ func TestObjective(t *testing.T) {
 	expectedObjective := outputObjective{
 		Key:   objectiveKey,
 		Owner: "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
-		TestData: &DatasetData{
-			DatasetKey: datasetOpenerHash,
+		TestData: &Dataset{
+			DataManagerKey: dataManagerOpenerHash,
 			DataKeys:   []string{testDataHash1, testDataHash2},
 		},
 		Name: inpObjective.Name,

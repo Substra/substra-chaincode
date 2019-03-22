@@ -28,8 +28,8 @@ type inputAlgo struct {
 	Permissions               string `validate:"required,oneof=all"`
 }
 
-// inputDataset is the representation of input args to register a Dataset
-type inputDataset struct {
+// inputDataManager is the representation of input args to register a DataManager
+type inputDataManager struct {
 	Name                      string `validate:"required,gte=1,lte=100"`
 	OpenerHash                string `validate:"required,gte=64,lte=64,hexadecimal"`
 	OpenerStorageAddress      string `validate:"required,url"`
@@ -40,30 +40,30 @@ type inputDataset struct {
 	Permissions               string `validate:"required,oneof=all"`
 }
 
-// inputUpdateDataset is the representation of input args to update a dataset with a objective
-type inputUpdateDataset struct {
-	DatasetKey   string `validate:"required,gte=64,lte=64,hexadecimal"`
+// inputUpdateDataManager is the representation of input args to update a dataManager with a objective
+type inputUpdateDataManager struct {
+	DataManagerKey   string `validate:"required,gte=64,lte=64,hexadecimal"`
 	ObjectiveKey string `validate:"required,gte=64,lte=64,hexadecimal"`
 }
 
 // inputData is the representation of input args to register one or more data
 type inputData struct {
 	Hashes      string `validate:"required"`
-	DatasetKeys string
+	DataManagerKeys string
 	TestOnly    string `validate:"required,oneof=true false"`
 }
 
 // inputUpdateData is the representation of input args to update one or more data
 type inputUpdateData struct {
 	Hashes      string `validate:"required"`
-	DatasetKeys string `validate:"required"`
+	DataManagerKeys string `validate:"required"`
 }
 
 // inputTraintuple is the representation of input args to register a Traintuple
 type inputTraintuple struct {
 	AlgoKey    string `validate:"required,gte=64,lte=64,hexadecimal"`
 	InModels   string //`validate:"omitEmpty"
-	DatasetKey string `validate:"required,gte=64,lte=64,hexadecimal"`
+	DataManagerKey string `validate:"required,gte=64,lte=64,hexadecimal"`
 	DataKeys   string `validate:"required"`
 	FLtask     string //`validate:"omitEmpty"`
 	Rank       string //`validate:"omitEmpty"`
@@ -72,6 +72,6 @@ type inputTraintuple struct {
 // inputTestuple is the representation of input args to register a Testtuple
 type inputTesttuple struct {
 	TraintupleKey string `validate:"required,gte=64,lte=64,hexadecimal"`
-	DatasetKey    string `validate:"omitempty,gte=64,lte=64,hexadecimal"`
+	DataManagerKey    string `validate:"omitempty,gte=64,lte=64,hexadecimal"`
 	DataKeys      string
 }

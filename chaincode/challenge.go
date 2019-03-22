@@ -11,17 +11,17 @@ import (
 )
 
 // Set is a method of the receiver Objective. It checks the validity of inputObjective and uses its fields to set the Objective.
-// Returns the objectiveKey and the datasetKey associated to test data
-func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjective) (objectiveKey string, datasetKey string, err error) {
+// Returns the objectiveKey and the dataManagerKey associated to test data
+func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjective) (objectiveKey string, dataManagerKey string, err error) {
 	// checking validity of submitted fields
 	validate := validator.New()
 	if err = validate.Struct(inp); err != nil {
 		err = fmt.Errorf("invalid objective inputs %s", err.Error())
 		return
 	}
-	datasetKey = strings.Split(inp.TestData, ":")[0]
+	dataManagerKey = strings.Split(inp.TestData, ":")[0]
 	dataKeys := strings.Split(strings.Replace(strings.Split(inp.TestData, ":")[1], " ", "", -1), ",")
-	testOnly, _, err := checkSameDataset(stub, datasetKey, dataKeys)
+	testOnly, _, err := checkSameDataManager(stub, dataManagerKey, dataKeys)
 	if err != nil {
 		err = fmt.Errorf("invalid test data %s", err.Error())
 		return
@@ -29,8 +29,8 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 		err = fmt.Errorf("test data are not tagged as testOnly data")
 		return
 	}
-	objective.TestData = &DatasetData{
-		DatasetKey: datasetKey,
+	objective.TestData = &Dataset{
+		DataManagerKey: dataManagerKey,
 		DataKeys:   dataKeys,
 	}
 	objective.Name = inp.Name
@@ -67,7 +67,7 @@ func registerObjective(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	stringToInputStruct(args, &inpc)
 	// check validity of input args and convert it to Objective
 	objective := Objective{}
-	objectiveKey, datasetKey, err := objective.Set(stub, inpc)
+	objectiveKey, dataManagerKey, err := objective.Set(stub, inpc)
 	if err != nil {
 		return nil, err
 	}
@@ -84,8 +84,8 @@ func registerObjective(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	if err := createCompositeKey(stub, "objective~owner~key", []string{"objective", objective.Owner, objectiveKey}); err != nil {
 		return nil, err
 	}
-	// add objective to dataset
-	err = addObjectiveDataset(stub, datasetKey, objectiveKey)
+	// add objective to dataManager
+	err = addObjectiveDataManager(stub, dataManagerKey, objectiveKey)
 	// return []byte(objectiveKey), err
 	return []byte(objectiveKey), err
 }
@@ -132,16 +132,16 @@ func queryObjectives(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 // Utils for objectivess
 // -------------------------------------------------------------------------------------------
 
-// addObjectiveDataset associates a objective to a dataset, more precisely, it adds the objective key to the dataset
-func addObjectiveDataset(stub shim.ChaincodeStubInterface, datasetKey string, objectiveKey string) error {
-	dataset := Dataset{}
-	if err := getElementStruct(stub, datasetKey, &dataset); err != nil {
+// addObjectiveDataManager associates a objective to a dataManager, more precisely, it adds the objective key to the dataManager
+func addObjectiveDataManager(stub shim.ChaincodeStubInterface, dataManagerKey string, objectiveKey string) error {
+	dataManager := DataManager{}
+	if err := getElementStruct(stub, dataManagerKey, &dataManager); err != nil {
 		return nil
 	}
-	if dataset.ObjectiveKey != "" {
-		return fmt.Errorf("dataset is already associated with a objective")
+	if dataManager.ObjectiveKey != "" {
+		return fmt.Errorf("dataManager is already associated with a objective")
 	}
-	dataset.ObjectiveKey = objectiveKey
-	datasetBytes, _ := json.Marshal(dataset)
-	return stub.PutState(datasetKey, datasetBytes)
+	dataManager.ObjectiveKey = objectiveKey
+	dataManagerBytes, _ := json.Marshal(dataManager)
+	return stub.PutState(dataManagerKey, dataManagerBytes)
 }
