@@ -34,7 +34,7 @@ func TestRegisterObjectiveWithDataKeyNotDataManagerKey(t *testing.T) {
 	assert.EqualValues(t, 200, r.Status)
 
 	// Fail to insert the objective
-	inpObjective := inputObjective{TestData: testDataHash1 + ":" + testDataHash2}
+	inpObjective := inputObjective{TestDataset: testDataHash1 + ":" + testDataHash2}
 	args = inpObjective.createSample()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status, "status should indicate an error since the dataManager key is a data key")
@@ -84,7 +84,7 @@ func TestObjective(t *testing.T) {
 	expectedObjective := outputObjective{
 		Key:   objectiveKey,
 		Owner: "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
-		TestData: &Dataset{
+		TestDataset: &Dataset{
 			DataManagerKey: dataManagerOpenerHash,
 			DataKeys:   []string{testDataHash1, testDataHash2},
 		},

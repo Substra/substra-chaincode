@@ -19,8 +19,8 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 		err = fmt.Errorf("invalid objective inputs %s", err.Error())
 		return
 	}
-	dataManagerKey = strings.Split(inp.TestData, ":")[0]
-	dataKeys := strings.Split(strings.Replace(strings.Split(inp.TestData, ":")[1], " ", "", -1), ",")
+	dataManagerKey = strings.Split(inp.TestDataset, ":")[0]
+	dataKeys := strings.Split(strings.Replace(strings.Split(inp.TestDataset, ":")[1], " ", "", -1), ",")
 	testOnly, _, err := checkSameDataManager(stub, dataManagerKey, dataKeys)
 	if err != nil {
 		err = fmt.Errorf("invalid test data %s", err.Error())
@@ -29,7 +29,7 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 		err = fmt.Errorf("test data are not tagged as testOnly data")
 		return
 	}
-	objective.TestData = &Dataset{
+	objective.TestDataset = &Dataset{
 		DataManagerKey: dataManagerKey,
 		DataKeys:   dataKeys,
 	}

@@ -13,7 +13,7 @@ type inputObjective struct {
 	MetricsName               string `validate:"required,gte=1,lte=100"`
 	MetricsHash               string `validate:"required,gte=64,lte=64,hexadecimal"`
 	MetricsStorageAddress     string `validate:"required,url"`
-	TestData                  string `validate:"required"`
+	TestDataset                  string `validate:"required"`
 	Permissions               string `validate:"required,oneof=all"`
 }
 

@@ -113,8 +113,8 @@ func (objective *inputObjective) createSample() [][]byte {
 	if objective.MetricsStorageAddress == "" {
 		objective.MetricsStorageAddress = objectiveMetricsStorageAddress
 	}
-	if objective.TestData == "" {
-		objective.TestData = dataManagerOpenerHash + ":" + testDataHash1 + ", " + testDataHash2
+	if objective.TestDataset == "" {
+		objective.TestDataset = dataManagerOpenerHash + ":" + testDataHash1 + ", " + testDataHash2
 	}
 	objective.Permissions = "all"
 	args, _ := inputStructToBytes(objective)
@@ -194,7 +194,7 @@ func registerItem(mockStub shim.MockStub, itemType string) (error, peer.Response
 	resp = mockStub.MockInvoke("42", args)
 	if resp.Status != 200 {
 		return fmt.Errorf("when adding test data with status %d and message %s", resp.Status, resp.Message), resp, inpData
-	} else if itemType == "testData" {
+	} else if itemType == "testDataset" {
 		return nil, resp, inpData
 	}
 	// 3. add objective
@@ -212,7 +212,7 @@ func registerItem(mockStub shim.MockStub, itemType string) (error, peer.Response
 	resp = mockStub.MockInvoke("42", args)
 	if resp.Status != 200 {
 		return fmt.Errorf("when adding train data with status %d and message %s", resp.Status, resp.Message), resp, inpData
-	} else if itemType == "trainData" {
+	} else if itemType == "trainDataset" {
 		return nil, resp, inpData
 	}
 	// 5. Add algo
