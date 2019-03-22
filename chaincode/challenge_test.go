@@ -9,35 +9,35 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-func TestRegisterObjectiveWithDataKeyNotDataManagerKey(t *testing.T) {
+func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	// Add a dataManager and some data successfuly
+	// Add a dataManager and some dataSample successfuly
 	inpDataManager := inputDataManager{}
 	args := inpDataManager.createSample()
 	mockStub.MockInvoke("42", args)
-	inpData := inputData{
-		Hashes:      testDataHash1,
+	inpDataSample := inputDataSample{
+		Hashes:      testDataSampleHash1,
 		DataManagerKeys: dataManagerOpenerHash,
 		TestOnly:    "true",
 	}
-	args = inpData.createSample()
+	args = inpDataSample.createSample()
 	mockStub.MockInvoke("42", args)
-	inpData = inputData{
-		Hashes:      testDataHash2,
+	inpDataSample = inputDataSample{
+		Hashes:      testDataSampleHash2,
 		DataManagerKeys: dataManagerOpenerHash,
 		TestOnly:    "true",
 	}
-	args = inpData.createSample()
+	args = inpDataSample.createSample()
 	r := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, r.Status)
 
 	// Fail to insert the objective
-	inpObjective := inputObjective{TestDataset: testDataHash1 + ":" + testDataHash2}
+	inpObjective := inputObjective{TestDataset: testDataSampleHash1 + ":" + testDataSampleHash2}
 	args = inpObjective.createSample()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 500, resp.Status, "status should indicate an error since the dataManager key is a data key")
+	assert.EqualValues(t, 500, resp.Status, "status should indicate an error since the dataManager key is a dataSample key")
 }
 func TestObjective(t *testing.T) {
 	scc := new(SubstraChaincode)
@@ -53,12 +53,12 @@ func TestObjective(t *testing.T) {
 		t.Errorf("when adding objective with invalid hash, status %d and message %s", status, resp.Message)
 	}
 
-	// Add objective with unexisting test data
+	// Add objective with unexisting test dataSample
 	inpObjective = inputObjective{}
 	args = inpObjective.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
-		t.Errorf("when adding objective with unexisting test data, status %d and message %s", status, resp.Message)
+		t.Errorf("when adding objective with unexisting test dataSample, status %d and message %s", status, resp.Message)
 	}
 
 	// Properly add objective
@@ -86,7 +86,7 @@ func TestObjective(t *testing.T) {
 		Owner: "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
 		TestDataset: &Dataset{
 			DataManagerKey: dataManagerOpenerHash,
-			DataKeys:   []string{testDataHash1, testDataHash2},
+			DataSampleKeys:   []string{testDataSampleHash1, testDataSampleHash2},
 		},
 		Name: inpObjective.Name,
 		Description: HashDress{

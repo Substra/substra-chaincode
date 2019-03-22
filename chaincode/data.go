@@ -49,24 +49,24 @@ func (dataManager *DataManager) Set(stub shim.ChaincodeStubInterface, inp inputD
 	return dataManagerKey, dataManager.ObjectiveKey, nil
 }
 
-// setData is a method checking the validity of inputData to be registered in the ledger
-// and returning corresponding data hashes, associated dataManagers, testOnly and errors
-func setData(stub shim.ChaincodeStubInterface, inp inputData) (dataHashes []string, data Data, err error) {
-	// validate input data
+// setDataSample is a method checking the validity of inputDataSample to be registered in the ledger
+// and returning corresponding dataSample hashes, associated dataManagers, testOnly and errors
+func setDataSample(stub shim.ChaincodeStubInterface, inp inputDataSample) (dataSampleHashes []string, dataSample DataSample, err error) {
+	// validate input dataSample
 	validate := validator.New()
 	if err = validate.Struct(inp); err != nil {
-		err = fmt.Errorf("invalid data inputs %s", err.Error())
+		err = fmt.Errorf("invalid dataSample inputs %s", err.Error())
 		return
 	}
-	// Get data keys (=hashes)
-	dataHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
-	// check validity of dataHashes
-	if err = checkHashes(dataHashes); err != nil {
+	// Get dataSample keys (=hashes)
+	dataSampleHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
+	// check validity of dataSampleHashes
+	if err = checkHashes(dataSampleHashes); err != nil {
 		return
 	}
-	// check data is not already in the ledger
-	if existingKeys := checkExist(stub, dataHashes); existingKeys != nil {
-		err = fmt.Errorf("data with these hashes already exist - %s", existingKeys)
+	// check dataSample is not already in the ledger
+	if existingKeys := checkExist(stub, dataSampleHashes); existingKeys != nil {
+		err = fmt.Errorf("dataSample with these hashes already exist - %s", existingKeys)
 		return
 	}
 
@@ -86,7 +86,7 @@ func setData(stub shim.ChaincodeStubInterface, inp inputData) (dataHashes []stri
 	// convert input testOnly to boolean
 	testOnly, err := strconv.ParseBool(inp.TestOnly)
 
-	data = Data{
+	dataSample = DataSample{
 		DataManagerKeys: dataManagerKeys,
 		TestOnly:    testOnly,
 		Owner:       owner}
@@ -94,22 +94,22 @@ func setData(stub shim.ChaincodeStubInterface, inp inputData) (dataHashes []stri
 	return
 }
 
-// validateUpdateData is a method checking the validity of elements sent to update
-// one or more dataf
-func validateUpdateData(stub shim.ChaincodeStubInterface, inp inputUpdateData) (dataHashes []string, dataManagerKeys []string, err error) {
+// validateUpdateDataSample is a method checking the validity of elements sent to update
+// one or more dataSamplef
+func validateUpdateDataSample(stub shim.ChaincodeStubInterface, inp inputUpdateDataSample) (dataSampleHashes []string, dataManagerKeys []string, err error) {
 
-	// TODO return full data
+	// TODO return full dataSample
 
-	// validate input to updatedata
+	// validate input to updatedataSample
 	validate := validator.New()
 	if err = validate.Struct(inp); err != nil {
-		err = fmt.Errorf("invalid inputs to update data %s", err.Error())
+		err = fmt.Errorf("invalid inputs to update dataSample %s", err.Error())
 		return
 	}
-	// Get data keys (=hashes)
-	dataHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
-	// check validity of dataHashes
-	if err = checkHashes(dataHashes); err != nil {
+	// Get dataSample keys (=hashes)
+	dataSampleHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
+	// check validity of dataSampleHashes
+	if err = checkHashes(dataSampleHashes); err != nil {
 		return
 	}
 	// check dataManagers exist and are owned by the transaction requester
@@ -145,7 +145,7 @@ func registerDataManager(stub shim.ChaincodeStubInterface, args []string) ([]byt
 	if err != nil {
 		return nil, fmt.Errorf("failed to add dataManager with opener hash %s, error is %s", inp.OpenerHash, err.Error())
 	}
-	// create composite keys (one for each associated objective) to find data associated with a objective
+	// create composite keys (one for each associated objective) to find dataSample associated with a objective
 	indexName := "dataManager~objective~key"
 	err = createCompositeKey(stub, indexName, []string{"dataManager", objectiveKey, dataManagerKey})
 	if err != nil {
@@ -159,92 +159,92 @@ func registerDataManager(stub shim.ChaincodeStubInterface, args []string) ([]byt
 	return []byte(dataManagerKey), nil
 }
 
-// registerData stores new data in the ledger (one or more).
-func registerData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	expectedArgs := getFieldNames(&inputData{})
+// registerDataSample stores new dataSample in the ledger (one or more).
+func registerDataSample(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	expectedArgs := getFieldNames(&inputDataSample{})
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
 		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
 	}
 
-	// convert input strings args to input struct inputData
-	inp := inputData{}
+	// convert input strings args to input struct inputDataSample
+	inp := inputDataSample{}
 	stringToInputStruct(args, &inp)
 	// check validity of input args
-	dataHashes, data, err := setData(stub, inp)
+	dataSampleHashes, dataSample, err := setDataSample(stub, inp)
 	if err != nil {
 		return nil, err
 	}
 
-	// Serialized Data object
-	dataBytes, _ := json.Marshal(data)
+	// Serialized DataSample object
+	dataSampleBytes, _ := json.Marshal(dataSample)
 
-	// store data in the ledger
-	var dataKeys string
+	// store dataSample in the ledger
+	var dataSampleKeys string
 	suffix := ", "
-	for _, dataHash := range dataHashes {
-		dataKeys = dataKeys + "\"" + dataHash + "\"" + suffix
-		if err = stub.PutState(dataHash, dataBytes); err != nil {
-			return nil, fmt.Errorf("failed to add data with hash %s", dataHash)
+	for _, dataSampleHash := range dataSampleHashes {
+		dataSampleKeys = dataSampleKeys + "\"" + dataSampleHash + "\"" + suffix
+		if err = stub.PutState(dataSampleHash, dataSampleBytes); err != nil {
+			return nil, fmt.Errorf("failed to add dataSample with hash %s", dataSampleHash)
 		}
-		for _, dataManagerKey := range data.DataManagerKeys {
-			// create composite keys to find all data associated with a dataManager and both test and train data
-			if err = createCompositeKey(stub, "data~dataManager~key", []string{"data", dataManagerKey, dataHash}); err != nil {
+		for _, dataManagerKey := range dataSample.DataManagerKeys {
+			// create composite keys to find all dataSample associated with a dataManager and both test and train dataSample
+			if err = createCompositeKey(stub, "dataSample~dataManager~key", []string{"dataSample", dataManagerKey, dataSampleHash}); err != nil {
 				return nil, err
 			}
-			// create composite keys to find all data associated with a dataManager and only test or train data
-			if err = createCompositeKey(stub, "data~dataManager~testOnly~key", []string{"data", dataManagerKey, strconv.FormatBool(data.TestOnly), dataHash}); err != nil {
+			// create composite keys to find all dataSample associated with a dataManager and only test or train dataSample
+			if err = createCompositeKey(stub, "dataSample~dataManager~testOnly~key", []string{"dataSample", dataManagerKey, strconv.FormatBool(dataSample.TestOnly), dataSampleHash}); err != nil {
 				return nil, err
 			}
 		}
 	}
-	// return added data keys
-	dataKeys = "{\"keys\": [" + strings.TrimSuffix(dataKeys, suffix) + "]}"
-	return []byte(dataKeys), nil
+	// return added dataSample keys
+	dataSampleKeys = "{\"keys\": [" + strings.TrimSuffix(dataSampleKeys, suffix) + "]}"
+	return []byte(dataSampleKeys), nil
 }
 
-// updateData associates one or more dataManagerKeys to one or more data
-func updateData(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	inp := inputUpdateData{}
+// updateDataSample associates one or more dataManagerKeys to one or more dataSample
+func updateDataSample(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	inp := inputUpdateDataSample{}
 	expectedArgs := getFieldNames(&inp)
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
 		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
 	}
 
-	// convert input strings args to input struct inputUpdateData
+	// convert input strings args to input struct inputUpdateDataSample
 	stringToInputStruct(args, &inp)
 	// check validity of input args
-	dataHashes, dataManagerKeys, err := validateUpdateData(stub, inp)
+	dataSampleHashes, dataManagerKeys, err := validateUpdateDataSample(stub, inp)
 	if err != nil {
 		return nil, err
 	}
-	// store data in the ledger
-	var dataKeys string
+	// store dataSample in the ledger
+	var dataSampleKeys string
 	suffix := ", "
-	for _, dataHash := range dataHashes {
-		dataKeys = dataKeys + "\"" + dataHash + "\"" + suffix
-		data := Data{}
-		if err = getElementStruct(stub, dataHash, &data); err != nil {
-			err = fmt.Errorf("could not retrieve data with key %s - %s", dataHash, err.Error())
+	for _, dataSampleHash := range dataSampleHashes {
+		dataSampleKeys = dataSampleKeys + "\"" + dataSampleHash + "\"" + suffix
+		dataSample := DataSample{}
+		if err = getElementStruct(stub, dataSampleHash, &dataSample); err != nil {
+			err = fmt.Errorf("could not retrieve dataSample with key %s - %s", dataSampleHash, err.Error())
 			return nil, err
 		}
-		if err = checkDataOwner(stub, data); err != nil {
+		if err = checkDataSampleOwner(stub, dataSample); err != nil {
 			return nil, err
 		}
 		for _, dataManagerKey := range dataManagerKeys {
-			if !stringInSlice(dataManagerKey, data.DataManagerKeys) {
-				data.DataManagerKeys = append(data.DataManagerKeys, dataManagerKey)
+			if !stringInSlice(dataManagerKey, dataSample.DataManagerKeys) {
+				dataSample.DataManagerKeys = append(dataSample.DataManagerKeys, dataManagerKey)
 			}
 		}
-		dataBytes, _ := json.Marshal(data)
-		if err = stub.PutState(dataHash, dataBytes); err != nil {
-			err = fmt.Errorf("could not put in ledger data with key %s - %s", dataHash, err.Error())
+		dataSampleBytes, _ := json.Marshal(dataSample)
+		if err = stub.PutState(dataSampleHash, dataSampleBytes); err != nil {
+			err = fmt.Errorf("could not put in ledger dataSample with key %s - %s", dataSampleHash, err.Error())
 			return nil, err
 		}
 
 	}
-	// return updated data keys
-	dataKeys = "{\"keys\": [" + strings.TrimSuffix(dataKeys, suffix) + "]}"
-	return []byte(dataKeys), nil
+	// return updated dataSample keys
+	dataSampleKeys = "{\"keys\": [" + strings.TrimSuffix(dataSampleKeys, suffix) + "]}"
+	return []byte(dataSampleKeys), nil
 }
 
 // updateDataManager associates a objectiveKey to an existing dataManager
@@ -255,7 +255,7 @@ func updateDataManager(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
 	}
 
-	// convert input strings args to input struct inputData
+	// convert input strings args to input struct inputDataSample
 	stringToInputStruct(args, &inp)
 	validate := validator.New()
 	if err := validate.Struct(inp); err != nil {
@@ -307,7 +307,7 @@ func queryDataManagers(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	return json.Marshal(outDataManagers)
 }
 
-// queryDataset returns info about a dataManager and all related data
+// queryDataset returns info about a dataManager and all related dataSample
 func queryDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	expectedArgs := [1]string{"dataManager key"}
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
@@ -321,13 +321,13 @@ func queryDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 		return nil, err
 	}
 	mPayload["key"] = dataManagerKey
-	// get related train data
+	// get related train dataSample
 	trainDatasetKeys, err := getDataset(stub, dataManagerKey, false)
 	if err != nil {
 		return nil, err
 	}
 	mPayload["trainDatasetKeys"] = trainDatasetKeys
-	// get related test data
+	// get related test dataSample
 	testDatasetKeys, err := getDataset(stub, dataManagerKey, true)
 	if err != nil {
 		return nil, err
@@ -342,7 +342,7 @@ func queryDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 }
 
 // -----------------------------------------------------------------
-// -------------------- Data / DataManager utils -----------------------
+// -------------------- DataSample / DataManager utils -----------------------
 // -----------------------------------------------------------------
 
 // check
@@ -370,48 +370,48 @@ func checkDataManagerOwner(stub shim.ChaincodeStubInterface, dataManagerKeys []s
 	return
 }
 
-//  checkDataOwner checks if the transaction requester is the owner of the data
-func checkDataOwner(stub shim.ChaincodeStubInterface, data Data) (err error) {
+//  checkDataSampleOwner checks if the transaction requester is the owner of the dataSample
+func checkDataSampleOwner(stub shim.ChaincodeStubInterface, dataSample DataSample) (err error) {
 	txRequester, err := getTxCreator(stub)
 	if err != nil {
 		return
 	}
-	if txRequester != data.Owner {
-		err = fmt.Errorf("%s is not the data's owner", txRequester)
+	if txRequester != dataSample.Owner {
+		err = fmt.Errorf("%s is not the dataSample's owner", txRequester)
 	}
 	return
 }
 
-// checkSameDataManager checks if data in a slice exist and are from the same dataManager.
-// If yes, returns two boolean indicating if data are testOnly and trainOnly
-func checkSameDataManager(stub shim.ChaincodeStubInterface, dataManagerKey string, dataKeys []string) (testOnly bool, trainOnly bool, err error) {
+// checkSameDataManager checks if dataSample in a slice exist and are from the same dataManager.
+// If yes, returns two boolean indicating if dataSample are testOnly and trainOnly
+func checkSameDataManager(stub shim.ChaincodeStubInterface, dataManagerKey string, dataSampleKeys []string) (testOnly bool, trainOnly bool, err error) {
 	testOnly = true
 	trainOnly = true
-	for _, dataKey := range dataKeys {
-		data := Data{}
-		if err = getElementStruct(stub, dataKey, &data); err != nil {
-			err = fmt.Errorf("could not retrieve data with key %s - %s", dataKey, err.Error())
+	for _, dataSampleKey := range dataSampleKeys {
+		dataSample := DataSample{}
+		if err = getElementStruct(stub, dataSampleKey, &dataSample); err != nil {
+			err = fmt.Errorf("could not retrieve dataSample with key %s - %s", dataSampleKey, err.Error())
 			return
 		}
-		if !stringInSlice(dataManagerKey, data.DataManagerKeys) {
-			err = fmt.Errorf("data do not belong to the same dataManager")
+		if !stringInSlice(dataManagerKey, dataSample.DataManagerKeys) {
+			err = fmt.Errorf("dataSample do not belong to the same dataManager")
 			return
 		}
-		testOnly = testOnly && data.TestOnly
-		trainOnly = trainOnly && !data.TestOnly
+		testOnly = testOnly && dataSample.TestOnly
+		trainOnly = trainOnly && !dataSample.TestOnly
 	}
 	return
 }
 
-// getDataset returns all data keys associated to a dataManager
+// getDataset returns all dataSample keys associated to a dataManager
 func getDataset(stub shim.ChaincodeStubInterface, dataManagerKey string, testOnly bool) ([]string, error) {
-	indexName := "data~dataManager~testOnly~key"
-	attributes := []string{"data", dataManagerKey, strconv.FormatBool(testOnly)}
-	dataKeys, err := getKeysFromComposite(stub, indexName, attributes)
+	indexName := "dataSample~dataManager~testOnly~key"
+	attributes := []string{"dataSample", dataManagerKey, strconv.FormatBool(testOnly)}
+	dataSampleKeys, err := getKeysFromComposite(stub, indexName, attributes)
 	if err != nil {
 		return nil, err
 	}
-	return dataKeys, nil
+	return dataSampleKeys, nil
 }
 
 // getDataManagerOwner returns the owner of a dataManager given its key

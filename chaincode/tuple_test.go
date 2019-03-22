@@ -14,7 +14,7 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	// Add a some dataManager, data and traintuple
+	// Add a some dataManager, dataSample and traintuple
 	err, resp, _ := registerItem(*mockStub, "traintuple")
 	assert.NoError(t, err)
 	// Mark the traintuple as failed
@@ -34,14 +34,14 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	// Add a some dataManager, data and traintuple
+	// Add a some dataManager, dataSample and traintuple
 	err, resp, _ := registerItem(*mockStub, "traintuple")
 	assert.NoError(t, err)
 
 	// Add a testtuple that shoulb be certified since it's the same dataManager and
-	// data than the objective but explicitly pass as arguments and in disorder
+	// dataSample than the objective but explicitly pass as arguments and in disorder
 	inpTesttuple := inputTesttuple{
-		DataKeys:   testDataHash2 + "," + testDataHash1,
+		DataSampleKeys: testDataSampleHash2 + "," + testDataSampleHash1,
 		DataManagerKey: dataManagerOpenerHash}
 	args := inpTesttuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
@@ -60,7 +60,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	// Add a some dataManager, data and traintuple
+	// Add a some dataManager, dataSample and traintuple
 	err, resp, _ := registerItem(*mockStub, "traintuple")
 	assert.NoError(t, err)
 
@@ -71,23 +71,23 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status)
 
 	// Fail to add an incomplete uncertified testtuple
-	inpTesttuple2 := inputTesttuple{DataKeys: trainDataHash1}
+	inpTesttuple2 := inputTesttuple{DataSampleKeys: trainDataSampleHash1}
 	args = inpTesttuple2.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status)
-	assert.Contains(t, resp.Message, "invalid input: dataManagerKey and dataKey should be provided together")
+	assert.Contains(t, resp.Message, "invalid input: dataManagerKey and dataSampleKey should be provided together")
 
 	// Add an uncertified testtuple successfully
 	inpTesttuple3 := inputTesttuple{
-		DataKeys:   trainDataHash1 + "," + trainDataHash2,
+		DataSampleKeys: trainDataSampleHash1 + "," + trainDataSampleHash2,
 		DataManagerKey: dataManagerOpenerHash}
 	args = inpTesttuple3.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 
-	// Fail to add the same testtuple with a different order for dataKeys
+	// Fail to add the same testtuple with a different order for dataSampleKeys
 	inpTesttuple4 := inputTesttuple{
-		DataKeys:   trainDataHash2 + "," + trainDataHash1,
+		DataSampleKeys: trainDataSampleHash2 + "," + trainDataSampleHash1,
 		DataManagerKey: dataManagerOpenerHash}
 	args = inpTesttuple4.createSample()
 	resp = mockStub.MockInvoke("42", args)
@@ -160,13 +160,13 @@ func TestTraintuple(t *testing.T) {
 	if a, b := traintuple["algo"], algo; !reflect.DeepEqual(a, b) {
 		t.Errorf("wrong ledger traintuple algo: %s - %s", a, b)
 	}
-	data := make(map[string]interface{})
-	data["worker"] = worker
-	data["keys"] = []interface{}{trainDataHash1, trainDataHash2}
-	data["openerHash"] = dataManagerOpenerHash
-	data["perf"] = 0.0
-	if a, b := traintuple["data"], data; !reflect.DeepEqual(a, b) {
-		t.Errorf("wrong ledger traintuple train data: %s - %s", a, b)
+	dataset := make(map[string]interface{})
+	dataset["worker"] = worker
+	dataset["keys"] = []interface{}{trainDataSampleHash1, trainDataSampleHash2}
+	dataset["openerHash"] = dataManagerOpenerHash
+	dataset["perf"] = 0.0
+	if a, b := traintuple["dataset"], dataset; !reflect.DeepEqual(a, b) {
+		t.Errorf("wrong ledger traintuple train dataset: %s - %s", a, b)
 	}
 
 	// Query all traintuples and check consistency
@@ -362,13 +362,13 @@ func TestTesttuple(t *testing.T) {
 	if a, b := traintuple["algo"], algo; !reflect.DeepEqual(a, b) {
 		t.Errorf("wrong ledger traintuple algo: %s - %s", a, b)
 	}
-	data := make(map[string]interface{})
-	data["worker"] = worker
-	data["keys"] = []interface{}{trainDataHash1, trainDataHash2}
-	data["openerHash"] = dataManagerOpenerHash
-	data["perf"] = 0.0
-	if a, b := traintuple["data"], data; !reflect.DeepEqual(a, b) {
-		t.Errorf("wrong ledger traintuple train data: %s - %s", a, b)
+	dataset := make(map[string]interface{})
+	dataset["worker"] = worker
+	dataset["keys"] = []interface{}{trainDataSampleHash1, trainDataSampleHash2}
+	dataset["openerHash"] = dataManagerOpenerHash
+	dataset["perf"] = 0.0
+	if a, b := traintuple["dataset"], dataset; !reflect.DeepEqual(a, b) {
+		t.Errorf("wrong ledger traintuple train dataset: %s - %s", a, b)
 	}
 
 	// Query all traintuples and check consistency

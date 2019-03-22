@@ -81,13 +81,13 @@ func TestDataManager(t *testing.T) {
 	args = [][]byte{[]byte("queryDataset"), []byte(inpDataManager.OpenerHash)}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying dataManager data, status %d and message %s", status, resp.Message)
+		t.Errorf("when querying Dataset, status %d and message %s", status, resp.Message)
 	}
 	if !strings.Contains(string(resp.Payload), "\"trainDatasetKeys\":[]") {
-		t.Errorf("when querying dataManager data, trainDatasetKeys should be []")
+		t.Errorf("when querying Dataset, trainDatasetKeys should be []")
 	}
 	if !strings.Contains(string(resp.Payload), "\"testDatasetKeys\":[]") {
-		t.Errorf("when querying dataManager data, testDatasetKeys should be []")
+		t.Errorf("when querying Dataset, testDatasetKeys should be []")
 	}
 }
 
@@ -100,13 +100,13 @@ func TestGetTestDatasetKeys(t *testing.T) {
 	args := inpDataManager.createSample()
 	mockStub.MockInvoke("42", args)
 
-	// Add both train and test data
-	inpData := inputData{Hashes: testDataHash1}
-	args = inpData.createSample()
+	// Add both train and test dataSample
+	inpDataSample := inputDataSample{Hashes: testDataSampleHash1}
+	args = inpDataSample.createSample()
 	mockStub.MockInvoke("42", args)
-	inpData.Hashes = testDataHash2
-	inpData.TestOnly = "true"
-	args = inpData.createSample()
+	inpDataSample.Hashes = testDataSampleHash2
+	inpDataSample.TestOnly = "true"
+	args = inpDataSample.createSample()
 	mockStub.MockInvoke("42", args)
 
 	// Querry the DataManager
@@ -118,75 +118,75 @@ func TestGetTestDatasetKeys(t *testing.T) {
 	assert.NoError(t, err)
 
 	v, ok := payload["testDatasetKeys"]
-	assert.True(t, ok, "payload should contains the test data keys")
-	assert.Contains(t, v, testDataHash2, "testDatasetKeys should contain the test dataHash")
-	assert.NotContains(t, v, testDataHash1, "testDatasetKeys should not contains the train dataHash")
+	assert.True(t, ok, "payload should contains the test dataSample keys")
+	assert.Contains(t, v, testDataSampleHash2, "testDatasetKeys should contain the test dataSampleHash")
+	assert.NotContains(t, v, testDataSampleHash1, "testDatasetKeys should not contains the train dataSampleHash")
 }
 func TestDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	// Add data with invalid field
-	inpData := inputData{
+	// Add dataSample with invalid field
+	inpDataSample := inputDataSample{
 		Hashes: "aaa",
 	}
-	args := inpData.createSample()
+	args := inpDataSample.createSample()
 	resp := mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
-		t.Errorf("when adding data with invalid hash, status %d and message %s", status, resp.Message)
+		t.Errorf("when adding dataSample with invalid hash, status %d and message %s", status, resp.Message)
 	}
 
-	// Add data with unexiting dataManager
-	inpData = inputData{}
-	args = inpData.createSample()
+	// Add dataSample with unexiting dataManager
+	inpDataSample = inputDataSample{}
+	args = inpDataSample.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
-		t.Errorf("when adding data with unexisting dataManager, status %d and message %s", status, resp.Message)
+		t.Errorf("when adding dataSample with unexisting dataManager, status %d and message %s", status, resp.Message)
 	}
-	// TODO Would be nice to check failure when adding data to a dataManager owned by a different people
+	// TODO Would be nice to check failure when adding dataSample to a dataManager owned by a different people
 
-	// Properly add data
+	// Properly add dataSample
 	// 1. add associated dataManager
 	inpDataManager := inputDataManager{}
 	args = inpDataManager.createSample()
 	mockStub.MockInvoke("42", args)
-	// 2. add data
-	inpData = inputData{}
-	args = inpData.createSample()
+	// 2. add dataSample
+	inpDataSample = inputDataSample{}
+	args = inpDataSample.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when adding data, status %d and message %s", status, resp.Message)
+		t.Errorf("when adding dataSample, status %d and message %s", status, resp.Message)
 	}
-	// check payload correspond to input data keys
-	dataKeys := string(resp.Payload)
-	if expectedResp := "{\"keys\": [\"" + strings.Replace(inpData.Hashes, ", ", "\", \"", -1) + "\"]}"; dataKeys != expectedResp {
-		t.Errorf("when adding data: data keys does not correspond to data hashes: %s - %s", dataKeys, expectedResp)
+	// check payload correspond to input dataSample keys
+	dataSampleKeys := string(resp.Payload)
+	if expectedResp := "{\"keys\": [\"" + strings.Replace(inpDataSample.Hashes, ", ", "\", \"", -1) + "\"]}"; dataSampleKeys != expectedResp {
+		t.Errorf("when adding dataSample: dataSample keys does not correspond to dataSample hashes: %s - %s", dataSampleKeys, expectedResp)
 	}
 
-	// Add data which already exist
+	// Add dataSample which already exist
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
-		t.Errorf("when adding data which already exist, status %d and message %s", status, resp.Message)
+		t.Errorf("when adding dataSample which already exist, status %d and message %s", status, resp.Message)
 	}
 
 	/**
-	// Query data and check it corresponds to what was input
+	// Query dataSample and check it corresponds to what was input
 	args = [][]byte{[]byte("queryDataset"), []byte(inpDataManager.OpenerHash)}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying dataManager data with status %d and message %s", status, resp.Message)
+		t.Errorf("when querying dataManager dataSample with status %d and message %s", status, resp.Message)
 	}
 	payload := make(map[string]interface{})
 	json.Unmarshal(resp.Payload, &payload)
 	if _, ok := payload["key"]; !ok {
-		t.Errorf("when querying dataManager data, payload should contain the dataManager key")
+		t.Errorf("when querying dataManager dataSample, payload should contain the dataManager key")
 	}
 	v, ok := payload["trainDatasetKeys"]
 	if !ok {
-		t.Errorf("when querying dataManager data, payload should contain the train data keys")
+		t.Errorf("when querying dataManager dataSample, payload should contain the train dataSample keys")
 	}
-	if reflect.DeepEqual(v, strings.Split(strings.Replace(inpData.Hashes, " ", "", -1), ",")) {
-		t.Errorf("when querying dataManager data, unexpected train keys")
+	if reflect.DeepEqual(v, strings.Split(strings.Replace(inpDataSample.Hashes, " ", "", -1), ",")) {
+		t.Errorf("when querying dataManager dataSample, unexpected train keys")
 	}
 	**/
 }

@@ -11,7 +11,7 @@ import (
 )
 
 // Set is a method of the receiver Objective. It checks the validity of inputObjective and uses its fields to set the Objective.
-// Returns the objectiveKey and the dataManagerKey associated to test data
+// Returns the objectiveKey and the dataManagerKey associated to test dataSample
 func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjective) (objectiveKey string, dataManagerKey string, err error) {
 	// checking validity of submitted fields
 	validate := validator.New()
@@ -20,18 +20,18 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 		return
 	}
 	dataManagerKey = strings.Split(inp.TestDataset, ":")[0]
-	dataKeys := strings.Split(strings.Replace(strings.Split(inp.TestDataset, ":")[1], " ", "", -1), ",")
-	testOnly, _, err := checkSameDataManager(stub, dataManagerKey, dataKeys)
+	dataSampleKeys := strings.Split(strings.Replace(strings.Split(inp.TestDataset, ":")[1], " ", "", -1), ",")
+	testOnly, _, err := checkSameDataManager(stub, dataManagerKey, dataSampleKeys)
 	if err != nil {
-		err = fmt.Errorf("invalid test data %s", err.Error())
+		err = fmt.Errorf("invalid test dataSample %s", err.Error())
 		return
 	} else if !testOnly {
-		err = fmt.Errorf("test data are not tagged as testOnly data")
+		err = fmt.Errorf("test dataSample are not tagged as testOnly dataSample")
 		return
 	}
 	objective.TestDataset = &Dataset{
 		DataManagerKey: dataManagerKey,
-		DataKeys:   dataKeys,
+		DataSampleKeys:   dataSampleKeys,
 	}
 	objective.Name = inp.Name
 	objective.DescriptionStorageAddress = inp.DescriptionStorageAddress

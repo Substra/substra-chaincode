@@ -46,15 +46,15 @@ type inputUpdateDataManager struct {
 	ObjectiveKey string `validate:"required,gte=64,lte=64,hexadecimal"`
 }
 
-// inputData is the representation of input args to register one or more data
-type inputData struct {
+// inputDataSample is the representation of input args to register one or more dataSample
+type inputDataSample struct {
 	Hashes      string `validate:"required"`
 	DataManagerKeys string
 	TestOnly    string `validate:"required,oneof=true false"`
 }
 
-// inputUpdateData is the representation of input args to update one or more data
-type inputUpdateData struct {
+// inputUpdateDataSample is the representation of input args to update one or more dataSample
+type inputUpdateDataSample struct {
 	Hashes      string `validate:"required"`
 	DataManagerKeys string `validate:"required"`
 }
@@ -64,7 +64,7 @@ type inputTraintuple struct {
 	AlgoKey    string `validate:"required,gte=64,lte=64,hexadecimal"`
 	InModels   string //`validate:"omitEmpty"
 	DataManagerKey string `validate:"required,gte=64,lte=64,hexadecimal"`
-	DataKeys   string `validate:"required"`
+	DataSampleKeys   string `validate:"required"`
 	FLtask     string //`validate:"omitEmpty"`
 	Rank       string //`validate:"omitEmpty"`
 }
@@ -73,5 +73,5 @@ type inputTraintuple struct {
 type inputTesttuple struct {
 	TraintupleKey string `validate:"required,gte=64,lte=64,hexadecimal"`
 	DataManagerKey    string `validate:"omitempty,gte=64,lte=64,hexadecimal"`
-	DataKeys      string
+	DataSampleKeys      string
 }
