@@ -8,7 +8,7 @@ type outputObjective struct {
 	Description HashDress      `json:"description"`
 	Metrics     *HashDressName `json:"metrics"`
 	Owner       string         `json:"owner"`
-	TestData    *DatasetData   `json:"testData"`
+	TestData    *Dataset   `json:"testData"`
 	Permissions string         `json:"permissions"`
 }
 
@@ -23,8 +23,8 @@ func (out *outputObjective) Fill(key string, in Objective) {
 	out.Permissions = in.Permissions
 }
 
-// outputDataset is the return representation of the Dataset type stored in the ledger
-type outputDataset struct {
+// outputDataManager is the return representation of the DataManager type stored in the ledger
+type outputDataManager struct {
 	ObjectiveKey string     `json:"objectiveKey"`
 	Description  *HashDress `json:"description"`
 	Key          string     `json:"key"`
@@ -35,7 +35,7 @@ type outputDataset struct {
 	Type         string     `json:"type"`
 }
 
-func (out *outputDataset) Fill(key string, in Dataset) {
+func (out *outputDataManager) Fill(key string, in DataManager) {
 	out.ObjectiveKey = in.ObjectiveKey
 	out.Description = in.Description
 	out.Key = key

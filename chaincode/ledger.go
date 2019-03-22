@@ -10,12 +10,12 @@ type Objective struct {
 	DescriptionStorageAddress string         `json:"descriptionStorageAddress"`
 	Metrics                   *HashDressName `json:"metrics"`
 	Owner                     string         `json:"owner"`
-	TestData                  *DatasetData   `json:"testData"`
+	TestData                  *Dataset   `json:"testData"`
 	Permissions               string         `json:"permissions"`
 }
 
-// Dataset is the representation of one of the elements type stored in the ledger
-type Dataset struct {
+// DataManager is the representation of one of the elements type stored in the ledger
+type DataManager struct {
 	Name                 string     `json:"name"`
 	OpenerStorageAddress string     `json:"openerStorageAddress"`
 	Type                 string     `json:"type"`
@@ -27,7 +27,7 @@ type Dataset struct {
 
 // Data is the representation of one of the element type stored in the ledger
 type Data struct {
-	DatasetKeys []string `json:"datasetKeys"`
+	DataManagerKeys []string `json:"dataManagerKeys"`
 	Owner       string   `json:"owner"`
 	TestOnly    bool     `json:"testOnly"`
 }
@@ -47,7 +47,7 @@ type Traintuple struct {
 	AlgoKey     string       `json:"algoKey"`
 	InModelKeys []string     `json:"inModels"`
 	OutModel    *HashDress   `json:"outModel"`
-	Data        *DatasetData `json:"data"`
+	Data        *Dataset `json:"data"`
 	Perf        float32      `json:"perf"`
 	FLtask      string       `json:"fltask"`
 	Rank        int          `json:"rank"`
@@ -94,9 +94,9 @@ type Model struct {
 	StorageAddress string `json:"storageAddress"`
 }
 
-// DatasetData stores info about a datasetKey and a list of associated data
-type DatasetData struct {
-	DatasetKey string   `json:"datasetKey"`
+// Dataset stores info about a dataManagerKey and a list of associated data
+type Dataset struct {
+	DataManagerKey string   `json:"dataManagerKey"`
 	DataKeys   []string `json:"dataKeys"`
 }
 

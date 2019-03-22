@@ -34,10 +34,10 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	switch fn {
 	case "registerObjective":
 		result, err = registerObjective(stub, args)
-	case "registerDataset":
-		result, err = registerDataset(stub, args)
-	case "updateDataset":
-		result, err = updateDataset(stub, args)
+	case "registerDataManager":
+		result, err = registerDataManager(stub, args)
+	case "updateDataManager":
+		result, err = updateDataManager(stub, args)
 	case "registerData":
 		result, err = registerData(stub, args)
 	case "updateData":
@@ -76,18 +76,18 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = queryTesttuple(stub, args)
 	case "queryTesttuples":
 		result, err = queryTesttuples(stub, args)
-	case "queryDataset":
-		result, err = queryDataset(stub, args)
-	case "queryDatasets":
-		result, err = queryDatasets(stub, args)
+	case "queryDataManager":
+		result, err = queryDataManager(stub, args)
+	case "queryDataManagers":
+		result, err = queryDataManagers(stub, args)
 	case "queryFilter":
 		result, err = queryFilter(stub, args)
 	case "queryModelDetails":
 		result, err = queryModelDetails(stub, args)
 	case "queryModels":
 		result, err = queryModels(stub, args)
-	case "queryDatasetData":
-		result, err = queryDatasetData(stub, args)
+	case "queryDataset":
+		result, err = queryDataset(stub, args)
 	default:
 		err = fmt.Errorf("function not implemented")
 	}

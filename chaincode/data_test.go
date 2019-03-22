@@ -10,84 +10,84 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-func TestDataset(t *testing.T) {
+func TestDataManager(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	// Add dataset with invalid field
-	inpDataset := inputDataset{
+	// Add dataManager with invalid field
+	inpDataManager := inputDataManager{
 		OpenerHash: "aaa",
 	}
-	args := inpDataset.createSample()
+	args := inpDataManager.createSample()
 	resp := mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
-		t.Errorf("when adding dataset with invalid opener hash, status %d and message %s", status, resp.Message)
+		t.Errorf("when adding dataManager with invalid opener hash, status %d and message %s", status, resp.Message)
 	}
-	// Properly add dataset
-	err, resp, tt := registerItem(*mockStub, "dataset")
+	// Properly add dataManager
+	err, resp, tt := registerItem(*mockStub, "dataManager")
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-	inpDataset = tt.(inputDataset)
-	datasetKey := string(resp.Payload)
-	// check returned dataset key corresponds to opener hash
-	if datasetKey != datasetOpenerHash {
-		t.Errorf("when adding dataset: dataset key does not correspond to dataset opener hash: %s - %s", datasetKey, datasetOpenerHash)
+	inpDataManager = tt.(inputDataManager)
+	dataManagerKey := string(resp.Payload)
+	// check returned dataManager key corresponds to opener hash
+	if dataManagerKey != dataManagerOpenerHash {
+		t.Errorf("when adding dataManager: dataManager key does not correspond to dataManager opener hash: %s - %s", dataManagerKey, dataManagerOpenerHash)
 	}
-	// Add dataset which already exist
+	// Add dataManager which already exist
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
-		t.Errorf("when adding dataset which already exists, status %d and message %s", status, resp.Message)
+		t.Errorf("when adding dataManager which already exists, status %d and message %s", status, resp.Message)
 	}
-	// Query dataset and check fields match expectations
-	args = [][]byte{[]byte("queryDataset"), []byte(datasetKey)}
+	// Query dataManager and check fields match expectations
+	args = [][]byte{[]byte("queryDataManager"), []byte(dataManagerKey)}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying the dataset, status %d and message %s", status, resp.Message)
+		t.Errorf("when querying the dataManager, status %d and message %s", status, resp.Message)
 	}
-	dataset := outputDataset{}
-	err = bytesToStruct(resp.Payload, &dataset)
-	assert.NoError(t, err, "when unmarshalling queried dataset")
-	expectedDataset := outputDataset{
-		ObjectiveKey: inpDataset.ObjectiveKey,
-		Key:          datasetKey,
+	dataManager := outputDataManager{}
+	err = bytesToStruct(resp.Payload, &dataManager)
+	assert.NoError(t, err, "when unmarshalling queried dataManager")
+	expectedDataManager := outputDataManager{
+		ObjectiveKey: inpDataManager.ObjectiveKey,
+		Key:          dataManagerKey,
 		Owner:        "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
-		Name:         inpDataset.Name,
+		Name:         inpDataManager.Name,
 		Description: &HashDress{
-			StorageAddress: inpDataset.DescriptionStorageAddress,
-			Hash:           inpDataset.DescriptionHash,
+			StorageAddress: inpDataManager.DescriptionStorageAddress,
+			Hash:           inpDataManager.DescriptionHash,
 		},
-		Permissions: inpDataset.Permissions,
+		Permissions: inpDataManager.Permissions,
 		Opener: HashDress{
-			Hash:           datasetKey,
-			StorageAddress: inpDataset.OpenerStorageAddress,
+			Hash:           dataManagerKey,
+			StorageAddress: inpDataManager.OpenerStorageAddress,
 		},
-		Type: inpDataset.Type,
+		Type: inpDataManager.Type,
 	}
-	assert.Exactly(t, expectedDataset, dataset)
+	assert.Exactly(t, expectedDataManager, dataManager)
 
-	// Query all datasets and check fields match expectations
-	args = [][]byte{[]byte("queryDatasets")}
+	// Query all dataManagers and check fields match expectations
+	args = [][]byte{[]byte("queryDataManagers")}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying datasets - status %d and message %s", status, resp.Message)
+		t.Errorf("when querying dataManagers - status %d and message %s", status, resp.Message)
 	}
-	var datasets []outputDataset
-	err = json.Unmarshal(resp.Payload, &datasets)
-	assert.NoError(t, err, "while unmarshalling datasets")
-	assert.Len(t, datasets, 1)
-	assert.Exactly(t, expectedDataset, datasets[0], "return objective different from registered one")
+	var dataManagers []outputDataManager
+	err = json.Unmarshal(resp.Payload, &dataManagers)
+	assert.NoError(t, err, "while unmarshalling dataManagers")
+	assert.Len(t, dataManagers, 1)
+	assert.Exactly(t, expectedDataManager, dataManagers[0], "return objective different from registered one")
 
-	args = [][]byte{[]byte("queryDatasetData"), []byte(inpDataset.OpenerHash)}
+	args = [][]byte{[]byte("queryDataset"), []byte(inpDataManager.OpenerHash)}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying dataset data, status %d and message %s", status, resp.Message)
+		t.Errorf("when querying dataManager data, status %d and message %s", status, resp.Message)
 	}
 	if !strings.Contains(string(resp.Payload), "\"trainDataKeys\":[]") {
-		t.Errorf("when querying dataset data, trainDataKeys should be []")
+		t.Errorf("when querying dataManager data, trainDataKeys should be []")
 	}
 	if !strings.Contains(string(resp.Payload), "\"testDataKeys\":[]") {
-		t.Errorf("when querying dataset data, testDataKeys should be []")
+		t.Errorf("when querying dataManager data, testDataKeys should be []")
 	}
 }
 
@@ -95,9 +95,9 @@ func TestGetTestDataKeys(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	// Input Dataset
-	inpDataset := inputDataset{}
-	args := inpDataset.createSample()
+	// Input DataManager
+	inpDataManager := inputDataManager{}
+	args := inpDataManager.createSample()
 	mockStub.MockInvoke("42", args)
 
 	// Add both train and test data
@@ -109,10 +109,10 @@ func TestGetTestDataKeys(t *testing.T) {
 	args = inpData.createSample()
 	mockStub.MockInvoke("42", args)
 
-	// Querry the Dataset
-	args = [][]byte{[]byte("queryDatasetData"), []byte(inpDataset.OpenerHash)}
+	// Querry the DataManager
+	args = [][]byte{[]byte("queryDataset"), []byte(inpDataManager.OpenerHash)}
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status, "querrying the dataset should return an ok status")
+	assert.EqualValues(t, 200, resp.Status, "querrying the dataManager should return an ok status")
 	payload := map[string]interface{}{}
 	err := json.Unmarshal(resp.Payload, &payload)
 	assert.NoError(t, err)
@@ -136,19 +136,19 @@ func TestData(t *testing.T) {
 		t.Errorf("when adding data with invalid hash, status %d and message %s", status, resp.Message)
 	}
 
-	// Add data with unexiting dataset
+	// Add data with unexiting dataManager
 	inpData = inputData{}
 	args = inpData.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
-		t.Errorf("when adding data with unexisting dataset, status %d and message %s", status, resp.Message)
+		t.Errorf("when adding data with unexisting dataManager, status %d and message %s", status, resp.Message)
 	}
-	// TODO Would be nice to check failure when adding data to a dataset owned by a different people
+	// TODO Would be nice to check failure when adding data to a dataManager owned by a different people
 
 	// Properly add data
-	// 1. add associated dataset
-	inpDataset := inputDataset{}
-	args = inpDataset.createSample()
+	// 1. add associated dataManager
+	inpDataManager := inputDataManager{}
+	args = inpDataManager.createSample()
 	mockStub.MockInvoke("42", args)
 	// 2. add data
 	inpData = inputData{}
@@ -171,22 +171,22 @@ func TestData(t *testing.T) {
 
 	/**
 	// Query data and check it corresponds to what was input
-	args = [][]byte{[]byte("queryDatasetData"), []byte(inpDataset.OpenerHash)}
+	args = [][]byte{[]byte("queryDataset"), []byte(inpDataManager.OpenerHash)}
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying dataset data with status %d and message %s", status, resp.Message)
+		t.Errorf("when querying dataManager data with status %d and message %s", status, resp.Message)
 	}
 	payload := make(map[string]interface{})
 	json.Unmarshal(resp.Payload, &payload)
 	if _, ok := payload["key"]; !ok {
-		t.Errorf("when querying dataset data, payload should contain the dataset key")
+		t.Errorf("when querying dataManager data, payload should contain the dataManager key")
 	}
 	v, ok := payload["trainDataKeys"]
 	if !ok {
-		t.Errorf("when querying dataset data, payload should contain the train data keys")
+		t.Errorf("when querying dataManager data, payload should contain the train data keys")
 	}
 	if reflect.DeepEqual(v, strings.Split(strings.Replace(inpData.Hashes, " ", "", -1), ",")) {
-		t.Errorf("when querying dataset data, unexpected train keys")
+		t.Errorf("when querying dataManager data, unexpected train keys")
 	}
 	**/
 }
