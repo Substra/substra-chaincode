@@ -83,15 +83,15 @@ func TestDataManager(t *testing.T) {
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying dataManager data, status %d and message %s", status, resp.Message)
 	}
-	if !strings.Contains(string(resp.Payload), "\"trainDataKeys\":[]") {
-		t.Errorf("when querying dataManager data, trainDataKeys should be []")
+	if !strings.Contains(string(resp.Payload), "\"trainDatasetKeys\":[]") {
+		t.Errorf("when querying dataManager data, trainDatasetKeys should be []")
 	}
-	if !strings.Contains(string(resp.Payload), "\"testDataKeys\":[]") {
-		t.Errorf("when querying dataManager data, testDataKeys should be []")
+	if !strings.Contains(string(resp.Payload), "\"testDatasetKeys\":[]") {
+		t.Errorf("when querying dataManager data, testDatasetKeys should be []")
 	}
 }
 
-func TestGetTestDataKeys(t *testing.T) {
+func TestGetTestDatasetKeys(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
@@ -117,12 +117,12 @@ func TestGetTestDataKeys(t *testing.T) {
 	err := json.Unmarshal(resp.Payload, &payload)
 	assert.NoError(t, err)
 
-	v, ok := payload["testDataKeys"]
+	v, ok := payload["testDatasetKeys"]
 	assert.True(t, ok, "payload should contains the test data keys")
-	assert.Contains(t, v, testDataHash2, "testDataKeys should contain the test dataHash")
-	assert.NotContains(t, v, testDataHash1, "testDataKeys should not contains the train dataHash")
+	assert.Contains(t, v, testDataHash2, "testDatasetKeys should contain the test dataHash")
+	assert.NotContains(t, v, testDataHash1, "testDatasetKeys should not contains the train dataHash")
 }
-func TestData(t *testing.T) {
+func TestDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
@@ -181,7 +181,7 @@ func TestData(t *testing.T) {
 	if _, ok := payload["key"]; !ok {
 		t.Errorf("when querying dataManager data, payload should contain the dataManager key")
 	}
-	v, ok := payload["trainDataKeys"]
+	v, ok := payload["trainDatasetKeys"]
 	if !ok {
 		t.Errorf("when querying dataManager data, payload should contain the train data keys")
 	}

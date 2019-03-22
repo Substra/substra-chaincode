@@ -10,7 +10,7 @@ type Objective struct {
 	DescriptionStorageAddress string         `json:"descriptionStorageAddress"`
 	Metrics                   *HashDressName `json:"metrics"`
 	Owner                     string         `json:"owner"`
-	TestData                  *Dataset   `json:"testData"`
+	TestDataset               *Dataset       `json:"testDataset"`
 	Permissions               string         `json:"permissions"`
 }
 
@@ -28,8 +28,8 @@ type DataManager struct {
 // Data is the representation of one of the element type stored in the ledger
 type Data struct {
 	DataManagerKeys []string `json:"dataManagerKeys"`
-	Owner       string   `json:"owner"`
-	TestOnly    bool     `json:"testOnly"`
+	Owner           string   `json:"owner"`
+	TestOnly        bool     `json:"testOnly"`
 }
 
 // Algo is the representation of one of the element type stored in the ledger
@@ -44,17 +44,17 @@ type Algo struct {
 
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
-	AlgoKey     string       `json:"algoKey"`
-	InModelKeys []string     `json:"inModels"`
-	OutModel    *HashDress   `json:"outModel"`
-	Data        *Dataset `json:"data"`
-	Perf        float32      `json:"perf"`
-	FLtask      string       `json:"fltask"`
-	Rank        int          `json:"rank"`
-	Status      string       `json:"status"`
-	Log         string       `json:"log"`
-	Permissions string       `json:"permissions"`
-	Creator     string       `json:"creator"`
+	AlgoKey     string     `json:"algoKey"`
+	Creator     string     `json:"creator"`
+	Data        *Dataset   `json:"data"`
+	FLtask      string     `json:"fltask"`
+	InModelKeys []string   `json:"inModels"`
+	Log         string     `json:"log"`
+	OutModel    *HashDress `json:"outModel"`
+	Perf        float32    `json:"perf"`
+	Permissions string     `json:"permissions"`
+	Rank        int        `json:"rank"`
+	Status      string     `json:"status"`
 }
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
@@ -97,7 +97,7 @@ type Model struct {
 // Dataset stores info about a dataManagerKey and a list of associated data
 type Dataset struct {
 	DataManagerKey string   `json:"dataManagerKey"`
-	DataKeys   []string `json:"dataKeys"`
+	DataKeys       []string `json:"dataKeys"`
 }
 
 // ----------------------------------------------------------------------------------------------

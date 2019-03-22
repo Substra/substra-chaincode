@@ -8,7 +8,7 @@ type outputObjective struct {
 	Description HashDress      `json:"description"`
 	Metrics     *HashDressName `json:"metrics"`
 	Owner       string         `json:"owner"`
-	TestData    *Dataset   `json:"testData"`
+	TestDataset *Dataset       `json:"testDataset"`
 	Permissions string         `json:"permissions"`
 }
 
@@ -19,7 +19,7 @@ func (out *outputObjective) Fill(key string, in Objective) {
 	out.Description.Hash = key
 	out.Metrics = in.Metrics
 	out.Owner = in.Owner
-	out.TestData = in.TestData
+	out.TestDataset = in.TestDataset
 	out.Permissions = in.Permissions
 }
 

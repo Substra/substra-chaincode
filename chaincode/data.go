@@ -322,17 +322,17 @@ func queryDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 	}
 	mPayload["key"] = dataManagerKey
 	// get related train data
-	trainDataKeys, err := getDataset(stub, dataManagerKey, false)
+	trainDatasetKeys, err := getDataset(stub, dataManagerKey, false)
 	if err != nil {
 		return nil, err
 	}
-	mPayload["trainDataKeys"] = trainDataKeys
+	mPayload["trainDatasetKeys"] = trainDatasetKeys
 	// get related test data
-	testDataKeys, err := getDataset(stub, dataManagerKey, true)
+	testDatasetKeys, err := getDataset(stub, dataManagerKey, true)
 	if err != nil {
 		return nil, err
 	}
-	mPayload["testDataKeys"] = testDataKeys
+	mPayload["testDatasetKeys"] = testDatasetKeys
 	// Marshal payload
 	payload, err := json.Marshal(mPayload)
 	if err != nil {

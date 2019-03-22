@@ -232,8 +232,8 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	if err = getElementStruct(stub, testtuple.Objective.Key, &objective); err != nil {
 		return testtupleKey, fmt.Errorf("could not retrieve objective with key %s - %s", testtuple.Objective.Key, err.Error())
 	}
-	objectiveDataManagerKey := objective.TestData.DataManagerKey
-	objectiveDataKeys := objective.TestData.DataKeys
+	objectiveDataManagerKey := objective.TestDataset.DataManagerKey
+	objectiveDataKeys := objective.TestDataset.DataKeys
 	// For now we need to sort it but in fine it should be save sorted
 	// TODO
 	sort.Strings(objectiveDataKeys)
