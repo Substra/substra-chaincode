@@ -38,10 +38,10 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = registerDataManager(stub, args)
 	case "updateDataManager":
 		result, err = updateDataManager(stub, args)
-	case "registerData":
-		result, err = registerData(stub, args)
-	case "updateData":
-		result, err = updateData(stub, args)
+	case "registerDataSample":
+		result, err = registerDataSample(stub, args)
+	case "updateDataSample":
+		result, err = updateDataSample(stub, args)
 	case "registerAlgo":
 		result, err = registerAlgo(stub, args)
 	case "createTraintuple":

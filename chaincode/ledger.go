@@ -25,8 +25,8 @@ type DataManager struct {
 	Permissions          string     `json:"permissions"`
 }
 
-// Data is the representation of one of the element type stored in the ledger
-type Data struct {
+// DataSample is the representation of one of the element type stored in the ledger
+type DataSample struct {
 	DataManagerKeys []string `json:"dataManagerKeys"`
 	Owner           string   `json:"owner"`
 	TestOnly        bool     `json:"testOnly"`
@@ -46,7 +46,7 @@ type Algo struct {
 type Traintuple struct {
 	AlgoKey     string     `json:"algoKey"`
 	Creator     string     `json:"creator"`
-	Data        *Dataset   `json:"data"`
+	Dataset     *Dataset   `json:"dataset"`
 	FLtask      string     `json:"fltask"`
 	InModelKeys []string   `json:"inModels"`
 	Log         string     `json:"log"`
@@ -62,7 +62,7 @@ type Testtuple struct {
 	Objective   *TtObjective   `json:"objective"`
 	Algo        *HashDressName `json:"algo"`
 	Model       *Model         `json:"model"`
-	Data        *TtData        `json:"data"`
+	Dataset     *TtDataset     `json:"dataset"`
 	Certified   bool           `json:"certified"`
 	Status      string         `json:"status"`
 	Log         string         `json:"log"`
@@ -94,10 +94,10 @@ type Model struct {
 	StorageAddress string `json:"storageAddress"`
 }
 
-// Dataset stores info about a dataManagerKey and a list of associated data
+// Dataset stores info about a dataManagerKey and a list of associated dataSample
 type Dataset struct {
 	DataManagerKey string   `json:"dataManagerKey"`
-	DataKeys       []string `json:"dataKeys"`
+	DataSampleKeys       []string `json:"dataSampleKeys"`
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -110,7 +110,7 @@ type outputTraintuple struct {
 	Algo        *HashDressName `json:"algo"`
 	InModels    []*Model       `json:"inModels"`
 	OutModel    *HashDress     `json:"outModel"`
-	Data        *TtData        `json:"data"`
+	Dataset     *TtDataset     `json:"dataset"`
 	FLtask      string         `json:"fltask"`
 	Rank        int            `json:"rank"`
 	Status      string         `json:"status"`
@@ -123,8 +123,8 @@ type outputTraintuple struct {
 // Struct used in the representation of outputs when querying some elements
 // ---------------------------------------------------------------------------------
 
-// TtData stores info about data in a Traintyple (train or test data) and in a PredTuple (later)
-type TtData struct {
+// TtDataset stores info about dataset in a Traintyple (train or test data) and in a PredTuple (later)
+type TtDataset struct {
 	Worker     string   `json:"worker"`
 	Keys       []string `json:"keys"`
 	OpenerHash string   `json:"openerHash"`
