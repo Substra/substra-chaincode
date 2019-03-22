@@ -18,29 +18,34 @@ Note for internal use only: See the [technical specifications](https://github.co
 ### Implemented smart contracts
 
 
-- `registerProblem`
-- `registerDataset`
-- `updateDataset`
-- `registerData`
-- `updateData`
-- `registerAlgo`
-- `createTraintuple`
-- `logStartTrain`
-- `logSuccessTrain`
-- `logFailTrain`
 - `createTesttuple`
-- `logStartTest`
-- `logSuccessTest`
+- `createTraintuple`
 - `logFailTest`
-- `query`
-- `queryProblems`
+- `logFailTrain`
+- `logStartTest`
+- `logStartTrain`
+- `logSuccessTest`
+- `logSuccessTrain`
 - `queryAlgo`
-- `queryTraintuples`
+- `queryAlgos`
+- `queryChallenge`
+- `queryChallenges`
+- `queryDataset`
+- `queryDatasetData`
 - `queryDatasets`
+- `queryFilter`
 - `queryModelDetails`
 - `queryModels`
-- `queryDatasetData`
-- `queryFilter`
+- `queryTesttuple`
+- `queryTesttuples`
+- `queryTraintuple`
+- `queryTraintuples`
+- `registerAlgo`
+- `registerChallenge`
+- `registerData`
+- `registerDataset`
+- `updateData`
+- `updateDataset`
 
 ### Examples 
 === RUN   TestPipeline
