@@ -53,9 +53,9 @@ func TestAlgo(t *testing.T) {
 	expectedAlgo := outputAlgo{
 		Key:  algoKey,
 		Name: inpAlgo.Name,
-		Storage: algoStorage{
-			Hash:    algoKey,
-			Address: inpAlgo.StorageAddress,
+		Content: HashDress{
+			Hash:           algoKey,
+			StorageAddress: inpAlgo.StorageAddress,
 		},
 		Description: &HashDress{
 			Hash:           inpAlgo.DescriptionHash,

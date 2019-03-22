@@ -48,25 +48,20 @@ func (out *outputDataset) Fill(key string, in Dataset) {
 }
 
 type outputAlgo struct {
-	Key          string      `json:"key"`
-	Name         string      `json:"name"`
-	Storage      algoStorage `json:"storage"`
-	Description  *HashDress  `json:"description"`
-	Owner        string      `json:"owner"`
-	ChallengeKey string      `json:"challengeKey"`
-	Permissions  string      `json:"permissions"`
-}
-
-type algoStorage struct {
-	Hash    string `json:"hash"`
-	Address string `json:"address"`
+	Key          string     `json:"key"`
+	Name         string     `json:"name"`
+	Content      HashDress  `json:"content"`
+	Description  *HashDress `json:"description"`
+	Owner        string     `json:"owner"`
+	ChallengeKey string     `json:"challengeKey"`
+	Permissions  string     `json:"permissions"`
 }
 
 func (out *outputAlgo) Fill(key string, in Algo) {
 	out.Key = key
 	out.Name = in.Name
-	out.Storage.Hash = key
-	out.Storage.Address = in.StorageAddress
+	out.Content.Hash = key
+	out.Content.StorageAddress = in.StorageAddress
 	out.Description = in.Description
 	out.Owner = in.Owner
 	out.ChallengeKey = in.ChallengeKey
