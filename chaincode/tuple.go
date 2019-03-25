@@ -107,78 +107,6 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	return
 }
 
-// Set is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
-func (outputTraintuple *outputTraintuple) Set(stub shim.ChaincodeStubInterface, traintuple Traintuple) (err error) {
-
-	outputTraintuple.Creator = traintuple.Creator
-	outputTraintuple.Permissions = traintuple.Permissions
-	outputTraintuple.Log = traintuple.Log
-	outputTraintuple.Status = traintuple.Status
-	outputTraintuple.Rank = traintuple.Rank
-	outputTraintuple.FLtask = traintuple.FLtask
-	outputTraintuple.OutModel = traintuple.OutModel
-	// fill algo
-	algo := Algo{}
-	if err = getElementStruct(stub, traintuple.AlgoKey, &algo); err != nil {
-		err = fmt.Errorf("could not retrieve algo with key %s - %s", traintuple.AlgoKey, err.Error())
-		return
-	}
-	outputTraintuple.Algo = &HashDressName{
-		Name:           algo.Name,
-		Hash:           traintuple.AlgoKey,
-		StorageAddress: algo.StorageAddress}
-
-	// fill objective
-	objective := Objective{}
-	if err = getElementStruct(stub, algo.ObjectiveKey, &objective); err != nil {
-		err = fmt.Errorf("could not retrieve associated objective with key %s- %s", algo.ObjectiveKey, err.Error())
-		return
-	}
-	metrics := HashDress{
-		Hash:           objective.Metrics.Hash,
-		StorageAddress: objective.Metrics.StorageAddress,
-	}
-	outputTraintuple.Objective = &TtObjective{
-		Key:     algo.ObjectiveKey,
-		Metrics: &metrics,
-	}
-
-	// fill inModels
-	for _, inModelKey := range traintuple.InModelKeys {
-		if inModelKey == "" {
-			break
-		}
-		parentTraintuple := Traintuple{}
-		if err = getElementStruct(stub, inModelKey, &parentTraintuple); err != nil {
-			err = fmt.Errorf("could not retrieve parent traintuple with key %s - %s", inModelKey, err.Error())
-			return
-		}
-		inModel := &Model{
-			TraintupleKey: inModelKey,
-		}
-		if parentTraintuple.OutModel != nil {
-			inModel.Hash = parentTraintuple.OutModel.Hash
-			inModel.StorageAddress = parentTraintuple.OutModel.StorageAddress
-		}
-		outputTraintuple.InModels = append(outputTraintuple.InModels, inModel)
-	}
-
-	// fill dataset from dataManager and dataSample
-	dataManager := DataManager{}
-	if err = getElementStruct(stub, traintuple.Dataset.DataManagerKey, &dataManager); err != nil {
-		err = fmt.Errorf("could not retrieve dataManager with key %s - %s", traintuple.Dataset.DataManagerKey, err.Error())
-		return
-	}
-	outputTraintuple.Dataset = &TtDataset{
-		Worker:         dataManager.Owner,
-		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
-		OpenerHash:     traintuple.Dataset.DataManagerKey,
-		Perf:           traintuple.Perf,
-	}
-
-	return
-}
-
 // Set is a method of the receiver Testtuple. It checks the validity of inputTesttuple and uses its fields to set the Testtuple
 func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTesttuple) (testtupleKey string, err error) {
 
@@ -204,7 +132,7 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 
 	// fill info from associated traintuple
 	outputTraintuple := &outputTraintuple{}
-	outputTraintuple.Set(stub, traintuple)
+	outputTraintuple.Fill(stub, traintuple)
 	testtuple.Objective = outputTraintuple.Objective
 	testtuple.Algo = outputTraintuple.Algo
 	testtuple.Model = &Model{
@@ -648,7 +576,7 @@ func queryTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 		return nil, err
 	}
 	outputTraintuple := outputTraintuple{}
-	outputTraintuple.Set(stub, traintuple)
+	outputTraintuple.Fill(stub, traintuple)
 	// Marshal payload
 	payload, err := json.Marshal(outputTraintuple)
 	return payload, err
@@ -814,7 +742,7 @@ func getOutputTraintuple(stub shim.ChaincodeStubInterface, traintupleKey string)
 	if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 		return outputTraintuple, err
 	}
-	outputTraintuple.Set(stub, traintuple)
+	outputTraintuple.Fill(stub, traintuple)
 	return outputTraintuple, nil
 }
 
