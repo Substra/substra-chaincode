@@ -170,10 +170,10 @@ func (outputTraintuple *outputTraintuple) Set(stub shim.ChaincodeStubInterface, 
 		return
 	}
 	outputTraintuple.Dataset = &TtDataset{
-		Worker:     dataManager.Owner,
-		Keys:       traintuple.Dataset.DataSampleKeys,
-		OpenerHash: traintuple.Dataset.DataManagerKey,
-		Perf:       traintuple.Perf,
+		Worker:         dataManager.Owner,
+		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
+		OpenerHash:     traintuple.Dataset.DataManagerKey,
+		Perf:           traintuple.Perf,
 	}
 
 	return
@@ -264,9 +264,9 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 		return testtupleKey, fmt.Errorf("could not retrieve dataManager with key %s - %s", dataManagerKey, err.Error())
 	}
 	testtuple.Dataset = &TtDataset{
-		Worker:     dataManager.Owner,
-		Keys:       dataSampleKeys,
-		OpenerHash: dataManagerKey,
+		Worker:         dataManager.Owner,
+		DataSampleKeys: dataSampleKeys,
+		OpenerHash:     dataManagerKey,
 	}
 
 	// create testtuple key and check if it already exists

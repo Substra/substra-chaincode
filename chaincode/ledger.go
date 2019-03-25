@@ -97,26 +97,7 @@ type Model struct {
 // Dataset stores info about a dataManagerKey and a list of associated dataSample
 type Dataset struct {
 	DataManagerKey string   `json:"dataManagerKey"`
-	DataSampleKeys       []string `json:"dataSampleKeys"`
-}
-
-// ----------------------------------------------------------------------------------------------
-// Representation of output when querying elements if different from what is stored in the ledger
-// ----------------------------------------------------------------------------------------------
-
-// outputTraintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
-type outputTraintuple struct {
-	Objective   *TtObjective   `json:"objective"`
-	Algo        *HashDressName `json:"algo"`
-	InModels    []*Model       `json:"inModels"`
-	OutModel    *HashDress     `json:"outModel"`
-	Dataset     *TtDataset     `json:"dataset"`
-	FLtask      string         `json:"fltask"`
-	Rank        int            `json:"rank"`
-	Status      string         `json:"status"`
-	Log         string         `json:"log"`
-	Permissions string         `json:"permissions"`
-	Creator     string         `json:"creator"`
+	DataSampleKeys []string `json:"dataSampleKeys"`
 }
 
 // ---------------------------------------------------------------------------------
@@ -125,10 +106,10 @@ type outputTraintuple struct {
 
 // TtDataset stores info about dataset in a Traintyple (train or test data) and in a PredTuple (later)
 type TtDataset struct {
-	Worker     string   `json:"worker"`
-	Keys       []string `json:"keys"`
-	OpenerHash string   `json:"openerHash"`
-	Perf       float32  `json:"perf"`
+	Worker         string   `json:"worker"`
+	DataSampleKeys []string `json:"keys"`
+	OpenerHash     string   `json:"openerHash"`
+	Perf           float32  `json:"perf"`
 }
 
 // TtObjective stores info about a objective in a Traintuple

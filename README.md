@@ -28,11 +28,11 @@ Note for internal use only: See the [technical specifications](https://github.co
 - `logSuccessTrain`
 - `queryAlgo`
 - `queryAlgos`
-- `queryChallenge`
-- `queryChallenges`
+- `queryObjective`
+- `queryObjectives`
+- `queryDataManager`
 - `queryDataset`
-- `queryDatasetData`
-- `queryDatasets`
+- `queryDataManagers`
 - `queryFilter`
 - `queryModelDetails`
 - `queryModels`
@@ -42,10 +42,10 @@ Note for internal use only: See the [technical specifications](https://github.co
 - `queryTraintuples`
 - `registerAlgo`
 - `registerChallenge`
-- `registerData`
-- `registerDataset`
-- `updateData`
-- `updateDataset`
+- `registerDataSample`
+- `registerDataManager`
+- `updateDataSample`
+- `updateDataManager`
 
 ### Examples 
 #### ------------ Add DataManager ------------
