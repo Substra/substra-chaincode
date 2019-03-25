@@ -1,6 +1,6 @@
 package main
 
-// Struct use as return representation of ledger data
+// Struct use as output representation of ledger data
 
 type outputObjective struct {
 	Key         string         `json:"key"`
@@ -66,4 +66,20 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 	out.Owner = in.Owner
 	out.ObjectiveKey = in.ObjectiveKey
 	out.Permissions = in.Permissions
+}
+
+// outputTraintuple is the representation of one the element type stored in the
+// ledger. It describes a training task occuring on the platform
+type outputTraintuple struct {
+	Objective   *TtObjective   `json:"objective"`
+	Algo        *HashDressName `json:"algo"`
+	InModels    []*Model       `json:"inModels"`
+	OutModel    *HashDress     `json:"outModel"`
+	Dataset     *TtDataset     `json:"dataset"`
+	FLtask      string         `json:"fltask"`
+	Rank        int            `json:"rank"`
+	Status      string         `json:"status"`
+	Log         string         `json:"log"`
+	Permissions string         `json:"permissions"`
+	Creator     string         `json:"creator"`
 }
