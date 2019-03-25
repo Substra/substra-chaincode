@@ -1,5 +1,11 @@
 package main
 
+import (
+	"fmt"
+
+	"github.com/hyperledger/fabric/core/chaincode/shim"
+)
+
 // Struct use as output representation of ledger data
 
 type outputObjective struct {
@@ -82,4 +88,76 @@ type outputTraintuple struct {
 	Log         string         `json:"log"`
 	Permissions string         `json:"permissions"`
 	Creator     string         `json:"creator"`
+}
+
+//Fill is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
+func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface, traintuple Traintuple) (err error) {
+
+	outputTraintuple.Creator = traintuple.Creator
+	outputTraintuple.Permissions = traintuple.Permissions
+	outputTraintuple.Log = traintuple.Log
+	outputTraintuple.Status = traintuple.Status
+	outputTraintuple.Rank = traintuple.Rank
+	outputTraintuple.FLtask = traintuple.FLtask
+	outputTraintuple.OutModel = traintuple.OutModel
+	// fill algo
+	algo := Algo{}
+	if err = getElementStruct(stub, traintuple.AlgoKey, &algo); err != nil {
+		err = fmt.Errorf("could not retrieve algo with key %s - %s", traintuple.AlgoKey, err.Error())
+		return
+	}
+	outputTraintuple.Algo = &HashDressName{
+		Name:           algo.Name,
+		Hash:           traintuple.AlgoKey,
+		StorageAddress: algo.StorageAddress}
+
+	// fill objective
+	objective := Objective{}
+	if err = getElementStruct(stub, algo.ObjectiveKey, &objective); err != nil {
+		err = fmt.Errorf("could not retrieve associated objective with key %s- %s", algo.ObjectiveKey, err.Error())
+		return
+	}
+	metrics := HashDress{
+		Hash:           objective.Metrics.Hash,
+		StorageAddress: objective.Metrics.StorageAddress,
+	}
+	outputTraintuple.Objective = &TtObjective{
+		Key:     algo.ObjectiveKey,
+		Metrics: &metrics,
+	}
+
+	// fill inModels
+	for _, inModelKey := range traintuple.InModelKeys {
+		if inModelKey == "" {
+			break
+		}
+		parentTraintuple := Traintuple{}
+		if err = getElementStruct(stub, inModelKey, &parentTraintuple); err != nil {
+			err = fmt.Errorf("could not retrieve parent traintuple with key %s - %s", inModelKey, err.Error())
+			return
+		}
+		inModel := &Model{
+			TraintupleKey: inModelKey,
+		}
+		if parentTraintuple.OutModel != nil {
+			inModel.Hash = parentTraintuple.OutModel.Hash
+			inModel.StorageAddress = parentTraintuple.OutModel.StorageAddress
+		}
+		outputTraintuple.InModels = append(outputTraintuple.InModels, inModel)
+	}
+
+	// fill dataset from dataManager and dataSample
+	dataManager := DataManager{}
+	if err = getElementStruct(stub, traintuple.Dataset.DataManagerKey, &dataManager); err != nil {
+		err = fmt.Errorf("could not retrieve dataManager with key %s - %s", traintuple.Dataset.DataManagerKey, err.Error())
+		return
+	}
+	outputTraintuple.Dataset = &TtDataset{
+		Worker:         dataManager.Owner,
+		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
+		OpenerHash:     traintuple.Dataset.DataManagerKey,
+		Perf:           traintuple.Perf,
+	}
+
+	return
 }

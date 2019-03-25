@@ -28,24 +28,24 @@ Note for internal use only: See the [technical specifications](https://github.co
 - `logSuccessTrain`
 - `queryAlgo`
 - `queryAlgos`
-- `queryObjective`
-- `queryObjectives`
 - `queryDataManager`
-- `queryDataset`
 - `queryDataManagers`
+- `queryDataset`
 - `queryFilter`
 - `queryModelDetails`
 - `queryModels`
+- `queryObjective`
+- `queryObjectives`
 - `queryTesttuple`
 - `queryTesttuples`
 - `queryTraintuple`
 - `queryTraintuples`
 - `registerAlgo`
-- `registerChallenge`
-- `registerDataSample`
 - `registerDataManager`
-- `updateDataSample`
+- `registerDataSample`
+- `registerObjective`
 - `updateDataManager`
+- `updateDataSample`
 
 ### Examples 
 #### ------------ Add DataManager ------------
