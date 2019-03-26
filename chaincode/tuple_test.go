@@ -38,6 +38,33 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 		getOutputTraintuple(mockStub, traintupleKey)
 	})
 }
+func TestTraintupleFLtaskCreation(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	// Add a some dataManager, dataSample and traintuple
+	err, resp, _ := registerItem(*mockStub, "algo")
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+
+	inpTraintuple := inputTraintuple{FLtask: "someFLtask"}
+	args := inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValues(t, 500, resp.Status, "should failed for missing rank")
+
+	inpTraintuple = inputTraintuple{Rank: "0"}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status)
+	results := map[string]string{}
+	err = json.Unmarshal(resp.Payload, &results)
+	assert.NoError(t, err, "should unmarshal")
+	require.Contains(t, results, "key")
+	require.Contains(t, results, "fltask")
+	require.EqualValues(t, results["key"], traintupleKey)
+	require.NotEmpty(t, results["fltask"])
+}
+
 func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)

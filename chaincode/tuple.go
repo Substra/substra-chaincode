@@ -39,13 +39,43 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	traintuple.Creator = creator
 	traintuple.Permissions = "all"
 
-	// WARNING FOR NOW NO CHECK ABOUT RANK AND FLtask
-	// The FL task should be returned by the ledger now TODO
-	// and the rank should be checked also...
-	if (inp.Rank != "") && (inp.FLtask != "") {
-		rank, _ := strconv.Atoi(inp.Rank)
-		traintuple.Rank = rank
-		traintuple.FLtask = inp.FLtask
+	if inp.Rank == "" {
+		if inp.FLtask != "" {
+			return "", fmt.Errorf("invalit inputs, a FLtask should have a rank")
+		}
+	} else {
+		traintuple.Rank, err = strconv.Atoi(inp.Rank)
+		if err != nil {
+			return
+		}
+		if inp.FLtask == "" {
+			if traintuple.Rank != 0 {
+				return "", fmt.Errorf("invalid inputs, a new FLtask should have a rank 0")
+			}
+			// TODO Check if it exists
+			hashBytes := sha256.Sum256([]byte(inp.AlgoKey + inp.InModels + inp.DataSampleKeys + inp.DataManagerKey + creator))
+			traintuple.FLtask = hex.EncodeToString(hashBytes[:])
+
+		} else {
+			// TODO Check rank
+			attributes := []string{"traintuple", inp.FLtask}
+			ttKeys, err := getKeysFromComposite(stub, "traintuple~fltask~key", attributes)
+			if err != nil {
+				return "", err
+			} else if len(ttKeys) == 0 {
+				return "", fmt.Errorf("cannot find the FLtask %s", inp.FLtask)
+			}
+			for _, ttKey := range ttKeys {
+				FLTraintuple := Traintuple{}
+				err = getElementStruct(stub, ttKey, &FLTraintuple)
+				if err != nil {
+					return "", err
+				} else if FLTraintuple.AlgoKey != inp.AlgoKey {
+					return "", fmt.Errorf("previous traintuple for FLtask %s does not have the same algo key %s", inp.FLtask, inp.AlgoKey)
+				}
+			}
+			traintuple.FLtask = inp.FLtask
+		}
 	}
 
 	// check if algo exists
@@ -257,7 +287,13 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 			return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
 		}
 	}
-	return []byte(traintupleKey), nil
+	if traintuple.FLtask != "" {
+		if err = createCompositeKey(stub, "traintuple~fltask~key", []string{"traintuple", traintuple.FLtask, traintupleKey}); err != nil {
+			return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
+		}
+	}
+	createdTraintuple := map[string]string{"key": traintupleKey, "fltask": traintuple.FLtask}
+	return json.Marshal(createdTraintuple)
 }
 
 // createTesttuple adds a Testtuple in the ledger
