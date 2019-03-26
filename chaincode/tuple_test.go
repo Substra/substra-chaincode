@@ -51,6 +51,13 @@ func TestTraintupleFLtaskCreation(t *testing.T) {
 	args := inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 500, resp.Status, "should failed for missing rank")
+	require.Contains(t, resp.Message, "invalit inputs, a FLtask should have a rank", "invalid error message")
+
+	inpTraintuple = inputTraintuple{Rank: "1"}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValues(t, 500, resp.Status, "should failed for invalid rank")
+	require.Contains(t, resp.Message, "invalid inputs, a new FLtask should have a rank 0")
 
 	inpTraintuple = inputTraintuple{Rank: "0"}
 	args = inpTraintuple.createSample()
@@ -63,6 +70,36 @@ func TestTraintupleFLtaskCreation(t *testing.T) {
 	require.Contains(t, results, "fltask")
 	require.EqualValues(t, results["key"], traintupleKey)
 	require.NotEmpty(t, results["fltask"])
+
+	inpTraintuple = inputTraintuple{Rank: "0"}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValues(t, 500, resp.Status, "should failed for existing FLtask")
+	require.Contains(t, resp.Message, "already exists for input traintuple")
+}
+
+func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	// Add a some dataManager, dataSample and traintuple
+	err, resp, _ := registerItem(*mockStub, "algo")
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+
+	inpTraintuple := inputTraintuple{Rank: "0"}
+	args := inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status)
+	results := map[string]string{}
+	json.Unmarshal(resp.Payload, &results)
+
+	inpTraintuple = inputTraintuple{Rank: "1", FLtask: results["fltask"]}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, resp.Message)
+	results = map[string]string{}
+	json.Unmarshal(resp.Payload, &results)
 }
 
 func TestTesttupleOnFailedTraintuple(t *testing.T) {
