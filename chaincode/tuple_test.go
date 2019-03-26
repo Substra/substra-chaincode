@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -94,12 +95,25 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 	results := map[string]string{}
 	json.Unmarshal(resp.Payload, &results)
 
-	inpTraintuple = inputTraintuple{Rank: "1", FLtask: results["fltask"]}
+	inpTraintuple = inputTraintuple{
+		InModels: results["key"],
+		Rank:     "1",
+		FLtask:   results["fltask"]}
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status, resp.Message)
+	assert.EqualValues(t, 200, resp.Status, resp.Message, "sould be able do create a traintuple with the same FLtask")
 	results = map[string]string{}
 	json.Unmarshal(resp.Payload, &results)
+
+	inpTraintuple = inputTraintuple{
+		AlgoKey:  strings.Replace(algoHash, "a", "b", 1),
+		InModels: results["key"],
+		Rank:     "2",
+		FLtask:   results["fltask"]}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 500, resp.Status, resp.Message, "sould fail for it doesn't have the same algo key")
+	assert.Contains(t, resp.Message, "does not have the same algo key")
 }
 
 func TestTesttupleOnFailedTraintuple(t *testing.T) {
