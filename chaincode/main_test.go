@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -337,7 +338,9 @@ func TestPipeline(t *testing.T) {
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 	// Get traintuple key from Payload
-	traintupleKey := resp.Payload
+	createdTraintuple := map[string]string{}
+	json.Unmarshal(resp.Payload, &createdTraintuple)
+	traintupleKey := []byte(createdTraintuple["key"])
 	// check not possible to create same traintuple
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
@@ -346,8 +349,11 @@ func TestPipeline(t *testing.T) {
 	// Get owner of the traintuple
 	args = [][]byte{[]byte("queryTraintuple"), traintupleKey}
 	resp = mockStub.MockInvoke("42", args)
-	respTraintuple := resp.Payload
+	if status := resp.Status; status != 200 {
+		t.Errorf("when adding traintuple with status %d and message %s", status, resp.Message)
+	}
 	traintuple := outputTraintuple{}
+	respTraintuple := resp.Payload
 	if err := bytesToStruct(respTraintuple, &traintuple); err != nil {
 		t.Errorf("when unmarshalling queried traintuple with error %s", err)
 	}
@@ -365,7 +371,9 @@ func TestPipeline(t *testing.T) {
 		t.Errorf("when adding traintuple with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
-	todoTraintupleKey := string(resp.Payload)
+	createdTraintuple = map[string]string{}
+	json.Unmarshal(resp.Payload, &createdTraintuple)
+	todoTraintupleKey := createdTraintuple["key"]
 
 	fmt.Println("#### ------------ Query Traintuples of worker with todo status ------------")
 	args = [][]byte{[]byte("queryFilter"), []byte("traintuple~worker~status"), []byte(trainWorker + ", todo")}

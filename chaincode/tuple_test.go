@@ -72,8 +72,12 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	// Add a some dataManager, dataSample and traintuple
 	err, resp, _ := registerItem(*mockStub, "traintuple")
 	assert.NoError(t, err)
+	createdTraintuple := map[string]string{}
+	json.Unmarshal(resp.Payload, &createdTraintuple)
+	traintupleKey := []byte(createdTraintuple["key"])
+
 	// Mark the traintuple as failed
-	args := [][]byte{[]byte("logFailTrain"), resp.Payload, []byte("pas glop")}
+	args := [][]byte{[]byte("logFailTrain"), traintupleKey, []byte("pas glop")}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "should be able to log traintuple as failed")
 
@@ -178,7 +182,9 @@ func TestTraintuple(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 	inpTraintuple = tt.(inputTraintuple)
-	traintupleKey := string(resp.Payload)
+	createdTraintuple := map[string]string{}
+	json.Unmarshal(resp.Payload, &createdTraintuple)
+	traintupleKey := createdTraintuple["key"]
 
 	// Query traintuple from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
