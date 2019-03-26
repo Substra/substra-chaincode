@@ -52,9 +52,16 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 			if traintuple.Rank != 0 {
 				return "", fmt.Errorf("invalid inputs, a new FLtask should have a rank 0")
 			}
-			// TODO Check if it exists
 			hashBytes := sha256.Sum256([]byte(inp.AlgoKey + inp.InModels + inp.DataSampleKeys + inp.DataManagerKey + creator))
 			traintuple.FLtask = hex.EncodeToString(hashBytes[:])
+
+			attributes := []string{"traintuple", traintuple.FLtask}
+			ttKeys, err := getKeysFromComposite(stub, "traintuple~fltask~key", attributes)
+			if err != nil {
+				return "", err
+			} else if len(ttKeys) != 0 {
+				return "", fmt.Errorf("FLtask %s already exists for input traintuple", traintuple.FLtask)
+			}
 
 		} else {
 			// TODO Check rank
