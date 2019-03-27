@@ -114,7 +114,7 @@ Smart contract: `createTraintuple`
 ```
 peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","",""]}' -C myc
 ```
->  337c5b7d78ffa157471cc790b61caa99b486cbf30b049c8c0550ed40f3fa1d4f 
+>  {"fltask":"","key":"337c5b7d78ffa157471cc790b61caa99b486cbf30b049c8c0550ed40f3fa1d4f"} 
 
 #### ------------ Add Traintuple with inModel from previous traintuple ------------
 Smart contract: `createTraintuple`  
@@ -122,7 +122,7 @@ Smart contract: `createTraintuple`
 ```
 peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","337c5b7d78ffa157471cc790b61caa99b486cbf30b049c8c0550ed40f3fa1d4f","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","",""]}' -C myc
 ```
->  f952b8514669261ca1c53ac853c3abab4a870fab395215ed8a9e7e308eb00c6b 
+>  {"fltask":"","key":"f952b8514669261ca1c53ac853c3abab4a870fab395215ed8a9e7e308eb00c6b"} 
 
 #### ------------ Query Traintuples of worker with todo status ------------
 ```
