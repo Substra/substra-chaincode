@@ -88,8 +88,8 @@ func setDataSample(stub shim.ChaincodeStubInterface, inp inputDataSample) (dataS
 
 	dataSample = DataSample{
 		DataManagerKeys: dataManagerKeys,
-		TestOnly:    testOnly,
-		Owner:       owner}
+		TestOnly:        testOnly,
+		Owner:           owner}
 
 	return
 }
@@ -322,17 +322,17 @@ func queryDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 	}
 	mPayload["key"] = dataManagerKey
 	// get related train dataSample
-	trainDatasetKeys, err := getDataset(stub, dataManagerKey, false)
+	trainDataSampleKeys, err := getDataset(stub, dataManagerKey, false)
 	if err != nil {
 		return nil, err
 	}
-	mPayload["trainDatasetKeys"] = trainDatasetKeys
+	mPayload["trainDataSampleKeys"] = trainDataSampleKeys
 	// get related test dataSample
-	testDatasetKeys, err := getDataset(stub, dataManagerKey, true)
+	testDataSampleKeys, err := getDataset(stub, dataManagerKey, true)
 	if err != nil {
 		return nil, err
 	}
-	mPayload["testDatasetKeys"] = testDatasetKeys
+	mPayload["testDataSampleKeys"] = testDataSampleKeys
 	// Marshal payload
 	payload, err := json.Marshal(mPayload)
 	if err != nil {
