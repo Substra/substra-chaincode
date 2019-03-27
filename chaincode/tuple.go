@@ -39,52 +39,6 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	traintuple.Creator = creator
 	traintuple.Permissions = "all"
 
-	if inp.Rank == "" {
-		if inp.FLtask != "" {
-			return "", fmt.Errorf("invalit inputs, a FLtask should have a rank")
-		}
-	} else {
-		traintuple.Rank, err = strconv.Atoi(inp.Rank)
-		if err != nil {
-			return
-		}
-		if inp.FLtask == "" {
-			if traintuple.Rank != 0 {
-				return "", fmt.Errorf("invalid inputs, a new FLtask should have a rank 0")
-			}
-			hashBytes := sha256.Sum256([]byte(inp.AlgoKey + inp.InModels + inp.DataSampleKeys + inp.DataManagerKey + creator))
-			traintuple.FLtask = hex.EncodeToString(hashBytes[:])
-
-			attributes := []string{"traintuple", traintuple.FLtask}
-			ttKeys, err := getKeysFromComposite(stub, "traintuple~fltask~key", attributes)
-			if err != nil {
-				return "", err
-			} else if len(ttKeys) != 0 {
-				return "", fmt.Errorf("FLtask %s already exists for input traintuple", traintuple.FLtask)
-			}
-
-		} else {
-			// TODO Check rank
-			attributes := []string{"traintuple", inp.FLtask}
-			ttKeys, err := getKeysFromComposite(stub, "traintuple~fltask~key", attributes)
-			if err != nil {
-				return "", err
-			} else if len(ttKeys) == 0 {
-				return "", fmt.Errorf("cannot find the FLtask %s", inp.FLtask)
-			}
-			for _, ttKey := range ttKeys {
-				FLTraintuple := Traintuple{}
-				err = getElementStruct(stub, ttKey, &FLTraintuple)
-				if err != nil {
-					return "", err
-				} else if FLTraintuple.AlgoKey != inp.AlgoKey {
-					return "", fmt.Errorf("previous traintuple for FLtask %s does not have the same algo key %s", inp.FLtask, inp.AlgoKey)
-				}
-			}
-			traintuple.FLtask = inp.FLtask
-		}
-	}
-
 	// check if algo exists
 	if _, err = getElementBytes(stub, inp.AlgoKey); err != nil {
 		err = fmt.Errorf("could not retrieve algo with key %s - %s", inp.AlgoKey, err.Error())
@@ -141,6 +95,55 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 		DataManagerKey: inp.DataManagerKey,
 		DataSampleKeys: dataSampleKeys,
 	}
+	worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
+	if err != nil {
+		return
+	}
+
+	if inp.Rank == "" {
+		if inp.FLtask != "" {
+			return "", fmt.Errorf("invalit inputs, a FLtask should have a rank")
+		}
+	} else {
+		traintuple.Rank, err = strconv.Atoi(inp.Rank)
+		if err != nil {
+			return
+		}
+		if inp.FLtask == "" {
+			if traintuple.Rank != 0 {
+				return "", fmt.Errorf("invalid inputs, a new FLtask should have a rank 0")
+			}
+			traintuple.FLtask = traintupleKey
+		} else {
+			attributes := []string{"traintuple", inp.FLtask}
+			ttKeys, err := getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
+			if err != nil {
+				return "", err
+			} else if len(ttKeys) == 0 {
+				return "", fmt.Errorf("cannot find the FLtask %s", inp.FLtask)
+			}
+			for _, ttKey := range ttKeys {
+				FLTraintuple := Traintuple{}
+				err = getElementStruct(stub, ttKey, &FLTraintuple)
+				if err != nil {
+					return "", err
+				} else if FLTraintuple.AlgoKey != inp.AlgoKey {
+					return "", fmt.Errorf("previous traintuple for FLtask %s does not have the same algo key %s", inp.FLtask, inp.AlgoKey)
+				}
+			}
+
+			attributes = []string{"traintuple", inp.FLtask, worker, inp.Rank}
+			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
+			if err != nil {
+				return "", err
+			} else if len(ttKeys) > 0 {
+				return "", fmt.Errorf("FLtask %s with worker %s rank %d already exists", inp.FLtask, worker, traintuple.Rank)
+			}
+
+			traintuple.FLtask = inp.FLtask
+		}
+	}
+
 	return
 }
 
@@ -276,6 +279,7 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	if err = stub.PutState(traintupleKey, traintupleBytes); err != nil {
 		return nil, fmt.Errorf("could not put in ledger traintuple with algo %s inModels %s - %s", inp.AlgoKey, inp.InModels, err.Error())
 	}
+
 	// get worker
 	worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
 	if err != nil {
@@ -295,7 +299,7 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 		}
 	}
 	if traintuple.FLtask != "" {
-		if err = createCompositeKey(stub, "traintuple~fltask~key", []string{"traintuple", traintuple.FLtask, traintupleKey}); err != nil {
+		if err = createCompositeKey(stub, "traintuple~fltask~worker~rank~key", []string{"traintuple", traintuple.FLtask, worker, inp.Rank, traintupleKey}); err != nil {
 			return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
 		}
 	}
