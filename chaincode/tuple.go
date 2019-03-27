@@ -100,9 +100,11 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 		return
 	}
 
+	// check FLtask and Rank and set it when required
 	if inp.Rank == "" {
 		if inp.FLtask != "" {
-			return "", fmt.Errorf("invalit inputs, a FLtask should have a rank")
+			err = fmt.Errorf("invalit inputs, a FLtask should have a rank")
+			return
 		}
 	} else {
 		traintuple.Rank, err = strconv.Atoi(inp.Rank)
@@ -111,33 +113,38 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 		}
 		if inp.FLtask == "" {
 			if traintuple.Rank != 0 {
-				return "", fmt.Errorf("invalid inputs, a new FLtask should have a rank 0")
+				err = fmt.Errorf("invalid inputs, a new FLtask should have a rank 0")
+				return
 			}
 			traintuple.FLtask = traintupleKey
 		} else {
+			var ttKeys []string
 			attributes := []string{"traintuple", inp.FLtask}
-			ttKeys, err := getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
+			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
 			if err != nil {
-				return "", err
+				return
 			} else if len(ttKeys) == 0 {
-				return "", fmt.Errorf("cannot find the FLtask %s", inp.FLtask)
+				err = fmt.Errorf("cannot find the FLtask %s", inp.FLtask)
+				return
 			}
 			for _, ttKey := range ttKeys {
 				FLTraintuple := Traintuple{}
 				err = getElementStruct(stub, ttKey, &FLTraintuple)
 				if err != nil {
-					return "", err
+					return
 				} else if FLTraintuple.AlgoKey != inp.AlgoKey {
-					return "", fmt.Errorf("previous traintuple for FLtask %s does not have the same algo key %s", inp.FLtask, inp.AlgoKey)
+					err = fmt.Errorf("previous traintuple for FLtask %s does not have the same algo key %s", inp.FLtask, inp.AlgoKey)
+					return
 				}
 			}
 
 			attributes = []string{"traintuple", inp.FLtask, worker, inp.Rank}
 			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
 			if err != nil {
-				return "", err
+				return
 			} else if len(ttKeys) > 0 {
-				return "", fmt.Errorf("FLtask %s with worker %s rank %d already exists", inp.FLtask, worker, traintuple.Rank)
+				err = fmt.Errorf("FLtask %s with worker %s rank %d already exists", inp.FLtask, worker, traintuple.Rank)
+				return
 			}
 
 			traintuple.FLtask = inp.FLtask
