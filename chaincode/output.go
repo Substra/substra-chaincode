@@ -53,29 +53,14 @@ func (out *outputDataManager) Fill(key string, in DataManager) {
 	out.Type = in.Type
 }
 
-type outputDataSet struct {
-	ObjectiveKey        string     `json:"objectiveKey"`
-	Description         *HashDress `json:"description"`
-	Key                 string     `json:"key"`
-	Name                string     `json:"name"`
-	Opener              HashDress  `json:"opener"`
-	Owner               string     `json:"owner"`
-	Permissions         string     `json:"permissions"`
-	Type                string     `json:"type"`
-	TrainDataSampleKeys []string   `json:"trainDataSampleKeys"`
-	TestDataSampleKeys  []string   `json:"testDataSampleKeys"`
+type outputDataset struct {
+	outputDataManager
+	TrainDataSampleKeys []string `json:"trainDataSampleKeys"`
+	TestDataSampleKeys  []string `json:"testDataSampleKeys"`
 }
 
-func (out *outputDataSet) Fill(key string, in DataManager, trainKeys []string, testKeys []string) {
-	out.ObjectiveKey = in.ObjectiveKey
-	out.Description = in.Description
-	out.Key = key
-	out.Name = in.Name
-	out.Opener.Hash = key
-	out.Opener.StorageAddress = in.OpenerStorageAddress
-	out.Owner = in.Owner
-	out.Permissions = in.Permissions
-	out.Type = in.Type
+func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, testKeys []string) {
+	out.outputDataManager.Fill(key, in)
 	out.TrainDataSampleKeys = trainKeys
 	out.TestDataSampleKeys = testKeys
 }
