@@ -76,7 +76,7 @@ func TestTraintupleFLtaskCreation(t *testing.T) {
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 500, resp.Status, "should failed for existing FLtask")
-	require.Contains(t, resp.Message, "already exists for input traintuple")
+	require.Contains(t, resp.Message, "traintuple with these algo, in models, and train dataSample already exist")
 }
 
 func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
@@ -105,8 +105,15 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 	results = map[string]string{}
 	json.Unmarshal(resp.Payload, &results)
 
+	// Add new algo to check all fltask algo consistency
+	newAlgoHash := strings.Replace(algoHash, "a", "b", 1)
+	inpAlgo := inputAlgo{Hash: newAlgoHash}
+	args = inpAlgo.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status)
+
 	inpTraintuple = inputTraintuple{
-		AlgoKey:  strings.Replace(algoHash, "a", "b", 1),
+		AlgoKey:  newAlgoHash,
 		InModels: results["key"],
 		Rank:     "2",
 		FLtask:   results["fltask"]}
