@@ -83,11 +83,11 @@ func TestDataManager(t *testing.T) {
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying Dataset, status %d and message %s", status, resp.Message)
 	}
-	if !strings.Contains(string(resp.Payload), "\"trainDatasetKeys\":[]") {
-		t.Errorf("when querying Dataset, trainDatasetKeys should be []")
+	if !strings.Contains(string(resp.Payload), "\"trainDataSampleKeys\":[]") {
+		t.Errorf("when querying Dataset, trainDataSampleKeys should be []")
 	}
-	if !strings.Contains(string(resp.Payload), "\"testDatasetKeys\":[]") {
-		t.Errorf("when querying Dataset, testDatasetKeys should be []")
+	if !strings.Contains(string(resp.Payload), "\"testDataSampleKeys\":[]") {
+		t.Errorf("when querying Dataset, testDataSampleKeys should be []")
 	}
 }
 
@@ -117,10 +117,10 @@ func TestGetTestDatasetKeys(t *testing.T) {
 	err := json.Unmarshal(resp.Payload, &payload)
 	assert.NoError(t, err)
 
-	v, ok := payload["testDatasetKeys"]
+	v, ok := payload["testDataSampleKeys"]
 	assert.True(t, ok, "payload should contains the test dataSample keys")
-	assert.Contains(t, v, testDataSampleHash2, "testDatasetKeys should contain the test dataSampleHash")
-	assert.NotContains(t, v, testDataSampleHash1, "testDatasetKeys should not contains the train dataSampleHash")
+	assert.Contains(t, v, testDataSampleHash2, "testDataSampleKeys should contain the test dataSampleHash")
+	assert.NotContains(t, v, testDataSampleHash1, "testDataSampleKeys should not contains the train dataSampleHash")
 }
 func TestDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
