@@ -309,36 +309,30 @@ func queryDataManagers(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 
 // queryDataset returns info about a dataManager and all related dataSample
 func queryDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	expectedArgs := [1]string{"dataManager key"}
-	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+	if len(args) != 1 || len(args[0]) != 64 {
+		return nil, fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
 	}
-	dataManagerKey := args[0]
+	key := args[0]
+	var dataManager DataManager
+	if err := getElementStruct(stub, key, &dataManager); err != nil {
+		return nil, err
+	}
 
-	// get dataManager info
-	var mPayload map[string]interface{}
-	if err := getElementStruct(stub, dataManagerKey, &mPayload); err != nil {
-		return nil, err
-	}
-	mPayload["key"] = dataManagerKey
 	// get related train dataSample
-	trainDataSampleKeys, err := getDataset(stub, dataManagerKey, false)
+	trainDataSampleKeys, err := getDataset(stub, key, false)
 	if err != nil {
 		return nil, err
 	}
-	mPayload["trainDataSampleKeys"] = trainDataSampleKeys
+
 	// get related test dataSample
-	testDataSampleKeys, err := getDataset(stub, dataManagerKey, true)
+	testDataSampleKeys, err := getDataset(stub, key, true)
 	if err != nil {
 		return nil, err
 	}
-	mPayload["testDataSampleKeys"] = testDataSampleKeys
-	// Marshal payload
-	payload, err := json.Marshal(mPayload)
-	if err != nil {
-		return nil, err
-	}
-	return payload, nil
+
+	var out outputDataSet
+	out.Fill(key, dataManager, trainDataSampleKeys, testDataSampleKeys)
+	return json.Marshal(out)
 }
 
 // -----------------------------------------------------------------
