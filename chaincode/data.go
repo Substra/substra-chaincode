@@ -330,7 +330,7 @@ func queryDataset(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 		return nil, err
 	}
 
-	var out outputDataSet
+	var out outputDataset
 	out.Fill(key, dataManager, trainDataSampleKeys, testDataSampleKeys)
 	return json.Marshal(out)
 }
