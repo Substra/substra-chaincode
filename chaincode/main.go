@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	peer "github.com/hyperledger/fabric/protos/peer"
+	"github.com/hyperledger/fabric/protos/peer"
 )
 
 // SubstraChaincode is a Receiver for Chaincode shim functions
@@ -32,16 +32,16 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	var result []byte
 	var err error
 	switch fn {
-	case "registerChallenge":
-		result, err = registerChallenge(stub, args)
-	case "registerDataset":
-		result, err = registerDataset(stub, args)
-	case "updateDataset":
-		result, err = updateDataset(stub, args)
-	case "registerData":
-		result, err = registerData(stub, args)
-	case "updateData":
-		result, err = updateData(stub, args)
+	case "registerObjective":
+		result, err = registerObjective(stub, args)
+	case "registerDataManager":
+		result, err = registerDataManager(stub, args)
+	case "updateDataManager":
+		result, err = updateDataManager(stub, args)
+	case "registerDataSample":
+		result, err = registerDataSample(stub, args)
+	case "updateDataSample":
+		result, err = updateDataSample(stub, args)
 	case "registerAlgo":
 		result, err = registerAlgo(stub, args)
 	case "createTraintuple":
@@ -60,28 +60,34 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = logFailTrain(stub, args)
 	case "logFailTest":
 		result, err = logFailTest(stub, args)
-	case "query":
-		result, err = query(stub, args)
+	case "queryObjective":
+		result, err = queryObjective(stub, args)
+	case "queryObjectives":
+		result, err = queryObjectives(stub, args)
+	case "queryAlgo":
+		result, err = queryAlgo(stub, args)
+	case "queryAlgos":
+		result, err = queryAlgos(stub, args)
 	case "queryTraintuple":
 		result, err = queryTraintuple(stub, args)
-	case "queryChallenges":
-		result, err = queryAll(stub, args, "challenge")
-	case "queryAlgos":
-		result, err = queryAll(stub, args, "algo")
 	case "queryTraintuples":
 		result, err = queryTraintuples(stub, args)
+	case "queryTesttuple":
+		result, err = queryTesttuple(stub, args)
 	case "queryTesttuples":
-		result, err = queryAll(stub, args, "testtuple")
-	case "queryDatasets":
-		result, err = queryAll(stub, args, "dataset")
+		result, err = queryTesttuples(stub, args)
+	case "queryDataManager":
+		result, err = queryDataManager(stub, args)
+	case "queryDataManagers":
+		result, err = queryDataManagers(stub, args)
 	case "queryFilter":
 		result, err = queryFilter(stub, args)
 	case "queryModelDetails":
 		result, err = queryModelDetails(stub, args)
 	case "queryModels":
 		result, err = queryModels(stub, args)
-	case "queryDatasetData":
-		result, err = queryDatasetData(stub, args)
+	case "queryDataset":
+		result, err = queryDataset(stub, args)
 	default:
 		err = fmt.Errorf("function not implemented")
 	}

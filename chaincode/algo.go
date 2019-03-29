@@ -5,11 +5,12 @@ import (
 	"strings"
 
 	"encoding/json"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"gopkg.in/go-playground/validator.v9"
 )
 
-// set is a method of the receiver Algo. It checks the validity of inputAlgo and uses its fields to set the Algo
+// Set is a method of the receiver Algo. It checks the validity of inputAlgo and uses its fields to set the Algo
 // Returns the algoKey
 func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey string, err error) {
 	// checking validity of submitted fields
@@ -18,8 +19,8 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 		err = fmt.Errorf("invalid algo inputs %s", err.Error())
 		return
 	}
-	// check associated challenge exists
-	_, err = getElementBytes(stub, inp.ChallengeKey)
+	// check associated objective exists
+	_, err = getElementBytes(stub, inp.ObjectiveKey)
 	if err != nil {
 		return
 	}
@@ -37,7 +38,7 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 		StorageAddress: inp.DescriptionStorageAddress,
 	}
 	algo.Owner = owner
-	algo.ChallengeKey = inp.ChallengeKey
+	algo.ObjectiveKey = inp.ObjectiveKey
 	algo.Permissions = inp.Permissions
 	return
 }
@@ -73,9 +74,47 @@ func registerAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 		return nil, fmt.Errorf("failed to add to ledger algo with key %s with error %s", algoKey, err.Error())
 	}
 	// create composite key
-	err = createCompositeKey(stub, "algo~challenge~key", []string{"algo", algo.ChallengeKey, algoKey})
+	err = createCompositeKey(stub, "algo~objective~key", []string{"algo", algo.ObjectiveKey, algoKey})
 	if err != nil {
 		return nil, err
 	}
 	return []byte(algoKey), nil
+}
+
+// queryAlgo returns an algo of the ledger given its key
+func queryAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 1 || len(args[0]) != 64 {
+		return nil, fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+	}
+	key := args[0]
+	var algo Algo
+	if err := getElementStruct(stub, key, &algo); err != nil {
+		return nil, err
+	}
+	var out outputAlgo
+	out.Fill(key, algo)
+	return json.Marshal(out)
+}
+
+// queryAlgos returns all algos of the ledger
+func queryAlgos(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	if len(args) != 0 {
+		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
+	}
+	var indexName = "algo~objective~key"
+	elementsKeys, err := getKeysFromComposite(stub, indexName, []string{"algo"})
+	if err != nil {
+		return nil, fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
+	}
+	var outAlgos []outputAlgo
+	for _, key := range elementsKeys {
+		var algo Algo
+		if err := getElementStruct(stub, key, &algo); err != nil {
+			return nil, err
+		}
+		var out outputAlgo
+		out.Fill(key, algo)
+		outAlgos = append(outAlgos, out)
+	}
+	return json.Marshal(outAlgos)
 }

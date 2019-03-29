@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"encoding/json"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
@@ -122,7 +123,7 @@ func getElementStruct(stub shim.ChaincodeStubInterface, elementKey string, eleme
 // checkHashes checks if all elements in a slice are all hashes, returns error if not the case
 func checkHashes(hashes []string) (err error) {
 	for _, hash := range hashes {
-		// check validity of dataHashes
+		// check validity of dataSampleHashes
 		if len(hash) != 64 {
 			err = fmt.Errorf("invalid hash %s", hash)
 			return

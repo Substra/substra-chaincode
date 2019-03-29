@@ -9,15 +9,15 @@ import (
 	peer "github.com/hyperledger/fabric/protos/peer"
 )
 
-const challengeDescriptionHash = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
-const challengeDescriptionStorageAddress = "https://toto/challenge/222/description"
-const challengeMetricsHash = "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
-const challengeMetricsStorageAddress = "https://toto/challenge/222/metrics"
-const datasetOpenerHash = "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-const trainDataHash1 = "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-const trainDataHash2 = "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-const testDataHash1 = "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-const testDataHash2 = "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+const objectiveDescriptionHash = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
+const objectiveDescriptionStorageAddress = "https://toto/objective/222/description"
+const objectiveMetricsHash = "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
+const objectiveMetricsStorageAddress = "https://toto/objective/222/metrics"
+const dataManagerOpenerHash = "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+const trainDataSampleHash1 = "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+const trainDataSampleHash2 = "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+const testDataSampleHash1 = "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+const testDataSampleHash2 = "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const algoHash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const algoStorageAddress = "https://toto/algo/222/algo"
 const algoName = "hog + svm"
@@ -54,71 +54,71 @@ func printArgsNames(fnName string, argsNames []string) {
 	fmt.Println(s)
 }
 
-func (dataset *inputDataset) createSample() [][]byte {
-	if dataset.Name == "" {
-		dataset.Name = "liver slide"
+func (dataManager *inputDataManager) createSample() [][]byte {
+	if dataManager.Name == "" {
+		dataManager.Name = "liver slide"
 	}
-	if dataset.OpenerHash == "" {
-		dataset.OpenerHash = datasetOpenerHash
+	if dataManager.OpenerHash == "" {
+		dataManager.OpenerHash = dataManagerOpenerHash
 	}
-	if dataset.OpenerStorageAddress == "" {
-		dataset.OpenerStorageAddress = "https://toto/dataset/42234/opener"
+	if dataManager.OpenerStorageAddress == "" {
+		dataManager.OpenerStorageAddress = "https://toto/dataManager/42234/opener"
 	}
-	if dataset.Type == "" {
-		dataset.Type = "images"
+	if dataManager.Type == "" {
+		dataManager.Type = "images"
 	}
-	if dataset.DescriptionHash == "" {
-		dataset.DescriptionHash = "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee"
+	if dataManager.DescriptionHash == "" {
+		dataManager.DescriptionHash = "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee"
 	}
-	if dataset.DescriptionStorageAddress == "" {
-		dataset.DescriptionStorageAddress = "https://toto/dataset/42234/description"
+	if dataManager.DescriptionStorageAddress == "" {
+		dataManager.DescriptionStorageAddress = "https://toto/dataManager/42234/description"
 	}
-	dataset.Permissions = "all"
-	args, _ := inputStructToBytes(dataset)
-	args = append([][]byte{[]byte("registerDataset")}, args...)
+	dataManager.Permissions = "all"
+	args, _ := inputStructToBytes(dataManager)
+	args = append([][]byte{[]byte("registerDataManager")}, args...)
 	return args
 }
 
-func (data *inputData) createSample() [][]byte {
-	if data.Hashes == "" {
-		data.Hashes = trainDataHash1 + ", " + trainDataHash2
+func (dataSample *inputDataSample) createSample() [][]byte {
+	if dataSample.Hashes == "" {
+		dataSample.Hashes = trainDataSampleHash1 + ", " + trainDataSampleHash2
 	}
-	if data.DatasetKeys == "" {
-		data.DatasetKeys = datasetOpenerHash
+	if dataSample.DataManagerKeys == "" {
+		dataSample.DataManagerKeys = dataManagerOpenerHash
 	}
-	if data.TestOnly == "" {
-		data.TestOnly = "false"
+	if dataSample.TestOnly == "" {
+		dataSample.TestOnly = "false"
 	}
-	args, _ := inputStructToBytes(data)
-	args = append([][]byte{[]byte("registerData")}, args...)
+	args, _ := inputStructToBytes(dataSample)
+	args = append([][]byte{[]byte("registerDataSample")}, args...)
 	return args
 }
 
-func (challenge *inputChallenge) createSample() [][]byte {
-	if challenge.Name == "" {
-		challenge.Name = "MSI classification"
+func (objective *inputObjective) createSample() [][]byte {
+	if objective.Name == "" {
+		objective.Name = "MSI classification"
 	}
-	if challenge.DescriptionHash == "" {
-		challenge.DescriptionHash = challengeDescriptionHash
+	if objective.DescriptionHash == "" {
+		objective.DescriptionHash = objectiveDescriptionHash
 	}
-	if challenge.DescriptionStorageAddress == "" {
-		challenge.DescriptionStorageAddress = "https://toto/challenge/222/description"
+	if objective.DescriptionStorageAddress == "" {
+		objective.DescriptionStorageAddress = "https://toto/objective/222/description"
 	}
-	if challenge.MetricsName == "" {
-		challenge.MetricsName = "accuracy"
+	if objective.MetricsName == "" {
+		objective.MetricsName = "accuracy"
 	}
-	if challenge.MetricsHash == "" {
-		challenge.MetricsHash = challengeMetricsHash
+	if objective.MetricsHash == "" {
+		objective.MetricsHash = objectiveMetricsHash
 	}
-	if challenge.MetricsStorageAddress == "" {
-		challenge.MetricsStorageAddress = challengeMetricsStorageAddress
+	if objective.MetricsStorageAddress == "" {
+		objective.MetricsStorageAddress = objectiveMetricsStorageAddress
 	}
-	if challenge.TestData == "" {
-		challenge.TestData = datasetOpenerHash + ":" + testDataHash1 + ", " + testDataHash2
+	if objective.TestDataset == "" {
+		objective.TestDataset = dataManagerOpenerHash + ":" + testDataSampleHash1 + ", " + testDataSampleHash2
 	}
-	challenge.Permissions = "all"
-	args, _ := inputStructToBytes(challenge)
-	args = append([][]byte{[]byte("registerChallenge")}, args...)
+	objective.Permissions = "all"
+	args, _ := inputStructToBytes(objective)
+	args = append([][]byte{[]byte("registerObjective")}, args...)
 	return args
 }
 
@@ -138,8 +138,8 @@ func (algo *inputAlgo) createSample() [][]byte {
 	if algo.DescriptionStorageAddress == "" {
 		algo.DescriptionStorageAddress = "https://toto/algo/222/description"
 	}
-	if algo.ChallengeKey == "" {
-		algo.ChallengeKey = challengeDescriptionHash
+	if algo.ObjectiveKey == "" {
+		algo.ObjectiveKey = objectiveDescriptionHash
 	}
 	algo.Permissions = "all"
 	args, _ := inputStructToBytes(algo)
@@ -154,11 +154,11 @@ func (traintuple *inputTraintuple) createSample() [][]byte {
 	if traintuple.InModels == "" {
 		traintuple.InModels = ""
 	}
-	if traintuple.DatasetKey == "" {
-		traintuple.DatasetKey = datasetOpenerHash
+	if traintuple.DataManagerKey == "" {
+		traintuple.DataManagerKey = dataManagerOpenerHash
 	}
-	if traintuple.DataKeys == "" {
-		traintuple.DataKeys = trainDataHash1 + ", " + trainDataHash2
+	if traintuple.DataSampleKeys == "" {
+		traintuple.DataSampleKeys = trainDataSampleHash1 + ", " + trainDataSampleHash2
 	}
 	args, _ := inputStructToBytes(traintuple)
 	args = append([][]byte{[]byte("createTraintuple")}, args...)
@@ -175,45 +175,45 @@ func (testtuple *inputTesttuple) createSample() [][]byte {
 }
 
 func registerItem(mockStub shim.MockStub, itemType string) (error, peer.Response, interface{}) {
-	// 1. add dataset
-	inpDataset := inputDataset{}
-	args := inpDataset.createSample()
+	// 1. add dataManager
+	inpDataManager := inputDataManager{}
+	args := inpDataManager.createSample()
 	resp := mockStub.MockInvoke("42", args)
 	if resp.Status != 200 {
-		return fmt.Errorf("when adding dataset with status %d and message %s", resp.Status, resp.Message), resp, inpDataset
-	} else if itemType == "dataset" {
-		return nil, resp, inpDataset
+		return fmt.Errorf("when adding dataManager with status %d and message %s", resp.Status, resp.Message), resp, inpDataManager
+	} else if itemType == "dataManager" {
+		return nil, resp, inpDataManager
 	}
-	// 2. add test data
-	inpData := inputData{
-		Hashes:      testDataHash1 + ", " + testDataHash2,
-		DatasetKeys: datasetOpenerHash,
-		TestOnly:    "true",
+	// 2. add test dataSample
+	inpDataSample := inputDataSample{
+		Hashes:          testDataSampleHash1 + ", " + testDataSampleHash2,
+		DataManagerKeys: dataManagerOpenerHash,
+		TestOnly:        "true",
 	}
-	args = inpData.createSample()
+	args = inpDataSample.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	if resp.Status != 200 {
-		return fmt.Errorf("when adding test data with status %d and message %s", resp.Status, resp.Message), resp, inpData
-	} else if itemType == "testData" {
-		return nil, resp, inpData
+		return fmt.Errorf("when adding test dataSample with status %d and message %s", resp.Status, resp.Message), resp, inpDataSample
+	} else if itemType == "testDataset" {
+		return nil, resp, inpDataSample
 	}
-	// 3. add challenge
-	inpChallenge := inputChallenge{}
-	args = inpChallenge.createSample()
+	// 3. add objective
+	inpObjective := inputObjective{}
+	args = inpObjective.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	if resp.Status != 200 {
-		return fmt.Errorf("when adding challenge with status %d and message %s", resp.Status, resp.Message), resp, inpChallenge
-	} else if itemType == "challenge" {
-		return nil, resp, inpChallenge
+		return fmt.Errorf("when adding objective with status %d and message %s", resp.Status, resp.Message), resp, inpObjective
+	} else if itemType == "objective" {
+		return nil, resp, inpObjective
 	}
-	// 4. Add train data
-	inpData = inputData{}
-	args = inpData.createSample()
+	// 4. Add train dataSample
+	inpDataSample = inputDataSample{}
+	args = inpDataSample.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	if resp.Status != 200 {
-		return fmt.Errorf("when adding train data with status %d and message %s", resp.Status, resp.Message), resp, inpData
-	} else if itemType == "trainData" {
-		return nil, resp, inpData
+		return fmt.Errorf("when adding train dataSample with status %d and message %s", resp.Status, resp.Message), resp, inpDataSample
+	} else if itemType == "trainDataset" {
+		return nil, resp, inpDataSample
 	}
 	// 5. Add algo
 	inpAlgo := inputAlgo{}
@@ -238,51 +238,51 @@ func TestPipeline(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	fmt.Println("#### ------------ Add Dataset ------------")
-	inpDataset := inputDataset{}
-	printArgsNames("registerDataset", getFieldNames(&inpDataset))
-	args := inpDataset.createSample()
+	fmt.Println("#### ------------ Add DataManager ------------")
+	inpDataManager := inputDataManager{}
+	printArgsNames("registerDataManager", getFieldNames(&inpDataManager))
+	args := inpDataManager.createSample()
 	printArgs(args, "invoke")
 	resp := mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when adding dataset with status %d and message %s", status, resp.Message)
+		t.Errorf("when adding dataManager with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
-	// Get dataset key from Payload
-	datasetKey := string(resp.Payload)
+	// Get dataManager key from Payload
+	dataManagerKey := string(resp.Payload)
 
-	fmt.Println("#### ------------ Query Dataset From key ------------")
-	printArgsNames("query", []string{"elementKey"})
-	args = [][]byte{[]byte("query"), []byte(datasetKey)}
-	printArgs(args, "query")
+	fmt.Println("#### ------------ Query DataManager From key ------------")
+	printArgsNames("queryDataManager", []string{"elementKey"})
+	args = [][]byte{[]byte("queryDataManager"), []byte(dataManagerKey)}
+	printArgs(args, "queryDataManager")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying a dataset with status %d and message %s", status, resp.Message)
+		t.Errorf("when querying a dataManager with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
-	fmt.Println("#### ------------ Add test Data ------------")
-	inpData := inputData{
-		Hashes:   testDataHash1 + ", " + testDataHash2,
+	fmt.Println("#### ------------ Add test DataSample ------------")
+	inpDataSample := inputDataSample{
+		Hashes:   testDataSampleHash1 + ", " + testDataSampleHash2,
 		TestOnly: "true",
 	}
-	printArgsNames("registerData", getFieldNames(&inpData))
-	args = inpData.createSample()
+	printArgsNames("registerDataSample", getFieldNames(&inpDataSample))
+	args = inpDataSample.createSample()
 	printArgs(args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when adding test data with status %d and message %s", status, resp.Message)
+		t.Errorf("when adding test dataSample with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
-	fmt.Println("#### ------------ Add Challenge ------------")
-	inpChallenge := inputChallenge{}
-	printArgsNames("registerChallenge", getFieldNames(&inpChallenge))
-	args = inpChallenge.createSample()
+	fmt.Println("#### ------------ Add Objective ------------")
+	inpObjective := inputObjective{}
+	printArgsNames("registerObjective", getFieldNames(&inpObjective))
+	args = inpObjective.createSample()
 	printArgs(args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when adding challenge with status %d and message %s", status, resp.Message)
+		t.Errorf("when adding objective with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
@@ -297,32 +297,32 @@ func TestPipeline(t *testing.T) {
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
-	fmt.Println("#### ------------ Add Train Data ------------")
-	inpData = inputData{}
-	printArgsNames("registerData", getFieldNames(&inpData))
-	args = inpData.createSample()
+	fmt.Println("#### ------------ Add Train DataSample ------------")
+	inpDataSample = inputDataSample{}
+	printArgsNames("registerDataSample", getFieldNames(&inpDataSample))
+	args = inpDataSample.createSample()
 	printArgs(args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when adding train data with status %d and message %s", status, resp.Message)
+		t.Errorf("when adding train dataSample with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
-	fmt.Println("#### ------------ Query Datasets ------------")
-	args = [][]byte{[]byte("queryDatasets")}
+	fmt.Println("#### ------------ Query DataManagers ------------")
+	args = [][]byte{[]byte("queryDataManagers")}
 	printArgs(args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying dataset with status %d and message %s", status, resp.Message)
+		t.Errorf("when querying dataManager with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
-	fmt.Println("#### ------------ Query Challenges ------------")
-	args = [][]byte{[]byte("queryChallenges")}
+	fmt.Println("#### ------------ Query Objectives ------------")
+	args = [][]byte{[]byte("queryObjectives")}
 	printArgs(args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying challenge with status %d and message %s", status, resp.Message)
+		t.Errorf("when querying objective with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
@@ -344,14 +344,14 @@ func TestPipeline(t *testing.T) {
 		t.Errorf("when adding same traintuple with status %d and message %s", status, resp.Message)
 	}
 	// Get owner of the traintuple
-	args = [][]byte{[]byte("query"), traintupleKey}
+	args = [][]byte{[]byte("queryTraintuple"), traintupleKey}
 	resp = mockStub.MockInvoke("42", args)
 	respTraintuple := resp.Payload
 	traintuple := outputTraintuple{}
 	if err := bytesToStruct(respTraintuple, &traintuple); err != nil {
 		t.Errorf("when unmarshalling queried traintuple with error %s", err)
 	}
-	trainWorker := traintuple.Data.Worker
+	trainWorker := traintuple.Dataset.Worker
 
 	fmt.Println("#### ------------ Add Traintuple with inModel from previous traintuple ------------")
 	inpTraintuple = inputTraintuple{
@@ -398,8 +398,8 @@ func TestPipeline(t *testing.T) {
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
 	fmt.Println("#### ------------ Query Traintuple From key ------------")
-	args = [][]byte{[]byte("query"), traintupleKey}
-	printArgs(args, "query")
+	args = [][]byte{[]byte("queryTraintuple"), traintupleKey}
+	printArgs(args, "queryTraintuple")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying traintuple with status %d and message %s", status, resp.Message)
@@ -408,8 +408,8 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Println("#### ------------ Add Non-Certified Testtuple ------------")
 	inpTesttuple := inputTesttuple{
-		DatasetKey: datasetOpenerHash,
-		DataKeys:   trainDataHash1 + ", " + trainDataHash2,
+		DataManagerKey: dataManagerOpenerHash,
+		DataSampleKeys: trainDataSampleHash1 + ", " + trainDataSampleHash2,
 	}
 	printArgsNames("createTesttuple", getFieldNames(&inpTesttuple))
 	args = inpTesttuple.createSample()
@@ -438,14 +438,14 @@ func TestPipeline(t *testing.T) {
 		t.Errorf("when adding same testtuple with status %d and message %s", status, resp.Message)
 	}
 	// Get owner of the testtuple
-	args = [][]byte{[]byte("query"), testtupleKey}
+	args = [][]byte{[]byte("queryTesttuple"), testtupleKey}
 	resp = mockStub.MockInvoke("42", args)
 	respTesttuple := resp.Payload
 	testtuple := Testtuple{}
 	if err := bytesToStruct(respTesttuple, &testtuple); err != nil {
 		t.Errorf("when unmarshalling queried testtuple with error %s", err)
 	}
-	testWorker := testtuple.Data.Worker
+	testWorker := testtuple.Dataset.Worker
 
 	fmt.Println("#### ------------ Add Testtuple with not done traintuple ------------")
 	inpTesttuple = inputTesttuple{
@@ -490,8 +490,8 @@ func TestPipeline(t *testing.T) {
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
 	fmt.Println("#### ------------ Query Testtuple from its key ------------")
-	args = [][]byte{[]byte("query"), testtupleKey}
-	printArgs(args, "query")
+	args = [][]byte{[]byte("queryTesttuple"), testtupleKey}
+	printArgs(args, "queryTesttuple")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying testtuple with status %d and message %s", status, resp.Message)
@@ -500,7 +500,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Println("#### ------------ Query all Testtuples ------------")
 	args = [][]byte{[]byte("queryTesttuples")}
-	printArgs(args, "query")
+	printArgs(args, "queryTesttuples")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
 		t.Errorf("when querying testtuple with status %d and message %s", status, resp.Message)
@@ -525,12 +525,12 @@ func TestPipeline(t *testing.T) {
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 
-	fmt.Println("#### ------------ Query Dataset Data ------------")
-	args = [][]byte{[]byte("queryDatasetData"), []byte(datasetOpenerHash)}
+	fmt.Println("#### ------------ Query Dataset ------------")
+	args = [][]byte{[]byte("queryDataset"), []byte(dataManagerOpenerHash)}
 	printArgs(args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 200 {
-		t.Errorf("when querying dataset data with status %d and message %s", status, resp.Message)
+		t.Errorf("when querying dataset with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 }
