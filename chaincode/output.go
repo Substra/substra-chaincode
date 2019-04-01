@@ -129,6 +129,10 @@ func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface,
 		err = fmt.Errorf("could not retrieve associated objective with key %s- %s", algo.ObjectiveKey, err.Error())
 		return
 	}
+	if objective.Metrics == nil {
+		err = fmt.Errorf("objective %s is missing metrics values", algo.ObjectiveKey)
+		return
+	}
 	metrics := HashDress{
 		Hash:           objective.Metrics.Hash,
 		StorageAddress: objective.Metrics.StorageAddress,

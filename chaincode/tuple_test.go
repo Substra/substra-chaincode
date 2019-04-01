@@ -5,11 +5,39 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+	// Add a some dataManager, dataSample and traintuple
+	err, _, _ := registerItem(*mockStub, "traintuple")
+	assert.NoError(t, err)
+
+	// Manually open a ledger transaction
+	mockStub.MockTransactionStart("42")
+	defer mockStub.MockTransactionEnd("42")
+
+	// Retreive and alter existing objectif to pass Metrics at nil
+	objective := Objective{}
+	getElementStruct(mockStub, objectiveDescriptionHash, &objective)
+	assert.NoError(t, err)
+	objective.Metrics = nil
+	objBytes, err := json.Marshal(objective)
+	assert.NoError(t, err)
+	err = mockStub.PutState(objectiveDescriptionHash, objBytes)
+	assert.NoError(t, err)
+
+	// It should not panic
+	require.NotPanics(t, func() {
+		getOutputTraintuple(mockStub, traintupleKey)
+	})
+}
 func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
