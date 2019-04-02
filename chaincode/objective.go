@@ -31,7 +31,7 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 	}
 	objective.TestDataset = &Dataset{
 		DataManagerKey: dataManagerKey,
-		DataSampleKeys:   dataSampleKeys,
+		DataSampleKeys: dataSampleKeys,
 	}
 	objective.Name = inp.Name
 	objective.DescriptionStorageAddress = inp.DescriptionStorageAddress
