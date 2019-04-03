@@ -304,8 +304,7 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 			return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
 		}
 	}
-	createdTraintuple := map[string]string{"key": traintupleKey, "fltask": traintuple.FLtask}
-	return json.Marshal(createdTraintuple)
+	return []byte(traintupleKey), nil
 }
 
 // createTesttuple adds a Testtuple in the ledger
