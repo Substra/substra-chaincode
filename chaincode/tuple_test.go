@@ -6,8 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
@@ -64,7 +62,6 @@ func TestTraintupleFLtaskCreation(t *testing.T) {
 
 	inpTraintuple = inputTraintuple{Rank: "0"}
 	args = inpTraintuple.createSample()
-	spew.Dump(inpTraintuple)
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 	key := string(resp.Payload)
@@ -72,10 +69,9 @@ func TestTraintupleFLtaskCreation(t *testing.T) {
 
 	inpTraintuple = inputTraintuple{Rank: "0"}
 	args = inpTraintuple.createSample()
-	spew.Dump(inpTraintuple)
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 500, resp.Status, "should failed for existing FLtask")
-	require.Contains(t, resp.Message, "traintuple with these algo, in models, and train dataSample already exist")
+	require.Contains(t, resp.Message, "this traintuple already exists")
 }
 
 func TestTraintupleMultipleFLtaskCreations(t *testing.T) {

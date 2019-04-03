@@ -650,10 +650,12 @@ func queryTesttuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, er
 	}
 	key := args[0]
 	var testtuple Testtuple
+	var out outputTesttuple
 	if err := getElementStruct(stub, key, &testtuple); err != nil {
 		return nil, err
 	}
-	return json.Marshal(testtuple)
+	out.Fill(key, testtuple)
+	return json.Marshal(out)
 }
 
 // queryTesttuples returns all testtuples of the ledger
@@ -666,13 +668,15 @@ func queryTesttuples(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	if err != nil {
 		return nil, fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
 	}
-	var outTesttuples []Testtuple
+	var outTesttuples []outputTesttuple
 	for _, key := range elementsKeys {
 		var testtuple Testtuple
+		var out outputTesttuple
 		if err := getElementStruct(stub, key, &testtuple); err != nil {
 			return nil, err
 		}
-		outTesttuples = append(outTesttuples, testtuple)
+		out.Fill(key, testtuple)
+		outTesttuples = append(outTesttuples, out)
 	}
 	return json.Marshal(outTesttuples)
 }
