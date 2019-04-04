@@ -46,16 +46,6 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	}
 	traintuple.AlgoKey = inp.AlgoKey
 
-	// create key: hash of algo + start model + train dataset + creator (keys)
-	// certainly not be the most efficient key... but let's make it work and them try to make it better...
-	tKey := sha256.Sum256([]byte(inp.AlgoKey + inp.InModels + inp.DataSampleKeys + creator))
-	traintupleKey = hex.EncodeToString(tKey[:])
-	// check if traintuple key already exist
-	if elementBytes, _ := stub.GetState(traintupleKey); elementBytes != nil {
-		err = fmt.Errorf("traintuple with these algo, in models, and train dataSample already exist - %s", traintupleKey)
-		return
-	}
-
 	// check if InModels is empty or if mentionned models do exist and fill inModels
 	status := "todo"
 	parentTraintupleKeys := strings.Split(strings.Replace(inp.InModels, " ", "", -1), ",")
@@ -96,6 +86,14 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 		DataSampleKeys: dataSampleKeys,
 	}
 	traintuple.Worker, err = getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
+	if err != nil {
+		return
+	}
+
+	hashKeys := []string{creator, traintuple.AlgoKey, traintuple.Dataset.DataManagerKey}
+	hashKeys = append(hashKeys, traintuple.Dataset.DataSampleKeys...)
+	hashKeys = append(hashKeys, traintuple.InModelKeys...)
+	traintupleKey, err = HashForKey(stub, "traintuple", hashKeys)
 	if err != nil {
 		return
 	}
@@ -150,7 +148,6 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 			traintuple.FLtask = inp.FLtask
 		}
 	}
-
 	return
 }
 
@@ -245,16 +242,8 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	}
 
 	// create testtuple key and check if it already exists
-	toHash := "testtuple"
-	toHash += testtuple.Model.TraintupleKey
-	toHash += strings.Join(dataSampleKeys, ",")
-	tKey := sha256.Sum256([]byte(toHash))
-	testtupleKey = hex.EncodeToString(tKey[:])
-	if testtupleBytes, err := stub.GetState(testtupleKey); testtupleBytes != nil {
-		return testtupleKey, fmt.Errorf("this testtuple already exists (tkey: %s)", testtupleKey)
-	} else if err != nil {
-		return testtupleKey, err
-	}
+	hashKeys := append(dataSampleKeys, testtuple.Model.TraintupleKey, dataManagerKey, creator)
+	testtupleKey, err = HashForKey(stub, "testtuple", hashKeys)
 
 	return testtupleKey, err
 }
@@ -661,10 +650,12 @@ func queryTesttuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, er
 	}
 	key := args[0]
 	var testtuple Testtuple
+	var out outputTesttuple
 	if err := getElementStruct(stub, key, &testtuple); err != nil {
 		return nil, err
 	}
-	return json.Marshal(testtuple)
+	out.Fill(key, testtuple)
+	return json.Marshal(out)
 }
 
 // queryTesttuples returns all testtuples of the ledger
@@ -677,13 +668,15 @@ func queryTesttuples(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	if err != nil {
 		return nil, fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
 	}
-	var outTesttuples []Testtuple
+	var outTesttuples []outputTesttuple
 	for _, key := range elementsKeys {
 		var testtuple Testtuple
+		var out outputTesttuple
 		if err := getElementStruct(stub, key, &testtuple); err != nil {
 			return nil, err
 		}
-		outTesttuples = append(outTesttuples, testtuple)
+		out.Fill(key, testtuple)
+		outTesttuples = append(outTesttuples, out)
 	}
 	return json.Marshal(outTesttuples)
 }
@@ -1014,4 +1007,21 @@ func getTraintuplesPayload(stub shim.ChaincodeStubInterface, traintupleKeys []st
 		elements = append(elements, element)
 	}
 	return json.Marshal(elements)
+}
+
+// HashForKey to generate key for an asset
+func HashForKey(stub shim.ChaincodeStubInterface, objectType string, hashElements []string) (key string, err error) {
+	toHash := objectType
+	sort.Strings(hashElements)
+	for _, element := range hashElements {
+		toHash += "," + element
+	}
+	sum := sha256.Sum256([]byte(toHash))
+	key = hex.EncodeToString(sum[:])
+	if bytes, stubErr := stub.GetState(key); bytes != nil {
+		err = fmt.Errorf("this %s already exists (tkey: %s)", objectType, key)
+	} else if stubErr != nil {
+		return key, stubErr
+	}
+	return
 }

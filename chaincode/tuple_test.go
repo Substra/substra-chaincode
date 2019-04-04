@@ -71,7 +71,7 @@ func TestTraintupleFLtaskCreation(t *testing.T) {
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 500, resp.Status, "should failed for existing FLtask")
-	require.Contains(t, resp.Message, "traintuple with these algo, in models, and train dataSample already exist")
+	require.Contains(t, resp.Message, "this traintuple already exists")
 }
 
 func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
