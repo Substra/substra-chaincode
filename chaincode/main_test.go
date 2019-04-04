@@ -24,7 +24,7 @@ const algoName = "hog + svm"
 const modelHash = "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed"
 const modelAddress = "https://substrabac/model/toto"
 const worker = "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0"
-const traintupleKey = "337c5b7d78ffa157471cc790b61caa99b486cbf30b049c8c0550ed40f3fa1d4f"
+const traintupleKey = "8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687"
 
 func TestInit(t *testing.T) {
 	scc := new(SubstraChaincode)
