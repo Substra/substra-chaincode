@@ -18,16 +18,16 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	args := inpDataManager.createSample()
 	mockStub.MockInvoke("42", args)
 	inpDataSample := inputDataSample{
-		Hashes:      testDataSampleHash1,
+		Hashes:          testDataSampleHash1,
 		DataManagerKeys: dataManagerOpenerHash,
-		TestOnly:    "true",
+		TestOnly:        "true",
 	}
 	args = inpDataSample.createSample()
 	mockStub.MockInvoke("42", args)
 	inpDataSample = inputDataSample{
-		Hashes:      testDataSampleHash2,
+		Hashes:          testDataSampleHash2,
 		DataManagerKeys: dataManagerOpenerHash,
-		TestOnly:    "true",
+		TestOnly:        "true",
 	}
 	args = inpDataSample.createSample()
 	r := mockStub.MockInvoke("42", args)
@@ -67,7 +67,11 @@ func TestObjective(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 	inpObjective = tt.(inputObjective)
-	objectiveKey := string(resp.Payload)
+	res := map[string]string{}
+	err = json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	objectiveKey := res["key"]
 	if objectiveKey != inpObjective.DescriptionHash {
 		t.Errorf("when adding objective: unexpected returned objective key - %s / %s", objectiveKey, inpObjective.DescriptionHash)
 	}
@@ -86,7 +90,7 @@ func TestObjective(t *testing.T) {
 		Owner: "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
 		TestDataset: &Dataset{
 			DataManagerKey: dataManagerOpenerHash,
-			DataSampleKeys:   []string{testDataSampleHash1, testDataSampleHash2},
+			DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 		},
 		Name: inpObjective.Name,
 		Description: HashDress{

@@ -254,10 +254,11 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 // -------------------------------------------------------------------------------------------
 
 // createTraintuple adds a Traintuple in the ledger
-func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	expectedArgs := getFieldNames(&inputTraintuple{})
 	if nbArgs := len(expectedArgs); (nbArgs != len(args)) && (nbArgs != len(args)-2) {
-		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+		return
 	}
 
 	// convert input strings args to input struct inputTraintuplet
@@ -267,40 +268,46 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	traintuple := Traintuple{}
 	traintupleKey, err := traintuple.Set(stub, inp)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	// store in ledger
 	traintupleBytes, _ := json.Marshal(traintuple)
 	if err = stub.PutState(traintupleKey, traintupleBytes); err != nil {
-		return nil, fmt.Errorf("could not put in ledger traintuple with algo %s inModels %s - %s", inp.AlgoKey, inp.InModels, err.Error())
+		err = fmt.Errorf("could not put in ledger traintuple with algo %s inModels %s - %s", inp.AlgoKey, inp.InModels, err.Error())
+		return
 	}
 
 	// create composite keys
 	if err = createCompositeKey(stub, "traintuple~algo~key", []string{"traintuple", traintuple.AlgoKey, traintupleKey}); err != nil {
-		return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
+		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+		return
 	}
 	if err = createCompositeKey(stub, "traintuple~worker~status~key", []string{"traintuple", traintuple.Dataset.Worker, traintuple.Status, traintupleKey}); err != nil {
-		return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
+		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+		return
 	}
 	for _, inModelKey := range traintuple.InModelKeys {
 		if err = createCompositeKey(stub, "traintuple~inModel~key", []string{"traintuple", inModelKey, traintupleKey}); err != nil {
-			return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
+			err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+			return
 		}
 	}
 	if traintuple.FLtask != "" {
 		if err = createCompositeKey(stub, "traintuple~fltask~worker~rank~key", []string{"traintuple", traintuple.FLtask, traintuple.Dataset.Worker, inp.Rank, traintupleKey}); err != nil {
-			return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
+			err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+			return
 		}
 	}
-	return []byte(traintupleKey), nil
+	return map[string]string{"key": traintupleKey}, nil
 }
 
 // createTesttuple adds a Testtuple in the ledger
-func createTesttuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	expectedArgs := getFieldNames(&inputTesttuple{})
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+		return
 	}
 
 	// convert input strings args to input struct inputTesttuple
@@ -310,101 +317,110 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	testtuple := Testtuple{}
 	testtupleKey, err := testtuple.Set(stub, inp)
 	if err != nil {
-		return nil, err
+		return
 	}
 	testtupleBytes, _ := json.Marshal(testtuple)
 	if err = stub.PutState(testtupleKey, testtupleBytes); err != nil {
-		return nil, fmt.Errorf("could not put in ledger testtuple associated with traintuple %s - %s", inp.TraintupleKey, err.Error())
+		err = fmt.Errorf("could not put in ledger testtuple associated with traintuple %s - %s", inp.TraintupleKey, err.Error())
+		return
 	}
 
 	// create composite keys
 	if err = createCompositeKey(stub, "testtuple~algo~key", []string{"testtuple", testtuple.Algo.Hash, testtupleKey}); err != nil {
-		return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
+		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+		return
 	}
 	if err = createCompositeKey(stub, "testtuple~worker~status~key", []string{"testtuple", testtuple.Dataset.Worker, testtuple.Status, testtupleKey}); err != nil {
-		return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
+		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+		return
 	}
 	if err = createCompositeKey(stub, "testtuple~traintuple~certified~key", []string{"testtuple", inp.TraintupleKey, strconv.FormatBool(testtuple.Certified), testtupleKey}); err != nil {
-		return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
+		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+		return
 	}
-	return []byte(testtupleKey), nil
+	return map[string]string{"key": testtupleKey}, nil
 }
 
 // logStartTrain modifies a traintuple by changing its status from todo to doing
-func logStartTrain(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple Traintuple, err error) {
 	expectedArgs := [1]string{"key of the traintuple to update"}
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		return
 	}
 
 	oldStatus := "todo"
 	status := "doing"
 	traintupleKey := args[0]
 	// get traintuple, check validity of the update, and update its status
-	traintuple, oldStatus, err := updateStatusTraintuple(stub, traintupleKey, status)
+	traintuple, oldStatus, err = updateStatusTraintuple(stub, traintupleKey, status)
 	if err != nil {
-		return nil, err
+		return
 	}
 	// save to ledger
 	traintupleBytes, _ := json.Marshal(traintuple)
-	if err := stub.PutState(traintupleKey, traintupleBytes); err != nil {
-		return traintupleBytes, fmt.Errorf("failed to update traintuple status to %s with key %s", status, traintupleKey)
+	if err = stub.PutState(traintupleKey, traintupleBytes); err != nil {
+		err = fmt.Errorf("failed to update traintuple status to %s with key %s", status, traintupleKey)
+		return
 	}
 	// get worker
 	worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
 	if err != nil {
-		return nil, err
+		return
 	}
 	// update associated composite keys
 	indexName := "traintuple~worker~status~key"
 	oldAttributes := []string{"traintuple", worker, oldStatus, traintupleKey}
 	newAttributes := []string{"traintuple", worker, status, traintupleKey}
-	if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
-		return nil, err
+	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
+		return
 	}
-	return traintupleBytes, nil
+	return
 }
 
 // logStartTest modifies a testtuple by changing its status from todo to doing
-func logStartTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func logStartTest(stub shim.ChaincodeStubInterface, args []string) (testtuple Testtuple, err error) {
 	expectedArgs := [1]string{"key of the testtuple to update"}
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		return
 	}
 
 	oldStatus := "todo"
 	status := "doing"
 	testtupleKey := args[0]
 	// get testtuple, check validity of the update, and update its status
-	testtuple, oldStatus, err := updateStatusTesttuple(stub, testtupleKey, status)
+	testtuple, oldStatus, err = updateStatusTesttuple(stub, testtupleKey, status)
 	if err != nil {
-		return nil, err
+		return
 	}
 	// save to ledger
 	testtupleBytes, _ := json.Marshal(testtuple)
-	if err := stub.PutState(testtupleKey, testtupleBytes); err != nil {
-		return testtupleBytes, fmt.Errorf("failed to update testtuple status to %s with key %s", status, testtupleKey)
+	if err = stub.PutState(testtupleKey, testtupleBytes); err != nil {
+		err = fmt.Errorf("failed to update testtuple status to %s with key %s", status, testtupleKey)
+		return
 	}
 	// update associated composite keys
 	indexName := "testtuple~worker~status~key"
 	oldAttributes := []string{"testtuple", testtuple.Dataset.Worker, oldStatus, testtupleKey}
 	newAttributes := []string{"testtuple", testtuple.Dataset.Worker, status, testtupleKey}
-	if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
-		return nil, err
+	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
+		return
 	}
-	return testtupleBytes, nil
+	return
 }
 
 // logSuccessTrain modifies a traintuple by changing its status from doing to done
 // reports logs and associated performances
-func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple Traintuple, err error) {
 	expectedArgs := [4]string{
 		"key of the traintuple to update",
 		"end model hash and storage address (endModelHash, endModelStorageAddress)",
 		"train perf (float)",
 		"logs"}
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		return
 	}
 
 	oldStatus := "doing"
@@ -413,23 +429,24 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	traintupleKey := args[0]
 	outModel := strings.Split(strings.Replace(args[1], " ", "", -1), ",")
 	if len(outModel[0]) != lenKey {
-		return nil, fmt.Errorf("invalid length of model hash")
+		err = fmt.Errorf("invalid length of model hash")
+		return
 	}
 	// get train perf, check validity
 	perf, err := strconv.ParseFloat(args[2], 32)
 	if err != nil {
-		return nil, err
+		return
 	}
 	// get logs and check validity
 	log := args[3]
 	if err = checkLog(log); err != nil {
-		return nil, err
+		return
 	}
 
 	// get traintuple, check validity of the update, and update its status
-	traintuple, oldStatus, err := updateStatusTraintuple(stub, traintupleKey, status)
+	traintuple, oldStatus, err = updateStatusTraintuple(stub, traintupleKey, status)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	// update traintuple
@@ -440,69 +457,73 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	traintuple.Log += log
 	traintupleBytes, _ := json.Marshal(traintuple)
 	if err = stub.PutState(traintupleKey, traintupleBytes); err != nil {
-		return nil, fmt.Errorf("failed to update traintuple status to trained with key %s", traintupleKey)
+		err = fmt.Errorf("failed to update traintuple status to trained with key %s", traintupleKey)
+		return
 	}
 	// get worker
 	worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
 	if err != nil {
-		return nil, err
+		return
 	}
 	// update associated composite keys
 	indexName := "traintuple~worker~status~key"
 	oldAttributes := []string{"traintuple", worker, oldStatus, traintupleKey}
 	newAttributes := []string{"traintuple", worker, status, traintupleKey}
 	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
-		return nil, err
+		return
 	}
 
 	// update traintuples whose inModel use the outModel of this traintuple
-	if err := updateWaitingTraintuples(stub, traintupleKey, "done"); err != nil {
-		return nil, err
+	if err = updateWaitingTraintuples(stub, traintupleKey, "done"); err != nil {
+		return
 	}
 	// update testtuple associated with this traintuple
-	if err := updateWaitingTesttuples(stub, traintupleKey, traintuple.OutModel, "todo"); err != nil {
-		return nil, err
+	if err = updateWaitingTesttuples(stub, traintupleKey, traintuple.OutModel, "todo"); err != nil {
+		return
 	}
-	return traintupleBytes, nil
+	return
 }
 
 // logSuccessTest modifies a testtuple by changing its status to done, reports perf and logs
-func logSuccessTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func logSuccessTest(stub shim.ChaincodeStubInterface, args []string) (testtuple Testtuple, err error) {
 	expectedArgs := [3]string{"key of the testtuple to update", "test perf (float)", "logs"}
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		return
 	}
 
 	status := "done"
 	// get testtuple
 	testtupleKey := args[0]
 	if len(testtupleKey) != lenKey {
-		return nil, fmt.Errorf("invalid testtuple key")
+		err = fmt.Errorf("invalid testtuple key")
+		return
 	}
 	// get testtuple, check validity of the update, and update its status
 	testtuple, oldStatus, err := updateStatusTesttuple(stub, testtupleKey, status)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	// get test perf, check validity
 	perf, err := strconv.ParseFloat(args[1], 32)
 	if err != nil {
-		return nil, err
+		return
 	}
 	testtuple.Dataset.Perf = float32(perf)
 
 	// get logs and check validity
 	log := args[2]
 	if err = checkLog(log); err != nil {
-		return nil, err
+		return
 	}
 	testtuple.Log += log
 
 	// save to ledger
 	testtupleBytes, _ := json.Marshal(testtuple)
 	if err = stub.PutState(testtupleKey, testtupleBytes); err != nil {
-		return nil, fmt.Errorf("failed to update testtuple status to trained with key %s", testtupleKey)
+		err = fmt.Errorf("failed to update testtuple status to trained with key %s", testtupleKey)
+		return
 	}
 
 	// update associated composite keys
@@ -510,207 +531,212 @@ func logSuccessTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, er
 	oldAttributes := []string{"testtuple", testtuple.Dataset.Worker, oldStatus, testtupleKey}
 	newAttributes := []string{"testtuple", testtuple.Dataset.Worker, status, testtupleKey}
 	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
-		return nil, err
+		return
 	}
-	return testtupleBytes, nil
+	return
 }
 
 // logFailTrain modifies a traintuple by changing its status to fail and reports associated logs
-func logFailTrain(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple Traintuple, err error) {
 	expectedArgs := [2]string{"the key of the traintuple to update", "logs"}
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		return
 	}
 	// get input args
 	traintupleKey := args[0]
 	if len(traintupleKey) != lenKey {
-		return nil, fmt.Errorf("invalid traintuple key")
+		err = fmt.Errorf("invalid traintuple key")
+		return
 	}
 	log := args[1]
-	if err := checkLog(log); err != nil {
-		return nil, err
+	if err = checkLog(log); err != nil {
+		return
 	}
 	// get traintuple and updates its status
 	traintuple, oldStatus, err := updateStatusTraintuple(stub, traintupleKey, "failed")
 	if err != nil {
-		return nil, err
+		return
 	}
 	traintuple.Log += log
 	traintupleBytes, _ := json.Marshal(traintuple)
-	if err := stub.PutState(traintupleKey, traintupleBytes); err != nil {
-		return nil, fmt.Errorf("failed to update traintuple status to failed with key %s", traintupleKey)
+	if err = stub.PutState(traintupleKey, traintupleBytes); err != nil {
+		err = fmt.Errorf("failed to update traintuple status to failed with key %s", traintupleKey)
+		return
 	}
 	// get worker
 	worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
 	if err != nil {
-		return nil, err
+		return
 	}
 	// update associated composite keys
 	indexName := "traintuple~worker~status~key"
 	oldAttributes := []string{"traintuple", worker, oldStatus, traintupleKey}
 	newAttributes := []string{"traintuple", worker, "failed", traintupleKey}
-	if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
-		return nil, err
+	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
+		return
 	}
 	// update testtuple associated with this traintuple
-	if err := updateWaitingTesttuples(stub, traintupleKey, &HashDress{}, "failed"); err != nil {
-		return nil, err
+	if err = updateWaitingTesttuples(stub, traintupleKey, &HashDress{}, "failed"); err != nil {
+		return
 	}
 	// update traintuple having this traintuple as inModel
-	if err := updateWaitingTraintuples(stub, traintupleKey, "failed"); err != nil {
-		return nil, err
+	if err = updateWaitingTraintuples(stub, traintupleKey, "failed"); err != nil {
+		return
 	}
-	return traintupleBytes, nil
+	return
 }
 
 // logFailTest modifies a testtuple by changing its status to fail and reports associated logs
-func logFailTest(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func logFailTest(stub shim.ChaincodeStubInterface, args []string) (testtuple Testtuple, err error) {
 	expectedArgs := [2]string{"the key of the testtuple to update", "logs"}
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		return
 	}
 
 	status := "failed"
 	// get input args
 	testtupleKey := args[0]
 	if len(testtupleKey) != lenKey {
-		return nil, fmt.Errorf("invalid testtuple key")
+		err = fmt.Errorf("invalid testtuple key")
+		return
 	}
 	log := args[1]
-	if err := checkLog(log); err != nil {
-		return nil, err
+	if err = checkLog(log); err != nil {
+		return
 	}
 	// get testtuple and updates its status
 	testtuple, oldStatus, err := updateStatusTesttuple(stub, testtupleKey, status)
 	if err != nil {
-		return nil, err
+		return
 	}
 	testtuple.Log += log
 	testtupleBytes, _ := json.Marshal(testtuple)
-	if err := stub.PutState(testtupleKey, testtupleBytes); err != nil {
-		return nil, fmt.Errorf("failed to update testtuple status to failed with key %s", testtupleKey)
+	if err = stub.PutState(testtupleKey, testtupleBytes); err != nil {
+		err = fmt.Errorf("failed to update testtuple status to failed with key %s", testtupleKey)
+		return
 	}
 	// update associated composite keys
 	indexName := "testtuple~worker~status~key"
 	oldAttributes := []string{"testtuple", testtuple.Dataset.Worker, oldStatus, testtupleKey}
 	newAttributes := []string{"testtuple", testtuple.Dataset.Worker, status, testtupleKey}
-	if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
-		return nil, err
+	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
+		return
 	}
-	return testtupleBytes, nil
+	return
 }
 
 // queryTraintuple returns info about a traintuple given its key
-func queryTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func queryTraintuple(stub shim.ChaincodeStubInterface, args []string) (outputTraintuple outputTraintuple, err error) {
 	expectedArgs := [1]string{"traintuple key"}
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		return
 	}
 	traintupleKey := args[0]
 	traintuple := Traintuple{}
-	if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
-		return nil, err
+	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
+		return
 	}
-	outputTraintuple := outputTraintuple{}
 	outputTraintuple.Fill(stub, traintuple)
-	// Marshal payload
-	payload, err := json.Marshal(outputTraintuple)
-	return payload, err
-
+	return
 }
 
 // queryTraintuples returns all traintuples
-func queryTraintuples(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func queryTraintuples(stub shim.ChaincodeStubInterface, args []string) (elements []map[string]interface{}, err error) {
 	if len(args) != 0 {
-		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
+		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
+		return
 	}
 	elementsKeys, err := getKeysFromComposite(stub, "traintuple~algo~key", []string{"traintuple"})
 	if err != nil {
-		return nil, err
+		return
 	}
-	var elements []map[string]interface{}
 	for _, key := range elementsKeys {
 		var element map[string]interface{}
-		outputTraintuple, err := getOutputTraintuple(stub, key)
+		var outputTraintuple outputTraintuple
+		outputTraintuple, err = getOutputTraintuple(stub, key)
 		if err != nil {
-			return nil, err
+			return
 		}
 		oo, _ := json.Marshal(outputTraintuple)
 		json.Unmarshal(oo, &element)
 		element["key"] = key
 		elements = append(elements, element)
 	}
-	return json.Marshal(elements)
+	return
 }
 
 // queryTesttuple returns a testtuple of the ledger given its key
-func queryTesttuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func queryTesttuple(stub shim.ChaincodeStubInterface, args []string) (out outputTesttuple, err error) {
 	if len(args) != 1 || len(args[0]) != 64 {
-		return nil, fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+		err = fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+		return
 	}
 	key := args[0]
 	var testtuple Testtuple
-	var out outputTesttuple
-	if err := getElementStruct(stub, key, &testtuple); err != nil {
-		return nil, err
+	if err = getElementStruct(stub, key, &testtuple); err != nil {
+		return
 	}
 	out.Fill(key, testtuple)
-	return json.Marshal(out)
+	return
 }
 
 // queryTesttuples returns all testtuples of the ledger
-func queryTesttuples(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func queryTesttuples(stub shim.ChaincodeStubInterface, args []string) (outTesttuples []outputTesttuple, err error) {
 	if len(args) != 0 {
-		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
+		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
+		return
 	}
 	var indexName = "testtuple~traintuple~certified~key"
 	elementsKeys, err := getKeysFromComposite(stub, indexName, []string{"testtuple"})
 	if err != nil {
-		return nil, fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
+		err = fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
+		return
 	}
-	var outTesttuples []outputTesttuple
 	for _, key := range elementsKeys {
 		var testtuple Testtuple
 		var out outputTesttuple
-		if err := getElementStruct(stub, key, &testtuple); err != nil {
-			return nil, err
+		if err = getElementStruct(stub, key, &testtuple); err != nil {
+			return
 		}
 		out.Fill(key, testtuple)
 		outTesttuples = append(outTesttuples, out)
 	}
-	return json.Marshal(outTesttuples)
+	return
 }
 
 // queryModelDetails returns info about the testtuple and algo related to a traintuple
-func queryModelDetails(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func queryModelDetails(stub shim.ChaincodeStubInterface, args []string) (mPayload map[string]interface{}, err error) {
 	expectedArgs := [1]string{"traintuple key"}
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+		return
 	}
 	traintupleKey := args[0]
 
-	mPayload := make(map[string]interface{})
 	// get associated traintuple
 	var element map[string]interface{}
 	outputTraintuple, err := getOutputTraintuple(stub, traintupleKey)
 	if err != nil {
-		return nil, err
+		return
 	}
 	oo, _ := json.Marshal(outputTraintuple)
 	json.Unmarshal(oo, &element)
 	element["key"] = traintupleKey
-	mPayload["traintuple"] = element
+	mPayload = map[string]interface{}{"traintuple": element}
 	// get certified and non-certified testtuples related to traintuple
 	var nonCertifiedTesttuples []map[string]interface{}
 	testtupleKeys, err := getKeysFromComposite(stub, "testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey})
 	if err != nil {
-		return nil, err
+		return
 	}
 	for _, testtupleKey := range testtupleKeys {
 		// get testtuple and serialize it
 		var testtuple map[string]interface{}
 		if err = getElementStruct(stub, testtupleKey, &testtuple); err != nil {
-			return nil, err
+			return
 		}
 		testtuple["key"] = testtupleKey
 		if testtuple["certified"] == true {
@@ -720,31 +746,29 @@ func queryModelDetails(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 		}
 		mPayload["nonCertifiedTesttuples"] = nonCertifiedTesttuples
 	}
-	// Marshal payload
-	payload, err := json.Marshal(mPayload)
-	return payload, err
+	return
 }
 
 // queryModels returns all traintuples and associated testuples
 // TODO
-func queryModels(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func queryModels(stub shim.ChaincodeStubInterface, args []string) (elements []map[string]interface{}, err error) {
 	if len(args) != 0 {
-		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
+		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
+		return
 	}
 
 	traintupleKeys, err := getKeysFromComposite(stub, "traintuple~algo~key", []string{"traintuple"})
 	if err != nil {
-		return nil, err
+		return
 	}
-	var elements []map[string]interface{}
 	for _, traintupleKey := range traintupleKeys {
+		var outputTraintuple outputTraintuple
 		element := make(map[string]interface{})
 		traintuple := make(map[string]interface{})
-
 		// get traintuple
-		outputTraintuple, err := getOutputTraintuple(stub, traintupleKey)
+		outputTraintuple, err = getOutputTraintuple(stub, traintupleKey)
 		if err != nil {
-			return nil, err
+			return
 		}
 		oo, _ := json.Marshal(outputTraintuple)
 		json.Unmarshal(oo, &traintuple)
@@ -752,23 +776,24 @@ func queryModels(stub shim.ChaincodeStubInterface, args []string) ([]byte, error
 		element["traintuple"] = traintuple
 
 		// get testtuple related to traintuple
-		testtupleKeys, err := getKeysFromComposite(stub, "testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey, "true"})
+		var testtupleKeys []string
+		testtupleKeys, err = getKeysFromComposite(stub, "testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey, "true"})
 		if err != nil {
-			return nil, err
+			return
 		}
 		if len(testtupleKeys) == 1 {
 			// get testtuple and serialize it
 			testtupleKey := testtupleKeys[0]
 			testtuple := make(map[string]interface{})
 			if err = getElementStruct(stub, testtupleKey, &testtuple); err != nil {
-				return nil, err
+				return
 			}
 			testtuple["key"] = testtupleKey
 			element["testtuple"] = testtuple
 		}
 		elements = append(elements, element)
 	}
-	return json.Marshal(elements)
+	return
 }
 
 // --------------------------------------------------------------
@@ -989,7 +1014,7 @@ func updateWaitingTesttuples(stub shim.ChaincodeStubInterface, traintupleKey str
 }
 
 // getTraintuplesPayload takes as input a list of keys and returns a paylaod containing a list of associated retrieved elements
-func getTraintuplesPayload(stub shim.ChaincodeStubInterface, traintupleKeys []string) ([]byte, error) {
+func getTraintuplesPayload(stub shim.ChaincodeStubInterface, traintupleKeys []string) ([]map[string]interface{}, error) {
 
 	var elements []map[string]interface{}
 	for _, key := range traintupleKeys {
@@ -1006,7 +1031,7 @@ func getTraintuplesPayload(stub shim.ChaincodeStubInterface, traintupleKeys []st
 		element["key"] = key
 		elements = append(elements, element)
 	}
-	return json.Marshal(elements)
+	return elements, nil
 }
 
 // HashForKey to generate key for an asset

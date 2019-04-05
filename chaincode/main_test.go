@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	peer "github.com/hyperledger/fabric/protos/peer"
+	"github.com/stretchr/testify/assert"
 )
 
 const objectiveDescriptionHash = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
@@ -249,7 +251,11 @@ func TestPipeline(t *testing.T) {
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 	// Get dataManager key from Payload
-	dataManagerKey := string(resp.Payload)
+	res := map[string]string{}
+	err := json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	dataManagerKey := res["key"]
 
 	fmt.Println("#### ------------ Query DataManager From key ------------")
 	printArgsNames("queryDataManager", []string{"elementKey"})
@@ -337,7 +343,11 @@ func TestPipeline(t *testing.T) {
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 	// Get traintuple key from Payload
-	traintupleKey := resp.Payload
+	res = map[string]string{}
+	err = json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	traintupleKey := []byte(res["key"])
 	// check not possible to create same traintuple
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
@@ -368,7 +378,11 @@ func TestPipeline(t *testing.T) {
 		t.Errorf("when adding traintuple with status %d and message %s", status, resp.Message)
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
-	todoTraintupleKey := string(resp.Payload)
+	res = map[string]string{}
+	err = json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	todoTraintupleKey := res["key"]
 
 	fmt.Println("#### ------------ Query Traintuples of worker with todo status ------------")
 	args = [][]byte{[]byte("queryFilter"), []byte("traintuple~worker~status"), []byte(trainWorker + ", todo")}
@@ -434,7 +448,11 @@ func TestPipeline(t *testing.T) {
 	}
 	fmt.Printf(">  %s \n\n", string(resp.Payload))
 	// Get testtuple key from Payload
-	testtupleKey := resp.Payload
+	res = map[string]string{}
+	err = json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	testtupleKey := []byte(res["key"])
 	// check not possible to create same testtuple
 	resp = mockStub.MockInvoke("42", args)
 	if status := resp.Status; status != 500 {
