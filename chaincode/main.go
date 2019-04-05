@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -29,7 +30,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	// Extract the function and args from the transaction proposal
 	fn, args := stub.GetFunctionAndParameters()
 
-	var result []byte
+	var result interface{}
 	var err error
 	switch fn {
 	case "createTesttuple":
@@ -95,7 +96,13 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	if err != nil {
 		return shim.Error(err.Error())
 	}
-	return shim.Success(result)
+	// Marshal to json the smartcontract result
+	resp, err := json.Marshal(result)
+	if err != nil {
+		return shim.Error("could not format response for unknown reason")
+	}
+
+	return shim.Success(resp)
 }
 
 // main function starts up the chaincode in the container during instantiate

@@ -64,7 +64,11 @@ func TestTraintupleFLtaskCreation(t *testing.T) {
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
-	key := string(resp.Payload)
+	res := map[string]string{}
+	err = json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	key := res["key"]
 	require.EqualValues(t, key, traintupleKey)
 
 	inpTraintuple = inputTraintuple{Rank: "0"}
@@ -87,8 +91,11 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 	args := inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
-	key := string(resp.Payload)
-
+	res := map[string]string{}
+	err = json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	key := res["key"]
 	// Failed to add a traintuple with the same rank
 	inpTraintuple = inputTraintuple{
 		InModels: key,
@@ -115,8 +122,10 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same FLtask")
-	ttkey := string(resp.Payload)
-
+	err = json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	ttkey := res["key"]
 	// Add new algo to check all fltask algo consistency
 	newAlgoHash := strings.Replace(algoHash, "a", "b", 1)
 	inpAlgo := inputAlgo{Hash: newAlgoHash}
@@ -142,10 +151,14 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	// Add a some dataManager, dataSample and traintuple
 	err, resp, _ := registerItem(*mockStub, "traintuple")
 	assert.NoError(t, err)
-	traintupleKey := resp.Payload
+	res := map[string]string{}
+	err = json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	traintupleKey := res["key"]
 
 	// Mark the traintuple as failed
-	args := [][]byte{[]byte("logFailTrain"), traintupleKey, []byte("pas glop")}
+	args := [][]byte{[]byte("logFailTrain"), []byte(traintupleKey), []byte("pas glop")}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "should be able to log traintuple as failed")
 
@@ -250,8 +263,11 @@ func TestTraintuple(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 	inpTraintuple = tt.(inputTraintuple)
-	traintupleKey := string(resp.Payload)
-
+	res := map[string]string{}
+	err = json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	traintupleKey := res["key"]
 	// Query traintuple from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)

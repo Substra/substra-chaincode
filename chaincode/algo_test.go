@@ -36,7 +36,11 @@ func TestAlgo(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 	inpAlgo = tt.(inputAlgo)
-	algoKey := string(resp.Payload)
+	res := map[string]string{}
+	err = json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	algoKey := res["key"]
 	if algoKey != inpAlgo.Hash {
 		t.Errorf("when adding algo, key does not corresponds to its hash - key: %s and hash %s", algoKey, inpAlgo.Hash)
 	}

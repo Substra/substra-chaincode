@@ -200,16 +200,15 @@ func updateCompositeKey(stub shim.ChaincodeStubInterface, indexName string, oldA
 }
 
 // getElementsPayload takes as input a list of keys and returns a paylaod containing a list of associated retrieved elements
-func getElementsPayload(stub shim.ChaincodeStubInterface, elementsKeys []string) ([]byte, error) {
+func getElementsPayload(stub shim.ChaincodeStubInterface, elementsKeys []string) (elements []map[string]interface{}, err error) {
 
-	var elements []map[string]interface{}
 	for _, key := range elementsKeys {
 		var element map[string]interface{}
-		if err := getElementStruct(stub, key, &element); err != nil {
-			return nil, err
+		if err = getElementStruct(stub, key, &element); err != nil {
+			return
 		}
 		element["key"] = key
 		elements = append(elements, element)
 	}
-	return json.Marshal(elements)
+	return
 }
