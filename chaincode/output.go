@@ -177,3 +177,13 @@ func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface,
 
 	return
 }
+
+type outputTesttuple struct {
+	Key string `json:"key"`
+	Testtuple
+}
+
+func (out *outputTesttuple) Fill(key string, in Testtuple) {
+	out.Testtuple = in
+	out.Key = key
+}

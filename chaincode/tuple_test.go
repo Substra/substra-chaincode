@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -38,6 +39,102 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 		getOutputTraintuple(mockStub, traintupleKey)
 	})
 }
+func TestTraintupleFLtaskCreation(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	// Add dataManager, dataSample and algo
+	err, resp, _ := registerItem(*mockStub, "algo")
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+
+	inpTraintuple := inputTraintuple{FLtask: "someFLtask"}
+	args := inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValues(t, 500, resp.Status, "should failed for missing rank")
+	require.Contains(t, resp.Message, "invalit inputs, a FLtask should have a rank", "invalid error message")
+
+	inpTraintuple = inputTraintuple{Rank: "1"}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValues(t, 500, resp.Status, "should failed for invalid rank")
+	require.Contains(t, resp.Message, "invalid inputs, a new FLtask should have a rank 0")
+
+	inpTraintuple = inputTraintuple{Rank: "0"}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status)
+	key := string(resp.Payload)
+	require.EqualValues(t, key, traintupleKey)
+
+	inpTraintuple = inputTraintuple{Rank: "0"}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValues(t, 500, resp.Status, "should failed for existing FLtask")
+	require.Contains(t, resp.Message, "this traintuple already exists")
+}
+
+func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	// Add a some dataManager, dataSample and traintuple
+	err, resp, _ := registerItem(*mockStub, "algo")
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+
+	inpTraintuple := inputTraintuple{Rank: "0"}
+	args := inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status)
+	key := string(resp.Payload)
+
+	// Failed to add a traintuple with the same rank
+	inpTraintuple = inputTraintuple{
+		InModels: key,
+		Rank:     "0",
+		FLtask:   key}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 500, resp.Status, resp.Message, "should failed to add a traintuple of the same rank")
+
+	// Failed to add a traintuple to an unexisting Fltask
+	inpTraintuple = inputTraintuple{
+		InModels: key,
+		Rank:     "1",
+		FLtask:   "notarealone"}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 500, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting FLtask")
+
+	// Succesfully add a traintuple to the same FLtask
+	inpTraintuple = inputTraintuple{
+		InModels: key,
+		Rank:     "1",
+		FLtask:   key}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same FLtask")
+	ttkey := string(resp.Payload)
+
+	// Add new algo to check all fltask algo consistency
+	newAlgoHash := strings.Replace(algoHash, "a", "b", 1)
+	inpAlgo := inputAlgo{Hash: newAlgoHash}
+	args = inpAlgo.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status)
+
+	inpTraintuple = inputTraintuple{
+		AlgoKey:  newAlgoHash,
+		InModels: ttkey,
+		Rank:     "2",
+		FLtask:   key}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 500, resp.Status, resp.Message, "sould fail for it doesn't have the same algo key")
+	assert.Contains(t, resp.Message, "does not have the same algo key")
+}
+
 func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
@@ -45,8 +142,10 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	// Add a some dataManager, dataSample and traintuple
 	err, resp, _ := registerItem(*mockStub, "traintuple")
 	assert.NoError(t, err)
+	traintupleKey := resp.Payload
+
 	// Mark the traintuple as failed
-	args := [][]byte{[]byte("logFailTrain"), resp.Payload, []byte("pas glop")}
+	args := [][]byte{[]byte("logFailTrain"), traintupleKey, []byte("pas glop")}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "should be able to log traintuple as failed")
 
