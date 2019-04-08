@@ -85,7 +85,7 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 		DataManagerKey: inp.DataManagerKey,
 		DataSampleKeys: dataSampleKeys,
 	}
-	traintuple.Worker, err = getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
+	traintuple.Dataset.Worker, err = getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
 	if err != nil {
 		return
 	}
@@ -136,12 +136,12 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 				}
 			}
 
-			attributes = []string{"traintuple", inp.FLtask, traintuple.Worker, inp.Rank}
+			attributes = []string{"traintuple", inp.FLtask, traintuple.Dataset.Worker, inp.Rank}
 			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
 			if err != nil {
 				return
 			} else if len(ttKeys) > 0 {
-				err = fmt.Errorf("FLtask %s with worker %s rank %d already exists", inp.FLtask, traintuple.Worker, traintuple.Rank)
+				err = fmt.Errorf("FLtask %s with worker %s rank %d already exists", inp.FLtask, traintuple.Dataset.Worker, traintuple.Rank)
 				return
 			}
 
@@ -280,7 +280,7 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	if err = createCompositeKey(stub, "traintuple~algo~key", []string{"traintuple", traintuple.AlgoKey, traintupleKey}); err != nil {
 		return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
 	}
-	if err = createCompositeKey(stub, "traintuple~worker~status~key", []string{"traintuple", traintuple.Worker, traintuple.Status, traintupleKey}); err != nil {
+	if err = createCompositeKey(stub, "traintuple~worker~status~key", []string{"traintuple", traintuple.Dataset.Worker, traintuple.Status, traintupleKey}); err != nil {
 		return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
 	}
 	for _, inModelKey := range traintuple.InModelKeys {
@@ -289,7 +289,7 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 		}
 	}
 	if traintuple.FLtask != "" {
-		if err = createCompositeKey(stub, "traintuple~fltask~worker~rank~key", []string{"traintuple", traintuple.FLtask, traintuple.Worker, inp.Rank, traintupleKey}); err != nil {
+		if err = createCompositeKey(stub, "traintuple~fltask~worker~rank~key", []string{"traintuple", traintuple.FLtask, traintuple.Dataset.Worker, inp.Rank, traintupleKey}); err != nil {
 			return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
 		}
 	}

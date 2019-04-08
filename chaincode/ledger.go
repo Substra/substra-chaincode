@@ -55,7 +55,6 @@ type Traintuple struct {
 	Permissions string     `json:"permissions"`
 	Rank        int        `json:"rank"`
 	Status      string     `json:"status"`
-	Worker      string     `json:"-"`
 }
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
@@ -99,6 +98,7 @@ type Model struct {
 type Dataset struct {
 	DataManagerKey string   `json:"dataManagerKey"`
 	DataSampleKeys []string `json:"dataSampleKeys"`
+	Worker         string   `json:"-"`
 }
 
 // ---------------------------------------------------------------------------------
