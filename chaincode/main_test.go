@@ -44,10 +44,7 @@ func TestInit(t *testing.T) {
 
 	// resp := mockStub.MockInit("42", [][]byte{[]byte("init")})
 	resp := mockStub.MockInit("42", [][]byte{[]byte("init")})
-	status := resp.Status
-	if status != 200 {
-		t.Errorf("init failed with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "init failed with status %d and message %s", resp.Status, resp.Message)
 }
 
 func printArgs(buf io.Writer, args [][]byte, command string) {
@@ -186,15 +183,14 @@ func (testtuple *inputTesttuple) createSample() [][]byte {
 	return args
 }
 
-func registerItem(mockStub shim.MockStub, itemType string) (error, peer.Response, interface{}) {
+func registerItem(t *testing.T, mockStub shim.MockStub, itemType string) (peer.Response, interface{}) {
 	// 1. add dataManager
 	inpDataManager := inputDataManager{}
 	args := inpDataManager.createSample()
 	resp := mockStub.MockInvoke("42", args)
-	if resp.Status != 200 {
-		return fmt.Errorf("when adding dataManager with status %d and message %s", resp.Status, resp.Message), resp, inpDataManager
-	} else if itemType == "dataManager" {
-		return nil, resp, inpDataManager
+	require.EqualValuesf(t, 200, resp.Status, "when adding dataManager with status %d and message %s", resp.Status, resp.Message)
+	if itemType == "dataManager" {
+		return resp, inpDataManager
 	}
 	// 2. add test dataSample
 	inpDataSample := inputDataSample{
@@ -204,46 +200,40 @@ func registerItem(mockStub shim.MockStub, itemType string) (error, peer.Response
 	}
 	args = inpDataSample.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	if resp.Status != 200 {
-		return fmt.Errorf("when adding test dataSample with status %d and message %s", resp.Status, resp.Message), resp, inpDataSample
-	} else if itemType == "testDataset" {
-		return nil, resp, inpDataSample
+	require.EqualValuesf(t, 200, resp.Status, "when adding test dataSample with status %d and message %s", resp.Status, resp.Message)
+	if itemType == "testDataset" {
+		return resp, inpDataSample
 	}
 	// 3. add objective
 	inpObjective := inputObjective{}
 	args = inpObjective.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	if resp.Status != 200 {
-		return fmt.Errorf("when adding objective with status %d and message %s", resp.Status, resp.Message), resp, inpObjective
-	} else if itemType == "objective" {
-		return nil, resp, inpObjective
+	require.EqualValuesf(t, 200, resp.Status, "when adding objective with status %d and message %s", resp.Status, resp.Message)
+	if itemType == "objective" {
+		return resp, inpObjective
 	}
 	// 4. Add train dataSample
 	inpDataSample = inputDataSample{}
 	args = inpDataSample.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	if resp.Status != 200 {
-		return fmt.Errorf("when adding train dataSample with status %d and message %s", resp.Status, resp.Message), resp, inpDataSample
-	} else if itemType == "trainDataset" {
-		return nil, resp, inpDataSample
+	require.EqualValuesf(t, 200, resp.Status, "when adding train dataSample with status %d and message %s", resp.Status, resp.Message)
+	if itemType == "trainDataset" {
+		return resp, inpDataSample
 	}
 	// 5. Add algo
 	inpAlgo := inputAlgo{}
 	args = inpAlgo.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	if resp.Status != 200 {
-		return fmt.Errorf("when adding algo with status %d and message %s", resp.Status, resp.Message), resp, inpAlgo
-	} else if itemType == "algo" {
-		return nil, resp, inpAlgo
+	require.EqualValuesf(t, 200, resp.Status, "when adding algo with status %d and message %s", resp.Status, resp.Message)
+	if itemType == "algo" {
+		return resp, inpAlgo
 	}
 	// 6. Add traintuple
 	inpTraintuple := inputTraintuple{}
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	if resp.Status != 200 {
-		return fmt.Errorf("when adding traintuple with status %d and message %s", resp.Status, resp.Message), resp, inpAlgo
-	}
-	return nil, resp, inpTraintuple
+	require.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
+	return resp, inpTraintuple
 }
 
 func TestPipeline(t *testing.T) {
@@ -257,9 +247,7 @@ func TestPipeline(t *testing.T) {
 	args := inpDataManager.createSample()
 	printArgs(&out, args, "invoke")
 	resp := mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when adding dataManager with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when adding dataManager with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 	// Get dataManager key from Payload
 	res := map[string]string{}
@@ -273,9 +261,7 @@ func TestPipeline(t *testing.T) {
 	args = [][]byte{[]byte("queryDataManager"), []byte(dataManagerKey)}
 	printArgs(&out, args, "queryDataManager")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying a dataManager with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying a dataManager with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Add test DataSample ------------")
@@ -287,9 +273,7 @@ func TestPipeline(t *testing.T) {
 	args = inpDataSample.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when adding test dataSample with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when adding test dataSample with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Add Objective ------------")
@@ -298,9 +282,7 @@ func TestPipeline(t *testing.T) {
 	args = inpObjective.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when adding objective with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when adding objective with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Add Algo ------------")
@@ -309,9 +291,7 @@ func TestPipeline(t *testing.T) {
 	args = inpAlgo.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when adding algo with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when adding algo with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Add Train DataSample ------------")
@@ -320,27 +300,21 @@ func TestPipeline(t *testing.T) {
 	args = inpDataSample.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when adding train dataSample with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when adding train dataSample with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query DataManagers ------------")
 	args = [][]byte{[]byte("queryDataManagers")}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying dataManager with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying dataManager with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query Objectives ------------")
 	args = [][]byte{[]byte("queryObjectives")}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying objective with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying objective with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Add Traintuple ------------")
@@ -349,9 +323,7 @@ func TestPipeline(t *testing.T) {
 	args = inpTraintuple.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when adding traintuple with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 	// Get traintuple key from Payload
 	res = map[string]string{}
@@ -361,15 +333,11 @@ func TestPipeline(t *testing.T) {
 	traintupleKey := []byte(res["key"])
 	// check not possible to create same traintuple
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 500 {
-		t.Errorf("when adding same traintuple with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 500, resp.Status, "when adding same traintuple with status %d and message %s", resp.Status, resp.Message)
 	// Get owner of the traintuple
 	args = [][]byte{[]byte("queryTraintuple"), traintupleKey}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when adding traintuple with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
 	traintuple := outputTraintuple{}
 	respTraintuple := resp.Payload
 	if err := bytesToStruct(respTraintuple, &traintuple); err != nil {
@@ -385,9 +353,7 @@ func TestPipeline(t *testing.T) {
 	args = inpTraintuple.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when adding traintuple with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 	res = map[string]string{}
 	err = json.Unmarshal(resp.Payload, &res)
@@ -399,18 +365,14 @@ func TestPipeline(t *testing.T) {
 	args = [][]byte{[]byte("queryFilter"), []byte("traintuple~worker~status"), []byte(trainWorker + ", todo")}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying traintuple of worker with todo status - with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple of worker with todo status - with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Training ------------")
 	args = [][]byte{[]byte("logStartTrain"), traintupleKey}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when logging start training with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when logging start training with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Training ------------")
@@ -420,18 +382,14 @@ func TestPipeline(t *testing.T) {
 		[]byte(perf), []byte(log)}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when logging successful training with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when logging successful training with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query Traintuple From key ------------")
 	args = [][]byte{[]byte("queryTraintuple"), traintupleKey}
 	printArgs(&out, args, "queryTraintuple")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying traintuple with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Add Non-Certified Testtuple ------------")
@@ -443,9 +401,7 @@ func TestPipeline(t *testing.T) {
 	args = inpTesttuple.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when adding testtuple with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when adding testtuple with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Add Certified Testtuple ------------")
@@ -454,9 +410,7 @@ func TestPipeline(t *testing.T) {
 	args = inpTesttuple.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when adding testtuple with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when adding testtuple with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 	// Get testtuple key from Payload
 	res = map[string]string{}
@@ -466,9 +420,7 @@ func TestPipeline(t *testing.T) {
 	testtupleKey := []byte(res["key"])
 	// check not possible to create same testtuple
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 500 {
-		t.Errorf("when adding same testtuple with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 500, resp.Status, "when adding same testtuple with status %d and message %s", resp.Status, resp.Message)
 	// Get owner of the testtuple
 	args = [][]byte{[]byte("queryTesttuple"), testtupleKey}
 	resp = mockStub.MockInvoke("42", args)
@@ -487,27 +439,21 @@ func TestPipeline(t *testing.T) {
 	args = inpTesttuple.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when adding testtuple with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when adding testtuple with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query Testtuples of worker with todo status ------------")
 	args = [][]byte{[]byte("queryFilter"), []byte("testtuple~worker~status"), []byte(testWorker + ", todo")}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying testtuple of worker with todo status - with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying testtuple of worker with todo status - with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Testing ------------")
 	args = [][]byte{[]byte("logStartTest"), testtupleKey}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when logging start testing with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when logging start testing with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Testing ------------")
@@ -516,54 +462,42 @@ func TestPipeline(t *testing.T) {
 	args = [][]byte{[]byte("logSuccessTest"), testtupleKey, []byte(perf), []byte(log)}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when logging successful training with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when logging successful training with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query Testtuple from its key ------------")
 	args = [][]byte{[]byte("queryTesttuple"), testtupleKey}
 	printArgs(&out, args, "queryTesttuple")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying testtuple with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying testtuple with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query all Testtuples ------------")
 	args = [][]byte{[]byte("queryTesttuples")}
 	printArgs(&out, args, "queryTesttuples")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying testtuple with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying testtuple with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query details about a model ------------")
 	args = [][]byte{[]byte("queryModelDetails"), []byte(traintupleKey)}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying model details with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying model details with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query all models ------------")
 	args = [][]byte{[]byte("queryModels")}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying model tuples with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying model tuples with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query Dataset ------------")
 	args = [][]byte{[]byte("queryDataset"), []byte(dataManagerOpenerHash)}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying dataset with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying dataset with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	// Use the output to check the README file and if asked update it
