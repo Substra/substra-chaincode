@@ -18,39 +18,29 @@ func TestAlgo(t *testing.T) {
 	}
 	args := inpAlgo.createSample()
 	resp := mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 500 {
-		t.Errorf("when adding algo with invalid hash, status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 500, resp.Status, "when adding algo with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Add algo with unexisting objective
 	inpAlgo = inputAlgo{}
 	args = inpAlgo.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 500 {
-		t.Errorf("when adding algo with unexisting objective, status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 500, resp.Status, "when adding algo with unexisting objective, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add algo
-	err, resp, tt := registerItem(*mockStub, "algo")
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	resp, tt := registerItem(t, *mockStub, "algo")
+
 	inpAlgo = tt.(inputAlgo)
 	res := map[string]string{}
-	err = json.Unmarshal(resp.Payload, &res)
+	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
 	algoKey := res["key"]
-	if algoKey != inpAlgo.Hash {
-		t.Errorf("when adding algo, key does not corresponds to its hash - key: %s and hash %s", algoKey, inpAlgo.Hash)
-	}
+	assert.Equalf(t, inpAlgo.Hash, algoKey, "when adding algo, key does not corresponds to its hash - key: %s and hash %s", algoKey, inpAlgo.Hash)
 
 	// Query algo from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryAlgo"), []byte(algoKey)}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying an algo with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying an algo with status %d and message %s", resp.Status, resp.Message)
 	algo := outputAlgo{}
 	err = bytesToStruct(resp.Payload, &algo)
 	assert.NoError(t, err, "when unmarshalling queried objective")
@@ -74,9 +64,7 @@ func TestAlgo(t *testing.T) {
 	// Query all algo and check consistency
 	args = [][]byte{[]byte("queryAlgos")}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying algos - status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying algos - status %d and message %s", resp.Status, resp.Message)
 	var algos []outputAlgo
 	err = json.Unmarshal(resp.Payload, &algos)
 	assert.NoError(t, err, "while unmarshalling algos")
