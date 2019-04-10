@@ -39,31 +39,12 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	traintuple.Creator = creator
 	traintuple.Permissions = "all"
 
-	// WARNING FOR NOW NO CHECK ABOUT RANK AND FLtask
-	// The FL task should be returned by the ledger now TODO
-	// and the rank should be checked also...
-	if (inp.Rank != "") && (inp.FLtask != "") {
-		rank, _ := strconv.Atoi(inp.Rank)
-		traintuple.Rank = rank
-		traintuple.FLtask = inp.FLtask
-	}
-
 	// check if algo exists
 	if _, err = getElementBytes(stub, inp.AlgoKey); err != nil {
 		err = fmt.Errorf("could not retrieve algo with key %s - %s", inp.AlgoKey, err.Error())
 		return
 	}
 	traintuple.AlgoKey = inp.AlgoKey
-
-	// create key: hash of algo + start model + train dataset + creator (keys)
-	// certainly not be the most efficient key... but let's make it work and them try to make it better...
-	tKey := sha256.Sum256([]byte(inp.AlgoKey + inp.InModels + inp.DataSampleKeys + creator))
-	traintupleKey = hex.EncodeToString(tKey[:])
-	// check if traintuple key already exist
-	if elementBytes, _ := stub.GetState(traintupleKey); elementBytes != nil {
-		err = fmt.Errorf("traintuple with these algo, in models, and train dataSample already exist - %s", traintupleKey)
-		return
-	}
 
 	// check if InModels is empty or if mentionned models do exist and fill inModels
 	status := "todo"
@@ -103,6 +84,69 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	traintuple.Dataset = &Dataset{
 		DataManagerKey: inp.DataManagerKey,
 		DataSampleKeys: dataSampleKeys,
+	}
+	traintuple.Dataset.Worker, err = getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
+	if err != nil {
+		return
+	}
+
+	hashKeys := []string{creator, traintuple.AlgoKey, traintuple.Dataset.DataManagerKey}
+	hashKeys = append(hashKeys, traintuple.Dataset.DataSampleKeys...)
+	hashKeys = append(hashKeys, traintuple.InModelKeys...)
+	traintupleKey, err = HashForKey(stub, "traintuple", hashKeys)
+	if err != nil {
+		return
+	}
+
+	// check FLtask and Rank and set it when required
+	if inp.Rank == "" {
+		if inp.FLtask != "" {
+			err = fmt.Errorf("invalit inputs, a FLtask should have a rank")
+			return
+		}
+	} else {
+		traintuple.Rank, err = strconv.Atoi(inp.Rank)
+		if err != nil {
+			return
+		}
+		if inp.FLtask == "" {
+			if traintuple.Rank != 0 {
+				err = fmt.Errorf("invalid inputs, a new FLtask should have a rank 0")
+				return
+			}
+			traintuple.FLtask = traintupleKey
+		} else {
+			var ttKeys []string
+			attributes := []string{"traintuple", inp.FLtask}
+			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
+			if err != nil {
+				return
+			} else if len(ttKeys) == 0 {
+				err = fmt.Errorf("cannot find the FLtask %s", inp.FLtask)
+				return
+			}
+			for _, ttKey := range ttKeys {
+				FLTraintuple := Traintuple{}
+				err = getElementStruct(stub, ttKey, &FLTraintuple)
+				if err != nil {
+					return
+				} else if FLTraintuple.AlgoKey != inp.AlgoKey {
+					err = fmt.Errorf("previous traintuple for FLtask %s does not have the same algo key %s", inp.FLtask, inp.AlgoKey)
+					return
+				}
+			}
+
+			attributes = []string{"traintuple", inp.FLtask, traintuple.Dataset.Worker, inp.Rank}
+			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
+			if err != nil {
+				return
+			} else if len(ttKeys) > 0 {
+				err = fmt.Errorf("FLtask %s with worker %s rank %d already exists", inp.FLtask, traintuple.Dataset.Worker, traintuple.Rank)
+				return
+			}
+
+			traintuple.FLtask = inp.FLtask
+		}
 	}
 	return
 }
@@ -198,16 +242,8 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	}
 
 	// create testtuple key and check if it already exists
-	toHash := "testtuple"
-	toHash += testtuple.Model.TraintupleKey
-	toHash += strings.Join(dataSampleKeys, ",")
-	tKey := sha256.Sum256([]byte(toHash))
-	testtupleKey = hex.EncodeToString(tKey[:])
-	if testtupleBytes, err := stub.GetState(testtupleKey); testtupleBytes != nil {
-		return testtupleKey, fmt.Errorf("this testtuple already exists (tkey: %s)", testtupleKey)
-	} else if err != nil {
-		return testtupleKey, err
-	}
+	hashKeys := append(dataSampleKeys, testtuple.Model.TraintupleKey, dataManagerKey, creator)
+	testtupleKey, err = HashForKey(stub, "testtuple", hashKeys)
 
 	return testtupleKey, err
 }
@@ -239,21 +275,21 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, 
 	if err = stub.PutState(traintupleKey, traintupleBytes); err != nil {
 		return nil, fmt.Errorf("could not put in ledger traintuple with algo %s inModels %s - %s", inp.AlgoKey, inp.InModels, err.Error())
 	}
-	// get worker
-	worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
-	if err != nil {
-		return nil, err
-	}
 
 	// create composite keys
 	if err = createCompositeKey(stub, "traintuple~algo~key", []string{"traintuple", traintuple.AlgoKey, traintupleKey}); err != nil {
 		return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
 	}
-	if err = createCompositeKey(stub, "traintuple~worker~status~key", []string{"traintuple", worker, traintuple.Status, traintupleKey}); err != nil {
+	if err = createCompositeKey(stub, "traintuple~worker~status~key", []string{"traintuple", traintuple.Dataset.Worker, traintuple.Status, traintupleKey}); err != nil {
 		return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
 	}
 	for _, inModelKey := range traintuple.InModelKeys {
 		if err = createCompositeKey(stub, "traintuple~inModel~key", []string{"traintuple", inModelKey, traintupleKey}); err != nil {
+			return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
+		}
+	}
+	if traintuple.FLtask != "" {
+		if err = createCompositeKey(stub, "traintuple~fltask~worker~rank~key", []string{"traintuple", traintuple.FLtask, traintuple.Dataset.Worker, inp.Rank, traintupleKey}); err != nil {
 			return nil, fmt.Errorf("issue creating composite keys - %s", err.Error())
 		}
 	}
@@ -614,10 +650,12 @@ func queryTesttuple(stub shim.ChaincodeStubInterface, args []string) ([]byte, er
 	}
 	key := args[0]
 	var testtuple Testtuple
+	var out outputTesttuple
 	if err := getElementStruct(stub, key, &testtuple); err != nil {
 		return nil, err
 	}
-	return json.Marshal(testtuple)
+	out.Fill(key, testtuple)
+	return json.Marshal(out)
 }
 
 // queryTesttuples returns all testtuples of the ledger
@@ -630,13 +668,15 @@ func queryTesttuples(stub shim.ChaincodeStubInterface, args []string) ([]byte, e
 	if err != nil {
 		return nil, fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
 	}
-	var outTesttuples []Testtuple
+	var outTesttuples []outputTesttuple
 	for _, key := range elementsKeys {
 		var testtuple Testtuple
+		var out outputTesttuple
 		if err := getElementStruct(stub, key, &testtuple); err != nil {
 			return nil, err
 		}
-		outTesttuples = append(outTesttuples, testtuple)
+		out.Fill(key, testtuple)
+		outTesttuples = append(outTesttuples, out)
 	}
 	return json.Marshal(outTesttuples)
 }
@@ -967,4 +1007,21 @@ func getTraintuplesPayload(stub shim.ChaincodeStubInterface, traintupleKeys []st
 		elements = append(elements, element)
 	}
 	return json.Marshal(elements)
+}
+
+// HashForKey to generate key for an asset
+func HashForKey(stub shim.ChaincodeStubInterface, objectType string, hashElements []string) (key string, err error) {
+	toHash := objectType
+	sort.Strings(hashElements)
+	for _, element := range hashElements {
+		toHash += "," + element
+	}
+	sum := sha256.Sum256([]byte(toHash))
+	key = hex.EncodeToString(sum[:])
+	if bytes, stubErr := stub.GetState(key); bytes != nil {
+		err = fmt.Errorf("this %s already exists (tkey: %s)", objectType, key)
+	} else if stubErr != nil {
+		return key, stubErr
+	}
+	return
 }

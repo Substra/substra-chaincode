@@ -32,62 +32,62 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	var result []byte
 	var err error
 	switch fn {
-	case "registerObjective":
-		result, err = registerObjective(stub, args)
-	case "registerDataManager":
-		result, err = registerDataManager(stub, args)
-	case "updateDataManager":
-		result, err = updateDataManager(stub, args)
-	case "registerDataSample":
-		result, err = registerDataSample(stub, args)
-	case "updateDataSample":
-		result, err = updateDataSample(stub, args)
-	case "registerAlgo":
-		result, err = registerAlgo(stub, args)
-	case "createTraintuple":
-		result, err = createTraintuple(stub, args)
 	case "createTesttuple":
 		result, err = createTesttuple(stub, args)
-	case "logStartTrain":
-		result, err = logStartTrain(stub, args)
-	case "logStartTest":
-		result, err = logStartTest(stub, args)
-	case "logSuccessTrain":
-		result, err = logSuccessTrain(stub, args)
-	case "logSuccessTest":
-		result, err = logSuccessTest(stub, args)
-	case "logFailTrain":
-		result, err = logFailTrain(stub, args)
+	case "createTraintuple":
+		result, err = createTraintuple(stub, args)
 	case "logFailTest":
 		result, err = logFailTest(stub, args)
-	case "queryObjective":
-		result, err = queryObjective(stub, args)
-	case "queryObjectives":
-		result, err = queryObjectives(stub, args)
+	case "logFailTrain":
+		result, err = logFailTrain(stub, args)
+	case "logStartTest":
+		result, err = logStartTest(stub, args)
+	case "logStartTrain":
+		result, err = logStartTrain(stub, args)
+	case "logSuccessTest":
+		result, err = logSuccessTest(stub, args)
+	case "logSuccessTrain":
+		result, err = logSuccessTrain(stub, args)
 	case "queryAlgo":
 		result, err = queryAlgo(stub, args)
 	case "queryAlgos":
 		result, err = queryAlgos(stub, args)
-	case "queryTraintuple":
-		result, err = queryTraintuple(stub, args)
-	case "queryTraintuples":
-		result, err = queryTraintuples(stub, args)
-	case "queryTesttuple":
-		result, err = queryTesttuple(stub, args)
-	case "queryTesttuples":
-		result, err = queryTesttuples(stub, args)
 	case "queryDataManager":
 		result, err = queryDataManager(stub, args)
 	case "queryDataManagers":
 		result, err = queryDataManagers(stub, args)
+	case "queryDataset":
+		result, err = queryDataset(stub, args)
 	case "queryFilter":
 		result, err = queryFilter(stub, args)
 	case "queryModelDetails":
 		result, err = queryModelDetails(stub, args)
 	case "queryModels":
 		result, err = queryModels(stub, args)
-	case "queryDataset":
-		result, err = queryDataset(stub, args)
+	case "queryObjective":
+		result, err = queryObjective(stub, args)
+	case "queryObjectives":
+		result, err = queryObjectives(stub, args)
+	case "queryTesttuple":
+		result, err = queryTesttuple(stub, args)
+	case "queryTesttuples":
+		result, err = queryTesttuples(stub, args)
+	case "queryTraintuple":
+		result, err = queryTraintuple(stub, args)
+	case "queryTraintuples":
+		result, err = queryTraintuples(stub, args)
+	case "registerAlgo":
+		result, err = registerAlgo(stub, args)
+	case "registerDataManager":
+		result, err = registerDataManager(stub, args)
+	case "registerDataSample":
+		result, err = registerDataSample(stub, args)
+	case "registerObjective":
+		result, err = registerObjective(stub, args)
+	case "updateDataManager":
+		result, err = updateDataManager(stub, args)
+	case "updateDataSample":
+		result, err = updateDataSample(stub, args)
 	default:
 		err = fmt.Errorf("function not implemented")
 	}
