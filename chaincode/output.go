@@ -89,17 +89,18 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 // outputTraintuple is the representation of one the element type stored in the
 // ledger. It describes a training task occuring on the platform
 type outputTraintuple struct {
-	Objective   *TtObjective   `json:"objective"`
 	Algo        *HashDressName `json:"algo"`
-	InModels    []*Model       `json:"inModels"`
-	OutModel    *HashDress     `json:"outModel"`
+	Creator     string         `json:"creator"`
 	Dataset     *TtDataset     `json:"dataset"`
 	FLtask      string         `json:"fltask"`
+	InModels    []*Model       `json:"inModels"`
+	Log         string         `json:"log"`
+	Objective   *TtObjective   `json:"objective"`
+	OutModel    *HashDress     `json:"outModel"`
+	Permissions string         `json:"permissions"`
 	Rank        int            `json:"rank"`
 	Status      string         `json:"status"`
-	Log         string         `json:"log"`
-	Permissions string         `json:"permissions"`
-	Creator     string         `json:"creator"`
+	Tag         string         `json:"tag"`
 }
 
 //Fill is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
@@ -112,6 +113,7 @@ func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface,
 	outputTraintuple.Rank = traintuple.Rank
 	outputTraintuple.FLtask = traintuple.FLtask
 	outputTraintuple.OutModel = traintuple.OutModel
+	outputTraintuple.Tag = traintuple.Tag
 	// fill algo
 	algo := Algo{}
 	if err = getElementStruct(stub, traintuple.AlgoKey, &algo); err != nil {

@@ -12,6 +12,40 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+func TestTagTuple(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	registerItem(t, *mockStub, "algo")
+
+	tag := strings.ReplaceAll(traintupleKey, "1", "2")
+
+	inpTraintuple := inputTraintuple{Tag: tag}
+	args := inpTraintuple.createSample()
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "should work with a tag")
+
+	args = [][]byte{[]byte("queryTraintuples")}
+	resp = mockStub.MockInvoke("42", args)
+	traintuples := []outputTraintuple{}
+	err := json.Unmarshal(resp.Payload, &traintuples)
+	assert.NoError(t, err, "should be unmarshaled")
+	assert.Len(t, traintuples, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, traintuples[0].Tag)
+
+	inpTesttuple := inputTesttuple{Tag: tag}
+	args = inpTesttuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status)
+
+	args = [][]byte{[]byte("queryTesttuples")}
+	resp = mockStub.MockInvoke("42", args)
+	testtuples := []outputTesttuple{}
+	err = json.Unmarshal(resp.Payload, &testtuples)
+	assert.NoError(t, err, "should be unmarshaled")
+	assert.Len(t, testtuples, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, testtuples[0].Tag)
+}
 func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
