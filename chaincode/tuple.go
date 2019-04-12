@@ -38,7 +38,7 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	}
 	traintuple.Creator = creator
 	traintuple.Permissions = "all"
-
+	traintuple.Tag = inp.Tag
 	// check if algo exists
 	if _, err = getElementBytes(stub, inp.AlgoKey); err != nil {
 		err = fmt.Errorf("could not retrieve algo with key %s - %s", inp.AlgoKey, err.Error())
@@ -173,6 +173,7 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	}
 	testtuple.Creator = creator
 	testtuple.Permissions = "all"
+	testtuple.Tag = inp.Tag
 
 	// fill info from associated traintuple
 	outputTraintuple := &outputTraintuple{}

@@ -55,19 +55,21 @@ type Traintuple struct {
 	Permissions string     `json:"permissions"`
 	Rank        int        `json:"rank"`
 	Status      string     `json:"status"`
+	Tag         string     `json:"tag"`
 }
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Testtuple struct {
-	Objective   *TtObjective   `json:"objective"`
 	Algo        *HashDressName `json:"algo"`
-	Model       *Model         `json:"model"`
-	Dataset     *TtDataset     `json:"dataset"`
 	Certified   bool           `json:"certified"`
-	Status      string         `json:"status"`
-	Log         string         `json:"log"`
-	Permissions string         `json:"permissions"`
 	Creator     string         `json:"creator"`
+	Dataset     *TtDataset     `json:"dataset"`
+	Log         string         `json:"log"`
+	Model       *Model         `json:"model"`
+	Objective   *TtObjective   `json:"objective"`
+	Permissions string         `json:"permissions"`
+	Status      string         `json:"status"`
+	Tag         string         `json:"tag"`
 }
 
 // ---------------------------------------------------------------------------------
