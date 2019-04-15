@@ -48,10 +48,11 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 // -------------------------------------------------------------------------------------------
 // registerAlgo stores a new algo in the ledger.
 // If the key exists, it will override the value with the new one
-func registerAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func registerAlgo(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	expectedArgs := getFieldNames(&inputAlgo{})
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+		return
 	}
 
 	// convert input strings args to input struct inputAlgo
@@ -61,60 +62,63 @@ func registerAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, erro
 	algo := Algo{}
 	algoKey, err := algo.Set(stub, inp)
 	if err != nil {
-		return nil, err
+		return
 	}
 	// check data is not already in ledgert
 	if elementBytes, _ := stub.GetState(algoKey); elementBytes != nil {
-		return nil, fmt.Errorf("algo with this hash already exists")
+		err = fmt.Errorf("algo with this hash already exists")
+		return
 	}
 	// submit to ledger
 	algoBytes, _ := json.Marshal(algo)
 	err = stub.PutState(algoKey, algoBytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to add to ledger algo with key %s with error %s", algoKey, err.Error())
+		err = fmt.Errorf("failed to add to ledger algo with key %s with error %s", algoKey, err.Error())
+		return
 	}
 	// create composite key
 	err = createCompositeKey(stub, "algo~objective~key", []string{"algo", algo.ObjectiveKey, algoKey})
 	if err != nil {
-		return nil, err
+		return
 	}
-	return []byte(algoKey), nil
+	return map[string]string{"key": algoKey}, nil
 }
 
 // queryAlgo returns an algo of the ledger given its key
-func queryAlgo(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func queryAlgo(stub shim.ChaincodeStubInterface, args []string) (out outputAlgo, err error) {
 	if len(args) != 1 || len(args[0]) != 64 {
-		return nil, fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+		err = fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+		return
 	}
 	key := args[0]
 	var algo Algo
-	if err := getElementStruct(stub, key, &algo); err != nil {
-		return nil, err
+	if err = getElementStruct(stub, key, &algo); err != nil {
+		return
 	}
-	var out outputAlgo
 	out.Fill(key, algo)
-	return json.Marshal(out)
+	return
 }
 
 // queryAlgos returns all algos of the ledger
-func queryAlgos(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func queryAlgos(stub shim.ChaincodeStubInterface, args []string) (outAlgos []outputAlgo, err error) {
 	if len(args) != 0 {
-		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
+		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
+		return
 	}
 	var indexName = "algo~objective~key"
 	elementsKeys, err := getKeysFromComposite(stub, indexName, []string{"algo"})
 	if err != nil {
-		return nil, fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
+		err = fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
+		return
 	}
-	var outAlgos []outputAlgo
 	for _, key := range elementsKeys {
 		var algo Algo
-		if err := getElementStruct(stub, key, &algo); err != nil {
-			return nil, err
+		if err = getElementStruct(stub, key, &algo); err != nil {
+			return
 		}
 		var out outputAlgo
 		out.Fill(key, algo)
 		outAlgos = append(outAlgos, out)
 	}
-	return json.Marshal(outAlgos)
+	return
 }

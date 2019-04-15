@@ -29,7 +29,11 @@ func TestDataManager(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 	inpDataManager = tt.(inputDataManager)
-	dataManagerKey := string(resp.Payload)
+	res := map[string]string{}
+	err = json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	dataManagerKey := res["key"]
 	// check returned dataManager key corresponds to opener hash
 	if dataManagerKey != dataManagerOpenerHash {
 		t.Errorf("when adding dataManager: dataManager key does not correspond to dataManager opener hash: %s - %s", dataManagerKey, dataManagerOpenerHash)
@@ -158,10 +162,13 @@ func TestDataset(t *testing.T) {
 		t.Errorf("when adding dataSample, status %d and message %s", status, resp.Message)
 	}
 	// check payload correspond to input dataSample keys
-	dataSampleKeys := string(resp.Payload)
-	if expectedResp := "{\"keys\": [\"" + strings.Replace(inpDataSample.Hashes, ", ", "\", \"", -1) + "\"]}"; dataSampleKeys != expectedResp {
-		t.Errorf("when adding dataSample: dataSample keys does not correspond to dataSample hashes: %s - %s", dataSampleKeys, expectedResp)
-	}
+	res := map[string][]string{}
+	err := json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "keys")
+	dataSampleKeys := res["keys"]
+	expectedResp := strings.Split(strings.ReplaceAll(inpDataSample.Hashes, " ", ""), ",")
+	assert.ElementsMatch(t, expectedResp, dataSampleKeys, "when adding dataSample: dataSample keys does not correspond to dataSample hashes")
 
 	// Add dataSample which already exist
 	resp = mockStub.MockInvoke("42", args)
