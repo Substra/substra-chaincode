@@ -49,39 +49,35 @@ func TestObjective(t *testing.T) {
 	}
 	args := inpObjective.createSample()
 	resp := mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 500 {
-		t.Errorf("when adding objective with invalid hash, status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 500, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Add objective with unexisting test dataSample
 	inpObjective = inputObjective{}
 	args = inpObjective.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 500 {
-		t.Errorf("when adding objective with unexisting test dataSample, status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 500, resp.Status, "when adding objective with unexisting test dataSample, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add objective
-	err, resp, tt := registerItem(*mockStub, "objective")
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	resp, tt := registerItem(t, *mockStub, "objective")
+
 	inpObjective = tt.(inputObjective)
 	res := map[string]string{}
-	err = json.Unmarshal(resp.Payload, &res)
+	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
 	objectiveKey := res["key"]
-	if objectiveKey != inpObjective.DescriptionHash {
-		t.Errorf("when adding objective: unexpected returned objective key - %s / %s", objectiveKey, inpObjective.DescriptionHash)
-	}
+	assert.EqualValuesf(
+		t,
+		inpObjective.DescriptionHash,
+		objectiveKey,
+		"when adding objective: unexpected returned objective key - %s / %s",
+		objectiveKey,
+		inpObjective.DescriptionHash)
 
 	// Query objective from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryObjective"), []byte(objectiveKey)}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying a dataManager with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying a dataManager with status %d and message %s", resp.Status, resp.Message)
 	objective := outputObjective{}
 	err = bytesToStruct(resp.Payload, &objective)
 	assert.NoError(t, err, "when unmarshalling queried objective")
@@ -109,9 +105,7 @@ func TestObjective(t *testing.T) {
 	// Query all objectives and check consistency
 	args = [][]byte{[]byte("queryObjectives")}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying objectives - status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying objectives - status %d and message %s", resp.Status, resp.Message)
 	var objectives []outputObjective
 	err = json.Unmarshal(resp.Payload, &objectives)
 	assert.NoError(t, err, "while unmarshalling objectives")
