@@ -55,7 +55,7 @@ Smart contract: `registerDataManager`
 ```
 peer chaincode invoke -n mycc -c '{"Args":["registerDataManager","liver slide","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","https://toto/dataManager/42234/opener","images","8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","https://toto/dataManager/42234/description","","all"]}' -C myc
 ```
->  da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc 
+>  {"key":"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"} 
 
 #### ------------ Query DataManager From key ------------
 Smart contract: `queryDataManager`  
@@ -71,7 +71,7 @@ Smart contract: `registerDataSample`
 ```
 peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","true"]}' -C myc
 ```
->  {"keys": ["bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc", "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]} 
+>  {"keys":["bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]} 
 
 #### ------------ Add Objective ------------
 Smart contract: `registerObjective`  
@@ -79,7 +79,7 @@ Smart contract: `registerObjective`
 ```
 peer chaincode invoke -n mycc -c '{"Args":["registerObjective","MSI classification","5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","https://toto/objective/222/description","accuracy","4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","https://toto/objective/222/metrics","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc:bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","all"]}' -C myc
 ```
->  5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379 
+>  {"key":"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"} 
 
 #### ------------ Add Algo ------------
 Smart contract: `registerAlgo`  
@@ -87,7 +87,7 @@ Smart contract: `registerAlgo`
 ```
 peer chaincode invoke -n mycc -c '{"Args":["registerAlgo","hog + svm","fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","https://toto/algo/222/algo","e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dca","https://toto/algo/222/description","5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","all"]}' -C myc
 ```
->  fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc 
+>  {"key":"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"} 
 
 #### ------------ Add Train DataSample ------------
 Smart contract: `registerDataSample`  
@@ -95,7 +95,7 @@ Smart contract: `registerDataSample`
 ```
 peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","false"]}' -C myc
 ```
->  {"keys": ["aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc", "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]} 
+>  {"keys":["aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]} 
 
 #### ------------ Query DataManagers ------------
 ```
@@ -115,7 +115,7 @@ Smart contract: `createTraintuple`
 ```
 peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","",""]}' -C myc
 ```
->  8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687 
+>  {"key":"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687"} 
 
 #### ------------ Add Traintuple with inModel from previous traintuple ------------
 Smart contract: `createTraintuple`  
@@ -123,7 +123,7 @@ Smart contract: `createTraintuple`
 ```
 peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","",""]}' -C myc
 ```
->  46ab1f11d49795f41e847e29e30fbd511a07dc231cf6991aa6da05cdc4a87cce 
+>  {"key":"46ab1f11d49795f41e847e29e30fbd511a07dc231cf6991aa6da05cdc4a87cce"} 
 
 #### ------------ Query Traintuples of worker with todo status ------------
 ```
@@ -155,7 +155,7 @@ Smart contract: `createTesttuple`
 ```
 peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]}' -C myc
 ```
->  cee7d90187be57dae0f83195302abd4c446c5e52fb49abb6b3e1607b970b2577 
+>  {"key":"cee7d90187be57dae0f83195302abd4c446c5e52fb49abb6b3e1607b970b2577"} 
 
 #### ------------ Add Certified Testtuple ------------
 Smart contract: `createTesttuple`  
@@ -163,7 +163,7 @@ Smart contract: `createTesttuple`
 ```
 peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687","",""]}' -C myc
 ```
->  6581232b890c5f80522ca480b815d3340dffde8924d863bfd1dfedb1841a2d53 
+>  {"key":"6581232b890c5f80522ca480b815d3340dffde8924d863bfd1dfedb1841a2d53"} 
 
 #### ------------ Add Testtuple with not done traintuple ------------
 Smart contract: `createTesttuple`  
@@ -171,7 +171,7 @@ Smart contract: `createTesttuple`
 ```
 peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","46ab1f11d49795f41e847e29e30fbd511a07dc231cf6991aa6da05cdc4a87cce","",""]}' -C myc
 ```
->  88d515424fddbc49e8f0202cecaff056f77a49faa59688346eab2e68c9dd8c46 
+>  {"key":"88d515424fddbc49e8f0202cecaff056f77a49faa59688346eab2e68c9dd8c46"} 
 
 #### ------------ Query Testtuples of worker with todo status ------------
 ```
@@ -221,5 +221,3 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","da1bb7c31f62244c0f3a76
 ```
 >  {"objectiveKey":"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","description":{"hash":"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","storageAddress":"https://toto/dataManager/42234/description"},"key":"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","name":"liver slide","opener":{"hash":"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","storageAddress":"https://toto/dataManager/42234/opener"},"owner":"bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0","permissions":"all","type":"images","trainDataSampleKeys":["aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"],"testDataSampleKeys":["bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]} 
 
-PASS
-ok  	github.com/SubstraFoundation/substra-chaincode/chaincode	0.051s
