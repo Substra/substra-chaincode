@@ -19,11 +19,7 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 		err = fmt.Errorf("invalid algo inputs %s", err.Error())
 		return
 	}
-	// check associated objective exists
-	_, err = getElementBytes(stub, inp.ObjectiveKey)
-	if err != nil {
-		return
-	}
+
 	algoKey = inp.Hash
 	// find associated owner
 	owner, err := getTxCreator(stub)
@@ -38,7 +34,6 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 		StorageAddress: inp.DescriptionStorageAddress,
 	}
 	algo.Owner = owner
-	algo.ObjectiveKey = inp.ObjectiveKey
 	algo.Permissions = inp.Permissions
 	return
 }
@@ -77,7 +72,7 @@ func registerAlgo(stub shim.ChaincodeStubInterface, args []string) (resp map[str
 		return
 	}
 	// create composite key
-	err = createCompositeKey(stub, "algo~objective~key", []string{"algo", algo.ObjectiveKey, algoKey})
+	err = createCompositeKey(stub, "algo~key", []string{"algo", algoKey})
 	if err != nil {
 		return
 	}
@@ -105,7 +100,7 @@ func queryAlgos(stub shim.ChaincodeStubInterface, args []string) (outAlgos []out
 		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
 		return
 	}
-	var indexName = "algo~objective~key"
+	var indexName = "algo~key"
 	elementsKeys, err := getKeysFromComposite(stub, indexName, []string{"algo"})
 	if err != nil {
 		err = fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())

@@ -66,13 +66,12 @@ func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, t
 }
 
 type outputAlgo struct {
-	Key          string     `json:"key"`
-	Name         string     `json:"name"`
-	Content      HashDress  `json:"content"`
-	Description  *HashDress `json:"description"`
-	Owner        string     `json:"owner"`
-	ObjectiveKey string     `json:"objectiveKey"`
-	Permissions  string     `json:"permissions"`
+	Key         string     `json:"key"`
+	Name        string     `json:"name"`
+	Content     HashDress  `json:"content"`
+	Description *HashDress `json:"description"`
+	Owner       string     `json:"owner"`
+	Permissions string     `json:"permissions"`
 }
 
 func (out *outputAlgo) Fill(key string, in Algo) {
@@ -82,7 +81,6 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 	out.Content.StorageAddress = in.StorageAddress
 	out.Description = in.Description
 	out.Owner = in.Owner
-	out.ObjectiveKey = in.ObjectiveKey
 	out.Permissions = in.Permissions
 }
 
@@ -127,12 +125,12 @@ func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface,
 
 	// fill objective
 	objective := Objective{}
-	if err = getElementStruct(stub, algo.ObjectiveKey, &objective); err != nil {
-		err = fmt.Errorf("could not retrieve associated objective with key %s- %s", algo.ObjectiveKey, err.Error())
+	if err = getElementStruct(stub, traintuple.ObjectiveKey, &objective); err != nil {
+		err = fmt.Errorf("could not retrieve associated objective with key %s- %s", traintuple.ObjectiveKey, err.Error())
 		return
 	}
 	if objective.Metrics == nil {
-		err = fmt.Errorf("objective %s is missing metrics values", algo.ObjectiveKey)
+		err = fmt.Errorf("objective %s is missing metrics values", traintuple.ObjectiveKey)
 		return
 	}
 	metrics := HashDress{
@@ -140,7 +138,7 @@ func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface,
 		StorageAddress: objective.Metrics.StorageAddress,
 	}
 	outputTraintuple.Objective = &TtObjective{
-		Key:     algo.ObjectiveKey,
+		Key:     traintuple.ObjectiveKey,
 		Metrics: &metrics,
 	}
 
