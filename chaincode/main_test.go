@@ -147,9 +147,6 @@ func (algo *inputAlgo) createSample() [][]byte {
 	if algo.DescriptionStorageAddress == "" {
 		algo.DescriptionStorageAddress = "https://toto/algo/222/description"
 	}
-	if algo.ObjectiveKey == "" {
-		algo.ObjectiveKey = objectiveDescriptionHash
-	}
 	algo.Permissions = "all"
 	args, _ := inputStructToBytes(algo)
 	args = append([][]byte{[]byte("registerAlgo")}, args...)
@@ -162,6 +159,9 @@ func (traintuple *inputTraintuple) createSample() [][]byte {
 	}
 	if traintuple.InModels == "" {
 		traintuple.InModels = ""
+	}
+	if traintuple.ObjectiveKey == "" {
+		traintuple.ObjectiveKey = objectiveDescriptionHash
 	}
 	if traintuple.DataManagerKey == "" {
 		traintuple.DataManagerKey = dataManagerOpenerHash

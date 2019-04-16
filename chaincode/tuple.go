@@ -46,6 +46,14 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	}
 	traintuple.AlgoKey = inp.AlgoKey
 
+	// check objective and add it
+	obj := Objective{}
+	if err = getElementStruct(stub, inp.ObjectiveKey, &obj); err != nil {
+		err = fmt.Errorf("could not retrieve objective with key %s - %s", inp.ObjectiveKey, err.Error())
+		return
+	}
+	traintuple.ObjectiveKey = inp.ObjectiveKey
+
 	// check if InModels is empty or if mentionned models do exist and fill inModels
 	status := "todo"
 	parentTraintupleKeys := strings.Split(strings.Replace(inp.InModels, " ", "", -1), ",")

@@ -24,7 +24,6 @@ type inputAlgo struct {
 	StorageAddress            string `validate:"required,url"`
 	DescriptionHash           string `validate:"required,len=64,hexadecimal"`
 	DescriptionStorageAddress string `validate:"required,url"`
-	ObjectiveKey              string `validate:"required,len=64,hexadecimal"`
 	Permissions               string `validate:"required,oneof=all"`
 }
 
@@ -62,6 +61,7 @@ type inputUpdateDataSample struct {
 // inputTraintuple is the representation of input args to register a Traintuple
 type inputTraintuple struct {
 	AlgoKey        string `validate:"required,len=64,hexadecimal"`
+	ObjectiveKey   string `validate:"required,len=64,hexadecimal"`
 	InModels       string //`validate:"omitEmpty"
 	DataManagerKey string `validate:"required,len=64,hexadecimal"`
 	DataSampleKeys string `validate:"required"`
