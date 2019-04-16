@@ -61,9 +61,9 @@ type inputUpdateDataSample struct {
 
 // inputTraintuple is the representation of input args to register a Traintuple
 type inputTraintuple struct {
-	AlgoKey        string `validate:"required,gte=64,lte=64,hexadecimal"`
+	AlgoKey        string `validate:"required,len=64,hexadecimal"`
 	InModels       string //`validate:"omitEmpty"
-	DataManagerKey string `validate:"required,gte=64,lte=64,hexadecimal"`
+	DataManagerKey string `validate:"required,len=64,hexadecimal"`
 	DataSampleKeys string `validate:"required"`
 	FLtask         string //`validate:"omitEmpty"`
 	Rank           string //`validate:"omitEmpty"`
@@ -72,8 +72,8 @@ type inputTraintuple struct {
 
 // inputTestuple is the representation of input args to register a Testtuple
 type inputTesttuple struct {
-	TraintupleKey  string `validate:"required,gte=64,lte=64,hexadecimal"`
-	DataManagerKey string `validate:"omitempty,gte=64,lte=64,hexadecimal"`
+	TraintupleKey  string `validate:"required,len=64,hexadecimal"`
+	DataManagerKey string `validate:"omitempty,len=64,hexadecimal"`
 	DataSampleKeys string
 	Tag            string `validate:"omitempty,len=64,hexadecimal"`
 }

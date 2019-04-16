@@ -300,6 +300,12 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 			return
 		}
 	}
+	if traintuple.Tag != "" {
+		err = createCompositeKey(stub, "traintuple~tag~key", []string{"traintuple", traintuple.Tag, traintupleKey})
+		if err != nil {
+			return nil, err
+		}
+	}
 	return map[string]string{"key": traintupleKey}, nil
 }
 
@@ -338,6 +344,12 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 	if err = createCompositeKey(stub, "testtuple~traintuple~certified~key", []string{"testtuple", inp.TraintupleKey, strconv.FormatBool(testtuple.Certified), testtupleKey}); err != nil {
 		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
 		return
+	}
+	if testtuple.Tag != "" {
+		err = createCompositeKey(stub, "testtuple~tag~key", []string{"traintuple", testtuple.Tag, testtupleKey})
+		if err != nil {
+			return nil, err
+		}
 	}
 	return map[string]string{"key": testtupleKey}, nil
 }

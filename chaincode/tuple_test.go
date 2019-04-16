@@ -45,6 +45,16 @@ func TestTagTuple(t *testing.T) {
 	assert.NoError(t, err, "should be unmarshaled")
 	assert.Len(t, testtuples, 1, "there should be one traintuple")
 	assert.EqualValues(t, tag, testtuples[0].Tag)
+
+	args = [][]byte{[]byte("queryFilter"), []byte("testtuple~tag"), []byte(tag)}
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, resp.Message)
+	filtertuples := []outputTesttuple{}
+	err = json.Unmarshal(resp.Payload, &filtertuples)
+	assert.NoError(t, err, "should be unmarshaled")
+	assert.Len(t, testtuples, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, testtuples[0].Tag)
+
 }
 func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
