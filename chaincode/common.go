@@ -17,7 +17,11 @@ func queryFilter(stub shim.ChaincodeStubInterface, args []string) (elements []ma
 	}
 	// check validity of inputs
 	indexName := args[0]
-	validIndexNames := []string{"traintuple~worker~status", "testtuple~worker~status"}
+	validIndexNames := []string{
+		"traintuple~worker~status",
+		"testtuple~worker~status",
+		"testtuple~tag",
+		"traintuple~tag"}
 	if !stringInSlice(indexName, validIndexNames) {
 		err = fmt.Errorf("invalid indexName filter query: %s", indexName)
 		return
@@ -33,9 +37,9 @@ func queryFilter(stub shim.ChaincodeStubInterface, args []string) (elements []ma
 	}
 	// get elements with filtererd keys
 	switch indexName {
-	case "testtuple~worker~status~key":
+	case "testtuple~worker~status~key", "testtuple~tag~key":
 		elements, err = getElementsPayload(stub, filteredKeys)
-	case "traintuple~worker~status~key":
+	case "traintuple~worker~status~key", "traintuple~tag~key":
 		elements, err = getTraintuplesPayload(stub, filteredKeys)
 	}
 	return
