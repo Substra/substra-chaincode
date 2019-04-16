@@ -20,18 +20,23 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 		return
 	}
 	dataManagerKey = strings.Split(inp.TestDataset, ":")[0]
-	dataSampleKeys := strings.Split(strings.Replace(strings.Split(inp.TestDataset, ":")[1], " ", "", -1), ",")
-	testOnly, _, err := checkSameDataManager(stub, dataManagerKey, dataSampleKeys)
-	if err != nil {
-		err = fmt.Errorf("invalid test dataSample %s", err.Error())
-		return
-	} else if !testOnly {
-		err = fmt.Errorf("test dataSample are not tagged as testOnly dataSample")
-		return
-	}
-	objective.TestDataset = &Dataset{
-		DataManagerKey: dataManagerKey,
-		DataSampleKeys: dataSampleKeys,
+	if dataManagerKey != "" {
+		var testOnly bool
+		dataSampleKeys := strings.Split(strings.Replace(strings.Split(inp.TestDataset, ":")[1], " ", "", -1), ",")
+		testOnly, _, err = checkSameDataManager(stub, dataManagerKey, dataSampleKeys)
+		if err != nil {
+			err = fmt.Errorf("invalid test dataSample %s", err.Error())
+			return
+		} else if !testOnly {
+			err = fmt.Errorf("test dataSample are not tagged as testOnly dataSample")
+			return
+		}
+		objective.TestDataset = &Dataset{
+			DataManagerKey: dataManagerKey,
+			DataSampleKeys: dataSampleKeys,
+		}
+	} else {
+		objective.TestDataset = nil
 	}
 	objective.Name = inp.Name
 	objective.DescriptionStorageAddress = inp.DescriptionStorageAddress

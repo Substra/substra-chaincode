@@ -12,6 +12,31 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+func TestTraintupleWithNoTestDataset(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+	registerItem(t, *mockStub, "trainDataset")
+
+	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	inpObjective := inputObjective{DescriptionHash: objHash, TestDataset: ":"}
+	args := inpObjective.createSample()
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
+
+	inpAlgo := inputAlgo{}
+	args = inpAlgo.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
+
+	inpTraintuple := inputTraintuple{ObjectiveKey: objHash}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "when adding traintuple without test dataset it should work: ", resp.Message)
+
+	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
+}
 func TestTagTuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
