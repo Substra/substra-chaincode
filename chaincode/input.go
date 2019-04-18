@@ -67,7 +67,7 @@ type inputTraintuple struct {
 	DataSampleKeys string `validate:"required"`
 	FLtask         string //`validate:"omitEmpty"`
 	Rank           string //`validate:"omitEmpty"`
-	Tag            string `validate:"omitempty,len=64,hexadecimal"`
+	Tag            string `validate:"omitempty,lte=64"`
 }
 
 // inputTestuple is the representation of input args to register a Testtuple
@@ -75,5 +75,5 @@ type inputTesttuple struct {
 	TraintupleKey  string `validate:"required,len=64,hexadecimal"`
 	DataManagerKey string `validate:"omitempty,len=64,hexadecimal"`
 	DataSampleKeys string
-	Tag            string `validate:"omitempty,len=64,hexadecimal"`
+	Tag            string `validate:"omitempty,lte=64"`
 }
