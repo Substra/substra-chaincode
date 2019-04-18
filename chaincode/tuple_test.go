@@ -43,12 +43,19 @@ func TestTagTuple(t *testing.T) {
 
 	registerItem(t, *mockStub, "algo")
 
-	tag := strings.ReplaceAll(traintupleKey, "1", "2")
+	noTag := "This is not a tag because it's waaaaaaaaaaaaaaaayyyyyyyyyyyyyyyyyyyyyyy too long."
 
-	inpTraintuple := inputTraintuple{Tag: tag}
+	inpTraintuple := inputTraintuple{Tag: noTag}
 	args := inpTraintuple.createSample()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status, "should work with a tag")
+	assert.EqualValues(t, 500, resp.Status, resp.Message)
+
+	tag := "This is a tag"
+
+	inpTraintuple = inputTraintuple{Tag: tag}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, resp.Message)
 
 	args = [][]byte{[]byte("queryTraintuples")}
 	resp = mockStub.MockInvoke("42", args)
@@ -61,7 +68,7 @@ func TestTagTuple(t *testing.T) {
 	inpTesttuple := inputTesttuple{Tag: tag}
 	args = inpTesttuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status)
+	assert.EqualValues(t, 200, resp.Status, resp.Message)
 
 	args = [][]byte{[]byte("queryTesttuples")}
 	resp = mockStub.MockInvoke("42", args)
