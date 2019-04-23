@@ -9,6 +9,15 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	inpObjective := inputObjective{TestDataset: ":"}
+	args := inpObjective.createSample()
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
+}
 func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)

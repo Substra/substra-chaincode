@@ -20,12 +20,6 @@ func TestAlgo(t *testing.T) {
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding algo with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
-	// Add algo with unexisting objective
-	inpAlgo = inputAlgo{}
-	args = inpAlgo.createSample()
-	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding algo with unexisting objective, status %d and message %s", resp.Status, resp.Message)
-
 	// Properly add algo
 	resp, tt := registerItem(t, *mockStub, "algo")
 
@@ -55,9 +49,8 @@ func TestAlgo(t *testing.T) {
 			Hash:           inpAlgo.DescriptionHash,
 			StorageAddress: inpAlgo.DescriptionStorageAddress,
 		},
-		Owner:        "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
-		ObjectiveKey: inpAlgo.ObjectiveKey,
-		Permissions:  inpAlgo.Permissions,
+		Owner:       "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
+		Permissions: inpAlgo.Permissions,
 	}
 	assert.Exactly(t, expectedAlgo, algo)
 

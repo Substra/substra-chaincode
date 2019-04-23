@@ -38,13 +38,21 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	}
 	traintuple.Creator = creator
 	traintuple.Permissions = "all"
-
+	traintuple.Tag = inp.Tag
 	// check if algo exists
 	if _, err = getElementBytes(stub, inp.AlgoKey); err != nil {
 		err = fmt.Errorf("could not retrieve algo with key %s - %s", inp.AlgoKey, err.Error())
 		return
 	}
 	traintuple.AlgoKey = inp.AlgoKey
+
+	// check objective and add it
+	obj := Objective{}
+	if err = getElementStruct(stub, inp.ObjectiveKey, &obj); err != nil {
+		err = fmt.Errorf("could not retrieve objective with key %s - %s", inp.ObjectiveKey, err.Error())
+		return
+	}
+	traintuple.ObjectiveKey = inp.ObjectiveKey
 
 	// check if InModels is empty or if mentionned models do exist and fill inModels
 	status := "todo"
@@ -173,6 +181,7 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	}
 	testtuple.Creator = creator
 	testtuple.Permissions = "all"
+	testtuple.Tag = inp.Tag
 
 	// fill info from associated traintuple
 	outputTraintuple := &outputTraintuple{}
@@ -299,6 +308,12 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 			return
 		}
 	}
+	if traintuple.Tag != "" {
+		err = createCompositeKey(stub, "traintuple~tag~key", []string{"traintuple", traintuple.Tag, traintupleKey})
+		if err != nil {
+			return nil, err
+		}
+	}
 	return map[string]string{"key": traintupleKey}, nil
 }
 
@@ -337,6 +352,12 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 	if err = createCompositeKey(stub, "testtuple~traintuple~certified~key", []string{"testtuple", inp.TraintupleKey, strconv.FormatBool(testtuple.Certified), testtupleKey}); err != nil {
 		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
 		return
+	}
+	if testtuple.Tag != "" {
+		err = createCompositeKey(stub, "testtuple~tag~key", []string{"traintuple", testtuple.Tag, testtupleKey})
+		if err != nil {
+			return nil, err
+		}
 	}
 	return map[string]string{"key": testtupleKey}, nil
 }
