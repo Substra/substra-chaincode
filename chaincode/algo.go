@@ -72,7 +72,7 @@ func registerAlgo(stub shim.ChaincodeStubInterface, args []string) (resp map[str
 		return
 	}
 	// create composite key
-	err = createCompositeKey(stub, "algo~key", []string{"algo", algoKey})
+	err = createCompositeKey(stub, "algo~owner~key", []string{"algo", algo.Owner, algoKey})
 	if err != nil {
 		return
 	}
@@ -100,7 +100,7 @@ func queryAlgos(stub shim.ChaincodeStubInterface, args []string) (outAlgos []out
 		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
 		return
 	}
-	var indexName = "algo~key"
+	var indexName = "algo~owner~key"
 	elementsKeys, err := getKeysFromComposite(stub, indexName, []string{"algo"})
 	if err != nil {
 		err = fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
