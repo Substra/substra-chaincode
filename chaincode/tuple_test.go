@@ -12,6 +12,82 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+func TestTraintupleWithNoTestDataset(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+	registerItem(t, *mockStub, "trainDataset")
+
+	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	inpObjective := inputObjective{DescriptionHash: objHash, TestDataset: ":"}
+	args := inpObjective.createSample()
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
+
+	inpAlgo := inputAlgo{}
+	args = inpAlgo.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
+
+	inpTraintuple := inputTraintuple{ObjectiveKey: objHash}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "when adding traintuple without test dataset it should work: ", resp.Message)
+
+	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
+}
+func TestTagTuple(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	registerItem(t, *mockStub, "algo")
+
+	noTag := "This is not a tag because it's waaaaaaaaaaaaaaaayyyyyyyyyyyyyyyyyyyyyyy too long."
+
+	inpTraintuple := inputTraintuple{Tag: noTag}
+	args := inpTraintuple.createSample()
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 500, resp.Status, resp.Message)
+
+	tag := "This is a tag"
+
+	inpTraintuple = inputTraintuple{Tag: tag}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, resp.Message)
+
+	args = [][]byte{[]byte("queryTraintuples")}
+	resp = mockStub.MockInvoke("42", args)
+	traintuples := []outputTraintuple{}
+	err := json.Unmarshal(resp.Payload, &traintuples)
+	assert.NoError(t, err, "should be unmarshaled")
+	assert.Len(t, traintuples, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, traintuples[0].Tag)
+
+	inpTesttuple := inputTesttuple{Tag: tag}
+	args = inpTesttuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, resp.Message)
+
+	args = [][]byte{[]byte("queryTesttuples")}
+	resp = mockStub.MockInvoke("42", args)
+	testtuples := []outputTesttuple{}
+	err = json.Unmarshal(resp.Payload, &testtuples)
+	assert.NoError(t, err, "should be unmarshaled")
+	assert.Len(t, testtuples, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, testtuples[0].Tag)
+
+	args = [][]byte{[]byte("queryFilter"), []byte("testtuple~tag"), []byte(tag)}
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, resp.Message)
+	filtertuples := []outputTesttuple{}
+	err = json.Unmarshal(resp.Payload, &filtertuples)
+	assert.NoError(t, err, "should be unmarshaled")
+	assert.Len(t, testtuples, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, testtuples[0].Tag)
+
+}
 func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)

@@ -94,15 +94,27 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	}
 	// Return the result as success payload
 	if err != nil {
-		return shim.Error(err.Error())
+		return formatErrorResponse(err.Error(), 500)
 	}
 	// Marshal to json the smartcontract result
 	resp, err := json.Marshal(result)
 	if err != nil {
-		return shim.Error("could not format response for unknown reason")
+		return formatErrorResponse("could not format response for unknown reason", 500)
 	}
 
 	return shim.Success(resp)
+}
+
+func formatErrorResponse(errMessage string, status int32) peer.Response {
+	errStruct := map[string]string{"error": errMessage}
+	payload, _ := json.Marshal(errStruct)
+
+	// For now we still return both payload and message.
+	return peer.Response{
+		Message: errMessage,
+		Payload: payload,
+		Status:  status,
+	}
 }
 
 // main function starts up the chaincode in the container during instantiate
