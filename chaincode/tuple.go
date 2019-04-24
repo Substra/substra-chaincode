@@ -101,7 +101,7 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	hashKeys := []string{creator, traintuple.AlgoKey, traintuple.Dataset.DataManagerKey}
 	hashKeys = append(hashKeys, traintuple.Dataset.DataSampleKeys...)
 	hashKeys = append(hashKeys, traintuple.InModelKeys...)
-	traintupleKey, err = HashForKey(stub, "traintuple", hashKeys)
+	traintupleKey, err = HashForKey(stub, "traintuple", hashKeys...)
 	if err != nil {
 		return
 	}
@@ -251,8 +251,9 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	}
 
 	// create testtuple key and check if it already exists
-	hashKeys := append(dataSampleKeys, testtuple.Model.TraintupleKey, dataManagerKey, creator)
-	testtupleKey, err = HashForKey(stub, "testtuple", hashKeys)
+	hashKeys := []string{testtuple.Model.TraintupleKey, dataManagerKey, creator}
+	hashKeys = append(hashKeys, dataSampleKeys...)
+	testtupleKey, err = HashForKey(stub, "testtuple", hashKeys...)
 
 	return testtupleKey, err
 }
@@ -1056,7 +1057,7 @@ func getTraintuplesPayload(stub shim.ChaincodeStubInterface, traintupleKeys []st
 }
 
 // HashForKey to generate key for an asset
-func HashForKey(stub shim.ChaincodeStubInterface, objectType string, hashElements []string) (key string, err error) {
+func HashForKey(stub shim.ChaincodeStubInterface, objectType string, hashElements ...string) (key string, err error) {
 	toHash := objectType
 	sort.Strings(hashElements)
 	for _, element := range hashElements {
