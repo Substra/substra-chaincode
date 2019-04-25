@@ -12,6 +12,9 @@ import (
 type SubstraChaincode struct {
 }
 
+// Create a global logger for the chaincode. Its default level is Info
+var logger = shim.NewLogger("substra-chaincode")
+
 // Init is called during chaincode instantiation to initialize any
 // data. Note that chaincode upgrade also calls this function to reset
 // or to migrate data.
@@ -27,6 +30,9 @@ func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response 
 
 // Invoke is called per transaction on the chaincode.
 func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
+	// Log all input for potential debug later on.
+	logger.Debugf("Args received by the chaincode: %#v", stub.GetStringArgs())
+
 	// Extract the function and args from the transaction proposal
 	fn, args := stub.GetFunctionAndParameters()
 
@@ -119,6 +125,8 @@ func formatErrorResponse(errMessage string, status int32) peer.Response {
 
 // main function starts up the chaincode in the container during instantiate
 func main() {
+	// TODO use the same level as the shim or an env variable
+	logger.SetLevel(shim.LogDebug)
 	if err := shim.Start(new(SubstraChaincode)); err != nil {
 		fmt.Printf("Error starting SubstraChaincode chaincode: %s", err)
 	}
