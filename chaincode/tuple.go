@@ -1008,29 +1008,30 @@ func updateWaitingTesttuples(stub shim.ChaincodeStubInterface, traintupleKey str
 	if err != nil || len(testtupleKeys) == 0 {
 		return err
 	}
-	testtupleKey := testtupleKeys[0]
-	// get and update testtuple
-	testtuple := Testtuple{}
-	if err := getElementStruct(stub, testtupleKey, &testtuple); err != nil {
-		return err
-	}
-	oldStatus := testtuple.Status
-	testtuple.Model = &Model{
-		TraintupleKey:  traintupleKey,
-		Hash:           model.Hash,
-		StorageAddress: model.StorageAddress,
-	}
-	testtuple.Status = testtupleStatus
-	testtupleBytes, _ := json.Marshal(testtuple)
-	if err := stub.PutState(testtupleKey, testtupleBytes); err != nil {
-		return fmt.Errorf("failed to update testtuple associated with traintuple %s - %s", traintupleKey, err.Error())
-	}
-	// update associated composite key
-	indexName = "testtuple~worker~status~key"
-	oldAttributes := []string{"testtuple", testtuple.Dataset.Worker, oldStatus, testtupleKey}
-	newAttributes := []string{"testtuple", testtuple.Dataset.Worker, testtupleStatus, testtupleKey}
-	if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
-		return err
+	for _, testtupleKey := range testtupleKeys {
+		// get and update testtuple
+		testtuple := Testtuple{}
+		if err := getElementStruct(stub, testtupleKey, &testtuple); err != nil {
+			return err
+		}
+		oldStatus := testtuple.Status
+		testtuple.Model = &Model{
+			TraintupleKey:  traintupleKey,
+			Hash:           model.Hash,
+			StorageAddress: model.StorageAddress,
+		}
+		testtuple.Status = testtupleStatus
+		testtupleBytes, _ := json.Marshal(testtuple)
+		if err := stub.PutState(testtupleKey, testtupleBytes); err != nil {
+			return fmt.Errorf("failed to update testtuple associated with traintuple %s - %s", traintupleKey, err.Error())
+		}
+		// update associated composite key
+		indexName = "testtuple~worker~status~key"
+		oldAttributes := []string{"testtuple", testtuple.Dataset.Worker, oldStatus, testtupleKey}
+		newAttributes := []string{"testtuple", testtuple.Dataset.Worker, testtupleStatus, testtupleKey}
+		if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
+			return err
+		}
 	}
 	return nil
 }
