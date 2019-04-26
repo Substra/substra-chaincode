@@ -213,8 +213,12 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	if err = getElementStruct(stub, testtuple.Objective.Key, &objective); err != nil {
 		return testtupleKey, fmt.Errorf("could not retrieve objective with key %s - %s", testtuple.Objective.Key, err.Error())
 	}
-	objectiveDataManagerKey := objective.TestDataset.DataManagerKey
-	objectiveDataSampleKeys := objective.TestDataset.DataSampleKeys
+	var objectiveDataManagerKey string
+	var objectiveDataSampleKeys []string
+	if objective.TestDataset != nil {
+		objectiveDataManagerKey = objective.TestDataset.DataManagerKey
+		objectiveDataSampleKeys = objective.TestDataset.DataSampleKeys
+	}
 	// For now we need to sort it but in fine it should be save sorted
 	// TODO
 	sort.Strings(objectiveDataSampleKeys)
@@ -234,10 +238,13 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 		testtuple.Certified = objectiveDataManagerKey == dataManagerKey && reflect.DeepEqual(objectiveDataSampleKeys, dataSampleKeys)
 	} else if len(inp.DataManagerKey) > 0 || len(inp.DataSampleKeys) > 0 {
 		return testtupleKey, fmt.Errorf("invalid input: dataManagerKey and dataSampleKey should be provided together")
-	} else {
+	} else if objective.TestDataset != nil {
 		dataSampleKeys = objectiveDataSampleKeys
 		dataManagerKey = objectiveDataManagerKey
 		testtuple.Certified = true
+	} else {
+		err = fmt.Errorf("can not create a certified testtuple, no data associated with objective %s", testtuple.Objective.Key)
+		return
 	}
 	// retrieve dataManager owner
 	dataManager := DataManager{}
