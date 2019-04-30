@@ -31,7 +31,7 @@ func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response 
 // Invoke is called per transaction on the chaincode.
 func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	// Log all input for potential debug later on.
-	logger.Debugf("Args received by the chaincode: %#v", stub.GetStringArgs())
+	logger.Infof("Args received by the chaincode: %#v", stub.GetStringArgs())
 
 	// Extract the function and args from the transaction proposal
 	fn, args := stub.GetFunctionAndParameters()
