@@ -983,6 +983,12 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 // TODO idem change name of the function
 // func (traintuple *Traintuple) TrySchedule(modelTraintupleKey string, model *HashDress) {
 func (traintuple *Traintuple) TrySchedule(stub shim.ChaincodeStubInterface, newDoneTraintupleKey string) error {
+	if traintuple.Status == "failed" {
+		return nil
+	}
+	if traintuple.Status != "waiting" {
+		return fmt.Errorf("invalid traintuple %s: expecting status waiting got %s instead", traintuple.FLtask, traintuple.Status)
+	}
 	for _, key := range traintuple.InModelKeys {
 		// don't check newly done traintuple
 		if key == newDoneTraintupleKey {
