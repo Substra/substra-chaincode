@@ -941,7 +941,7 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 		if status == "failed" {
 			traintuple.Status = status
 		} else if status == "done" {
-			err := traintuple.CheckReady(stub, modelTraintupleKey)
+			err := traintuple.TrySchedule(stub, modelTraintupleKey)
 			if err != nil {
 				return err
 			}
@@ -978,13 +978,11 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 	return nil
 }
 
-// CheckReady checks if inModels of a traintuple have been trained, except the newDoneTraintupleKey (since the transaction is not commited)
+// TrySchedule checks if inModels of a traintuple have been trained, except the newDoneTraintupleKey (since the transaction is not commited)
 // and updates the traintuple status if necessary
 // TODO idem change name of the function
-// func (traintuple *Traintuple) CheckReady(modelTraintupleKey string, model *HashDress) {
-func (traintuple *Traintuple) CheckReady(stub shim.ChaincodeStubInterface, newDoneTraintupleKey string) error {
-	var statuses []string
-	// would be much easier if traintuple.InModels was map[string]HashDress
+// func (traintuple *Traintuple) TryScheduleCheckReady(modelTraintupleKey string, model *HashDress) {
+func (traintuple *Traintuple) TrySchedule(stub shim.ChaincodeStubInterface, newDoneTraintupleKey string) error {
 	for _, key := range traintuple.InModelKeys {
 		// don't check newly done traintuple
 		if key == newDoneTraintupleKey {
@@ -994,15 +992,11 @@ func (traintuple *Traintuple) CheckReady(stub shim.ChaincodeStubInterface, newDo
 		if err := getElementStruct(stub, key, &tt); err != nil {
 			return err
 		}
-		statuses = append(statuses, tt.Status)
+		if tt.Status != "done" {
+			return nil
+		}
 	}
-	new_status := "waiting"
-	if stringInSlice("failed", statuses) {
-		new_status = "failed"
-	} else if allStringsInSlice("done", statuses) {
-		new_status = "todo"
-	}
-	traintuple.Status = new_status
+	traintuple.Status = "todo"
 	return nil
 
 }
