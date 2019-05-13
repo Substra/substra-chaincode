@@ -983,13 +983,9 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 // TODO idem change name of the function
 // func (traintuple *Traintuple) CheckReady(modelTraintupleKey string, model *HashDress) {
 func (traintuple *Traintuple) CheckReady(stub shim.ChaincodeStubInterface, newDoneTraintupleKey string) error {
-	status := "todo"
+	var statuses []string
 	// would be much easier if traintuple.InModels was map[string]HashDress
 	for _, key := range traintuple.InModelKeys {
-		// don't update a failed status
-		if status == "failed" {
-			continue
-		}
 		// don't check newly done traintuple
 		if key == newDoneTraintupleKey {
 			continue
@@ -998,14 +994,15 @@ func (traintuple *Traintuple) CheckReady(stub shim.ChaincodeStubInterface, newDo
 		if err := getElementStruct(stub, key, &tt); err != nil {
 			return err
 		}
-		if tt.Status == "waiting" || tt.Status == "todo" {
-			status = "waiting"
-		} else if tt.Status == "failed" {
-			status = "failed"
-		}
+		statuses = append(statuses, tt.Status)
 	}
-
-	traintuple.Status = status
+	new_status := "waiting"
+	if stringInSlice("failed", statuses) {
+		new_status = "failed"
+	} else if allStringsInSlice("done", statuses) {
+		new_status = "todo"
+	}
+	traintuple.Status = new_status
 	return nil
 
 }
