@@ -22,16 +22,6 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-// allStringInSlice check if all strings in a slice are the same@
-func allStringsInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b != a {
-			return false
-		}
-	}
-	return true
-}
-
 // sliceEqual tells whether a and b contain the same elements.
 func sliceEqual(a, b []string) bool {
 	if len(a) != len(b) {
