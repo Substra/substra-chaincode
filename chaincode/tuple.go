@@ -66,6 +66,7 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 			err = fmt.Errorf("could not retrieve parent traintuple with key %s - %s %d", parentTraintupleKeys, err.Error(), len(parentTraintupleKeys))
 			return
 		}
+		// set traintuple to waiting if one of the parent traintuples is not done
 		if parentTraintuple.OutModel == nil {
 			status = "waiting"
 		}
@@ -985,18 +986,25 @@ func (traintuple *Traintuple) CheckReady(stub shim.ChaincodeStubInterface, newDo
 	status := "todo"
 	// would be much easier if traintuple.InModels was map[string]HashDress
 	for _, key := range traintuple.InModelKeys {
-		if key != newDoneTraintupleKey {
-			tt := Traintuple{}
-			if err := getElementStruct(stub, key, &tt); err != nil {
-				return err
-			}
-			if tt.Status == "waiting" || tt.Status == "todo" {
-				status = "waiting"
-			} else if tt.Status == "failed" {
-				status = "failed"
-			}
+		// don't update a failed status
+		if status == "failed" {
+			continue
+		}
+		// don't check newly done traintuple
+		if key == newDoneTraintupleKey {
+			continue
+		}
+		tt := Traintuple{}
+		if err := getElementStruct(stub, key, &tt); err != nil {
+			return err
+		}
+		if tt.Status == "waiting" || tt.Status == "todo" {
+			status = "waiting"
+		} else if tt.Status == "failed" {
+			status = "failed"
 		}
 	}
+
 	traintuple.Status = status
 	return nil
 
