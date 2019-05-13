@@ -981,7 +981,7 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 // TrySchedule checks if inModels of a traintuple have been trained, except the newDoneTraintupleKey (since the transaction is not commited)
 // and updates the traintuple status if necessary
 // TODO idem change name of the function
-// func (traintuple *Traintuple) TryScheduleCheckReady(modelTraintupleKey string, model *HashDress) {
+// func (traintuple *Traintuple) TrySchedule(modelTraintupleKey string, model *HashDress) {
 func (traintuple *Traintuple) TrySchedule(stub shim.ChaincodeStubInterface, newDoneTraintupleKey string) error {
 	for _, key := range traintuple.InModelKeys {
 		// don't check newly done traintuple
