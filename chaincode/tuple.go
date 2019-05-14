@@ -937,6 +937,20 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 		if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 			return err
 		}
+		// remove associated composite key
+		compositeKey, err := stub.CreateCompositeKey(indexName, []string{"traintuple", modelTraintupleKey, traintupleKey})
+		if err != nil {
+			return fmt.Errorf("failed to recreate composite key to update traintuple %s with inModel %s - %s", traintupleKey, modelTraintupleKey, err.Error())
+		}
+		if err := stub.DelState(compositeKey); err != nil {
+			return fmt.Errorf("failed to delete associated composite key to update traintuple %s with inModel %s - %s", traintupleKey, modelTraintupleKey, err.Error())
+		}
+
+		// traintuple is already failed, don't update it
+		if traintuple.Status == "failed" {
+			continue
+		}
+
 		oldStatus := traintuple.Status
 		if status == "failed" {
 			traintuple.Status = status
@@ -946,34 +960,27 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 				return err
 			}
 		}
-		// remove associated composite key
-		compositeKey, err := stub.CreateCompositeKey(indexName, []string{"traintuple", modelTraintupleKey, traintupleKey})
-		if err != nil {
-			return fmt.Errorf("failed to recreate composite key to update traintuple %s with inModel %s - %s", traintupleKey, modelTraintupleKey, err.Error())
-		}
-		if err := stub.DelState(compositeKey); err != nil {
-			return fmt.Errorf("failed to delete associated composite key to update traintuple %s with inModel %s - %s", traintupleKey, modelTraintupleKey, err.Error())
-		}
-		if oldStatus != traintuple.Status {
-			// save update in ledger
-			traintupleBytes, _ := json.Marshal(traintuple)
-			if err := stub.PutState(traintupleKey, traintupleBytes); err != nil {
-				return fmt.Errorf("failed to update traintuple %s with inModel %s - %s", traintupleKey, modelTraintupleKey, err.Error())
-			}
-			// get worker
-			worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
-			if err != nil {
-				return err
-			}
-			// update associated composite keys
-			indexName := "traintuple~worker~status~key"
-			oldAttributes := []string{"traintuple", worker, "waiting", traintupleKey}
-			newAttributes := []string{"traintuple", worker, traintuple.Status, traintupleKey}
-			if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
-				return err
-			}
-		}
 
+		// save update in ledger if status has been changed
+		if oldStatus == traintuple.Status {
+			continue
+		}
+		traintupleBytes, _ := json.Marshal(traintuple)
+		if err := stub.PutState(traintupleKey, traintupleBytes); err != nil {
+			return fmt.Errorf("failed to update traintuple %s with inModel %s - %s", traintupleKey, modelTraintupleKey, err.Error())
+		}
+		// get worker
+		worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
+		if err != nil {
+			return err
+		}
+		// update associated composite keys
+		indexName := "traintuple~worker~status~key"
+		oldAttributes := []string{"traintuple", worker, "waiting", traintupleKey}
+		newAttributes := []string{"traintuple", worker, traintuple.Status, traintupleKey}
+		if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -983,9 +990,6 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 // TODO idem change name of the function
 // func (traintuple *Traintuple) TrySchedule(modelTraintupleKey string, model *HashDress) {
 func (traintuple *Traintuple) TrySchedule(stub shim.ChaincodeStubInterface, newDoneTraintupleKey string) error {
-	if traintuple.Status == "failed" {
-		return nil
-	}
 	if traintuple.Status != "waiting" {
 		return fmt.Errorf("invalid traintuple %s: expecting status waiting got %s instead", traintuple.FLtask, traintuple.Status)
 	}
