@@ -835,7 +835,7 @@ func checkUpdateTuple(stub shim.ChaincodeStubInterface, worker string, oldStatus
 
 // updateStatusTraintuple retrieves a traintuple given its key, check the validity of the status update, changes the status of a traintuple, and returns the updated traintuple and its oldStatus
 func updateStatusTraintuple(stub shim.ChaincodeStubInterface, traintupleKey string, status string) (Traintuple, string, error) {
-
+	// TODO should not fetch traintuple, this should be done outside the function
 	var oldStatus string
 	traintuple := Traintuple{}
 	if len(traintupleKey) != lenKey {
@@ -910,6 +910,7 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 		}
 
 		// get traintuple new status
+		// TODO use updateStatusTraintuple
 		newStatus := traintuple.Status
 		if status == "failed" {
 			newStatus = status
@@ -957,6 +958,7 @@ func (traintuple *Traintuple) isReady(stub shim.ChaincodeStubInterface, newDoneT
 	return true, nil
 }
 
+// removeModelCompositeKey remove the Model key state of a traintuple
 func (traintuple *Traintuple) removeModelCompositeKey(stub shim.ChaincodeStubInterface, modelKey string) error {
 	indexName := "traintuple~inModel~key"
 	compositeKey, err := stub.CreateCompositeKey(indexName, []string{"traintuple", modelKey, traintuple.FLtask})
