@@ -937,13 +937,10 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 		if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 			return err
 		}
+
 		// remove associated composite key
-		compositeKey, err := stub.CreateCompositeKey(indexName, []string{"traintuple", modelTraintupleKey, traintupleKey})
-		if err != nil {
-			return fmt.Errorf("failed to recreate composite key to update traintuple %s with inModel %s - %s", traintupleKey, modelTraintupleKey, err.Error())
-		}
-		if err := stub.DelState(compositeKey); err != nil {
-			return fmt.Errorf("failed to delete associated composite key to update traintuple %s with inModel %s - %s", traintupleKey, modelTraintupleKey, err.Error())
+		if err := traintuple.removeModelCompositeKey(stub, modelTraintupleKey); err != nil {
+			return err
 		}
 
 		// traintuple is already failed, don't update it
@@ -1009,6 +1006,20 @@ func (traintuple *Traintuple) TrySchedule(stub shim.ChaincodeStubInterface, newD
 	traintuple.Status = "todo"
 	return nil
 
+}
+
+func (traintuple *Traintuple) removeModelCompositeKey(stub shim.ChaincodeStubInterface, modelKey string) error {
+	indexName := "traintuple~inModel~key"
+	compositeKey, err := stub.CreateCompositeKey(indexName, []string{"traintuple", modelKey, traintuple.FLtask})
+
+	if err != nil {
+		return fmt.Errorf("failed to recreate composite key to update traintuple %s with inModel %s - %s", traintuple.FLtask, modelKey, err.Error())
+	}
+
+	if err := stub.DelState(compositeKey); err != nil {
+		return fmt.Errorf("failed to delete associated composite key to update traintuple %s with inModel %s - %s", traintuple.FLtask, modelKey, err.Error())
+	}
+	return nil
 }
 
 // updateWaitingTesttuple updates Status of testtuple whose associated traintuple has been trained or has failed
