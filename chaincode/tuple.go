@@ -884,7 +884,7 @@ func updateStatusTesttuple(stub shim.ChaincodeStubInterface, testtupleKey string
 
 // updateWaitingTraintuples updates the status of waiting trainuples  InModels of traintuples once they have been trained (succesfully or failed)
 // func updateWaitingInModels(stub shim.ChaincodeStubInterface, modelTraintupleKey string, model *HashDress) error {
-func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleKey string, status string) error {
+func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleKey string, parentStatus string) error {
 
 	indexName := "traintuple~inModel~key"
 	// get traintuples having as inModels the input traintuple
@@ -908,24 +908,26 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 		if traintuple.Status == "failed" {
 			continue
 		}
-
+		if traintuple.Status != "waiting" {
+			return fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", traintupleKey, traintuple.Status)
+		}
 		// get traintuple new status
 		// TODO use updateStatusTraintuple
-		newStatus := traintuple.Status
-		if status == "failed" {
-			newStatus = status
-		} else if status == "done" {
+		var newStatus string
+		if parentStatus == "failed" {
+			newStatus = parentStatus
+		} else if parentStatus == "done" {
 			ready, err := traintuple.isReady(stub, modelTraintupleKey)
 			if err != nil {
 				return err
 			}
-			if ready == true {
+			if ready {
 				newStatus = "todo"
 			}
 		}
 
 		// commit new status
-		if newStatus != traintuple.Status {
+		if newStatus != "" {
 			oldStatus := traintuple.Status
 			traintuple.Status = newStatus
 			if err := traintuple.commitUpdate(stub, traintupleKey, oldStatus); err != nil {
@@ -939,9 +941,6 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 // isReady checks if inModels of a traintuple have been trained, except the newDoneTraintupleKey (since the transaction is not commited)
 // and updates the traintuple status if necessary
 func (traintuple *Traintuple) isReady(stub shim.ChaincodeStubInterface, newDoneTraintupleKey string) (ready bool, err error) {
-	if traintuple.Status != "waiting" {
-		return false, fmt.Errorf("invalid traintuple %s: expecting status waiting got %s instead", traintuple.FLtask, traintuple.Status)
-	}
 	for _, key := range traintuple.InModelKeys {
 		// don't check newly done traintuple
 		if key == newDoneTraintupleKey {
