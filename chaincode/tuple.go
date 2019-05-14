@@ -393,11 +393,9 @@ func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple 
 	if err != nil {
 		return
 	}
-	// TODO: Stop passing oldStatus, pass new status
-	oldStatus := traintuple.Status
-	traintuple.Status = status
+
 	// save to ledger
-	if err = traintuple.commitUpdate(stub, traintupleKey, oldStatus); err != nil {
+	if err = traintuple.commitUpdate(stub, traintupleKey, status); err != nil {
 		return
 	}
 	return
@@ -487,10 +485,7 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintupl
 		StorageAddress: outModel[1]}
 	traintuple.Log += log
 
-	// TODO: Stop passing oldStatus, pass new status
-	oldStatus := traintuple.Status
-	traintuple.Status = status
-	if err = traintuple.commitUpdate(stub, traintupleKey, oldStatus); err != nil {
+	if err = traintuple.commitUpdate(stub, traintupleKey, status); err != nil {
 		return
 	}
 
@@ -589,10 +584,7 @@ func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple T
 	}
 	traintuple.Log += log
 
-	// TODO: Stop passing oldStatus, pass new status
-	oldStatus := traintuple.Status
-	traintuple.Status = status
-	if err = traintuple.commitUpdate(stub, traintupleKey, oldStatus); err != nil {
+	if err = traintuple.commitUpdate(stub, traintupleKey, status); err != nil {
 		return
 	}
 
@@ -945,9 +937,7 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 
 		// commit new status
 		if newStatus != "" {
-			oldStatus := traintuple.Status
-			traintuple.Status = newStatus
-			if err := traintuple.commitUpdate(stub, traintupleKey, oldStatus); err != nil {
+			if err := traintuple.commitUpdate(stub, traintupleKey, newStatus); err != nil {
 				return err
 			}
 		}
@@ -990,11 +980,12 @@ func (traintuple *Traintuple) removeModelCompositeKey(stub shim.ChaincodeStubInt
 }
 
 // commitUpdate update the traintuple after a status update in the ledger
-func (traintuple *Traintuple) commitUpdate(stub shim.ChaincodeStubInterface, traintupleKey string, oldStatus string) error {
-	if oldStatus == traintuple.Status {
-		return fmt.Errorf("cannot update traintuple %s - status already %s", traintupleKey, oldStatus)
+func (traintuple *Traintuple) commitUpdate(stub shim.ChaincodeStubInterface, traintupleKey string, newStatus string) error {
+	if traintuple.Status == newStatus {
+		return fmt.Errorf("cannot update traintuple %s - status already %s", traintupleKey, newStatus)
 	}
-
+	oldStatus := traintuple.Status
+	traintuple.Status = newStatus
 	traintupleBytes, _ := json.Marshal(traintuple)
 	if err := stub.PutState(traintupleKey, traintupleBytes); err != nil {
 		return fmt.Errorf("failed to update traintuple %s - %s", traintupleKey, err.Error())
