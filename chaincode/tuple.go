@@ -379,14 +379,23 @@ func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple 
 		return
 	}
 
-	oldStatus := "todo"
 	status := "doing"
 	traintupleKey := args[0]
 	// get traintuple, check validity of the update, and update its status
-	traintuple, oldStatus, err = updateStatusTraintuple(stub, traintupleKey, status)
+	traintuple = Traintuple{}
+	if len(traintupleKey) != lenKey {
+		return traintuple, fmt.Errorf("invalid traintuple key")
+	}
+	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
+		return
+	}
+	err = traintuple.checkNewStatus(stub, traintupleKey, status)
 	if err != nil {
 		return
 	}
+	// TODO: Stop passing oldStatus, pass new status
+	oldStatus := traintuple.Status
+	traintuple.Status = status
 	// save to ledger
 	if err = traintuple.commitUpdate(stub, traintupleKey, oldStatus); err != nil {
 		return
@@ -439,7 +448,6 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintupl
 		return
 	}
 
-	oldStatus := "doing"
 	status := "done"
 	// get and check inputs
 	traintupleKey := args[0]
@@ -460,7 +468,14 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintupl
 	}
 
 	// get traintuple, check validity of the update, and update its status
-	traintuple, oldStatus, err = updateStatusTraintuple(stub, traintupleKey, status)
+	traintuple = Traintuple{}
+	if len(traintupleKey) != lenKey {
+		return traintuple, fmt.Errorf("invalid traintuple key")
+	}
+	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
+		return
+	}
+	err = traintuple.checkNewStatus(stub, traintupleKey, status)
 	if err != nil {
 		return
 	}
@@ -472,6 +487,9 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintupl
 		StorageAddress: outModel[1]}
 	traintuple.Log += log
 
+	// TODO: Stop passing oldStatus, pass new status
+	oldStatus := traintuple.Status
+	traintuple.Status = status
 	if err = traintuple.commitUpdate(stub, traintupleKey, oldStatus); err != nil {
 		return
 	}
@@ -557,22 +575,33 @@ func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple T
 		return
 	}
 	// get traintuple and updates its status
-	traintuple, oldStatus, err := updateStatusTraintuple(stub, traintupleKey, "failed")
+	status := "failed"
+	traintuple = Traintuple{}
+	if len(traintupleKey) != lenKey {
+		return traintuple, fmt.Errorf("invalid traintuple key")
+	}
+	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
+		return
+	}
+	err = traintuple.checkNewStatus(stub, traintupleKey, status)
 	if err != nil {
 		return
 	}
 	traintuple.Log += log
 
+	// TODO: Stop passing oldStatus, pass new status
+	oldStatus := traintuple.Status
+	traintuple.Status = status
 	if err = traintuple.commitUpdate(stub, traintupleKey, oldStatus); err != nil {
 		return
 	}
 
 	// update testtuple associated with this traintuple
-	if err = updateWaitingTesttuples(stub, traintupleKey, &HashDress{}, "failed"); err != nil {
+	if err = updateWaitingTesttuples(stub, traintupleKey, &HashDress{}, status); err != nil {
 		return
 	}
 	// update traintuple having this traintuple as inModel
-	if err = updateWaitingTraintuples(stub, traintupleKey, "failed"); err != nil {
+	if err = updateWaitingTraintuples(stub, traintupleKey, status); err != nil {
 		return
 	}
 	return
@@ -833,31 +862,19 @@ func checkUpdateTuple(stub shim.ChaincodeStubInterface, worker string, oldStatus
 // TODO: change names for all functions related to updates, since it is not consistent
 //
 
-// updateStatusTraintuple retrieves a traintuple given its key, check the validity of the status update, changes the status of a traintuple, and returns the updated traintuple and its oldStatus
-func updateStatusTraintuple(stub shim.ChaincodeStubInterface, traintupleKey string, status string) (Traintuple, string, error) {
-	// TODO should not fetch traintuple, this should be done outside the function
-	var oldStatus string
-	traintuple := Traintuple{}
-	if len(traintupleKey) != lenKey {
-		return traintuple, oldStatus, fmt.Errorf("invalid traintuple key")
-	}
-	if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
-		return traintuple, oldStatus, err
-	}
-	oldStatus = traintuple.Status
+// checkNewStatus retrieves a traintuple given its key, check the validity of the status update, changes the status of a traintuple, and returns the updated traintuple and its oldStatus
+func (traintuple Traintuple) checkNewStatus(stub shim.ChaincodeStubInterface, traintupleKey string, status string) error {
 	// get worker
 	worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
 	if err != nil {
-		return traintuple, oldStatus, err
+		return err
 	}
 	// check validity of worker and change of status
-	if err := checkUpdateTuple(stub, worker, oldStatus, status); err != nil {
-		return traintuple, oldStatus, err
+	if err := checkUpdateTuple(stub, worker, traintuple.Status, status); err != nil {
+		return err
 	}
-	// update traintuple
-	traintuple.Status = status
 
-	return traintuple, oldStatus, nil
+	return nil
 }
 
 // updateStatusTesttuple retrieves a testtuple given its key, check the validity of the status update, changes the status of a testtuple, and returns the updated tesntuple and its oldStatus
@@ -912,7 +929,7 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 			return fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", traintupleKey, traintuple.Status)
 		}
 		// get traintuple new status
-		// TODO use updateStatusTraintuple
+		// TODO use checkNewStatus
 		var newStatus string
 		if parentStatus == "failed" {
 			newStatus = parentStatus
