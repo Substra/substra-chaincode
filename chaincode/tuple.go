@@ -389,7 +389,7 @@ func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple 
 	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 		return
 	}
-	err = traintuple.checkNewStatus(stub, traintupleKey, status)
+	err = traintuple.checkNewStatus(stub, status)
 	if err != nil {
 		return
 	}
@@ -473,7 +473,7 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintupl
 	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 		return
 	}
-	err = traintuple.checkNewStatus(stub, traintupleKey, status)
+	err = traintuple.checkNewStatus(stub, status)
 	if err != nil {
 		return
 	}
@@ -578,7 +578,7 @@ func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple T
 	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 		return
 	}
-	err = traintuple.checkNewStatus(stub, traintupleKey, status)
+	err = traintuple.checkNewStatus(stub, status)
 	if err != nil {
 		return
 	}
@@ -854,8 +854,8 @@ func checkUpdateTuple(stub shim.ChaincodeStubInterface, worker string, oldStatus
 // TODO: change names for all functions related to updates, since it is not consistent
 //
 
-// checkNewStatus retrieves a traintuple given its key, check the validity of the status update, changes the status of a traintuple, and returns the updated traintuple and its oldStatus
-func (traintuple Traintuple) checkNewStatus(stub shim.ChaincodeStubInterface, traintupleKey string, status string) error {
+// checkNewStatus verifies that the new status is consistent with the tuple current status
+func (traintuple *Traintuple) checkNewStatus(stub shim.ChaincodeStubInterface, status string) error {
 	// get worker
 	worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
 	if err != nil {
