@@ -326,7 +326,13 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 
 	out := outputTraintuple{}
 	_ = out.Fill(stub, traintuple)
-	traintupleEventBytes, _ := json.Marshal(out)
+	outBytes, _ := json.Marshal(out)
+
+	var element map[string]interface{}
+	json.Unmarshal(outBytes, &element)
+	element["key"] = traintupleKey
+	traintupleEventBytes, _ := json.Marshal(element)
+
 	err = stub.SetEvent("traintuple-creation", traintupleEventBytes)
 
 	return map[string]string{"key": traintupleKey}, nil
