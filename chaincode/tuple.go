@@ -324,16 +324,19 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 		}
 	}
 
-	out := outputTraintuple{}
-	_ = out.Fill(stub, traintuple)
-	outBytes, _ := json.Marshal(out)
+	if traintuple.Status == "todo" {
 
-	var element map[string]interface{}
-	json.Unmarshal(outBytes, &element)
-	element["key"] = traintupleKey
-	traintupleEventBytes, _ := json.Marshal(element)
+		out := outputTraintuple{}
+		_ = out.Fill(stub, traintuple)
+		outBytes, _ := json.Marshal(out)
 
-	err = stub.SetEvent("traintuple-creation", traintupleEventBytes)
+		var element map[string]interface{}
+		json.Unmarshal(outBytes, &element)
+		element["key"] = traintupleKey
+		traintupleEventBytes, _ := json.Marshal(element)
+
+		err = stub.SetEvent("traintuple-creation", traintupleEventBytes)
+	}
 
 	return map[string]string{"key": traintupleKey}, nil
 }
@@ -381,10 +384,13 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 		}
 	}
 
-	out := outputTesttuple{}
-	out.Fill(testtupleKey, testtuple)
-	testtupleEventBytes, _ := json.Marshal(out)
-	err = stub.SetEvent("testtuple-creation", testtupleEventBytes)
+
+	if testtuple.Status == "todo" {
+		out := outputTesttuple{}
+		out.Fill(testtupleKey, testtuple)
+		testtupleEventBytes, _ := json.Marshal(out)
+		err = stub.SetEvent("testtuple-creation", testtupleEventBytes)
+	}
 
 	return map[string]string{"key": testtupleKey}, nil
 }
@@ -951,6 +957,20 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 			if ready {
 				newStatus = "todo"
 			}
+
+			if traintuple.Status == "todo" {
+
+				out := outputTraintuple{}
+				_ = out.Fill(stub, traintuple)
+				outBytes, _ := json.Marshal(out)
+
+				var element map[string]interface{}
+				json.Unmarshal(outBytes, &element)
+				element["key"] = traintupleKey
+				traintupleEventBytes, _ := json.Marshal(element)
+
+				err = stub.SetEvent("traintuple-creation", traintupleEventBytes)
+			}
 		}
 
 		// commit new status
@@ -1062,6 +1082,14 @@ func updateWaitingTesttuples(stub shim.ChaincodeStubInterface, traintupleKey str
 		if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
 			return err
 		}
+
+		if testtuple.Status == "todo" {
+			out := outputTesttuple{}
+			out.Fill(testtupleKey, testtuple)
+			testtupleEventBytes, _ := json.Marshal(out)
+			err = stub.SetEvent("testtuple-creation", testtupleEventBytes)
+		}
+
 	}
 	return nil
 }
