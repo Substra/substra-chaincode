@@ -380,6 +380,12 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 			return nil, err
 		}
 	}
+
+	out := outputTesttuple{}
+	out.Fill(testtupleKey, testtuple)
+	testtupleEventBytes, _ := json.Marshal(out)
+	err = stub.SetEvent("testtuple-creation", testtupleEventBytes)
+
 	return map[string]string{"key": testtupleKey}, nil
 }
 
