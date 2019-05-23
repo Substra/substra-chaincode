@@ -20,12 +20,13 @@ Steps to reproduce the behavior:
 **Expected behavior**
 > Give a clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Screenshots**  
+> If applicable, add screenshots to help explain your problem.
 
 **Environment:**
  - Version, branch (branch and commit number)
- - OS and version: [e.g. macOS Mojave version 10.14.4]
+ - OS and version: [e.g. macOS Mojave version 10.14.4] 
+     > Get it with `uname -a` on Linux and `system_profiler SPSoftwareDataType` on Mac
  - Browser and version if relevant [e.g. chrome, safari]
  - Any other relevant information [e.g. dependencies, version of Python, version of Go, ...]
 
