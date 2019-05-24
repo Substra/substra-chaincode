@@ -66,6 +66,7 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 			err = fmt.Errorf("could not retrieve parent traintuple with key %s - %s %d", parentTraintupleKeys, err.Error(), len(parentTraintupleKeys))
 			return
 		}
+		// set traintuple to waiting if one of the parent traintuples is not done
 		if parentTraintuple.OutModel == nil {
 			status = "waiting"
 		}
@@ -378,30 +379,23 @@ func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple 
 		return
 	}
 
-	oldStatus := "todo"
 	status := "doing"
 	traintupleKey := args[0]
 	// get traintuple, check validity of the update, and update its status
-	traintuple, oldStatus, err = updateStatusTraintuple(stub, traintupleKey, status)
+	traintuple = Traintuple{}
+	if len(traintupleKey) != lenKey {
+		return traintuple, fmt.Errorf("invalid traintuple key")
+	}
+	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
+		return
+	}
+	err = traintuple.checkNewStatus(stub, status)
 	if err != nil {
 		return
 	}
+
 	// save to ledger
-	traintupleBytes, _ := json.Marshal(traintuple)
-	if err = stub.PutState(traintupleKey, traintupleBytes); err != nil {
-		err = fmt.Errorf("failed to update traintuple status to %s with key %s", status, traintupleKey)
-		return
-	}
-	// get worker
-	worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
-	if err != nil {
-		return
-	}
-	// update associated composite keys
-	indexName := "traintuple~worker~status~key"
-	oldAttributes := []string{"traintuple", worker, oldStatus, traintupleKey}
-	newAttributes := []string{"traintuple", worker, status, traintupleKey}
-	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
+	if err = traintuple.commitUpdate(stub, traintupleKey, status); err != nil {
 		return
 	}
 	return
@@ -452,7 +446,6 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintupl
 		return
 	}
 
-	oldStatus := "doing"
 	status := "done"
 	// get and check inputs
 	traintupleKey := args[0]
@@ -473,7 +466,14 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintupl
 	}
 
 	// get traintuple, check validity of the update, and update its status
-	traintuple, oldStatus, err = updateStatusTraintuple(stub, traintupleKey, status)
+	traintuple = Traintuple{}
+	if len(traintupleKey) != lenKey {
+		return traintuple, fmt.Errorf("invalid traintuple key")
+	}
+	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
+		return
+	}
+	err = traintuple.checkNewStatus(stub, status)
 	if err != nil {
 		return
 	}
@@ -484,21 +484,8 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintupl
 		Hash:           outModel[0],
 		StorageAddress: outModel[1]}
 	traintuple.Log += log
-	traintupleBytes, _ := json.Marshal(traintuple)
-	if err = stub.PutState(traintupleKey, traintupleBytes); err != nil {
-		err = fmt.Errorf("failed to update traintuple status to trained with key %s", traintupleKey)
-		return
-	}
-	// get worker
-	worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
-	if err != nil {
-		return
-	}
-	// update associated composite keys
-	indexName := "traintuple~worker~status~key"
-	oldAttributes := []string{"traintuple", worker, oldStatus, traintupleKey}
-	newAttributes := []string{"traintuple", worker, status, traintupleKey}
-	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
+
+	if err = traintuple.commitUpdate(stub, traintupleKey, status); err != nil {
 		return
 	}
 
@@ -583,34 +570,30 @@ func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple T
 		return
 	}
 	// get traintuple and updates its status
-	traintuple, oldStatus, err := updateStatusTraintuple(stub, traintupleKey, "failed")
+	status := "failed"
+	traintuple = Traintuple{}
+	if len(traintupleKey) != lenKey {
+		return traintuple, fmt.Errorf("invalid traintuple key")
+	}
+	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
+		return
+	}
+	err = traintuple.checkNewStatus(stub, status)
 	if err != nil {
 		return
 	}
 	traintuple.Log += log
-	traintupleBytes, _ := json.Marshal(traintuple)
-	if err = stub.PutState(traintupleKey, traintupleBytes); err != nil {
-		err = fmt.Errorf("failed to update traintuple status to failed with key %s", traintupleKey)
+
+	if err = traintuple.commitUpdate(stub, traintupleKey, status); err != nil {
 		return
 	}
-	// get worker
-	worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
-	if err != nil {
-		return
-	}
-	// update associated composite keys
-	indexName := "traintuple~worker~status~key"
-	oldAttributes := []string{"traintuple", worker, oldStatus, traintupleKey}
-	newAttributes := []string{"traintuple", worker, "failed", traintupleKey}
-	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
-		return
-	}
+
 	// update testtuple associated with this traintuple
-	if err = updateWaitingTesttuples(stub, traintupleKey, &HashDress{}, "failed"); err != nil {
+	if err = updateWaitingTesttuples(stub, traintupleKey, &HashDress{}, status); err != nil {
 		return
 	}
 	// update traintuple having this traintuple as inModel
-	if err = updateWaitingTraintuples(stub, traintupleKey, "failed"); err != nil {
+	if err = updateWaitingTraintuples(stub, traintupleKey, status); err != nil {
 		return
 	}
 	return
@@ -871,31 +854,19 @@ func checkUpdateTuple(stub shim.ChaincodeStubInterface, worker string, oldStatus
 // TODO: change names for all functions related to updates, since it is not consistent
 //
 
-// updateStatusTraintuple retrieves a traintuple given its key, check the validity of the status update, changes the status of a traintuple, and returns the updated traintuple and its oldStatus
-func updateStatusTraintuple(stub shim.ChaincodeStubInterface, traintupleKey string, status string) (Traintuple, string, error) {
-
-	var oldStatus string
-	traintuple := Traintuple{}
-	if len(traintupleKey) != lenKey {
-		return traintuple, oldStatus, fmt.Errorf("invalid traintuple key")
-	}
-	if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
-		return traintuple, oldStatus, err
-	}
-	oldStatus = traintuple.Status
+// checkNewStatus verifies that the new status is consistent with the tuple current status
+func (traintuple *Traintuple) checkNewStatus(stub shim.ChaincodeStubInterface, status string) error {
 	// get worker
 	worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
 	if err != nil {
-		return traintuple, oldStatus, err
+		return err
 	}
 	// check validity of worker and change of status
-	if err := checkUpdateTuple(stub, worker, oldStatus, status); err != nil {
-		return traintuple, oldStatus, err
+	if err := checkUpdateTuple(stub, worker, traintuple.Status, status); err != nil {
+		return err
 	}
-	// update traintuple
-	traintuple.Status = status
 
-	return traintuple, oldStatus, nil
+	return nil
 }
 
 // updateStatusTesttuple retrieves a testtuple given its key, check the validity of the status update, changes the status of a testtuple, and returns the updated tesntuple and its oldStatus
@@ -922,7 +893,7 @@ func updateStatusTesttuple(stub shim.ChaincodeStubInterface, testtupleKey string
 
 // updateWaitingTraintuples updates the status of waiting trainuples  InModels of traintuples once they have been trained (succesfully or failed)
 // func updateWaitingInModels(stub shim.ChaincodeStubInterface, modelTraintupleKey string, model *HashDress) error {
-func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleKey string, status string) error {
+func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleKey string, parentStatus string) error {
 
 	indexName := "traintuple~inModel~key"
 	// get traintuples having as inModels the input traintuple
@@ -936,70 +907,104 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 		if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 			return err
 		}
-		oldStatus := traintuple.Status
-		if status == "failed" {
-			traintuple.Status = status
-		} else if status == "done" {
-			err := traintuple.CheckReady(stub, modelTraintupleKey)
-			if err != nil {
-				return err
-			}
-		}
+
 		// remove associated composite key
-		compositeKey, err := stub.CreateCompositeKey(indexName, []string{"traintuple", modelTraintupleKey, traintupleKey})
-		if err != nil {
-			return fmt.Errorf("failed to recreate composite key to update traintuple %s with inModel %s - %s", traintupleKey, modelTraintupleKey, err.Error())
+		if err := traintuple.removeModelCompositeKey(stub, modelTraintupleKey); err != nil {
+			return err
 		}
-		if err := stub.DelState(compositeKey); err != nil {
-			return fmt.Errorf("failed to delete associated composite key to update traintuple %s with inModel %s - %s", traintupleKey, modelTraintupleKey, err.Error())
+
+		// traintuple is already failed, don't update it
+		if traintuple.Status == "failed" {
+			continue
 		}
-		if oldStatus != traintuple.Status {
-			// save update in ledger
-			traintupleBytes, _ := json.Marshal(traintuple)
-			if err := stub.PutState(traintupleKey, traintupleBytes); err != nil {
-				return fmt.Errorf("failed to update traintuple %s with inModel %s - %s", traintupleKey, modelTraintupleKey, err.Error())
-			}
-			// get worker
-			worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
+		if traintuple.Status != "waiting" {
+			return fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", traintupleKey, traintuple.Status)
+		}
+		// get traintuple new status
+		// TODO use checkNewStatus
+		var newStatus string
+		if parentStatus == "failed" {
+			newStatus = parentStatus
+		} else if parentStatus == "done" {
+			ready, err := traintuple.isReady(stub, modelTraintupleKey)
 			if err != nil {
 				return err
 			}
-			// update associated composite keys
-			indexName := "traintuple~worker~status~key"
-			oldAttributes := []string{"traintuple", worker, "waiting", traintupleKey}
-			newAttributes := []string{"traintuple", worker, traintuple.Status, traintupleKey}
-			if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
-				return err
+			if ready {
+				newStatus = "todo"
 			}
 		}
 
+		// commit new status
+		if newStatus != "" {
+			if err := traintuple.commitUpdate(stub, traintupleKey, newStatus); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
 
-// CheckReady checks if inModels of a traintuple have been trained, except the newDoneTraintupleKey (since the transaction is not commited)
+// isReady checks if inModels of a traintuple have been trained, except the newDoneTraintupleKey (since the transaction is not commited)
 // and updates the traintuple status if necessary
-// TODO idem change name of the function
-// func (traintuple *Traintuple) CheckReady(modelTraintupleKey string, model *HashDress) {
-func (traintuple *Traintuple) CheckReady(stub shim.ChaincodeStubInterface, newDoneTraintupleKey string) error {
-	status := "todo"
-	// would be much easier if traintuple.InModels was map[string]HashDress
+func (traintuple *Traintuple) isReady(stub shim.ChaincodeStubInterface, newDoneTraintupleKey string) (ready bool, err error) {
 	for _, key := range traintuple.InModelKeys {
-		if key != newDoneTraintupleKey {
-			tt := Traintuple{}
-			if err := getElementStruct(stub, key, &tt); err != nil {
-				return err
-			}
-			if tt.Status == "waiting" || tt.Status == "todo" {
-				status = "waiting"
-			} else if tt.Status == "failed" {
-				status = "failed"
-			}
+		// don't check newly done traintuple
+		if key == newDoneTraintupleKey {
+			continue
+		}
+		tt := Traintuple{}
+		if err := getElementStruct(stub, key, &tt); err != nil {
+			return false, err
+		}
+		if tt.Status != "done" {
+			return false, nil
 		}
 	}
-	traintuple.Status = status
-	return nil
+	return true, nil
+}
 
+// removeModelCompositeKey remove the Model key state of a traintuple
+func (traintuple *Traintuple) removeModelCompositeKey(stub shim.ChaincodeStubInterface, modelKey string) error {
+	indexName := "traintuple~inModel~key"
+	compositeKey, err := stub.CreateCompositeKey(indexName, []string{"traintuple", modelKey, traintuple.FLtask})
+
+	if err != nil {
+		return fmt.Errorf("failed to recreate composite key to update traintuple %s with inModel %s - %s", traintuple.FLtask, modelKey, err.Error())
+	}
+
+	if err := stub.DelState(compositeKey); err != nil {
+		return fmt.Errorf("failed to delete associated composite key to update traintuple %s with inModel %s - %s", traintuple.FLtask, modelKey, err.Error())
+	}
+	return nil
+}
+
+// commitUpdate update the traintuple after a status update in the ledger
+func (traintuple *Traintuple) commitUpdate(stub shim.ChaincodeStubInterface, traintupleKey string, newStatus string) error {
+	if traintuple.Status == newStatus {
+		return fmt.Errorf("cannot update traintuple %s - status already %s", traintupleKey, newStatus)
+	}
+	oldStatus := traintuple.Status
+	traintuple.Status = newStatus
+	traintupleBytes, _ := json.Marshal(traintuple)
+	if err := stub.PutState(traintupleKey, traintupleBytes); err != nil {
+		return fmt.Errorf("failed to update traintuple %s - %s", traintupleKey, err.Error())
+	}
+
+	// get worker
+	worker, err := getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
+	if err != nil {
+		return err
+	}
+
+	// update associated composite keys
+	indexName := "traintuple~worker~status~key"
+	oldAttributes := []string{"traintuple", worker, oldStatus, traintupleKey}
+	newAttributes := []string{"traintuple", worker, traintuple.Status, traintupleKey}
+	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
+		return err
+	}
+	return nil
 }
 
 // updateWaitingTesttuple updates Status of testtuple whose associated traintuple has been trained or has failed
