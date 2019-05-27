@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"reflect"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -13,12 +13,116 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+func TestSpecifiqArgSeq(t *testing.T) {
+	// This test is a POC and a example of a test base on the output of the log
+	// parameters directly copied in a test. It can be realy usesul for debugging
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+	fmt.Println(logger.IsEnabledFor(shim.LogNotice))
+	argSeq := [][]string{
+		[]string{"registerDataManager", "Titanic", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223", "http://owkin.substrabac:8000/data_manager/17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223/opener/", "csv", "48c89276972363250ea949c32809020e9d7fda786547a570bcaecedcc5092627", "http://owkin.substrabac:8000/data_manager/17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223/description/", "", "all"},
+		[]string{"registerDataSample", "47f9af29d34d737acfb0e37d93bfa650979292297ed263e8536ef3d13f70c83e,df94060511117dd25da1d2b1846f9be17340128233c8b24694d5e780d909b22c,50b7a4b4f2541674958fd09a061276862e1e2ea4dbdd0e1af06e70051804e33b,1befb03ceed3ab7ec9fa4bebe9b681bbc7725a402e03f9e64f9f1677cf619183", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223", "false"},
+		[]string{"registerDataSample", "1a8532bd84d5ef785a4abe503a12bc7040c666a9f6264f982aa4ad77ff7217a8", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223", "true"},
+		[]string{"registerObjective", "Titanic: Machine Learning From Disaster", "1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb", "http://owkin.substrabac:8000/objective/1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb/description/", "accuracy", "0bc13ad2e481c1a52959a228984bbee2e31271d567ea55a458e9ae92d481fedb", "http://owkin.substrabac:8000/objective/1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb/metrics/", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223:1a8532bd84d5ef785a4abe503a12bc7040c666a9f6264f982aa4ad77ff7217a8", "all"},
+		[]string{"registerAlgo", "Constant death predictor", "10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9", "http://owkin.substrabac:8000/algo/10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9/file/", "1dae14e339c94ae04cc8846d353c07c8de96a38d6c5b5ee4486c4102ff011450", "http://owkin.substrabac:8000/algo/10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9/description/", "all"},
+		[]string{"createTraintuple", "10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9", "1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb", "", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223", "47f9af29d34d737acfb0e37d93bfa650979292297ed263e8536ef3d13f70c83e,df94060511117dd25da1d2b1846f9be17340128233c8b24694d5e780d909b22c,50b7a4b4f2541674958fd09a061276862e1e2ea4dbdd0e1af06e70051804e33b", "", "", "titanic v0"},
+		[]string{"createTesttuple", "8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223", "1befb03ceed3ab7ec9fa4bebe9b681bbc7725a402e03f9e64f9f1677cf619183", "titanic v0"},
+		[]string{"createTesttuple", "8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4", "", "", ""},
+		[]string{"logStartTrain", "8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4"},
+		[]string{"logSuccessTrain", "8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4", "6f6f2c318ff95ea7de9e4c01395b78b9217ddb134279275dae7842e7d4eb4c16, http://owkin.substrabac:8000/model/6f6f2c318ff95ea7de9e4c01395b78b9217ddb134279275dae7842e7d4eb4c16/file/", "0.6161048689138576", "Train - CPU:119.66 % - Mem:0.04 GB - GPU:0.00 % - GPU Mem:0.00 GB; "},
+		[]string{"logStartTest", "81bad50d76898ba6ea5af9d0a4816726bd46b947730a1bc2dd1d6755e8ab682b"},
+		[]string{"logSuccessTest", "81bad50d76898ba6ea5af9d0a4816726bd46b947730a1bc2dd1d6755e8ab682b", "0.6179775280898876", "Test - CPU:0.00 % - Mem:0.00 GB - GPU:0.00 % - GPU Mem:0.00 GB; "},
+	}
+	for _, argList := range argSeq {
+		args := [][]byte{}
+		for _, arg := range argList {
+			args = append(args, []byte(arg))
+		}
+		resp := mockStub.MockInvoke("42", args)
+		assert.EqualValues(t, 200, resp.Status, resp.Message)
+	}
+}
+func TestTraintupleWithNoTestDataset(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+	registerItem(t, *mockStub, "trainDataset")
+
+	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	inpObjective := inputObjective{DescriptionHash: objHash, TestDataset: ":"}
+	args := inpObjective.createSample()
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
+
+	inpAlgo := inputAlgo{}
+	args = inpAlgo.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
+
+	inpTraintuple := inputTraintuple{ObjectiveKey: objHash}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "when adding traintuple without test dataset it should work: ", resp.Message)
+
+	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
+}
+func TestTagTuple(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	registerItem(t, *mockStub, "algo")
+
+	noTag := "This is not a tag because it's waaaaaaaaaaaaaaaayyyyyyyyyyyyyyyyyyyyyyy too long."
+
+	inpTraintuple := inputTraintuple{Tag: noTag}
+	args := inpTraintuple.createSample()
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 500, resp.Status, resp.Message)
+
+	tag := "This is a tag"
+
+	inpTraintuple = inputTraintuple{Tag: tag}
+	args = inpTraintuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, resp.Message)
+
+	args = [][]byte{[]byte("queryTraintuples")}
+	resp = mockStub.MockInvoke("42", args)
+	traintuples := []outputTraintuple{}
+	err := json.Unmarshal(resp.Payload, &traintuples)
+	assert.NoError(t, err, "should be unmarshaled")
+	assert.Len(t, traintuples, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, traintuples[0].Tag)
+
+	inpTesttuple := inputTesttuple{Tag: tag}
+	args = inpTesttuple.createSample()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, resp.Message)
+
+	args = [][]byte{[]byte("queryTesttuples")}
+	resp = mockStub.MockInvoke("42", args)
+	testtuples := []outputTesttuple{}
+	err = json.Unmarshal(resp.Payload, &testtuples)
+	assert.NoError(t, err, "should be unmarshaled")
+	assert.Len(t, testtuples, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, testtuples[0].Tag)
+
+	args = [][]byte{[]byte("queryFilter"), []byte("testtuple~tag"), []byte(tag)}
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, resp.Message)
+	filtertuples := []outputTesttuple{}
+	err = json.Unmarshal(resp.Payload, &filtertuples)
+	assert.NoError(t, err, "should be unmarshaled")
+	assert.Len(t, testtuples, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, testtuples[0].Tag)
+
+}
 func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 	// Add a some dataManager, dataSample and traintuple
-	err, _, _ := registerItem(*mockStub, "traintuple")
-	assert.NoError(t, err)
+	registerItem(t, *mockStub, "traintuple")
 
 	// Manually open a ledger transaction
 	mockStub.MockTransactionStart("42")
@@ -26,7 +130,7 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 
 	// Retreive and alter existing objectif to pass Metrics at nil
 	objective := Objective{}
-	getElementStruct(mockStub, objectiveDescriptionHash, &objective)
+	err := getElementStruct(mockStub, objectiveDescriptionHash, &objective)
 	assert.NoError(t, err)
 	objective.Metrics = nil
 	objBytes, err := json.Marshal(objective)
@@ -44,13 +148,11 @@ func TestTraintupleFLtaskCreation(t *testing.T) {
 	mockStub := shim.NewMockStub("substra", scc)
 
 	// Add dataManager, dataSample and algo
-	err, resp, _ := registerItem(*mockStub, "algo")
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	registerItem(t, *mockStub, "algo")
 
 	inpTraintuple := inputTraintuple{FLtask: "someFLtask"}
 	args := inpTraintuple.createSample()
-	resp = mockStub.MockInvoke("42", args)
+	resp := mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 500, resp.Status, "should failed for missing rank")
 	require.Contains(t, resp.Message, "invalit inputs, a FLtask should have a rank", "invalid error message")
 
@@ -64,7 +166,11 @@ func TestTraintupleFLtaskCreation(t *testing.T) {
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
-	key := string(resp.Payload)
+	res := map[string]string{}
+	err := json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	key := res["key"]
 	require.EqualValues(t, key, traintupleKey)
 
 	inpTraintuple = inputTraintuple{Rank: "0"}
@@ -79,16 +185,17 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 	mockStub := shim.NewMockStub("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
-	err, resp, _ := registerItem(*mockStub, "algo")
-	assert.NoError(t, err)
-	assert.NotNil(t, resp)
+	registerItem(t, *mockStub, "algo")
 
 	inpTraintuple := inputTraintuple{Rank: "0"}
 	args := inpTraintuple.createSample()
-	resp = mockStub.MockInvoke("42", args)
+	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
-	key := string(resp.Payload)
-
+	res := map[string]string{}
+	err := json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	key := res["key"]
 	// Failed to add a traintuple with the same rank
 	inpTraintuple = inputTraintuple{
 		InModels: key,
@@ -115,8 +222,10 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same FLtask")
-	ttkey := string(resp.Payload)
-
+	err = json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	ttkey := res["key"]
 	// Add new algo to check all fltask algo consistency
 	newAlgoHash := strings.Replace(algoHash, "a", "b", 1)
 	inpAlgo := inputAlgo{Hash: newAlgoHash}
@@ -140,12 +249,16 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	mockStub := shim.NewMockStub("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
-	err, resp, _ := registerItem(*mockStub, "traintuple")
-	assert.NoError(t, err)
-	traintupleKey := resp.Payload
+	resp, _ := registerItem(t, *mockStub, "traintuple")
+
+	res := map[string]string{}
+	err := json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	traintupleKey := res["key"]
 
 	// Mark the traintuple as failed
-	args := [][]byte{[]byte("logFailTrain"), traintupleKey, []byte("pas glop")}
+	args := [][]byte{[]byte("logFailTrain"), []byte(traintupleKey), []byte("pas glop")}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "should be able to log traintuple as failed")
 
@@ -162,8 +275,7 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 	mockStub := shim.NewMockStub("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
-	err, resp, _ := registerItem(*mockStub, "traintuple")
-	assert.NoError(t, err)
+	registerItem(t, *mockStub, "traintuple")
 
 	// Add a testtuple that shoulb be certified since it's the same dataManager and
 	// dataSample than the objective but explicitly pass as arguments and in disorder
@@ -171,13 +283,13 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 		DataSampleKeys: testDataSampleHash2 + "," + testDataSampleHash1,
 		DataManagerKey: dataManagerOpenerHash}
 	args := inpTesttuple.createSample()
-	resp = mockStub.MockInvoke("42", args)
+	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 
 	args = [][]byte{[]byte("queryTesttuples")}
 	resp = mockStub.MockInvoke("42", args)
 	testtuples := [](map[string]interface{}){}
-	err = json.Unmarshal(resp.Payload, &testtuples)
+	err := json.Unmarshal(resp.Payload, &testtuples)
 	assert.NoError(t, err, "should be unmarshaled")
 	assert.Len(t, testtuples, 1, "there should be only one testtuple...")
 	assert.True(t, testtuples[0]["certified"].(bool), "... and it should be certified")
@@ -188,13 +300,12 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	mockStub := shim.NewMockStub("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
-	err, resp, _ := registerItem(*mockStub, "traintuple")
-	assert.NoError(t, err)
+	registerItem(t, *mockStub, "traintuple")
 
 	// Add a certified testtuple
 	inpTesttuple1 := inputTesttuple{}
 	args := inpTesttuple1.createSample()
-	resp = mockStub.MockInvoke("42", args)
+	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 
 	// Fail to add an incomplete uncertified testtuple
@@ -232,85 +343,66 @@ func TestTraintuple(t *testing.T) {
 	}
 	args := inpTraintuple.createSample()
 	resp := mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 500 {
-		t.Errorf("when adding objective with invalid hash, status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 500, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Add traintuple with unexisting algo
 	inpTraintuple = inputTraintuple{}
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 500 {
-		t.Errorf("when adding traintuple with unexisting algo, status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 500, resp.Status, "when adding traintuple with unexisting algo, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add traintuple
-	err, resp, tt := registerItem(*mockStub, "traintuple")
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	inpTraintuple = tt.(inputTraintuple)
-	traintupleKey := string(resp.Payload)
+	resp, tt := registerItem(t, *mockStub, "traintuple")
 
+	inpTraintuple = tt.(inputTraintuple)
+	res := map[string]string{}
+	err := json.Unmarshal(resp.Payload, &res)
+	assert.NoError(t, err, "traintuple should unmarshal without problem")
+	assert.Contains(t, res, "key")
+	traintupleKey := res["key"]
 	// Query traintuple from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying the traintuple - status %d and message %s", status, resp.Message)
+	assert.EqualValuesf(t, 200, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
+	out := outputTraintuple{}
+	err = json.Unmarshal(resp.Payload, &out)
+	assert.NoError(t, err, "when unmarshalling queried traintuple")
+	expected := outputTraintuple{
+		Algo: &HashDressName{
+			Hash:           algoHash,
+			Name:           algoName,
+			StorageAddress: algoStorageAddress,
+		},
+		Creator: "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
+		Dataset: &TtDataset{
+			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
+			OpenerHash:     dataManagerOpenerHash,
+			Perf:           0.0,
+			Worker:         worker,
+		},
+		Objective: &TtObjective{
+			Key: objectiveDescriptionHash,
+			Metrics: &HashDress{
+				Hash:           objectiveMetricsHash,
+				StorageAddress: objectiveMetricsStorageAddress,
+			},
+		},
+		Permissions: "all",
+		Status:      "todo",
 	}
-	traintuple := make(map[string]interface{})
-	if err := bytesToStruct(resp.Payload, &traintuple); err != nil {
-		t.Errorf("when unmarshalling queried traintuple with error %s", err)
-	}
-	if a, b := traintuple["status"], "todo"; a != b {
-		t.Errorf("wrong ledger traintuple status: %s - %s", a, b)
-	}
-	if a, b := traintuple["permissions"], "all"; a != b {
-		t.Errorf("ledger traintuple permissions does not correspond to what was input: %s - %s", a, b)
-	}
-	if a, b := traintuple["log"], ""; a != b {
-		t.Errorf("wrong ledger traintuple log: %s - %s", a, b)
-	}
-	if a, b := traintuple["objective"].(map[string]interface{})["hash"], objectiveDescriptionHash; a != b {
-		t.Errorf("ledger traintuple objective hash does not corresponds to what was input: %s - %s", a, b)
-	}
-	if a, b := traintuple["objective"].(map[string]interface{})["metrics"].(map[string]interface{})["hash"], objectiveMetricsHash; a != b {
-		t.Errorf("ledger traintuple objective hash does not corresponds to what was input: %s - %s", a, b)
-	}
-	if a, b := traintuple["objective"].(map[string]interface{})["metrics"].(map[string]interface{})["storageAddress"], objectiveMetricsStorageAddress; a != b {
-		t.Errorf("ledger traintuple objective hash does not corresponds to what was input: %s - %s", a, b)
-	}
-	algo := make(map[string]interface{})
-	algo["hash"] = algoHash
-	algo["storageAddress"] = algoStorageAddress
-	algo["name"] = algoName
-	if a, b := traintuple["algo"], algo; !reflect.DeepEqual(a, b) {
-		t.Errorf("wrong ledger traintuple algo: %s - %s", a, b)
-	}
-	dataset := make(map[string]interface{})
-	dataset["worker"] = worker
-	dataset["keys"] = []interface{}{trainDataSampleHash1, trainDataSampleHash2}
-	dataset["openerHash"] = dataManagerOpenerHash
-	dataset["perf"] = 0.0
-	if a, b := traintuple["dataset"], dataset; !reflect.DeepEqual(a, b) {
-		t.Errorf("wrong ledger traintuple train dataset: %s - %s", a, b)
-	}
+	assert.Exactly(t, expected, out, "the traintuple queried from the ledger differ from expected")
 
 	// Query all traintuples and check consistency
 	args = [][]byte{[]byte("queryTraintuples")}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying traintuples - status %d and message %s", status, resp.Message)
-	}
-	var sPayload []map[string]interface{}
-	if err := json.Unmarshal(resp.Payload, &sPayload); err != nil {
-		t.Errorf("when unmarshalling queried objectives")
-	}
-	payload := sPayload[0]
-	delete(payload, "key")
-	if !reflect.DeepEqual(payload, traintuple) {
-		t.Errorf("when querying traintuples, does not correspond to what was input")
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuples - status %d and message %s", resp.Status, resp.Message)
+	// TODO add traintuple key to output struct
+	// For now we test it as cleanly as its added to the query response
+	assert.Contains(t, string(resp.Payload), "key\":\""+traintupleKey)
+	var queryTraintuples []outputTraintuple
+	err = json.Unmarshal(resp.Payload, &queryTraintuples)
+	assert.NoError(t, err, "traintuples should unmarshal without problem")
+	assert.Exactly(t, out, queryTraintuples[0])
 
 	// Add traintuple with inmodel from the above-submitted traintuple
 	inpWaitingTraintuple := inputTraintuple{
@@ -318,27 +410,16 @@ func TestTraintuple(t *testing.T) {
 	}
 	args = inpWaitingTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when adding traintuple with status %d and message %s", status, resp.Message)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
 	//waitingTraintupleKey := string(resp.Payload)
 
 	// Query traintuple with status todo and worker as trainworker and check consistency
 	args = [][]byte{[]byte("queryFilter"), []byte("traintuple~worker~status"), []byte(worker + ", todo")}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying traintuple of worker with todo status - status %d and message %s", status, resp.Message)
-	}
-	if err := bytesToStruct(resp.Payload, &sPayload); err != nil {
-		t.Errorf("when unmarshalling queried traintuple with error %s", err)
-	}
-	if a, b := sPayload[0]["key"], traintupleKey; a != b {
-		t.Errorf("wrong retrieved key when querying traintuple of worker with todo status: %s %s", a, b)
-	}
-	delete(sPayload[0], "key")
-	if !reflect.DeepEqual(sPayload[0], traintuple) {
-		t.Errorf("unexpected traintuple when querying traintuple with status todo and worker")
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple of worker with todo status - status %d and message %s", resp.Status, resp.Message)
+	err = json.Unmarshal(resp.Payload, &queryTraintuples)
+	assert.NoError(t, err, "traintuples should unmarshal without problem")
+	assert.Exactly(t, out, queryTraintuples[0])
 
 	// Update status and check consistency
 	perf := "0.9"
@@ -351,73 +432,43 @@ func TestTraintuple(t *testing.T) {
 	traintupleStatus := []string{"doing", "done"}
 	for i := range traintupleStatus {
 		resp = mockStub.MockInvoke("42", argsSlice[i])
-		if status := resp.Status; status != 200 {
-			t.Errorf("when logging start %s with status %d and message %s",
-				traintupleStatus[i], status, resp.Message)
-		}
+		assert.EqualValuesf(t, 200, resp.Status, "when logging start %s with message %s", traintupleStatus[i], resp.Message)
 		args = [][]byte{[]byte("queryFilter"), []byte("traintuple~worker~status"), []byte(worker + ", " + traintupleStatus[i])}
 		resp = mockStub.MockInvoke("42", args)
-		if status := resp.Status; status != 200 {
-			t.Errorf("when querying traintuple of worker with %s status - status %d and message %s", traintupleStatus[i], status, resp.Message)
-		}
-		sPayload = make([]map[string]interface{}, 1)
-		if err := bytesToStruct(resp.Payload, &sPayload); err != nil {
-			t.Errorf("when unmarshalling queried traintuple with error %s", err)
-		}
-		if a, b := sPayload[0]["key"], traintupleKey; a != b {
-			t.Errorf("wrong retrieved key when querying traintuple of worker with %s status: %s %s", traintupleStatus[i], a, b)
-		}
-		delete(sPayload[0], "key")
-		if a, b := sPayload[0]["status"], traintupleStatus[i]; a != b {
-			t.Errorf("wrong retrieved status when querying traintuple of worker with %s status: %s %s", traintupleStatus[i], a, b)
-		}
+		assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple of worker with %s status - message %s", traintupleStatus[i], resp.Message)
+		sPayload := make([]map[string]interface{}, 1)
+		assert.NoError(t, json.Unmarshal(resp.Payload, &sPayload), "when unmarshal queried traintuples")
+		assert.EqualValues(t, traintupleKey, sPayload[0]["key"], "wrong retrieved key when querying traintuple of worker with %s status ", traintupleStatus[i])
+		assert.EqualValues(t, traintupleStatus[i], sPayload[0]["status"], "wrong retrieved status when querying traintuple of worker with %s status ", traintupleStatus[i])
 	}
 
 	// Query Traintuple From key
 	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying traintuple with status %d and message %s",
-			status, resp.Message)
-	}
-	respTraintuple := resp.Payload
-	endTraintuple := Traintuple{}
-	if err := bytesToStruct(respTraintuple, &endTraintuple); err != nil {
-		t.Errorf("when unmarshalling queried traintuple with error %s", err)
-	}
-	if a := endTraintuple.Log; a != log {
-		t.Errorf("because retrieved log in traintuple does not correspond to what "+
-			"was submitted: %s", a)
-	}
-	outModel := HashDress{
+	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple with status %d and message %s", resp.Status, resp.Message)
+	endTraintuple := outputTraintuple{}
+	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
+	expected.Dataset.Perf = 0.9
+	expected.Log = log
+	expected.OutModel = &HashDress{
 		Hash:           modelHash,
 		StorageAddress: modelAddress}
-	if endTraintuple.OutModel.Hash != outModel.Hash || endTraintuple.OutModel.StorageAddress != outModel.StorageAddress {
-		t.Errorf("because retrieved endModel in traintuple does not correspond to what "+
-			"was submitted: %s, %s", endTraintuple.OutModel, outModel)
-	}
+	expected.Status = traintupleStatus[1]
+	assert.Exactly(t, expected, endTraintuple, "retreived Traintuple does not correspond to what is expected")
 
 	// query all traintuples related to a traintuple with the same algo
 	args = [][]byte{[]byte("queryModelDetails"), []byte(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying model details with status %d and message %s", status, resp.Message)
-	}
-	payload = make(map[string]interface{})
-	json.Unmarshal(resp.Payload, &payload)
-	if l := len(payload); l != 1 {
-		t.Errorf("when querying model tuples, payload should contain at this stage only one traintuple, but it contains %d elements", l)
-	}
+	assert.EqualValuesf(t, 200, resp.Status, "when querying model details with status %d and message %s", resp.Status, resp.Message)
+	payload := map[string]interface{}{}
+	assert.NoError(t, json.Unmarshal(resp.Payload, &payload))
+	assert.Contains(t, payload, "traintuple")
+	assert.NotNil(t, payload["traintuple"], "when querying model tuples, payload should contain one traintuple")
 
 	// query all traintuples related to a traintuple with the same algo
 	args = [][]byte{[]byte("queryModels")}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying models with status %d and message %s", status, resp.Message)
-	}
-	// var mPayload []map[string]interface{}
-	// json.Unmarshal(resp.Payload, &mPayload)
-	// fmt.Println(mPayload)
+	assert.EqualValuesf(t, 200, resp.Status, "when querying models with status %d and message %s", resp.Status, resp.Message)
 }
 
 /**
@@ -434,17 +485,13 @@ func TestTesttuple(t *testing.T) {
 	}
 	args := inpTesttuple.createSample()
 	resp := mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 500 {
-		t.Errorf("when adding objective with invalid hash, status %d and message %s", status, resp.Message)
-	}
+assert.EqualValuesf(t, 500, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Add traintuple with unexisting algo
 	inpTraintuple = inputTraintuple{}
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 500 {
-		t.Errorf("when adding traintuple with unexisting algo, status %d and message %s", status, resp.Message)
-	}
+assert.EqualValuesf(t, 500, resp.Status, "when adding traintuple with unexisting algo, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add traintuple
 	err, resp, tt := registerItem(*mockStub, "traintuple")
@@ -457,9 +504,7 @@ func TestTesttuple(t *testing.T) {
 	// Query traintuple from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("query"), []byte(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying the traintuple - status %d and message %s", status, resp.Message)
-	}
+assert.EqualValuesf(t, 200, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 	traintuple := make(map[string]interface{})
 	if err := bytesToStruct(resp.Payload, &traintuple); err != nil {
 		t.Errorf("when unmarshalling queried traintuple with error %s", err)
@@ -501,9 +546,7 @@ func TestTesttuple(t *testing.T) {
 	// Query all traintuples and check consistency
 	args = [][]byte{[]byte("queryTraintuples")}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying traintuples - status %d and message %s", status, resp.Message)
-	}
+assert.EqualValuesf(t, 200, resp.Status, "when querying traintuples - status %d and message %s", resp.Status, resp.Message)
 	var sPayload []map[string]interface{}
 	if err := json.Unmarshal(resp.Payload, &sPayload); err != nil {
 		t.Errorf("when unmarshalling queried objectives")
@@ -517,9 +560,7 @@ func TestTesttuple(t *testing.T) {
 	// Query traintuple with status todo and worker as trainworker and check consistency
 	args = [][]byte{[]byte("queryFilter"), []byte("traintuple~worker~status"), []byte(worker + ", todo")}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying traintuple of worker with todo status - status %d and message %s", status, resp.Message)
-	}
+assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple of worker with todo status - status %d and message %s", resp.Status, resp.Message)
 	if err := bytesToStruct(resp.Payload, &sPayload); err != nil {
 		t.Errorf("when unmarshalling queried traintuple with error %s", err)
 	}
@@ -591,9 +632,7 @@ func TestTesttuple(t *testing.T) {
 	// query all traintuples related to a traintuple with the same algo
 	args = [][]byte{[]byte("queryTraintuplesAlgo"), []byte(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
-	if status := resp.Status; status != 200 {
-		t.Errorf("when querying algo traintuples with status %d and message %s", status, resp.Message)
-	}
+assert.EqualValuesf(t, 200, resp.Status, "when querying algo traintuples with status %d and message %s", resp.Status, resp.Message)
 	payload = make(map[string]interface{})
 	json.Unmarshal(resp.Payload, &payload)
 	if l := len(payload); l != 2 {

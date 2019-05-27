@@ -20,18 +20,23 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 		return
 	}
 	dataManagerKey = strings.Split(inp.TestDataset, ":")[0]
-	dataSampleKeys := strings.Split(strings.Replace(strings.Split(inp.TestDataset, ":")[1], " ", "", -1), ",")
-	testOnly, _, err := checkSameDataManager(stub, dataManagerKey, dataSampleKeys)
-	if err != nil {
-		err = fmt.Errorf("invalid test dataSample %s", err.Error())
-		return
-	} else if !testOnly {
-		err = fmt.Errorf("test dataSample are not tagged as testOnly dataSample")
-		return
-	}
-	objective.TestDataset = &Dataset{
-		DataManagerKey: dataManagerKey,
-		DataSampleKeys: dataSampleKeys,
+	if dataManagerKey != "" {
+		var testOnly bool
+		dataSampleKeys := strings.Split(strings.Replace(strings.Split(inp.TestDataset, ":")[1], " ", "", -1), ",")
+		testOnly, _, err = checkSameDataManager(stub, dataManagerKey, dataSampleKeys)
+		if err != nil {
+			err = fmt.Errorf("invalid test dataSample %s", err.Error())
+			return
+		} else if !testOnly {
+			err = fmt.Errorf("test dataSample are not tagged as testOnly dataSample")
+			return
+		}
+		objective.TestDataset = &Dataset{
+			DataManagerKey: dataManagerKey,
+			DataSampleKeys: dataSampleKeys,
+		}
+	} else {
+		objective.TestDataset = nil
 	}
 	objective.Name = inp.Name
 	objective.DescriptionStorageAddress = inp.DescriptionStorageAddress
@@ -56,10 +61,11 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 
 // registerObjective stores a new objective in the ledger.
 // If the key exists, it will override the value with the new one
-func registerObjective(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func registerObjective(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	expectedArgs := getFieldNames(&inputObjective{})
 	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		return nil, fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+		return
 	}
 
 	// convert input strings args to input struct inputObjective
@@ -69,63 +75,65 @@ func registerObjective(stub shim.ChaincodeStubInterface, args []string) ([]byte,
 	objective := Objective{}
 	objectiveKey, dataManagerKey, err := objective.Set(stub, inpc)
 	if err != nil {
-		return nil, err
+		return
 	}
 	// check objective is not already in ledger
 	if elementBytes, _ := stub.GetState(objectiveKey); elementBytes != nil {
-		return nil, fmt.Errorf("objective with this description already exists - %s", string(elementBytes))
+		err = fmt.Errorf("objective with this description already exists - %s", string(elementBytes))
+		return
 	}
 	// submit to ledger
 	objectiveBytes, _ := json.Marshal(objective)
-	if err := stub.PutState(objectiveKey, objectiveBytes); err != nil {
-		return nil, fmt.Errorf("failed to submit to ledger the objective with key %s, error is %s", objectiveKey, err.Error())
+	if err = stub.PutState(objectiveKey, objectiveBytes); err != nil {
+		err = fmt.Errorf("failed to submit to ledger the objective with key %s, error is %s", objectiveKey, err.Error())
+		return
 	}
 	// create composite key
-	if err := createCompositeKey(stub, "objective~owner~key", []string{"objective", objective.Owner, objectiveKey}); err != nil {
-		return nil, err
+	if err = createCompositeKey(stub, "objective~owner~key", []string{"objective", objective.Owner, objectiveKey}); err != nil {
+		return
 	}
 	// add objective to dataManager
 	err = addObjectiveDataManager(stub, dataManagerKey, objectiveKey)
-	// return []byte(objectiveKey), err
-	return []byte(objectiveKey), err
+	return map[string]string{"key": objectiveKey}, err
 }
 
 // queryObjective returns a objective of the ledger given its key
-func queryObjective(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func queryObjective(stub shim.ChaincodeStubInterface, args []string) (out outputObjective, err error) {
 	if len(args) != 1 || len(args[0]) != 64 {
-		return nil, fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+		err = fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+		return
 	}
 	key := args[0]
 	var objective Objective
-	if err := getElementStruct(stub, key, &objective); err != nil {
-		return nil, err
+	if err = getElementStruct(stub, key, &objective); err != nil {
+		return
 	}
-	var out outputObjective
 	out.Fill(key, objective)
-	return json.Marshal(out)
+	return
 }
 
 // queryObjectives returns all objectives of the ledger
-func queryObjectives(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+func queryObjectives(stub shim.ChaincodeStubInterface, args []string) (outObjectives []outputObjective, err error) {
 	if len(args) != 0 {
-		return nil, fmt.Errorf("incorrect number of arguments, expecting nothing")
+		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
+		return
 	}
 	var indexName = "objective~owner~key"
 	elementsKeys, err := getKeysFromComposite(stub, indexName, []string{"objective"})
 	if err != nil {
-		return nil, fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
+		err = fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
+		return
 	}
-	var outObjectives []outputObjective
 	for _, key := range elementsKeys {
 		var objective Objective
-		if err := getElementStruct(stub, key, &objective); err != nil {
-			return nil, err
+		if err = getElementStruct(stub, key, &objective); err != nil {
+			return
 		}
 		var out outputObjective
 		out.Fill(key, objective)
 		outObjectives = append(outObjectives, out)
 	}
-	return json.Marshal(outObjectives)
+	return
 }
 
 // -------------------------------------------------------------------------------------------
