@@ -234,7 +234,16 @@ func updateDataSample(stub shim.ChaincodeStubInterface, args []string) (resp map
 		}
 		for _, dataManagerKey := range dataManagerKeys {
 			if !stringInSlice(dataManagerKey, dataSample.DataManagerKeys) {
+				// check data manager is not already associated with this data
 				dataSample.DataManagerKeys = append(dataSample.DataManagerKeys, dataManagerKey)
+				// create composite keys to find all dataSample associated with a dataManager and both test and train dataSample
+				if err = createCompositeKey(stub, "dataSample~dataManager~key", []string{"dataSample", dataManagerKey, dataSampleHash}); err != nil {
+					return
+				}
+				// create composite keys to find all dataSample associated with a dataManager and only test or train dataSample
+				if err = createCompositeKey(stub, "dataSample~dataManager~testOnly~key", []string{"dataSample", dataManagerKey, strconv.FormatBool(dataSample.TestOnly), dataSampleHash}); err != nil {
+					return
+				}
 			}
 		}
 		dataSampleBytes, _ := json.Marshal(dataSample)

@@ -221,3 +221,15 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","da1bb7c31f62244c0f3a76
 ```
 >  {"objectiveKey":"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","description":{"hash":"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","storageAddress":"https://toto/dataManager/42234/description"},"key":"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","name":"liver slide","opener":{"hash":"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","storageAddress":"https://toto/dataManager/42234/opener"},"owner":"bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0","permissions":"all","type":"images","trainDataSampleKeys":["aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"],"testDataSampleKeys":["bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]} 
 
+#### ------------ Update Data Sample with new data manager ------------
+```
+peer chaincode invoke -n mycc -c '{"Args":["updateDataSample","aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee"]}' -C myc
+```
+>  {"key":"{\"keys\": [\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"]}"} 
+
+#### ------------ Query the new Dataset ------------
+```
+peer chaincode query -n mycc -c '{"Args":["queryDataset","38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee"]}' -C myc
+```
+>  {"objectiveKey":"","description":{"hash":"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","storageAddress":"https://toto/dataManager/42234/description"},"key":"38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee","name":"liver slide","opener":{"hash":"38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee","storageAddress":"https://toto/dataManager/42234/opener"},"owner":"bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0","permissions":"all","type":"images","trainDataSampleKeys":["aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"],"testDataSampleKeys":[]} 
+
