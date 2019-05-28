@@ -327,11 +327,15 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 	if traintuple.Status == "todo" {
 
 		out := outputTraintuple{}
-		_ = out.Fill(stub, traintuple, traintupleKey)
-		outBytes, _ := json.Marshal(out)
-		err = stub.SetEvent("traintuple-creation", outBytes)
+		err = out.Fill(stub, traintuple, traintupleKey)
+		if err != nil {
+			return nil, err
+		}
+		err = SetEvent(stub, "traintuple-creation", out)
+		if err != nil {
+			return nil, err
+		}
 	}
-
 	return map[string]string{"key": traintupleKey}, nil
 }
 
@@ -381,8 +385,10 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 	if testtuple.Status == "todo" {
 		out := outputTesttuple{}
 		out.Fill(testtupleKey, testtuple)
-		testtupleEventBytes, _ := json.Marshal(out)
-		err = stub.SetEvent("testtuple-creation", testtupleEventBytes)
+		err = SetEvent(stub, "testtuple-creation", out)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return map[string]string{"key": testtupleKey}, nil
@@ -954,10 +960,14 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 			if traintuple.Status == "todo" {
 
 				out := outputTraintuple{}
-				_ = out.Fill(stub, traintuple, traintupleKey)
-				outBytes, _ := json.Marshal(out)
-
-				err = stub.SetEvent("traintuple-creation", outBytes)
+				err = out.Fill(stub, traintuple, traintupleKey)
+				if err != nil {
+					return err
+				}
+				err = SetEvent(stub, "traintuple-creation", out)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
@@ -1074,8 +1084,10 @@ func updateWaitingTesttuples(stub shim.ChaincodeStubInterface, traintupleKey str
 		if testtuple.Status == "todo" {
 			out := outputTesttuple{}
 			out.Fill(testtupleKey, testtuple)
-			testtupleEventBytes, _ := json.Marshal(out)
-			err = stub.SetEvent("testtuple-creation", testtupleEventBytes)
+			err = SetEvent(stub, "testtuple-creation", out)
+			if err != nil {
+				return err
+			}
 		}
 
 	}

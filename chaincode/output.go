@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -188,4 +189,17 @@ type outputTesttuple struct {
 func (out *outputTesttuple) Fill(key string, in Testtuple) {
 	out.Testtuple = in
 	out.Key = key
+}
+
+// SetEvent wrap the steps for sending a struct as payload for a event
+func SetEvent(stub shim.ChaincodeStubInterface, eventName string, eventObject interface{}) error {
+	payload, err := json.Marshal(eventObject)
+	if err != nil {
+		return err
+	}
+	err = stub.SetEvent(eventName, payload)
+	if err != nil {
+		return err
+	}
+	return nil
 }
