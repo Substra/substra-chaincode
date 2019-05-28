@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -87,6 +88,7 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 // outputTraintuple is the representation of one the element type stored in the
 // ledger. It describes a training task occuring on the platform
 type outputTraintuple struct {
+	Key         string         `json:"key"`
 	Algo        *HashDressName `json:"algo"`
 	Creator     string         `json:"creator"`
 	Dataset     *TtDataset     `json:"dataset"`
@@ -102,8 +104,9 @@ type outputTraintuple struct {
 }
 
 //Fill is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
-func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface, traintuple Traintuple) (err error) {
+func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface, traintuple Traintuple, traintupleKey string) (err error) {
 
+	outputTraintuple.Key = traintupleKey
 	outputTraintuple.Creator = traintuple.Creator
 	outputTraintuple.Permissions = traintuple.Permissions
 	outputTraintuple.Log = traintuple.Log
@@ -186,4 +189,17 @@ type outputTesttuple struct {
 func (out *outputTesttuple) Fill(key string, in Testtuple) {
 	out.Testtuple = in
 	out.Key = key
+}
+
+// SetEvent wrap the steps for sending a struct as payload for a event
+func SetEvent(stub shim.ChaincodeStubInterface, eventName string, eventObject interface{}) error {
+	payload, err := json.Marshal(eventObject)
+	if err != nil {
+		return err
+	}
+	err = stub.SetEvent(eventName, payload)
+	if err != nil {
+		return err
+	}
+	return nil
 }
