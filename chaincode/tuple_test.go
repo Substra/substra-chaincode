@@ -368,6 +368,7 @@ func TestTraintuple(t *testing.T) {
 	err = json.Unmarshal(resp.Payload, &out)
 	assert.NoError(t, err, "when unmarshalling queried traintuple")
 	expected := outputTraintuple{
+		Key: traintupleKey,
 		Algo: &HashDressName{
 			Hash:           algoHash,
 			Name:           algoName,

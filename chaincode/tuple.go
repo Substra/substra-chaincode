@@ -186,7 +186,7 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 
 	// fill info from associated traintuple
 	outputTraintuple := &outputTraintuple{}
-	outputTraintuple.Fill(stub, traintuple)
+	outputTraintuple.Fill(stub, traintuple, inp.TraintupleKey)
 	testtuple.Objective = outputTraintuple.Objective
 	testtuple.Algo = outputTraintuple.Algo
 	testtuple.Model = &Model{
@@ -327,15 +327,9 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 	if traintuple.Status == "todo" {
 
 		out := outputTraintuple{}
-		_ = out.Fill(stub, traintuple)
+		_ = out.Fill(stub, traintuple, traintupleKey)
 		outBytes, _ := json.Marshal(out)
-
-		var element map[string]interface{}
-		json.Unmarshal(outBytes, &element)
-		element["key"] = traintupleKey
-		traintupleEventBytes, _ := json.Marshal(element)
-
-		err = stub.SetEvent("traintuple-creation", traintupleEventBytes)
+		err = stub.SetEvent("traintuple-creation", outBytes)
 	}
 
 	return map[string]string{"key": traintupleKey}, nil
@@ -383,7 +377,6 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 			return nil, err
 		}
 	}
-
 
 	if testtuple.Status == "todo" {
 		out := outputTesttuple{}
@@ -675,7 +668,7 @@ func queryTraintuple(stub shim.ChaincodeStubInterface, args []string) (outputTra
 	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 		return
 	}
-	outputTraintuple.Fill(stub, traintuple)
+	outputTraintuple.Fill(stub, traintuple, traintupleKey)
 	return
 }
 
@@ -843,7 +836,7 @@ func getOutputTraintuple(stub shim.ChaincodeStubInterface, traintupleKey string)
 	if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 		return outputTraintuple, err
 	}
-	outputTraintuple.Fill(stub, traintuple)
+	outputTraintuple.Fill(stub, traintuple, traintupleKey)
 	return outputTraintuple, nil
 }
 
@@ -961,15 +954,10 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 			if traintuple.Status == "todo" {
 
 				out := outputTraintuple{}
-				_ = out.Fill(stub, traintuple)
+				_ = out.Fill(stub, traintuple, traintupleKey)
 				outBytes, _ := json.Marshal(out)
 
-				var element map[string]interface{}
-				json.Unmarshal(outBytes, &element)
-				element["key"] = traintupleKey
-				traintupleEventBytes, _ := json.Marshal(element)
-
-				err = stub.SetEvent("traintuple-creation", traintupleEventBytes)
+				err = stub.SetEvent("traintuple-creation", outBytes)
 			}
 		}
 
