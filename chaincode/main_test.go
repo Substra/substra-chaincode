@@ -525,7 +525,7 @@ func TestPipeline(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	//Raise log level to silence during tests
+	//Raise log level to silence it during tests
 	logger.SetLevel(shim.LogCritical)
 	os.Exit(m.Run())
 }
