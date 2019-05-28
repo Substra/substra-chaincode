@@ -186,7 +186,7 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 
 	// fill info from associated traintuple
 	outputTraintuple := &outputTraintuple{}
-	outputTraintuple.Fill(stub, traintuple)
+	outputTraintuple.Fill(stub, traintuple, inp.TraintupleKey)
 	testtuple.Objective = outputTraintuple.Objective
 	testtuple.Algo = outputTraintuple.Algo
 	testtuple.Model = &Model{
@@ -323,6 +323,19 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 			return nil, err
 		}
 	}
+
+	if traintuple.Status == "todo" {
+
+		out := outputTraintuple{}
+		err = out.Fill(stub, traintuple, traintupleKey)
+		if err != nil {
+			return nil, err
+		}
+		err = SetEvent(stub, "traintuple-creation", out)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return map[string]string{"key": traintupleKey}, nil
 }
 
@@ -368,6 +381,16 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 			return nil, err
 		}
 	}
+
+	if testtuple.Status == "todo" {
+		out := outputTesttuple{}
+		out.Fill(testtupleKey, testtuple)
+		err = SetEvent(stub, "testtuple-creation", out)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return map[string]string{"key": testtupleKey}, nil
 }
 
@@ -651,7 +674,7 @@ func queryTraintuple(stub shim.ChaincodeStubInterface, args []string) (outputTra
 	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 		return
 	}
-	outputTraintuple.Fill(stub, traintuple)
+	outputTraintuple.Fill(stub, traintuple, traintupleKey)
 	return
 }
 
@@ -819,7 +842,7 @@ func getOutputTraintuple(stub shim.ChaincodeStubInterface, traintupleKey string)
 	if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
 		return outputTraintuple, err
 	}
-	outputTraintuple.Fill(stub, traintuple)
+	outputTraintuple.Fill(stub, traintuple, traintupleKey)
 	return outputTraintuple, nil
 }
 
@@ -940,6 +963,17 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 			if err := traintuple.commitUpdate(stub, traintupleKey, newStatus); err != nil {
 				return err
 			}
+			if newStatus == "todo" {
+				out := outputTraintuple{}
+				err = out.Fill(stub, traintuple, traintupleKey)
+				if err != nil {
+					return err
+				}
+				err = SetEvent(stub, "traintuple-creation", out)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil
@@ -1044,6 +1078,16 @@ func updateWaitingTesttuples(stub shim.ChaincodeStubInterface, traintupleKey str
 		if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
 			return err
 		}
+
+		if testtuple.Status == "todo" {
+			out := outputTesttuple{}
+			out.Fill(testtupleKey, testtuple)
+			err = SetEvent(stub, "testtuple-creation", out)
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 	return nil
 }
