@@ -956,9 +956,14 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 			if ready {
 				newStatus = "todo"
 			}
+		}
 
-			if traintuple.Status == "todo" {
-
+		// commit new status
+		if newStatus != "" {
+			if err := traintuple.commitUpdate(stub, traintupleKey, newStatus); err != nil {
+				return err
+			}
+			if newStatus == "todo" {
 				out := outputTraintuple{}
 				err = out.Fill(stub, traintuple, traintupleKey)
 				if err != nil {
@@ -968,13 +973,6 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 				if err != nil {
 					return err
 				}
-			}
-		}
-
-		// commit new status
-		if newStatus != "" {
-			if err := traintuple.commitUpdate(stub, traintupleKey, newStatus); err != nil {
-				return err
 			}
 		}
 	}
