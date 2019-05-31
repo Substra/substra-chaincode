@@ -77,3 +77,7 @@ type inputTesttuple struct {
 	DataSampleKeys string
 	Tag            string `validate:"omitempty,lte=64"`
 }
+
+type inputHashe struct {
+	Key string `validate:"required,len=64,hexadecimal"`
+}

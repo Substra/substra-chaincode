@@ -48,6 +48,15 @@ func TestInit(t *testing.T) {
 	assert.EqualValuesf(t, 200, resp.Status, "init failed with status %d and message %s", resp.Status, resp.Message)
 }
 
+func assetToJSON(asset interface{}) []byte {
+	assetjson, _ := json.Marshal(asset)
+	payload, _ := json.Marshal(string(assetjson))
+	return payload
+}
+
+func keyToJSON(key string) []byte {
+	return assetToJSON(inputHashe{Key: key})
+}
 func printArgs(buf io.Writer, args [][]byte, command string) {
 	s := "```\npeer chaincode " + command + " -n mycc -c '{\"Args\":["
 	for i, arg := range args {
@@ -84,11 +93,10 @@ func (dataManager *inputDataManager) createSample() [][]byte {
 		dataManager.DescriptionStorageAddress = "https://toto/dataManager/42234/description"
 	}
 	dataManager.Permissions = "all"
-	args, _ := inputStructToBytes(dataManager)
-	args = append([][]byte{[]byte("registerDataManager")}, args...)
+	args := append([][]byte{[]byte("registerDataManager")}, assetToJSON(dataManager))
+
 	return args
 }
-
 func (dataSample *inputDataSample) createSample() [][]byte {
 	if dataSample.Hashes == "" {
 		dataSample.Hashes = trainDataSampleHash1 + ", " + trainDataSampleHash2
@@ -99,8 +107,7 @@ func (dataSample *inputDataSample) createSample() [][]byte {
 	if dataSample.TestOnly == "" {
 		dataSample.TestOnly = "false"
 	}
-	args, _ := inputStructToBytes(dataSample)
-	args = append([][]byte{[]byte("registerDataSample")}, args...)
+	args := append([][]byte{[]byte("registerDataSample")}, assetToJSON(dataSample))
 	return args
 }
 
@@ -259,7 +266,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Query DataManager From key ------------")
 	printArgsNames(&out, "queryDataManager", []string{"elementKey"})
-	args = [][]byte{[]byte("queryDataManager"), []byte(dataManagerKey)}
+	args = [][]byte{[]byte("queryDataManager"), keyToJSON(dataManagerKey)}
 	printArgs(&out, args, "queryDataManager")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying a dataManager with status %d and message %s", resp.Status, resp.Message)
@@ -495,7 +502,7 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query Dataset ------------")
-	args = [][]byte{[]byte("queryDataset"), []byte(dataManagerOpenerHash)}
+	args = [][]byte{[]byte("queryDataset"), keyToJSON(dataManagerOpenerHash)}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying dataset with status %d and message %s", resp.Status, resp.Message)

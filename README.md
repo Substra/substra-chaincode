@@ -53,7 +53,7 @@ Note for internal use only: See the [technical specifications](https://github.co
 Smart contract: `registerDataManager`  
  Inputs: `Name`, `OpenerHash`, `OpenerStorageAddress`, `Type`, `DescriptionHash`, `DescriptionStorageAddress`, `ObjectiveKey`, `Permissions`
 ```
-peer chaincode invoke -n mycc -c '{"Args":["registerDataManager","liver slide","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","https://toto/dataManager/42234/opener","images","8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","https://toto/dataManager/42234/description","","all"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerDataManager",""{\"Name\":\"liver slide\",\"OpenerHash\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"OpenerStorageAddress\":\"https://toto/dataManager/42234/opener\",\"Type\":\"images\",\"DescriptionHash\":\"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee\",\"DescriptionStorageAddress\":\"https://toto/dataManager/42234/description\",\"ObjectiveKey\":\"\",\"Permissions\":\"all\"}""]}' -C myc
 ```
 >  {"key":"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"} 
 
@@ -61,7 +61,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerDataManager","liver slide","
 Smart contract: `queryDataManager`  
  Inputs: `elementKey`
 ```
-peer chaincode queryDataManager -n mycc -c '{"Args":["queryDataManager","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]}' -C myc
+peer chaincode queryDataManager -n mycc -c '{"Args":["queryDataManager",""{\"Key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"}""]}' -C myc
 ```
 >  {"objectiveKey":"","description":{"hash":"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","storageAddress":"https://toto/dataManager/42234/description"},"key":"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","name":"liver slide","opener":{"hash":"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","storageAddress":"https://toto/dataManager/42234/opener"},"owner":"bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0","permissions":"all","type":"images"} 
 
@@ -69,7 +69,7 @@ peer chaincode queryDataManager -n mycc -c '{"Args":["queryDataManager","da1bb7c
 Smart contract: `registerDataSample`  
  Inputs: `Hashes`, `DataManagerKeys`, `TestOnly`
 ```
-peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","true"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerDataSample",""{\"Hashes\":\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"DataManagerKeys\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"TestOnly\":\"true\"}""]}' -C myc
 ```
 >  {"keys":["bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]} 
 
@@ -93,7 +93,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerAlgo","hog + svm","fd1bb7c31
 Smart contract: `registerDataSample`  
  Inputs: `Hashes`, `DataManagerKeys`, `TestOnly`
 ```
-peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","false"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerDataSample",""{\"Hashes\":\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"DataManagerKeys\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"TestOnly\":\"false\"}""]}' -C myc
 ```
 >  {"keys":["aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]} 
 
@@ -217,7 +217,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
 
 #### ------------ Query Dataset ------------
 ```
-peer chaincode query -n mycc -c '{"Args":["queryDataset","da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]}' -C myc
+peer chaincode query -n mycc -c '{"Args":["queryDataset",""{\"Key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"}""]}' -C myc
 ```
 >  {"objectiveKey":"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","description":{"hash":"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee","storageAddress":"https://toto/dataManager/42234/description"},"key":"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","name":"liver slide","opener":{"hash":"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","storageAddress":"https://toto/dataManager/42234/opener"},"owner":"bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0","permissions":"all","type":"images","trainDataSampleKeys":["aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"],"testDataSampleKeys":["bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]} 
 

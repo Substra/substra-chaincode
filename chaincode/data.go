@@ -126,14 +126,11 @@ func validateUpdateDataSample(stub shim.ChaincodeStubInterface, inp inputUpdateD
 
 // registerDataManager stores a new dataManager in the ledger.
 func registerDataManager(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
-	expectedArgs := getFieldNames(&inputDataManager{})
-	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+	inp := inputDataManager{}
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
 		return
 	}
-	// convert input strings args to input struct inputDataManager
-	inp := inputDataManager{}
-	stringToInputStruct(args, &inp)
 	// check validity of input args and convert it to a DataManager
 	dataManager := DataManager{}
 	dataManagerKey, objectiveKey, err := dataManager.Set(stub, inp)
@@ -163,15 +160,12 @@ func registerDataManager(stub shim.ChaincodeStubInterface, args []string) (resp 
 
 // registerDataSample stores new dataSample in the ledger (one or more).
 func registerDataSample(stub shim.ChaincodeStubInterface, args []string) (dataSampleKeys map[string][]string, err error) {
-	expectedArgs := getFieldNames(&inputDataSample{})
-	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
-		return
-	}
-
 	// convert input strings args to input struct inputDataSample
 	inp := inputDataSample{}
-	stringToInputStruct(args, &inp)
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
+		return
+	}
 	// check validity of input args
 	dataSampleHashes, dataSample, err := setDataSample(stub, inp)
 	if err != nil {
@@ -206,14 +200,10 @@ func registerDataSample(stub shim.ChaincodeStubInterface, args []string) (dataSa
 // updateDataSample associates one or more dataManagerKeys to one or more dataSample
 func updateDataSample(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	inp := inputUpdateDataSample{}
-	expectedArgs := getFieldNames(&inp)
-	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
 		return
 	}
-
-	// convert input strings args to input struct inputUpdateDataSample
-	stringToInputStruct(args, &inp)
 	// check validity of input args
 	dataSampleHashes, dataManagerKeys, err := validateUpdateDataSample(stub, inp)
 	if err != nil {
@@ -261,14 +251,10 @@ func updateDataSample(stub shim.ChaincodeStubInterface, args []string) (resp map
 // updateDataManager associates a objectiveKey to an existing dataManager
 func updateDataManager(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	inp := inputUpdateDataManager{}
-	expectedArgs := getFieldNames(&inp)
-	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
 		return
 	}
-
-	// convert input strings args to input struct inputDataSample
-	stringToInputStruct(args, &inp)
 	validate := validator.New()
 	if err = validate.Struct(inp); err != nil {
 		err = fmt.Errorf("invalid update dataManager inputs %s", err.Error())
@@ -283,16 +269,16 @@ func updateDataManager(stub shim.ChaincodeStubInterface, args []string) (resp ma
 
 // queryObjective returns a objective of the ledger given its key
 func queryDataManager(stub shim.ChaincodeStubInterface, args []string) (out outputDataManager, err error) {
-	if len(args) != 1 || len(args[0]) != 64 {
-		err = fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+	inp := inputHashe{}
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
 		return
 	}
-	key := args[0]
 	var dataManager DataManager
-	if err = getElementStruct(stub, key, &dataManager); err != nil {
+	if err = getElementStruct(stub, inp.Key, &dataManager); err != nil {
 		return
 	}
-	out.Fill(key, dataManager)
+	out.Fill(inp.Key, dataManager)
 	return
 }
 
@@ -322,29 +308,29 @@ func queryDataManagers(stub shim.ChaincodeStubInterface, args []string) (outData
 
 // queryDataset returns info about a dataManager and all related dataSample
 func queryDataset(stub shim.ChaincodeStubInterface, args []string) (out outputDataset, err error) {
-	if len(args) != 1 || len(args[0]) != 64 {
-		err = fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+	inp := inputHashe{}
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
 		return
 	}
-	key := args[0]
 	var dataManager DataManager
-	if err = getElementStruct(stub, key, &dataManager); err != nil {
+	if err = getElementStruct(stub, inp.Key, &dataManager); err != nil {
 		return
 	}
 
 	// get related train dataSample
-	trainDataSampleKeys, err := getDataset(stub, key, false)
+	trainDataSampleKeys, err := getDataset(stub, inp.Key, false)
 	if err != nil {
 		return
 	}
 
 	// get related test dataSample
-	testDataSampleKeys, err := getDataset(stub, key, true)
+	testDataSampleKeys, err := getDataset(stub, inp.Key, true)
 	if err != nil {
 		return
 	}
 
-	out.Fill(key, dataManager, trainDataSampleKeys, testDataSampleKeys)
+	out.Fill(inp.Key, dataManager, trainDataSampleKeys, testDataSampleKeys)
 	return
 }
 
