@@ -177,17 +177,35 @@ func (traintuple *inputTraintuple) createSample() [][]byte {
 	if traintuple.DataSampleKeys == "" {
 		traintuple.DataSampleKeys = trainDataSampleHash1 + ", " + trainDataSampleHash2
 	}
-	args, _ := inputStructToBytes(traintuple)
-	args = append([][]byte{[]byte("createTraintuple")}, args...)
+	args := append([][]byte{[]byte("createTraintuple")}, assetToJSON(traintuple))
 	return args
 }
 
+func (success *inputSuccessTrain) createSample() [][]byte {
+	if success.Key == "" {
+		success.Key = traintupleKey
+	}
+	if success.Log == "" {
+		success.Log = "no error, ah ah ah"
+	}
+	if success.Perf == 0 {
+		success.Perf = 0.9
+	}
+	if success.OutModel.Hash == "" {
+		success.OutModel.Hash = modelHash
+	}
+	if success.OutModel.StorageAddress == "" {
+		success.OutModel.StorageAddress = modelAddress
+	}
+	args := append([][]byte{[]byte("logSuccessTrain")}, assetToJSON(success))
+	return args
+}
 func (testtuple *inputTesttuple) createSample() [][]byte {
 	if testtuple.TraintupleKey == "" {
 		testtuple.TraintupleKey = traintupleKey
 	}
 	args, _ := inputStructToBytes(testtuple)
-	args = append([][]byte{[]byte("createTesttuple")}, args...)
+	args = append([][]byte{[]byte("createTesttuple")}, assetToJSON(testtuple))
 	return args
 }
 
@@ -377,17 +395,15 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Training ------------")
-	args = [][]byte{[]byte("logStartTrain"), traintupleKey}
+	args = [][]byte{[]byte("logStartTrain"), keyToJSON(string(traintupleKey))}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when logging start training with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Training ------------")
-	perf := "0.9"
-	log := "no error, ah ah ah"
-	args = [][]byte{[]byte("logSuccessTrain"), traintupleKey, []byte(modelHash + ", " + modelAddress),
-		[]byte(perf), []byte(log)}
+	inp := inputSuccessTrain{Key: string(traintupleKey)}
+	args = inp.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when logging successful training with status %d and message %s", resp.Status, resp.Message)
@@ -458,15 +474,15 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Testing ------------")
-	args = [][]byte{[]byte("logStartTest"), testtupleKey}
+	args = [][]byte{[]byte("logStartTest"), keyToJSON(string(testtupleKey))}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when logging start testing with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Testing ------------")
-	perf = "0.89"
-	log = "still no error, suprah ah ah"
+	perf := "0.89"
+	log := "still no error, suprah ah ah"
 	args = [][]byte{[]byte("logSuccessTest"), testtupleKey, []byte(perf), []byte(log)}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
