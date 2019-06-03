@@ -81,3 +81,15 @@ type inputTesttuple struct {
 type inputHashe struct {
 	Key string `validate:"required,len=64,hexadecimal"`
 }
+
+type inputSuccessTrain struct {
+	Key      string         `validate:"required,len=64,hexadecimal"`
+	Log      string         `validate:"required,lte=200"`
+	OutModel inputHashDress `validate:"required"`
+	Perf     float32        `validate:"required"`
+}
+
+type inputHashDress struct {
+	Hash           string `validate:"required,len=64,hexadecimal"`
+	StorageAddress string `validate:"required"`
+}

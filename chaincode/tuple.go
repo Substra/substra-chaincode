@@ -273,15 +273,12 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 
 // createTraintuple adds a Traintuple in the ledger
 func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
-	expectedArgs := getFieldNames(&inputTraintuple{})
-	if nbArgs := len(expectedArgs); (nbArgs != len(args)) && (nbArgs != len(args)-2) {
-		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+	inp := inputTraintuple{}
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
 		return
 	}
 
-	// convert input strings args to input struct inputTraintuplet
-	inp := inputTraintuple{}
-	stringToInputStruct(args, &inp)
 	// check validity of input arg and set traintuples
 	traintuple := Traintuple{}
 	traintupleKey, err := traintuple.Set(stub, inp)
@@ -341,15 +338,12 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 
 // createTesttuple adds a Testtuple in the ledger
 func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
-	expectedArgs := getFieldNames(&inputTesttuple{})
-	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+	inp := inputTesttuple{}
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
 		return
 	}
 
-	// convert input strings args to input struct inputTesttuple
-	inp := inputTesttuple{}
-	stringToInputStruct(args, &inp)
 	// check validity of input arg and set testtuple
 	testtuple := Testtuple{}
 	testtupleKey, err := testtuple.Set(stub, inp)
@@ -396,20 +390,17 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 
 // logStartTrain modifies a traintuple by changing its status from todo to doing
 func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple Traintuple, err error) {
-	expectedArgs := [1]string{"key of the traintuple to update"}
-	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+	inp := inputHashe{}
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
 		return
 	}
 
 	status := "doing"
-	traintupleKey := args[0]
 	// get traintuple, check validity of the update, and update its status
 	traintuple = Traintuple{}
-	if len(traintupleKey) != lenKey {
-		return traintuple, fmt.Errorf("invalid traintuple key")
-	}
-	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
+
+	if err = getElementStruct(stub, inp.Key, &traintuple); err != nil {
 		return
 	}
 	err = traintuple.checkNewStatus(stub, status)
@@ -418,7 +409,7 @@ func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple 
 	}
 
 	// save to ledger
-	if err = traintuple.commitUpdate(stub, traintupleKey, status); err != nil {
+	if err = traintuple.commitUpdate(stub, inp.Key, status); err != nil {
 		return
 	}
 	return
@@ -426,30 +417,29 @@ func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple 
 
 // logStartTest modifies a testtuple by changing its status from todo to doing
 func logStartTest(stub shim.ChaincodeStubInterface, args []string) (testtuple Testtuple, err error) {
-	expectedArgs := [1]string{"key of the testtuple to update"}
-	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
+	inp := inputHashe{}
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
 		return
 	}
 
 	oldStatus := "todo"
 	status := "doing"
-	testtupleKey := args[0]
 	// get testtuple, check validity of the update, and update its status
-	testtuple, oldStatus, err = updateStatusTesttuple(stub, testtupleKey, status)
+	testtuple, oldStatus, err = updateStatusTesttuple(stub, inp.Key, status)
 	if err != nil {
 		return
 	}
 	// save to ledger
 	testtupleBytes, _ := json.Marshal(testtuple)
-	if err = stub.PutState(testtupleKey, testtupleBytes); err != nil {
-		err = fmt.Errorf("failed to update testtuple status to %s with key %s", status, testtupleKey)
+	if err = stub.PutState(inp.Key, testtupleBytes); err != nil {
+		err = fmt.Errorf("failed to update testtuple status to %s with key %s", status, inp.Key)
 		return
 	}
 	// update associated composite keys
 	indexName := "testtuple~worker~status~key"
-	oldAttributes := []string{"testtuple", testtuple.Dataset.Worker, oldStatus, testtupleKey}
-	newAttributes := []string{"testtuple", testtuple.Dataset.Worker, status, testtupleKey}
+	oldAttributes := []string{"testtuple", testtuple.Dataset.Worker, oldStatus, inp.Key}
+	newAttributes := []string{"testtuple", testtuple.Dataset.Worker, status, inp.Key}
 	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
 		return
 	}
@@ -459,41 +449,21 @@ func logStartTest(stub shim.ChaincodeStubInterface, args []string) (testtuple Te
 // logSuccessTrain modifies a traintuple by changing its status from doing to done
 // reports logs and associated performances
 func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple Traintuple, err error) {
-	expectedArgs := [4]string{
+	inp := inputSuccessTrain{}
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
+		return
+	}
+	_ = [4]string{
 		"key of the traintuple to update",
 		"end model hash and storage address (endModelHash, endModelStorageAddress)",
 		"train perf (float)",
 		"logs"}
-	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs[:], ", "))
-		return
-	}
 
 	status := "done"
-	// get and check inputs
-	traintupleKey := args[0]
-	outModel := strings.Split(strings.Replace(args[1], " ", "", -1), ",")
-	if len(outModel[0]) != lenKey {
-		err = fmt.Errorf("invalid length of model hash")
-		return
-	}
-	// get train perf, check validity
-	perf, err := strconv.ParseFloat(args[2], 32)
-	if err != nil {
-		return
-	}
-	// get logs and check validity
-	log := args[3]
-	if err = checkLog(log); err != nil {
-		return
-	}
-
 	// get traintuple, check validity of the update, and update its status
 	traintuple = Traintuple{}
-	if len(traintupleKey) != lenKey {
-		return traintuple, fmt.Errorf("invalid traintuple key")
-	}
-	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
+	if err = getElementStruct(stub, inp.Key, &traintuple); err != nil {
 		return
 	}
 	err = traintuple.checkNewStatus(stub, status)
@@ -502,22 +472,22 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintupl
 	}
 
 	// update traintuple
-	traintuple.Perf = float32(perf)
+	traintuple.Perf = inp.Perf
 	traintuple.OutModel = &HashDress{
-		Hash:           outModel[0],
-		StorageAddress: outModel[1]}
-	traintuple.Log += log
+		Hash:           inp.OutModel.Hash,
+		StorageAddress: inp.OutModel.StorageAddress}
+	traintuple.Log += inp.Log
 
-	if err = traintuple.commitUpdate(stub, traintupleKey, status); err != nil {
+	if err = traintuple.commitUpdate(stub, inp.Key, status); err != nil {
 		return
 	}
 
 	// update traintuples whose inModel use the outModel of this traintuple
-	if err = updateWaitingTraintuples(stub, traintupleKey, "done"); err != nil {
+	if err = updateWaitingTraintuples(stub, inp.Key, "done"); err != nil {
 		return
 	}
 	// update testtuple associated with this traintuple
-	if err = updateWaitingTesttuples(stub, traintupleKey, traintuple.OutModel, "todo"); err != nil {
+	if err = updateWaitingTesttuples(stub, inp.Key, traintuple.OutModel, "todo"); err != nil {
 		return
 	}
 	return
