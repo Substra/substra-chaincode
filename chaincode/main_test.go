@@ -501,6 +501,26 @@ func TestPipeline(t *testing.T) {
 	assert.EqualValuesf(t, 200, resp.Status, "when querying dataset with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
+	// 3. add new data manager and dataSample
+	fmt.Fprintln(&out, "#### ------------ Update Data Sample with new data manager ------------")
+	newDataManagerKey := "38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee"
+	inpDataManager = inputDataManager{OpenerHash: newDataManagerKey}
+	args = inpDataManager.createSample()
+	mockStub.MockInvoke("42", args)
+	// associate a data sample with the old data manager with the updateDataSample
+	args = [][]byte{[]byte("updateDataSample"), []byte(trainDataSampleHash1), []byte(newDataManagerKey)}
+	printArgs(&out, args, "invoke")
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValuesf(t, 200, resp.Status, "when updating data sample with new data manager with status %d and message %s", resp.Status, resp.Message)
+	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+
+	fmt.Fprintln(&out, "#### ------------ Query the new Dataset ------------")
+	args = [][]byte{[]byte("queryDataset"), []byte(newDataManagerKey)}
+	printArgs(&out, args, "query")
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValuesf(t, 200, resp.Status, "when querying dataset with status %d and message %s", resp.Status, resp.Message)
+	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+
 	// Use the output to check the README file and if asked update it
 	doc := out.String()
 	fromFile, err := ioutil.ReadFile(*readme)
