@@ -106,3 +106,9 @@ type inputHashDress struct {
 	Hash           string `validate:"required,len=64,hexadecimal"`
 	StorageAddress string `validate:"required"`
 }
+
+type inputQueryFilter struct{
+	IndexName string
+	//TODO : Make Attributes a real list
+	Attributes string
+}

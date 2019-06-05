@@ -109,7 +109,11 @@ func TestTagTuple(t *testing.T) {
 	assert.Len(t, testtuples, 1, "there should be one traintuple")
 	assert.EqualValues(t, tag, testtuples[0].Tag)
 
-	args = [][]byte{[]byte("queryFilter"), []byte("testtuple~tag"), []byte(tag)}
+	filter := inputQueryFilter{
+		IndexName: "testtuple~tag",
+		Attributes: tag,
+	}
+	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message)
 	filtertuples := []outputTesttuple{}
@@ -418,7 +422,11 @@ func TestTraintuple(t *testing.T) {
 	//waitingTraintupleKey := string(resp.Payload)
 
 	// Query traintuple with status todo and worker as trainworker and check consistency
-	args = [][]byte{[]byte("queryFilter"), []byte("traintuple~worker~status"), []byte(worker + ", todo")}
+	filter := inputQueryFilter{
+		IndexName: "traintuple~worker~status",
+		Attributes: worker + ", todo",
+	}
+	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple of worker with todo status - status %d and message %s", resp.Status, resp.Message)
 	err = json.Unmarshal(resp.Payload, &queryTraintuples)
@@ -437,7 +445,11 @@ func TestTraintuple(t *testing.T) {
 	for i := range traintupleStatus {
 		resp = mockStub.MockInvoke("42", argsSlice[i])
 		require.EqualValuesf(t, 200, resp.Status, "when logging start %s with message %s", traintupleStatus[i], resp.Message)
-		args = [][]byte{[]byte("queryFilter"), []byte("traintuple~worker~status"), []byte(worker + ", " + traintupleStatus[i])}
+		filter := inputQueryFilter{
+			IndexName: "traintuple~worker~status",
+			Attributes: worker + ", " + traintupleStatus[i],
+		}
+		args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 		resp = mockStub.MockInvoke("42", args)
 		assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple of worker with %s status - message %s", traintupleStatus[i], resp.Message)
 		sPayload := make([]map[string]interface{}, 1)
