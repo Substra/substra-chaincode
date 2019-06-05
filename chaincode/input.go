@@ -65,7 +65,7 @@ type inputTraintuple struct {
 	InModels       string //`validate:"omitEmpty"
 	DataManagerKey string `validate:"required,len=64,hexadecimal"`
 	DataSampleKeys string `validate:"required"`
-	FLtask         string //`validate:"omitEmpty"`
+	FLTask         string //`validate:"omitEmpty"`
 	Rank           string //`validate:"omitEmpty"`
 	Tag            string `validate:"omitempty,lte=64"`
 }
@@ -85,11 +85,11 @@ type inputHashe struct {
 type inputLogSuccessTrain struct {
 	inputLog
 	OutModel inputHashDress `validate:"required"`
-	Perf     float32         `validate:"required"`
+	Perf     float32        `validate:"required"`
 }
-type inputLogSuccessTest struct{
+type inputLogSuccessTest struct {
 	inputLog
-	Perf     float32         `validate:"required"`
+	Perf float32 `validate:"required"`
 }
 type inputLogFailTrain struct {
 	inputLog
@@ -98,8 +98,8 @@ type inputLogFailTest struct {
 	inputLog
 }
 type inputLog struct {
-	Key      string          `validate:"required,len=64,hexadecimal"`
-	Log      string          `validate:"required,lte=200"`
+	Key string `validate:"required,len=64,hexadecimal"`
+	Log string `validate:"required,lte=200"`
 }
 
 type inputHashDress struct {
@@ -107,7 +107,7 @@ type inputHashDress struct {
 	StorageAddress string `validate:"required"`
 }
 
-type inputQueryFilter struct{
+type inputQueryFilter struct {
 	IndexName string
 	//TODO : Make Attributes a real list
 	Attributes string

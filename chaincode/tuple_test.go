@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/stretchr/testify/assert"
@@ -25,7 +24,7 @@ func TestSpecifiqArgSeq(t *testing.T) {
 		[]string{"registerDataSample", "\"{\\\"Hashes\\\":\\\"1a8532bd84d5ef785a4abe503a12bc7040c666a9f6264f982aa4ad77ff7217a8\\\",\\\"DataManagerKeys\\\":\\\"17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223\\\",\\\"TestOnly\\\":\\\"true\\\"}\""},
 		[]string{"registerObjective", "\"{\\\"Name\\\":\\\"Titanic: Machine Learning From Disaster\\\",\\\"DescriptionHash\\\":\\\"1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb\\\",\\\"DescriptionStorageAddress\\\":\\\"http://owkin.substrabac:8000/objective/1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb/description/\\\",\\\"MetricsName\\\":\\\"accuracy\\\",\\\"MetricsHash\\\":\\\"0bc13ad2e481c1a52959a228984bbee2e31271d567ea55a458e9ae92d481fedb\\\",\\\"MetricsStorageAddress\\\":\\\"http://owkin.substrabac:8000/objective/1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb/metrics/\\\",\\\"TestDataset\\\":\\\"17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223:1a8532bd84d5ef785a4abe503a12bc7040c666a9f6264f982aa4ad77ff7217a8\\\",\\\"Permissions\\\":\\\"all\\\"}\""},
 		[]string{"registerAlgo", "\"{\\\"Name\\\":\\\"Constant death predictor\\\",\\\"Hash\\\":\\\"10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9\\\",\\\"StorageAddress\\\":\\\"http://owkin.substrabac:8000/algo/10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9/file/\\\",\\\"DescriptionHash\\\":\\\"1dae14e339c94ae04cc8846d353c07c8de96a38d6c5b5ee4486c4102ff011450\\\",\\\"DescriptionStorageAddress\\\":\\\"http://owkin.substrabac:8000/algo/10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9/description/\\\",\\\"Permissions\\\":\\\"all\\\"}\""},
-		[]string{"createTraintuple", "\"{\\\"AlgoKey\\\":\\\"10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9\\\",\\\"ObjectiveKey\\\":\\\"1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb\\\",\\\"InModels\\\":\\\"\\\",\\\"DataManagerKey\\\":\\\"17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223\\\",\\\"DataSampleKeys\\\":\\\"47f9af29d34d737acfb0e37d93bfa650979292297ed263e8536ef3d13f70c83e,df94060511117dd25da1d2b1846f9be17340128233c8b24694d5e780d909b22c,50b7a4b4f2541674958fd09a061276862e1e2ea4dbdd0e1af06e70051804e33b\\\",\\\"FLtask\\\":\\\"\\\",\\\"Rank\\\":\\\"\\\",\\\"Tag\\\":\\\"titanic v0\\\"}\""},
+		[]string{"createTraintuple", "\"{\\\"AlgoKey\\\":\\\"10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9\\\",\\\"ObjectiveKey\\\":\\\"1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb\\\",\\\"InModels\\\":\\\"\\\",\\\"DataManagerKey\\\":\\\"17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223\\\",\\\"DataSampleKeys\\\":\\\"47f9af29d34d737acfb0e37d93bfa650979292297ed263e8536ef3d13f70c83e,df94060511117dd25da1d2b1846f9be17340128233c8b24694d5e780d909b22c,50b7a4b4f2541674958fd09a061276862e1e2ea4dbdd0e1af06e70051804e33b\\\",\\\"FLTask\\\":\\\"\\\",\\\"Rank\\\":\\\"\\\",\\\"Tag\\\":\\\"titanic v0\\\"}\""},
 		[]string{"createTesttuple", "\"{\\\"TraintupleKey\\\":\\\"8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4\\\",\\\"DataManagerKey\\\":\\\"17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223\\\",\\\"DataSampleKeys\\\":\\\"1befb03ceed3ab7ec9fa4bebe9b681bbc7725a402e03f9e64f9f1677cf619183\\\",\\\"Tag\\\":\\\"titanic v0\\\"}\""},
 		[]string{"createTesttuple", "\"{\\\"TraintupleKey\\\":\\\"8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4\\\",\\\"DataManagerKey\\\":\\\"\\\",\\\"DataSampleKeys\\\":\\\"\\\",\\\"Tag\\\":\\\"\\\"}\""},
 		[]string{"logStartTrain", "\"{\\\"Key\\\":\\\"8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4\\\"}\""},
@@ -110,7 +109,7 @@ func TestTagTuple(t *testing.T) {
 	assert.EqualValues(t, tag, testtuples[0].Tag)
 
 	filter := inputQueryFilter{
-		IndexName: "testtuple~tag",
+		IndexName:  "testtuple~tag",
 		Attributes: tag,
 	}
 	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
@@ -148,24 +147,24 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 		getOutputTraintuple(mockStub, traintupleKey)
 	})
 }
-func TestTraintupleFLtaskCreation(t *testing.T) {
+func TestTraintupleFLTaskCreation(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
 	// Add dataManager, dataSample and algo
 	registerItem(t, *mockStub, "algo")
 
-	inpTraintuple := inputTraintuple{FLtask: "someFLtask"}
+	inpTraintuple := inputTraintuple{FLTask: "someFLTask"}
 	args := inpTraintuple.createSample()
 	resp := mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 500, resp.Status, "should failed for missing rank")
-	require.Contains(t, resp.Message, "invalit inputs, a FLtask should have a rank", "invalid error message")
+	require.Contains(t, resp.Message, "invalit inputs, a FLTask should have a rank", "invalid error message")
 
 	inpTraintuple = inputTraintuple{Rank: "1"}
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 500, resp.Status, "should failed for invalid rank")
-	require.Contains(t, resp.Message, "invalid inputs, a new FLtask should have a rank 0")
+	require.Contains(t, resp.Message, "invalid inputs, a new FLTask should have a rank 0")
 
 	inpTraintuple = inputTraintuple{Rank: "0"}
 	args = inpTraintuple.createSample()
@@ -181,11 +180,11 @@ func TestTraintupleFLtaskCreation(t *testing.T) {
 	inpTraintuple = inputTraintuple{Rank: "0"}
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	require.EqualValues(t, 500, resp.Status, "should failed for existing FLtask")
+	require.EqualValues(t, 500, resp.Status, "should failed for existing FLTask")
 	require.Contains(t, resp.Message, "this traintuple already exists")
 }
 
-func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
+func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
@@ -205,7 +204,7 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 	inpTraintuple = inputTraintuple{
 		InModels: key,
 		Rank:     "0",
-		FLtask:   key}
+		FLTask:   key}
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status, resp.Message, "should failed to add a traintuple of the same rank")
@@ -214,19 +213,19 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 	inpTraintuple = inputTraintuple{
 		InModels: key,
 		Rank:     "1",
-		FLtask:   "notarealone"}
+		FLTask:   "notarealone"}
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 500, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting FLtask")
+	assert.EqualValues(t, 500, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting FLTask")
 
-	// Succesfully add a traintuple to the same FLtask
+	// Succesfully add a traintuple to the same FLTask
 	inpTraintuple = inputTraintuple{
 		InModels: key,
 		Rank:     "1",
-		FLtask:   key}
+		FLTask:   key}
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same FLtask")
+	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same FLTask")
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
@@ -242,7 +241,7 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 		AlgoKey:  newAlgoHash,
 		InModels: ttkey,
 		Rank:     "2",
-		FLtask:   key}
+		FLTask:   key}
 	args = inpTraintuple.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status, resp.Message, "sould fail for it doesn't have the same algo key")
@@ -265,7 +264,7 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	// Mark the traintuple as failed
 	fail := inputLogFailTrain{}
 	fail.Key = traintupleKey
-	args :=fail.createSample()
+	args := fail.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "should be able to log traintuple as failed")
 
@@ -423,7 +422,7 @@ func TestTraintuple(t *testing.T) {
 
 	// Query traintuple with status todo and worker as trainworker and check consistency
 	filter := inputQueryFilter{
-		IndexName: "traintuple~worker~status",
+		IndexName:  "traintuple~worker~status",
 		Attributes: worker + ", todo",
 	}
 	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
@@ -435,7 +434,7 @@ func TestTraintuple(t *testing.T) {
 
 	// Update status and check consistency
 	success := inputLogSuccessTrain{}
-	success.Key= traintupleKey
+	success.Key = traintupleKey
 
 	argsSlice := [][][]byte{
 		[][]byte{[]byte("logStartTrain"), keyToJSON(traintupleKey)},
@@ -446,7 +445,7 @@ func TestTraintuple(t *testing.T) {
 		resp = mockStub.MockInvoke("42", argsSlice[i])
 		require.EqualValuesf(t, 200, resp.Status, "when logging start %s with message %s", traintupleStatus[i], resp.Message)
 		filter := inputQueryFilter{
-			IndexName: "traintuple~worker~status",
+			IndexName:  "traintuple~worker~status",
 			Attributes: worker + ", " + traintupleStatus[i],
 		}
 		args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
