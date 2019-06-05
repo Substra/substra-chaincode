@@ -82,11 +82,24 @@ type inputHashe struct {
 	Key string `validate:"required,len=64,hexadecimal"`
 }
 
-type inputSuccessTrain struct {
-	Key      string         `validate:"required,len=64,hexadecimal"`
-	Log      string         `validate:"required,lte=200"`
+type inputLogSuccessTrain struct {
+	inputLog
 	OutModel inputHashDress `validate:"required"`
-	Perf     float32        `validate:"required"`
+	Perf     float32         `validate:"required"`
+}
+type inputLogSuccessTest struct{
+	inputLog
+	Perf     float32         `validate:"required"`
+}
+type inputLogFailTrain struct {
+	inputLog
+}
+type inputLogFailTest struct {
+	inputLog
+}
+type inputLog struct {
+	Key      string          `validate:"required,len=64,hexadecimal"`
+	Log      string          `validate:"required,lte=200"`
 }
 
 type inputHashDress struct {

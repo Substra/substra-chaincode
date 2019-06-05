@@ -32,7 +32,7 @@ func TestSpecifiqArgSeq(t *testing.T) {
 		[]string{"logStartTrain", "\"{\\\"Key\\\":\\\"8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4\\\"}\""},
 		[]string{"logSuccessTrain", "\"{\\\"Key\\\":\\\"8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4\\\",\\\"Log\\\":\\\"Train - CPU:119.66 % - Mem:0.04 GB - GPU:0.00 % - GPU Mem:0.00 GB; \\\",\\\"OutModel\\\":{\\\"Hash\\\":\\\"6f6f2c318ff95ea7de9e4c01395b78b9217ddb134279275dae7842e7d4eb4c16\\\",\\\"StorageAddress\\\":\\\"http://owkin.substrabac:8000/model/6f6f2c318ff95ea7de9e4c01395b78b9217ddb134279275dae7842e7d4eb4c16/file/\\\"},\\\"Perf\\\":0.61610484}\""},
 		[]string{"logStartTest", "\"{\\\"Key\\\":\\\"81bad50d76898ba6ea5af9d0a4816726bd46b947730a1bc2dd1d6755e8ab682b\\\"}\""},
-		[]string{"logSuccessTest", "81bad50d76898ba6ea5af9d0a4816726bd46b947730a1bc2dd1d6755e8ab682b", "0.6179775280898876", "Test - CPU:0.00 % - Mem:0.00 GB - GPU:0.00 % - GPU Mem:0.00 GB; "},
+		[]string{"logSuccessTest", "\"{\\\"Key\\\":\\\"81bad50d76898ba6ea5af9d0a4816726bd46b947730a1bc2dd1d6755e8ab682b\\\",\\\"Log\\\":\\\"Test - CPU:0.00 % - Mem:0.00 GB - GPU:0.00 % - GPU Mem:0.00 GB; \\\",\\\"Perf\\\":0.6179775}\""},
 	}
 	for _, argList := range argSeq {
 		args := [][]byte{}
@@ -50,7 +50,6 @@ func TestFixer(t *testing.T) {
 	argSeq := [][]string{
 		// []string{"registerObjective", "Titanic: Machine Learning From Disaster", "1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb", "http://owkin.substrabac:8000/objective/1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb/description/", "accuracy", "0bc13ad2e481c1a52959a228984bbee2e31271d567ea55a458e9ae92d481fedb", "http://owkin.substrabac:8000/objective/1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb/metrics/", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223:1a8532bd84d5ef785a4abe503a12bc7040c666a9f6264f982aa4ad77ff7217a8", "all"},
 		// []string{"registerAlgo", "Constant death predictor", "10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9", "http://owkin.substrabac:8000/algo/10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9/file/", "1dae14e339c94ae04cc8846d353c07c8de96a38d6c5b5ee4486c4102ff011450", "http://owkin.substrabac:8000/algo/10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9/description/", "all"},
-		// []string{"logSuccessTest", "81bad50d76898ba6ea5af9d0a4816726bd46b947730a1bc2dd1d6755e8ab682b", "0.6179775280898876", "Test - CPU:0.00 % - Mem:0.00 GB - GPU:0.00 % - GPU Mem:0.00 GB; "},
 	}
 	_ = [4]string{
 		"key of the traintuple to update",
@@ -58,8 +57,11 @@ func TestFixer(t *testing.T) {
 		"train perf (float)",
 		"logs"}
 	for _, argList := range argSeq {
-		inp := inputSuccessTrain{}
-		stringToInputStruct(argList[1:], &inp)
+		inp := inputLogSuccessTest{}
+		inp.Key = argList[1]
+		inp.Perf = 0.6179775280898876
+		inp.Log = argList[3]
+		// stringToInputStruct(argList[1:], &inp)
 		b := assetToJSON(inp)
 		spew.Dump(string(b))
 		t.Fail()
@@ -91,7 +93,7 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding traintuple without test dataset it should work: ", resp.Message)
 
-	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
 }
@@ -286,7 +288,9 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	traintupleKey := res["key"]
 
 	// Mark the traintuple as failed
-	args := [][]byte{[]byte("logFailTrain"), []byte(traintupleKey), []byte("pas glop")}
+	fail := inputLogFailTrain{}
+	fail.Key = traintupleKey
+	args :=fail.createSample()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "should be able to log traintuple as failed")
 
@@ -389,7 +393,7 @@ func TestTraintuple(t *testing.T) {
 	assert.Contains(t, res, "key")
 	traintupleKey := res["key"]
 	// Query traintuple from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 	out := outputTraintuple{}
@@ -451,7 +455,9 @@ func TestTraintuple(t *testing.T) {
 	assert.Exactly(t, out, queryTraintuples[0])
 
 	// Update status and check consistency
-	success := inputSuccessTrain{Key: traintupleKey}
+	success := inputLogSuccessTrain{}
+	success.Key= traintupleKey
+
 	argsSlice := [][][]byte{
 		[][]byte{[]byte("logStartTrain"), keyToJSON(traintupleKey)},
 		success.createSample(),
@@ -459,7 +465,7 @@ func TestTraintuple(t *testing.T) {
 	traintupleStatus := []string{"doing", "done"}
 	for i := range traintupleStatus {
 		resp = mockStub.MockInvoke("42", argsSlice[i])
-		assert.EqualValuesf(t, 200, resp.Status, "when logging start %s with message %s", traintupleStatus[i], resp.Message)
+		require.EqualValuesf(t, 200, resp.Status, "when logging start %s with message %s", traintupleStatus[i], resp.Message)
 		args = [][]byte{[]byte("queryFilter"), []byte("traintuple~worker~status"), []byte(worker + ", " + traintupleStatus[i])}
 		resp = mockStub.MockInvoke("42", args)
 		assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple of worker with %s status - message %s", traintupleStatus[i], resp.Message)
@@ -470,7 +476,7 @@ func TestTraintuple(t *testing.T) {
 	}
 
 	// Query Traintuple From key
-	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple with status %d and message %s", resp.Status, resp.Message)
 	endTraintuple := outputTraintuple{}
@@ -484,7 +490,7 @@ func TestTraintuple(t *testing.T) {
 	assert.Exactly(t, expected, endTraintuple, "retreived Traintuple does not correspond to what is expected")
 
 	// query all traintuples related to a traintuple with the same algo
-	args = [][]byte{[]byte("queryModelDetails"), []byte(traintupleKey)}
+	args = [][]byte{[]byte("queryModelDetails"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying model details with status %d and message %s", resp.Status, resp.Message)
 	payload := map[string]interface{}{}
