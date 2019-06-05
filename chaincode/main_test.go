@@ -134,8 +134,7 @@ func (objective *inputObjective) createSample() [][]byte {
 		objective.TestDataset = dataManagerOpenerHash + ":" + testDataSampleHash1 + ", " + testDataSampleHash2
 	}
 	objective.Permissions = "all"
-	args, _ := inputStructToBytes(objective)
-	args = append([][]byte{[]byte("registerObjective")}, args...)
+	args := append([][]byte{[]byte("registerObjective")}, assetToJSON(objective))
 	return args
 }
 
@@ -569,14 +568,18 @@ func TestPipeline(t *testing.T) {
 	args = inpDataManager.createSample()
 	mockStub.MockInvoke("42", args)
 	// associate a data sample with the old data manager with the updateDataSample
-	args = [][]byte{[]byte("updateDataSample"), []byte(trainDataSampleHash1), []byte(newDataManagerKey)}
+	updateData := inputUpdateDataSample{
+		DataManagerKeys: newDataManagerKey,
+		Hashes: trainDataSampleHash1,
+	}
+	args = [][]byte{[]byte("updateDataSample"), assetToJSON(updateData)}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when updating data sample with new data manager with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query the new Dataset ------------")
-	args = [][]byte{[]byte("queryDataset"), []byte(newDataManagerKey)}
+	args = [][]byte{[]byte("queryDataset"), keyToJSON(newDataManagerKey)}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying dataset with status %d and message %s", resp.Status, resp.Message)
