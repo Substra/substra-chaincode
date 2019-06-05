@@ -423,7 +423,11 @@ func TestPipeline(t *testing.T) {
 	todoTraintupleKey := res["key"]
 
 	fmt.Fprintln(&out, "#### ------------ Query Traintuples of worker with todo status ------------")
-	args = [][]byte{[]byte("queryFilter"), []byte("traintuple~worker~status"), []byte(trainWorker + ", todo")}
+	filter := inputQueryFilter{
+		IndexName: "traintuple~worker~status",
+		Attributes: trainWorker + ", todo",
+	}
+	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple of worker with todo status - with status %d and message %s", resp.Status, resp.Message)
@@ -503,7 +507,11 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query Testtuples of worker with todo status ------------")
-	args = [][]byte{[]byte("queryFilter"), []byte("testtuple~worker~status"), []byte(testWorker + ", todo")}
+	filter = inputQueryFilter{
+		IndexName: "testtuple~worker~status",
+		Attributes: testWorker + ", todo",
+	}
+	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying testtuple of worker with todo status - with status %d and message %s", resp.Status, resp.Message)
