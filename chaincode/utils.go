@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"encoding/json"
@@ -217,11 +216,11 @@ func getElementsPayload(stub shim.ChaincodeStubInterface, elementsKeys []string)
 // AssetFromJSON unmarshal a stringify json into the passed interface
 // TODO: Validate the interface here if possible
 func AssetFromJSON(args string, asset interface{}) error {
-	inpStr, err := strconv.Unquote(args)
-	if err != nil {
-		return fmt.Errorf("Expected escaped json string as second arg got: %s", args)
-	}
-	err = json.Unmarshal([]byte(inpStr), &asset)
+	// inpStr, err := strconv.Unquote(args)
+	// if err != nil {
+	// 	return fmt.Errorf("Expected escaped json string as second arg got: %s", args)
+	// }
+	err := json.Unmarshal([]byte(args), &asset)
 	if err != nil {
 		return fmt.Errorf("Problem when reading json arg : %s, errror is : %s", args, err.Error())
 	}
