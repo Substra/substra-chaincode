@@ -155,8 +155,7 @@ func (algo *inputAlgo) createSample() [][]byte {
 		algo.DescriptionStorageAddress = "https://toto/algo/222/description"
 	}
 	algo.Permissions = "all"
-	args, _ := inputStructToBytes(algo)
-	args = append([][]byte{[]byte("registerAlgo")}, args...)
+	args := append([][]byte{[]byte("registerAlgo")}, assetToJSON(algo))
 	return args
 }
 
