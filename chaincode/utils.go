@@ -215,6 +215,7 @@ func getElementsPayload(stub shim.ChaincodeStubInterface, elementsKeys []string)
 }
 
 // AssetFromJSON unmarshal a stringify json into the passed interface
+// TODO: Validate the interface here if possible
 func AssetFromJSON(args string, asset interface{}) error {
 	inpStr, err := strconv.Unquote(args)
 	if err != nil {

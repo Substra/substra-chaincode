@@ -84,7 +84,7 @@ func TestObjective(t *testing.T) {
 		inpObjective.DescriptionHash)
 
 	// Query objective from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryObjective"), []byte(objectiveKey)}
+	args = [][]byte{[]byte("queryObjective"), keyToJSON(objectiveKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying a dataManager with status %d and message %s", resp.Status, resp.Message)
 	objective := outputObjective{}
