@@ -85,7 +85,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerObjective",""{\"Name\":\"MSI
 Smart contract: `registerAlgo`  
  Inputs: `Name`, `Hash`, `StorageAddress`, `DescriptionHash`, `DescriptionStorageAddress`, `Permissions`
 ```
-peer chaincode invoke -n mycc -c '{"Args":["registerAlgo","hog + svm","fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","https://toto/algo/222/algo","e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dca","https://toto/algo/222/description","all"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerAlgo",""{\"Name\":\"hog + svm\",\"Hash\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"StorageAddress\":\"https://toto/algo/222/algo\",\"DescriptionHash\":\"e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dca\",\"DescriptionStorageAddress\":\"https://toto/algo/222/description\",\"Permissions\":\"all\"}""]}' -C myc
 ```
 >  {"key":"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"} 
 
