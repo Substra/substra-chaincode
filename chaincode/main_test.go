@@ -181,7 +181,7 @@ func (traintuple *inputTraintuple) createSample() [][]byte {
 	return args
 }
 
-func (success *inputSuccessTrain) createSample() [][]byte {
+func (success *inputLogSuccessTrain) createSample() [][]byte {
 	if success.Key == "" {
 		success.Key = traintupleKey
 	}
@@ -197,7 +197,44 @@ func (success *inputSuccessTrain) createSample() [][]byte {
 	if success.OutModel.StorageAddress == "" {
 		success.OutModel.StorageAddress = modelAddress
 	}
+	
 	args := append([][]byte{[]byte("logSuccessTrain")}, assetToJSON(success))
+	return args
+}
+func (success *inputLogSuccessTest) createSample() [][]byte {
+	if success.Key == "" {
+		success.Key = traintupleKey
+	}
+	if success.Log == "" {
+		success.Log = "no error, ah ah ah"
+	}
+	if success.Perf == 0 {
+		success.Perf = 0.9
+	}
+	
+	args := append([][]byte{[]byte("logSuccessTest")}, assetToJSON(success))
+	return args
+}
+func (fail *inputLogFailTrain) createSample() [][]byte {
+	if fail.Key == "" {
+		fail.Key = traintupleKey
+	}
+	if fail.Log == "" {
+		fail.Log = "man, did it failed!"
+	}
+	
+	args := append([][]byte{[]byte("logFailTrain")}, assetToJSON(fail))
+	return args
+}
+func (fail *inputLogFailTest) createSample() [][]byte {
+	if fail.Key == "" {
+		fail.Key = traintupleKey
+	}
+	if fail.Log == "" {
+		fail.Log = "man, did it failed!"
+	}
+	
+	args := append([][]byte{[]byte("logFailTest")}, assetToJSON(fail))
 	return args
 }
 func (testtuple *inputTesttuple) createSample() [][]byte {
@@ -356,12 +393,12 @@ func TestPipeline(t *testing.T) {
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
-	traintupleKey := []byte(res["key"])
+	traintupleKey :=res["key"]
 	// check not possible to create same traintuple
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding same traintuple with status %d and message %s", resp.Status, resp.Message)
 	// Get owner of the traintuple
-	args = [][]byte{[]byte("queryTraintuple"), traintupleKey}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
 	traintuple := outputTraintuple{}
@@ -373,7 +410,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Add Traintuple with inModel from previous traintuple ------------")
 	inpTraintuple = inputTraintuple{
-		InModels: string(traintupleKey),
+		InModels: traintupleKey,
 	}
 	printArgsNames(&out, "createTraintuple", getFieldNames(&inpTraintuple))
 	args = inpTraintuple.createSample()
@@ -395,14 +432,15 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Training ------------")
-	args = [][]byte{[]byte("logStartTrain"), keyToJSON(string(traintupleKey))}
+	args = [][]byte{[]byte("logStartTrain"), keyToJSON(traintupleKey)}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when logging start training with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Training ------------")
-	inp := inputSuccessTrain{Key: string(traintupleKey)}
+	inp := inputLogSuccessTrain{}
+	inp.Key = string(traintupleKey)
 	args = inp.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
@@ -410,7 +448,7 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query Traintuple From key ------------")
-	args = [][]byte{[]byte("queryTraintuple"), traintupleKey}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	printArgs(&out, args, "queryTraintuple")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple with status %d and message %s", resp.Status, resp.Message)
@@ -441,12 +479,12 @@ func TestPipeline(t *testing.T) {
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
-	testtupleKey := []byte(res["key"])
+	testtupleKey := res["key"]
 	// check not possible to create same testtuple
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding same testtuple with status %d and message %s", resp.Status, resp.Message)
 	// Get owner of the testtuple
-	args = [][]byte{[]byte("queryTesttuple"), testtupleKey}
+	args = [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	respTesttuple := resp.Payload
 	testtuple := Testtuple{}
@@ -474,23 +512,23 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Testing ------------")
-	args = [][]byte{[]byte("logStartTest"), keyToJSON(string(testtupleKey))}
+	args = [][]byte{[]byte("logStartTest"), keyToJSON(testtupleKey)}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when logging start testing with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Testing ------------")
-	perf := "0.89"
-	log := "still no error, suprah ah ah"
-	args = [][]byte{[]byte("logSuccessTest"), testtupleKey, []byte(perf), []byte(log)}
+	success := inputLogSuccessTest{}
+	success.Key = testtupleKey
+	args = success.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 200, resp.Status, "when logging successful training with status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 200, resp.Status, "when logging successful testing with status %d and message %s", resp.Status, resp.Message)
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query Testtuple from its key ------------")
-	args = [][]byte{[]byte("queryTesttuple"), testtupleKey}
+	args = [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
 	printArgs(&out, args, "queryTesttuple")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying testtuple with status %d and message %s", resp.Status, resp.Message)
@@ -504,7 +542,7 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
 
 	fmt.Fprintln(&out, "#### ------------ Query details about a model ------------")
-	args = [][]byte{[]byte("queryModelDetails"), []byte(traintupleKey)}
+	args = [][]byte{[]byte("queryModelDetails"), keyToJSON(traintupleKey)}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying model details with status %d and message %s", resp.Status, resp.Message)
