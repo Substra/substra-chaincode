@@ -107,10 +107,10 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 		return
 	}
 
-	// check FLtask and Rank and set it when required
+	// check FLTask and Rank and set it when required
 	if inp.Rank == "" {
-		if inp.FLtask != "" {
-			err = fmt.Errorf("invalit inputs, a FLtask should have a rank")
+		if inp.FLTask != "" {
+			err = fmt.Errorf("invalit inputs, a FLTask should have a rank")
 			return
 		}
 	} else {
@@ -118,20 +118,20 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 		if err != nil {
 			return
 		}
-		if inp.FLtask == "" {
+		if inp.FLTask == "" {
 			if traintuple.Rank != 0 {
-				err = fmt.Errorf("invalid inputs, a new FLtask should have a rank 0")
+				err = fmt.Errorf("invalid inputs, a new FLTask should have a rank 0")
 				return
 			}
-			traintuple.FLtask = traintupleKey
+			traintuple.FLTask = traintupleKey
 		} else {
 			var ttKeys []string
-			attributes := []string{"traintuple", inp.FLtask}
+			attributes := []string{"traintuple", inp.FLTask}
 			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
 			if err != nil {
 				return
 			} else if len(ttKeys) == 0 {
-				err = fmt.Errorf("cannot find the FLtask %s", inp.FLtask)
+				err = fmt.Errorf("cannot find the FLTask %s", inp.FLTask)
 				return
 			}
 			for _, ttKey := range ttKeys {
@@ -140,21 +140,21 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 				if err != nil {
 					return
 				} else if FLTraintuple.AlgoKey != inp.AlgoKey {
-					err = fmt.Errorf("previous traintuple for FLtask %s does not have the same algo key %s", inp.FLtask, inp.AlgoKey)
+					err = fmt.Errorf("previous traintuple for FLTask %s does not have the same algo key %s", inp.FLTask, inp.AlgoKey)
 					return
 				}
 			}
 
-			attributes = []string{"traintuple", inp.FLtask, traintuple.Dataset.Worker, inp.Rank}
+			attributes = []string{"traintuple", inp.FLTask, traintuple.Dataset.Worker, inp.Rank}
 			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
 			if err != nil {
 				return
 			} else if len(ttKeys) > 0 {
-				err = fmt.Errorf("FLtask %s with worker %s rank %d already exists", inp.FLtask, traintuple.Dataset.Worker, traintuple.Rank)
+				err = fmt.Errorf("FLTask %s with worker %s rank %d already exists", inp.FLTask, traintuple.Dataset.Worker, traintuple.Rank)
 				return
 			}
 
-			traintuple.FLtask = inp.FLtask
+			traintuple.FLTask = inp.FLTask
 		}
 	}
 	return
@@ -308,8 +308,8 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 			return
 		}
 	}
-	if traintuple.FLtask != "" {
-		if err = createCompositeKey(stub, "traintuple~fltask~worker~rank~key", []string{"traintuple", traintuple.FLtask, traintuple.Dataset.Worker, inp.Rank, traintupleKey}); err != nil {
+	if traintuple.FLTask != "" {
+		if err = createCompositeKey(stub, "traintuple~fltask~worker~rank~key", []string{"traintuple", traintuple.FLTask, traintuple.Dataset.Worker, inp.Rank, traintupleKey}); err != nil {
 			err = fmt.Errorf("issue creating composite keys - %s", err.Error())
 			return
 		}
@@ -924,14 +924,14 @@ func (traintuple *Traintuple) isReady(stub shim.ChaincodeStubInterface, newDoneT
 // removeModelCompositeKey remove the Model key state of a traintuple
 func (traintuple *Traintuple) removeModelCompositeKey(stub shim.ChaincodeStubInterface, modelKey string) error {
 	indexName := "traintuple~inModel~key"
-	compositeKey, err := stub.CreateCompositeKey(indexName, []string{"traintuple", modelKey, traintuple.FLtask})
+	compositeKey, err := stub.CreateCompositeKey(indexName, []string{"traintuple", modelKey, traintuple.FLTask})
 
 	if err != nil {
-		return fmt.Errorf("failed to recreate composite key to update traintuple %s with inModel %s - %s", traintuple.FLtask, modelKey, err.Error())
+		return fmt.Errorf("failed to recreate composite key to update traintuple %s with inModel %s - %s", traintuple.FLTask, modelKey, err.Error())
 	}
 
 	if err := stub.DelState(compositeKey); err != nil {
-		return fmt.Errorf("failed to delete associated composite key to update traintuple %s with inModel %s - %s", traintuple.FLtask, modelKey, err.Error())
+		return fmt.Errorf("failed to delete associated composite key to update traintuple %s with inModel %s - %s", traintuple.FLTask, modelKey, err.Error())
 	}
 	return nil
 }

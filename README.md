@@ -111,17 +111,17 @@ peer chaincode query -n mycc -c '{"Args":["queryObjectives"]}' -C myc
 
 #### ------------ Add Traintuple ------------
 Smart contract: `createTraintuple`  
- Inputs: `AlgoKey`, `ObjectiveKey`, `InModels`, `DataManagerKey`, `DataSampleKeys`, `FLtask`, `Rank`, `Tag`
+ Inputs: `AlgoKey`, `ObjectiveKey`, `InModels`, `DataManagerKey`, `DataSampleKeys`, `FLTask`, `Rank`, `Tag`
 ```
-peer chaincode invoke -n mycc -c '{"Args":["createTraintuple",""{\"AlgoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"ObjectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"InModels\":\"\",\"DataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"DataSampleKeys\":\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"FLtask\":\"\",\"Rank\":\"\",\"Tag\":\"\"}""]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTraintuple",""{\"AlgoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"ObjectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"InModels\":\"\",\"DataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"DataSampleKeys\":\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"FLTask\":\"\",\"Rank\":\"\",\"Tag\":\"\"}""]}' -C myc
 ```
 >  {"key":"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687"} 
 
 #### ------------ Add Traintuple with inModel from previous traintuple ------------
 Smart contract: `createTraintuple`  
- Inputs: `AlgoKey`, `ObjectiveKey`, `InModels`, `DataManagerKey`, `DataSampleKeys`, `FLtask`, `Rank`, `Tag`
+ Inputs: `AlgoKey`, `ObjectiveKey`, `InModels`, `DataManagerKey`, `DataSampleKeys`, `FLTask`, `Rank`, `Tag`
 ```
-peer chaincode invoke -n mycc -c '{"Args":["createTraintuple",""{\"AlgoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"ObjectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"InModels\":\"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687\",\"DataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"DataSampleKeys\":\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"FLtask\":\"\",\"Rank\":\"\",\"Tag\":\"\"}""]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTraintuple",""{\"AlgoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"ObjectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"InModels\":\"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687\",\"DataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"DataSampleKeys\":\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"FLTask\":\"\",\"Rank\":\"\",\"Tag\":\"\"}""]}' -C myc
 ```
 >  {"key":"46ab1f11d49795f41e847e29e30fbd511a07dc231cf6991aa6da05cdc4a87cce"} 
 
