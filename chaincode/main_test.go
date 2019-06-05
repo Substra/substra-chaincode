@@ -50,23 +50,19 @@ func TestInit(t *testing.T) {
 
 func assetToJSON(asset interface{}) []byte {
 	assetjson, _ := json.Marshal(asset)
-	payload, _ := json.Marshal(string(assetjson))
-	return payload
+	return assetjson
 }
 
 func keyToJSON(key string) []byte {
 	return assetToJSON(inputHashe{Key: key})
 }
 func printArgs(buf io.Writer, args [][]byte, command string) {
-	s := "```\npeer chaincode " + command + " -n mycc -c '{\"Args\":["
-	for i, arg := range args {
-		s += "\"" + string(arg) + "\""
-		if i+1 < len(args) {
-			s += ","
-		}
+	fmt.Fprintf(buf, "```\npeer chaincode %s -n mycc -c '{\"Args\":[\"%s\"", command, args[0])
+	if len(args) == 2 {
+		escapedJSON, _ := json.Marshal(string(args[1]))
+		fmt.Fprintf(buf, ",%s", escapedJSON)
 	}
-	s += "]}' -C myc\n```"
-	fmt.Fprintln(buf, s)
+	fmt.Fprint(buf, "]}' -C myc\n```\n")
 }
 func printArgsNames(buf io.Writer, fnName string, argsNames []string) {
 	s := "Smart contract: `" + fnName + "`  \n Inputs: `" + strings.Join(argsNames, "`, `") + "`"
@@ -195,7 +191,7 @@ func (success *inputLogSuccessTrain) createSample() [][]byte {
 	if success.OutModel.StorageAddress == "" {
 		success.OutModel.StorageAddress = modelAddress
 	}
-	
+
 	args := append([][]byte{[]byte("logSuccessTrain")}, assetToJSON(success))
 	return args
 }
@@ -209,7 +205,7 @@ func (success *inputLogSuccessTest) createSample() [][]byte {
 	if success.Perf == 0 {
 		success.Perf = 0.9
 	}
-	
+
 	args := append([][]byte{[]byte("logSuccessTest")}, assetToJSON(success))
 	return args
 }
@@ -220,7 +216,7 @@ func (fail *inputLogFailTrain) createSample() [][]byte {
 	if fail.Log == "" {
 		fail.Log = "man, did it failed!"
 	}
-	
+
 	args := append([][]byte{[]byte("logFailTrain")}, assetToJSON(fail))
 	return args
 }
@@ -231,7 +227,7 @@ func (fail *inputLogFailTest) createSample() [][]byte {
 	if fail.Log == "" {
 		fail.Log = "man, did it failed!"
 	}
-	
+
 	args := append([][]byte{[]byte("logFailTest")}, assetToJSON(fail))
 	return args
 }
@@ -391,7 +387,7 @@ func TestPipeline(t *testing.T) {
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
-	traintupleKey :=res["key"]
+	traintupleKey := res["key"]
 	// check not possible to create same traintuple
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding same traintuple with status %d and message %s", resp.Status, resp.Message)
@@ -424,7 +420,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Query Traintuples of worker with todo status ------------")
 	filter := inputQueryFilter{
-		IndexName: "traintuple~worker~status",
+		IndexName:  "traintuple~worker~status",
 		Attributes: trainWorker + ", todo",
 	}
 	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
@@ -508,7 +504,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Query Testtuples of worker with todo status ------------")
 	filter = inputQueryFilter{
-		IndexName: "testtuple~worker~status",
+		IndexName:  "testtuple~worker~status",
 		Attributes: testWorker + ", todo",
 	}
 	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
@@ -577,7 +573,7 @@ func TestPipeline(t *testing.T) {
 	// associate a data sample with the old data manager with the updateDataSample
 	updateData := inputUpdateDataSample{
 		DataManagerKeys: newDataManagerKey,
-		Hashes: trainDataSampleHash1,
+		Hashes:          trainDataSampleHash1,
 	}
 	args = [][]byte{[]byte("updateDataSample"), assetToJSON(updateData)}
 	printArgs(&out, args, "invoke")

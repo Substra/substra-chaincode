@@ -35,7 +35,7 @@ type inputDataManager struct {
 	Type                      string `validate:"required,gte=1,lte=30" json:"type"`
 	DescriptionHash           string `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
 	DescriptionStorageAddress string `validate:"required,url" json:"descriptionStorageAddress"`
-	ObjectiveKey              string `json:"objectiveKey"` //`validate:"required"`
+	ObjectiveKey              string `validate:"omitempty" json:"objectiveKey"` //`validate:"required"`
 	Permissions               string `validate:"required,oneof=all" json:"permissions"`
 }
 
@@ -48,7 +48,7 @@ type inputUpdateDataManager struct {
 // inputDataSample is the representation of input args to register one or more dataSample
 type inputDataSample struct {
 	Hashes          string `validate:"required" json:"hashes"`
-	DataManagerKeys string `json:"dataManagerKeys"`
+	DataManagerKeys string `validate:"omitempty" json:"dataManagerKeys"`
 	TestOnly        string `validate:"required,oneof=true false" json:"testOnly"`
 }
 
@@ -62,11 +62,11 @@ type inputUpdateDataSample struct {
 type inputTraintuple struct {
 	AlgoKey        string `validate:"required,len=64,hexadecimal" json:"algoKey"`
 	ObjectiveKey   string `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
-	InModels       string `json:"inModels"` //`validate:"omitEmpty"
+	InModels       string `validate:"omitempty" json:"inModels"` //`validate:"omitEmpty"
 	DataManagerKey string `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
 	DataSampleKeys string `validate:"required" json:"dataSampleKeys"`
-	FLTask         string `json:"flTask"` //`validate:"omitEmpty"`
-	Rank           string `json:"rank"`   //`validate:"omitEmpty"`
+	FLTask         string `validate:"omitempty" json:"flTask"` //`validate:"omitEmpty"`
+	Rank           string `validate:"omitempty" json:"rank"`   //`validate:"omitEmpty"`
 	Tag            string `validate:"omitempty,lte=64" json:"tag"`
 }
 
@@ -74,7 +74,7 @@ type inputTraintuple struct {
 type inputTesttuple struct {
 	TraintupleKey  string `validate:"required,len=64,hexadecimal" json:"traintupleKey"`
 	DataManagerKey string `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
-	DataSampleKeys string `json:"dataSampleKeys"`
+	DataSampleKeys string `validate:"omitempty" json:"dataSampleKeys"`
 	Tag            string `validate:"omitempty,lte=64" json:"tag"`
 }
 
@@ -108,7 +108,7 @@ type inputHashDress struct {
 }
 
 type inputQueryFilter struct {
-	IndexName string `json:"indexName"`
+	IndexName string `validate:"required" json:"indexName"`
 	//TODO : Make Attributes a real list
-	Attributes string `json:"attributes"`
+	Attributes string `validate:"required" json:"attributes"`
 }

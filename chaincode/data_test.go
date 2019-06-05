@@ -16,8 +16,7 @@ func TestJsonInputsDataManager(t *testing.T) {
 
 	inpDataManager := inputDataManager{}
 	inpDataManager.createSample()
-	payload, _ := json.Marshal(inpDataManager)
-	payload, err := json.Marshal(string(payload))
+	payload, err := json.Marshal(inpDataManager)
 	assert.NoError(t, err)
 	args := [][]byte{[]byte("registerDataManager"), payload}
 	resp := mockStub.MockInvoke("42", args)
