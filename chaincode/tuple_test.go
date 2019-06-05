@@ -13,6 +13,7 @@ import (
 )
 
 func TestSpecifiqArgSeq(t *testing.T) {
+	t.SkipNow()
 	// This test is a POC and a example of a test base on the output of the log
 	// parameters directly copied in a test. It can be realy usesul for debugging
 	scc := new(SubstraChaincode)
