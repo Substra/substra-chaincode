@@ -83,19 +83,19 @@ type inputHashe struct {
 }
 
 type inputLogSuccessTrain struct {
-	inputLog `json:"inputLog"`
+	inputLog
 	OutModel inputHashDress `validate:"required" json:"outModel"`
 	Perf     float32        `validate:"required" json:"perf"`
 }
 type inputLogSuccessTest struct {
-	inputLog `json:"inputLog"`
-	Perf     float32 `validate:"required" json:"perf"`
+	inputLog
+	Perf float32 `validate:"required" json:"perf"`
 }
 type inputLogFailTrain struct {
-	inputLog `json:"inputLog"`
+	inputLog
 }
 type inputLogFailTest struct {
-	inputLog `json:"inputLog"`
+	inputLog
 }
 type inputLog struct {
 	Key string `validate:"required,len=64,hexadecimal" json:"key"`

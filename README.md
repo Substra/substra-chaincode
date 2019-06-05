@@ -139,7 +139,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain",""{\"key\":\"8e29bace
 
 #### ------------ Log Success Training ------------
 ```
-peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain",""{\"inputLog\":{\"key\":\"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687\",\"log\":\"no error, ah ah ah\"},\"outModel\":{\"hash\":\"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed\",\"storageAddress\":\"https://substrabac/model/toto\"},\"perf\":0.9}""]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain",""{\"key\":\"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687\",\"log\":\"no error, ah ah ah\",\"outModel\":{\"hash\":\"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed\",\"storageAddress\":\"https://substrabac/model/toto\"},\"perf\":0.9}""]}' -C myc
 ```
 >  {"algoKey":"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","creator":"bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0","dataset":{"dataManagerKey":"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","dataSampleKeys":["aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"]},"fltask":"","inModels":null,"log":"no error, ah ah ah","objectiveKey":"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","outModel":{"hash":"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed","storageAddress":"https://substrabac/model/toto"},"perf":0.9,"permissions":"all","rank":0,"status":"done","tag":""} 
 
@@ -187,7 +187,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest",""{\"key\":\"6581232b8
 
 #### ------------ Log Success Testing ------------
 ```
-peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest",""{\"inputLog\":{\"key\":\"6581232b890c5f80522ca480b815d3340dffde8924d863bfd1dfedb1841a2d53\",\"log\":\"no error, ah ah ah\"},\"perf\":0.9}""]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest",""{\"key\":\"6581232b890c5f80522ca480b815d3340dffde8924d863bfd1dfedb1841a2d53\",\"log\":\"no error, ah ah ah\",\"perf\":0.9}""]}' -C myc
 ```
 >  {"algo":{"name":"hog + svm","hash":"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","storageAddress":"https://toto/algo/222/algo"},"certified":true,"creator":"bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0","dataset":{"worker":"bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0","keys":["bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"],"openerHash":"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc","perf":0.9},"log":"no error, ah ah ah","model":{"traintupleKey":"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687","hash":"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed","storageAddress":"https://substrabac/model/toto"},"objective":{"hash":"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","metrics":{"hash":"4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","storageAddress":"https://toto/objective/222/metrics"}},"permissions":"all","status":"done","tag":""} 
 
