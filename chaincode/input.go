@@ -62,11 +62,11 @@ type inputUpdateDataSample struct {
 type inputTraintuple struct {
 	AlgoKey        string `validate:"required,len=64,hexadecimal" json:"algoKey"`
 	ObjectiveKey   string `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
-	InModels       string `validate:"omitempty" json:"inModels"` //`validate:"omitEmpty"
+	InModels       string `validate:"omitempty" json:"inModels"`
 	DataManagerKey string `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
 	DataSampleKeys string `validate:"required" json:"dataSampleKeys"`
-	FLTask         string `validate:"omitempty" json:"flTask"` //`validate:"omitEmpty"`
-	Rank           string `validate:"omitempty" json:"rank"`   //`validate:"omitEmpty"`
+	FLTask         string `validate:"omitempty" json:"flTask"`
+	Rank           string `validate:"omitempty" json:"rank"`
 	Tag            string `validate:"omitempty,lte=64" json:"tag"`
 }
 
