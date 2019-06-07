@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -57,187 +58,41 @@ func keyToJSON(key string) []byte {
 	return assetToJSON(inputHashe{Key: key})
 }
 func printArgs(buf io.Writer, args [][]byte, command string) {
-	fmt.Fprintf(buf, "```\npeer chaincode %s -n mycc -c '{\"Args\":[\"%s\"", command, args[0])
+	fmt.Fprintln(buf, "##### Command peer example:")
+	fmt.Fprintf(buf, "```bash\npeer chaincode %s -n mycc -c '{\"Args\":[\"%s\"", command, args[0])
 	if len(args) == 2 {
 		escapedJSON, _ := json.Marshal(string(args[1]))
 		fmt.Fprintf(buf, ",%s", escapedJSON)
 	}
 	fmt.Fprint(buf, "]}' -C myc\n```\n")
 }
-func printArgsNames(buf io.Writer, fnName string, argsNames []string) {
-	s := "Smart contract: `" + fnName + "`  \n Inputs: `" + strings.Join(argsNames, "`, `") + "`"
-	fmt.Fprintln(buf, s)
+
+func prettyPrintStruct(buf io.Writer, margin string, strucType reflect.Type) {
+	fmt.Fprintln(buf, "{")
+	prettyPrintStructElements(buf, margin+" ", strucType)
+	fmt.Fprintf(buf, "%s}\n", margin)
+}
+func prettyPrintStructElements(buf io.Writer, margin string, strucType reflect.Type) {
+	for i := 0; i < strucType.NumField(); i++ {
+		f := strucType.Field(i)
+		if f.Type.Kind() == reflect.Struct {
+			if f.Anonymous {
+				prettyPrintStructElements(buf, margin, f.Type)
+			} else {
+				fmt.Fprintf(buf, "%s%s: ", margin, f.Type.Name())
+				prettyPrintStruct(buf, margin+"  ", f.Type)
+				fmt.Fprint(buf, margin)
+			}
+			continue
+		}
+		fmt.Fprintf(buf, "%s\"%s\": %s (%s),\n", margin, f.Tag.Get("json"), f.Type.Kind(), f.Tag.Get("validate"))
+	}
 }
 
-func (dataManager *inputDataManager) createSample() [][]byte {
-	if dataManager.Name == "" {
-		dataManager.Name = "liver slide"
-	}
-	if dataManager.OpenerHash == "" {
-		dataManager.OpenerHash = dataManagerOpenerHash
-	}
-	if dataManager.OpenerStorageAddress == "" {
-		dataManager.OpenerStorageAddress = "https://toto/dataManager/42234/opener"
-	}
-	if dataManager.Type == "" {
-		dataManager.Type = "images"
-	}
-	if dataManager.DescriptionHash == "" {
-		dataManager.DescriptionHash = "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee"
-	}
-	if dataManager.DescriptionStorageAddress == "" {
-		dataManager.DescriptionStorageAddress = "https://toto/dataManager/42234/description"
-	}
-	dataManager.Permissions = "all"
-	args := append([][]byte{[]byte("registerDataManager")}, assetToJSON(dataManager))
-
-	return args
-}
-func (dataSample *inputDataSample) createSample() [][]byte {
-	if dataSample.Hashes == "" {
-		dataSample.Hashes = trainDataSampleHash1 + ", " + trainDataSampleHash2
-	}
-	if dataSample.DataManagerKeys == "" {
-		dataSample.DataManagerKeys = dataManagerOpenerHash
-	}
-	if dataSample.TestOnly == "" {
-		dataSample.TestOnly = "false"
-	}
-	args := append([][]byte{[]byte("registerDataSample")}, assetToJSON(dataSample))
-	return args
-}
-
-func (objective *inputObjective) createSample() [][]byte {
-	if objective.Name == "" {
-		objective.Name = "MSI classification"
-	}
-	if objective.DescriptionHash == "" {
-		objective.DescriptionHash = objectiveDescriptionHash
-	}
-	if objective.DescriptionStorageAddress == "" {
-		objective.DescriptionStorageAddress = "https://toto/objective/222/description"
-	}
-	if objective.MetricsName == "" {
-		objective.MetricsName = "accuracy"
-	}
-	if objective.MetricsHash == "" {
-		objective.MetricsHash = objectiveMetricsHash
-	}
-	if objective.MetricsStorageAddress == "" {
-		objective.MetricsStorageAddress = objectiveMetricsStorageAddress
-	}
-	if objective.TestDataset == "" {
-		objective.TestDataset = dataManagerOpenerHash + ":" + testDataSampleHash1 + ", " + testDataSampleHash2
-	}
-	objective.Permissions = "all"
-	args := append([][]byte{[]byte("registerObjective")}, assetToJSON(objective))
-	return args
-}
-
-func (algo *inputAlgo) createSample() [][]byte {
-	if algo.Name == "" {
-		algo.Name = algoName
-	}
-	if algo.Hash == "" {
-		algo.Hash = algoHash
-	}
-	if algo.StorageAddress == "" {
-		algo.StorageAddress = algoStorageAddress
-	}
-	if algo.DescriptionHash == "" {
-		algo.DescriptionHash = "e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dca"
-	}
-	if algo.DescriptionStorageAddress == "" {
-		algo.DescriptionStorageAddress = "https://toto/algo/222/description"
-	}
-	algo.Permissions = "all"
-	args := append([][]byte{[]byte("registerAlgo")}, assetToJSON(algo))
-	return args
-}
-
-func (traintuple *inputTraintuple) createSample() [][]byte {
-	if traintuple.AlgoKey == "" {
-		traintuple.AlgoKey = algoHash
-	}
-	if traintuple.InModels == "" {
-		traintuple.InModels = ""
-	}
-	if traintuple.ObjectiveKey == "" {
-		traintuple.ObjectiveKey = objectiveDescriptionHash
-	}
-	if traintuple.DataManagerKey == "" {
-		traintuple.DataManagerKey = dataManagerOpenerHash
-	}
-	if traintuple.DataSampleKeys == "" {
-		traintuple.DataSampleKeys = trainDataSampleHash1 + ", " + trainDataSampleHash2
-	}
-	args := append([][]byte{[]byte("createTraintuple")}, assetToJSON(traintuple))
-	return args
-}
-
-func (success *inputLogSuccessTrain) createSample() [][]byte {
-	if success.Key == "" {
-		success.Key = traintupleKey
-	}
-	if success.Log == "" {
-		success.Log = "no error, ah ah ah"
-	}
-	if success.Perf == 0 {
-		success.Perf = 0.9
-	}
-	if success.OutModel.Hash == "" {
-		success.OutModel.Hash = modelHash
-	}
-	if success.OutModel.StorageAddress == "" {
-		success.OutModel.StorageAddress = modelAddress
-	}
-
-	args := append([][]byte{[]byte("logSuccessTrain")}, assetToJSON(success))
-	return args
-}
-func (success *inputLogSuccessTest) createSample() [][]byte {
-	if success.Key == "" {
-		success.Key = traintupleKey
-	}
-	if success.Log == "" {
-		success.Log = "no error, ah ah ah"
-	}
-	if success.Perf == 0 {
-		success.Perf = 0.9
-	}
-
-	args := append([][]byte{[]byte("logSuccessTest")}, assetToJSON(success))
-	return args
-}
-func (fail *inputLogFailTrain) createSample() [][]byte {
-	if fail.Key == "" {
-		fail.Key = traintupleKey
-	}
-	if fail.Log == "" {
-		fail.Log = "man, did it failed!"
-	}
-
-	args := append([][]byte{[]byte("logFailTrain")}, assetToJSON(fail))
-	return args
-}
-func (fail *inputLogFailTest) createSample() [][]byte {
-	if fail.Key == "" {
-		fail.Key = traintupleKey
-	}
-	if fail.Log == "" {
-		fail.Log = "man, did it failed!"
-	}
-
-	args := append([][]byte{[]byte("logFailTest")}, assetToJSON(fail))
-	return args
-}
-func (testtuple *inputTesttuple) createSample() [][]byte {
-	if testtuple.TraintupleKey == "" {
-		testtuple.TraintupleKey = traintupleKey
-	}
-	args, _ := inputStructToBytes(testtuple)
-	args = append([][]byte{[]byte("createTesttuple")}, assetToJSON(testtuple))
-	return args
+func printInputStuct(buf io.Writer, fnName string, inputType reflect.Type) {
+	fmt.Fprintf(buf, "Smart contract: `%s`\n\n##### JSON Inputs:\n```go\n", fnName) // ", fnName)
+	prettyPrintStruct(buf, "", inputType)
+	fmt.Fprint(buf, "```\n")
 }
 
 func registerItem(t *testing.T, mockStub shim.MockStub, itemType string) (peer.Response, interface{}) {
@@ -293,6 +148,21 @@ func registerItem(t *testing.T, mockStub shim.MockStub, itemType string) (peer.R
 	return resp, inpTraintuple
 }
 
+func printResp(buf io.Writer, payload []byte) {
+	var toPrint []byte
+	if strings.HasPrefix(string(payload), "{") {
+		obj := map[string]interface{}{}
+		json.Unmarshal(payload, &obj)
+		toPrint, _ = json.MarshalIndent(obj, "", " ")
+	} else if strings.HasPrefix(string(payload), "[") {
+		obj := []map[string]interface{}{}
+		json.Unmarshal(payload, &obj)
+		toPrint, _ = json.MarshalIndent(obj, "", " ")
+	} else {
+		toPrint = payload
+	}
+	fmt.Fprintf(buf, "##### Command output:\n```json\n%s\n```\n", toPrint)
+}
 func TestPipeline(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
@@ -300,12 +170,12 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Add DataManager ------------")
 	inpDataManager := inputDataManager{}
-	printArgsNames(&out, "registerDataManager", getFieldNames(&inpDataManager))
+	printInputStuct(&out, "registerDataManager", reflect.TypeOf(inpDataManager))
 	args := inpDataManager.createSample()
 	printArgs(&out, args, "invoke")
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding dataManager with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 	// Get dataManager key from Payload
 	res := map[string]string{}
 	err := json.Unmarshal(resp.Payload, &res)
@@ -314,74 +184,74 @@ func TestPipeline(t *testing.T) {
 	dataManagerKey := res["key"]
 
 	fmt.Fprintln(&out, "#### ------------ Query DataManager From key ------------")
-	printArgsNames(&out, "queryDataManager", []string{"elementKey"})
+	printInputStuct(&out, "queryDataManager", reflect.TypeOf(inputHashe{}))
 	args = [][]byte{[]byte("queryDataManager"), keyToJSON(dataManagerKey)}
 	printArgs(&out, args, "queryDataManager")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying a dataManager with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Add test DataSample ------------")
 	inpDataSample := inputDataSample{
 		Hashes:   testDataSampleHash1 + ", " + testDataSampleHash2,
 		TestOnly: "true",
 	}
-	printArgsNames(&out, "registerDataSample", getFieldNames(&inpDataSample))
+	printInputStuct(&out, "registerDataSample", reflect.TypeOf(inpDataSample))
 	args = inpDataSample.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding test dataSample with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Add Objective ------------")
 	inpObjective := inputObjective{}
-	printArgsNames(&out, "registerObjective", getFieldNames(&inpObjective))
+	printInputStuct(&out, "registerObjective", reflect.TypeOf(inpObjective))
 	args = inpObjective.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding objective with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Add Algo ------------")
 	inpAlgo := inputAlgo{}
-	printArgsNames(&out, "registerAlgo", getFieldNames(&inpAlgo))
+	printInputStuct(&out, "registerAlgo", reflect.TypeOf(inpAlgo))
 	args = inpAlgo.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding algo with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Add Train DataSample ------------")
 	inpDataSample = inputDataSample{}
-	printArgsNames(&out, "registerDataSample", getFieldNames(&inpDataSample))
+	printInputStuct(&out, "registerDataSample", reflect.TypeOf(inpDataSample))
 	args = inpDataSample.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding train dataSample with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Query DataManagers ------------")
 	args = [][]byte{[]byte("queryDataManagers")}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying dataManager with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Query Objectives ------------")
 	args = [][]byte{[]byte("queryObjectives")}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying objective with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Add Traintuple ------------")
 	inpTraintuple := inputTraintuple{}
-	printArgsNames(&out, "createTraintuple", getFieldNames(&inpTraintuple))
+	printInputStuct(&out, "createTraintuple", reflect.TypeOf(inpTraintuple))
 	args = inpTraintuple.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 	// Get traintuple key from Payload
 	res = map[string]string{}
 	err = json.Unmarshal(resp.Payload, &res)
@@ -403,15 +273,14 @@ func TestPipeline(t *testing.T) {
 	trainWorker := traintuple.Dataset.Worker
 
 	fmt.Fprintln(&out, "#### ------------ Add Traintuple with inModel from previous traintuple ------------")
-	inpTraintuple = inputTraintuple{
-		InModels: traintupleKey,
-	}
-	printArgsNames(&out, "createTraintuple", getFieldNames(&inpTraintuple))
+	inpTraintuple = inputTraintuple{}
+	printInputStuct(&out, "createTraintuple", reflect.TypeOf(inpTraintuple))
+	inpTraintuple.InModels = traintupleKey
 	args = inpTraintuple.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 	res = map[string]string{}
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
@@ -423,55 +292,59 @@ func TestPipeline(t *testing.T) {
 		IndexName:  "traintuple~worker~status",
 		Attributes: trainWorker + ", todo",
 	}
+	printInputStuct(&out, "queryFilter", reflect.TypeOf(filter))
 	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple of worker with todo status - with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Training ------------")
+	printInputStuct(&out, "logStartTrain", reflect.TypeOf(inputHashe{}))
 	args = [][]byte{[]byte("logStartTrain"), keyToJSON(traintupleKey)}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when logging start training with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Training ------------")
 	inp := inputLogSuccessTrain{}
 	inp.Key = string(traintupleKey)
+	printInputStuct(&out, "logSucessTrain", reflect.TypeOf(inp))
 	args = inp.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when logging successful training with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Query Traintuple From key ------------")
+	printInputStuct(&out, "queryTraintuple", reflect.TypeOf(inputHashe{}))
 	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	printArgs(&out, args, "queryTraintuple")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Add Non-Certified Testtuple ------------")
 	inpTesttuple := inputTesttuple{
 		DataManagerKey: dataManagerOpenerHash,
 		DataSampleKeys: trainDataSampleHash1 + ", " + trainDataSampleHash2,
 	}
-	printArgsNames(&out, "createTesttuple", getFieldNames(&inpTesttuple))
+	printInputStuct(&out, "createTesttuple", reflect.TypeOf(inpTesttuple))
 	args = inpTesttuple.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding testtuple with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Add Certified Testtuple ------------")
 	inpTesttuple = inputTesttuple{}
-	printArgsNames(&out, "createTesttuple", getFieldNames(&inpTesttuple))
+	printInputStuct(&out, "createTesttuple", reflect.TypeOf(inpTesttuple))
 	args = inpTesttuple.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding testtuple with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 	// Get testtuple key from Payload
 	res = map[string]string{}
 	err = json.Unmarshal(resp.Payload, &res)
@@ -492,77 +365,82 @@ func TestPipeline(t *testing.T) {
 	testWorker := testtuple.Dataset.Worker
 
 	fmt.Fprintln(&out, "#### ------------ Add Testtuple with not done traintuple ------------")
-	inpTesttuple = inputTesttuple{
-		TraintupleKey: todoTraintupleKey,
-	}
-	printArgsNames(&out, "createTesttuple", getFieldNames(&inpTesttuple))
+	inpTesttuple = inputTesttuple{}
+	printInputStuct(&out, "createTesttuple", reflect.TypeOf(inpTesttuple))
+	inpTesttuple.TraintupleKey = todoTraintupleKey
 	args = inpTesttuple.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding testtuple with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Query Testtuples of worker with todo status ------------")
 	filter = inputQueryFilter{
 		IndexName:  "testtuple~worker~status",
 		Attributes: testWorker + ", todo",
 	}
+	printInputStuct(&out, "createTesttuple", reflect.TypeOf(filter))
 	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying testtuple of worker with todo status - with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Testing ------------")
+	printInputStuct(&out, "logStartTest", reflect.TypeOf(inputHashe{}))
 	args = [][]byte{[]byte("logStartTest"), keyToJSON(testtupleKey)}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when logging start testing with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Testing ------------")
 	success := inputLogSuccessTest{}
 	success.Key = testtupleKey
+	printInputStuct(&out, "logSucessTest", reflect.TypeOf(success))
 	args = success.createSample()
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when logging successful testing with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Query Testtuple from its key ------------")
+	printInputStuct(&out, "queryTesttuple", reflect.TypeOf(inputHashe{}))
 	args = [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
 	printArgs(&out, args, "queryTesttuple")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying testtuple with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Query all Testtuples ------------")
 	args = [][]byte{[]byte("queryTesttuples")}
 	printArgs(&out, args, "queryTesttuples")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying testtuple with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Query details about a model ------------")
+	printInputStuct(&out, "queryModelDetails", reflect.TypeOf(inputHashe{}))
 	args = [][]byte{[]byte("queryModelDetails"), keyToJSON(traintupleKey)}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying model details with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Query all models ------------")
 	args = [][]byte{[]byte("queryModels")}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying model tuples with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Query Dataset ------------")
+	printInputStuct(&out, "queryDataset", reflect.TypeOf(inputHashe{}))
 	args = [][]byte{[]byte("queryDataset"), keyToJSON(dataManagerOpenerHash)}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying dataset with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	// 3. add new data manager and dataSample
 	fmt.Fprintln(&out, "#### ------------ Update Data Sample with new data manager ------------")
@@ -575,18 +453,20 @@ func TestPipeline(t *testing.T) {
 		DataManagerKeys: newDataManagerKey,
 		Hashes:          trainDataSampleHash1,
 	}
+	printInputStuct(&out, "updateDataSample", reflect.TypeOf(updateData))
 	args = [][]byte{[]byte("updateDataSample"), assetToJSON(updateData)}
 	printArgs(&out, args, "invoke")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when updating data sample with new data manager with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	fmt.Fprintln(&out, "#### ------------ Query the new Dataset ------------")
+	printInputStuct(&out, "queryDataset", reflect.TypeOf(inputHashe{}))
 	args = [][]byte{[]byte("queryDataset"), keyToJSON(newDataManagerKey)}
 	printArgs(&out, args, "query")
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying dataset with status %d and message %s", resp.Status, resp.Message)
-	fmt.Fprintf(&out, ">  %s \n\n", string(resp.Payload))
+	printResp(&out, resp.Payload)
 
 	// Use the output to check the README file and if asked update it
 	doc := out.String()
