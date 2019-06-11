@@ -16,7 +16,7 @@ func TestAlgo(t *testing.T) {
 	inpAlgo := inputAlgo{
 		DescriptionHash: "aaa",
 	}
-	args := inpAlgo.createSample()
+	args := inpAlgo.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding algo with invalid hash, status %d and message %s", resp.Status, resp.Message)
 

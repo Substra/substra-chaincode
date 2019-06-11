@@ -98,7 +98,7 @@ func printInputStuct(buf io.Writer, fnName string, inputType reflect.Type) {
 func registerItem(t *testing.T, mockStub shim.MockStub, itemType string) (peer.Response, interface{}) {
 	// 1. add dataManager
 	inpDataManager := inputDataManager{}
-	args := inpDataManager.createSample()
+	args := inpDataManager.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding dataManager with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "dataManager" {
@@ -110,7 +110,7 @@ func registerItem(t *testing.T, mockStub shim.MockStub, itemType string) (peer.R
 		DataManagerKeys: dataManagerOpenerHash,
 		TestOnly:        "true",
 	}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding test dataSample with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "testDataset" {
@@ -118,7 +118,7 @@ func registerItem(t *testing.T, mockStub shim.MockStub, itemType string) (peer.R
 	}
 	// 3. add objective
 	inpObjective := inputObjective{}
-	args = inpObjective.createSample()
+	args = inpObjective.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding objective with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "objective" {
@@ -126,7 +126,7 @@ func registerItem(t *testing.T, mockStub shim.MockStub, itemType string) (peer.R
 	}
 	// 4. Add train dataSample
 	inpDataSample = inputDataSample{}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding train dataSample with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "trainDataset" {
@@ -134,7 +134,7 @@ func registerItem(t *testing.T, mockStub shim.MockStub, itemType string) (peer.R
 	}
 	// 5. Add algo
 	inpAlgo := inputAlgo{}
-	args = inpAlgo.createSample()
+	args = inpAlgo.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding algo with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "algo" {
@@ -142,7 +142,7 @@ func registerItem(t *testing.T, mockStub shim.MockStub, itemType string) (peer.R
 	}
 	// 6. Add traintuple
 	inpTraintuple := inputTraintuple{}
-	args = inpTraintuple.createSample()
+	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
 	return resp, inpTraintuple
@@ -181,7 +181,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Add DataManager ------------")
 	inpDataManager := inputDataManager{}
-	args := inpDataManager.createSample()
+	args := inpDataManager.createDefault()
 	resp := callAssertAndPrint("invoke", "registerDataManager", args, inpDataManager)
 	// Get dataManager key from Payload
 	res := map[string]string{}
@@ -199,22 +199,22 @@ func TestPipeline(t *testing.T) {
 		Hashes:   testDataSampleHash1 + ", " + testDataSampleHash2,
 		TestOnly: "true",
 	}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	callAssertAndPrint("invoke", "registerDataSample", args, inpDataSample)
 
 	fmt.Fprintln(&out, "#### ------------ Add Objective ------------")
 	inpObjective := inputObjective{}
-	args = inpObjective.createSample()
+	args = inpObjective.createDefault()
 	callAssertAndPrint("invoke", "registerObjective", args, inpObjective)
 
 	fmt.Fprintln(&out, "#### ------------ Add Algo ------------")
 	inpAlgo := inputAlgo{}
-	args = inpAlgo.createSample()
+	args = inpAlgo.createDefault()
 	callAssertAndPrint("invoke", "registerAlgo", args, inpAlgo)
 
 	fmt.Fprintln(&out, "#### ------------ Add Train DataSample ------------")
 	inpDataSample = inputDataSample{}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	callAssertAndPrint("invoke", "registerDataSample", args, inpDataSample)
 
 	fmt.Fprintln(&out, "#### ------------ Query DataManagers ------------")
@@ -227,7 +227,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Add Traintuple ------------")
 	inpTraintuple := inputTraintuple{}
-	args = inpTraintuple.createSample()
+	args = inpTraintuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTraintuple", args, inpTraintuple)
 	// Get traintuple key from Payload
 	res = map[string]string{}
@@ -252,7 +252,7 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintln(&out, "#### ------------ Add Traintuple with inModel from previous traintuple ------------")
 	inpTraintuple = inputTraintuple{}
 	inpTraintuple.InModels = traintupleKey
-	args = inpTraintuple.createSample()
+	args = inpTraintuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTraintuple", args, inpTraintuple)
 	printResp(&out, resp.Payload)
 	res = map[string]string{}
@@ -276,7 +276,7 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintln(&out, "#### ------------ Log Success Training ------------")
 	inp := inputLogSuccessTrain{}
 	inp.Key = string(traintupleKey)
-	args = inp.createSample()
+	args = inp.createDefault()
 	callAssertAndPrint("invoke", "logSucessTrain", args, inp)
 
 	fmt.Fprintln(&out, "#### ------------ Query Traintuple From key ------------")
@@ -288,12 +288,12 @@ func TestPipeline(t *testing.T) {
 		DataManagerKey: dataManagerOpenerHash,
 		DataSampleKeys: trainDataSampleHash1 + ", " + trainDataSampleHash2,
 	}
-	args = inpTesttuple.createSample()
+	args = inpTesttuple.createDefault()
 	callAssertAndPrint("invoke", "createTesttuple", args, inputHashe{})
 
 	fmt.Fprintln(&out, "#### ------------ Add Certified Testtuple ------------")
 	inpTesttuple = inputTesttuple{}
-	args = inpTesttuple.createSample()
+	args = inpTesttuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTesttuple", args, inpTesttuple)
 	// Get testtuple key from Payload
 	res = map[string]string{}
@@ -317,7 +317,7 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintln(&out, "#### ------------ Add Testtuple with not done traintuple ------------")
 	inpTesttuple = inputTesttuple{}
 	inpTesttuple.TraintupleKey = todoTraintupleKey
-	args = inpTesttuple.createSample()
+	args = inpTesttuple.createDefault()
 	callAssertAndPrint("invoke", "createTesttuple", args, inpTesttuple)
 
 	fmt.Fprintln(&out, "#### ------------ Query Testtuples of worker with todo status ------------")
@@ -335,7 +335,7 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintln(&out, "#### ------------ Log Success Testing ------------")
 	success := inputLogSuccessTest{}
 	success.Key = testtupleKey
-	args = success.createSample()
+	args = success.createDefault()
 	callAssertAndPrint("invoke", "logSucessTest", args, success)
 
 	fmt.Fprintln(&out, "#### ------------ Query Testtuple from its key ------------")
@@ -362,7 +362,7 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintln(&out, "#### ------------ Update Data Sample with new data manager ------------")
 	newDataManagerKey := "38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee"
 	inpDataManager = inputDataManager{OpenerHash: newDataManagerKey}
-	args = inpDataManager.createSample()
+	args = inpDataManager.createDefault()
 	mockStub.MockInvoke("42", args)
 	// associate a data sample with the old data manager with the updateDataSample
 	updateData := inputUpdateDataSample{
