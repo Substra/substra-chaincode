@@ -86,7 +86,7 @@ Smart contract: `queryDataManager`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode queryDataManager -n mycc -c '{"Args":["queryDataManager","{\"key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["queryDataManager","{\"key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -315,6 +315,12 @@ peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd
  "key": "46ab1f11d49795f41e847e29e30fbd511a07dc231cf6991aa6da05cdc4a87cce"
 }
 ```
+##### Command output:
+```json
+{
+ "key": "46ab1f11d49795f41e847e29e30fbd511a07dc231cf6991aa6da05cdc4a87cce"
+}
+```
 #### ------------ Query Traintuples of worker with todo status ------------
 Smart contract: `queryFilter`
 
@@ -461,7 +467,7 @@ Smart contract: `queryTraintuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode queryTraintuple -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -508,10 +514,7 @@ Smart contract: `createTesttuple`
 ##### JSON Inputs:
 ```go
 {
- "traintupleKey": string (required,len=64,hexadecimal),
- "dataManagerKey": string (omitempty,len=64,hexadecimal),
- "dataSampleKeys": string (omitempty),
- "tag": string (omitempty,lte=64),
+ "key": string (required,len=64,hexadecimal),
 }
 ```
 ##### Command peer example:
@@ -569,7 +572,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"traintupleKey\"
 }
 ```
 #### ------------ Query Testtuples of worker with todo status ------------
-Smart contract: `createTesttuple`
+Smart contract: `queryFilter`
 
 ##### JSON Inputs:
 ```go
@@ -770,7 +773,7 @@ Smart contract: `queryTesttuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode queryTesttuple -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"6581232b890c5f80522ca480b815d3340dffde8924d863bfd1dfedb1841a2d53\"}"]}' -C myc
+peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"6581232b890c5f80522ca480b815d3340dffde8924d863bfd1dfedb1841a2d53\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -813,7 +816,7 @@ peer chaincode queryTesttuple -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"
 #### ------------ Query all Testtuples ------------
 ##### Command peer example:
 ```bash
-peer chaincode queryTesttuples -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
+peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
 ```
 ##### Command output:
 ```json
