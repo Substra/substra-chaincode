@@ -11,7 +11,7 @@ import (
 // For now, ok for everything. Later returns if the requester has permission to see it
 func queryFilter(stub shim.ChaincodeStubInterface, args []string) (elements []map[string]interface{}, err error) {
 	inp := inputQueryFilter{}
-	AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
 		return
 	}

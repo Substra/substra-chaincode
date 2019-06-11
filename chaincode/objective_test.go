@@ -14,7 +14,7 @@ func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 	mockStub := shim.NewMockStub("substra", scc)
 
 	inpObjective := inputObjective{TestDataset: ":"}
-	args := inpObjective.createSample()
+	args := inpObjective.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
 }
@@ -24,27 +24,27 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 
 	// Add a dataManager and some dataSample successfuly
 	inpDataManager := inputDataManager{}
-	args := inpDataManager.createSample()
+	args := inpDataManager.createDefault()
 	mockStub.MockInvoke("42", args)
 	inpDataSample := inputDataSample{
 		Hashes:          testDataSampleHash1,
 		DataManagerKeys: dataManagerOpenerHash,
 		TestOnly:        "true",
 	}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	mockStub.MockInvoke("42", args)
 	inpDataSample = inputDataSample{
 		Hashes:          testDataSampleHash2,
 		DataManagerKeys: dataManagerOpenerHash,
 		TestOnly:        "true",
 	}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	r := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, r.Status)
 
 	// Fail to insert the objective
 	inpObjective := inputObjective{TestDataset: testDataSampleHash1 + ":" + testDataSampleHash2}
-	args = inpObjective.createSample()
+	args = inpObjective.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status, "status should indicate an error since the dataManager key is a dataSample key")
 }
@@ -56,13 +56,13 @@ func TestObjective(t *testing.T) {
 	inpObjective := inputObjective{
 		DescriptionHash: "aaa",
 	}
-	args := inpObjective.createSample()
+	args := inpObjective.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Add objective with unexisting test dataSample
 	inpObjective = inputObjective{}
-	args = inpObjective.createSample()
+	args = inpObjective.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding objective with unexisting test dataSample, status %d and message %s", resp.Status, resp.Message)
 

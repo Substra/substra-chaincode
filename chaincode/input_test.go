@@ -1,6 +1,6 @@
 package main
 
-func (dataManager *inputDataManager) createSample() [][]byte {
+func (dataManager *inputDataManager) createDefault() [][]byte {
 	if dataManager.Name == "" {
 		dataManager.Name = "liver slide"
 	}
@@ -24,7 +24,7 @@ func (dataManager *inputDataManager) createSample() [][]byte {
 
 	return args
 }
-func (dataSample *inputDataSample) createSample() [][]byte {
+func (dataSample *inputDataSample) createDefault() [][]byte {
 	if dataSample.Hashes == "" {
 		dataSample.Hashes = trainDataSampleHash1 + ", " + trainDataSampleHash2
 	}
@@ -38,7 +38,7 @@ func (dataSample *inputDataSample) createSample() [][]byte {
 	return args
 }
 
-func (objective *inputObjective) createSample() [][]byte {
+func (objective *inputObjective) createDefault() [][]byte {
 	if objective.Name == "" {
 		objective.Name = "MSI classification"
 	}
@@ -65,7 +65,7 @@ func (objective *inputObjective) createSample() [][]byte {
 	return args
 }
 
-func (algo *inputAlgo) createSample() [][]byte {
+func (algo *inputAlgo) createDefault() [][]byte {
 	if algo.Name == "" {
 		algo.Name = algoName
 	}
@@ -86,7 +86,7 @@ func (algo *inputAlgo) createSample() [][]byte {
 	return args
 }
 
-func (traintuple *inputTraintuple) createSample() [][]byte {
+func (traintuple *inputTraintuple) createDefault() [][]byte {
 	if traintuple.AlgoKey == "" {
 		traintuple.AlgoKey = algoHash
 	}
@@ -106,7 +106,7 @@ func (traintuple *inputTraintuple) createSample() [][]byte {
 	return args
 }
 
-func (success *inputLogSuccessTrain) createSample() [][]byte {
+func (success *inputLogSuccessTrain) createDefault() [][]byte {
 	if success.Key == "" {
 		success.Key = traintupleKey
 	}
@@ -126,7 +126,7 @@ func (success *inputLogSuccessTrain) createSample() [][]byte {
 	args := append([][]byte{[]byte("logSuccessTrain")}, assetToJSON(success))
 	return args
 }
-func (success *inputLogSuccessTest) createSample() [][]byte {
+func (success *inputLogSuccessTest) createDefault() [][]byte {
 	if success.Key == "" {
 		success.Key = traintupleKey
 	}
@@ -140,7 +140,7 @@ func (success *inputLogSuccessTest) createSample() [][]byte {
 	args := append([][]byte{[]byte("logSuccessTest")}, assetToJSON(success))
 	return args
 }
-func (fail *inputLogFailTrain) createSample() [][]byte {
+func (fail *inputLogFailTrain) createDefault() [][]byte {
 	if fail.Key == "" {
 		fail.Key = traintupleKey
 	}
@@ -151,7 +151,7 @@ func (fail *inputLogFailTrain) createSample() [][]byte {
 	args := append([][]byte{[]byte("logFailTrain")}, assetToJSON(fail))
 	return args
 }
-func (fail *inputLogFailTest) createSample() [][]byte {
+func (fail *inputLogFailTest) createDefault() [][]byte {
 	if fail.Key == "" {
 		fail.Key = traintupleKey
 	}
@@ -162,7 +162,7 @@ func (fail *inputLogFailTest) createSample() [][]byte {
 	args := append([][]byte{[]byte("logFailTest")}, assetToJSON(fail))
 	return args
 }
-func (testtuple *inputTesttuple) createSample() [][]byte {
+func (testtuple *inputTesttuple) createDefault() [][]byte {
 	if testtuple.TraintupleKey == "" {
 		testtuple.TraintupleKey = traintupleKey
 	}

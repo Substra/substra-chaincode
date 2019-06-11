@@ -15,7 +15,7 @@ func TestJsonInputsDataManager(t *testing.T) {
 	mockStub := shim.NewMockStub("substra", scc)
 
 	inpDataManager := inputDataManager{}
-	inpDataManager.createSample()
+	inpDataManager.createDefault()
 	payload, err := json.Marshal(inpDataManager)
 	assert.NoError(t, err)
 	args := [][]byte{[]byte("registerDataManager"), payload}
@@ -30,7 +30,7 @@ func TestDataManager(t *testing.T) {
 	inpDataManager := inputDataManager{
 		OpenerHash: "aaa",
 	}
-	args := inpDataManager.createSample()
+	args := inpDataManager.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding dataManager with invalid opener hash, status %d and message %s", resp.Status, resp.Message)
 	// Properly add dataManager
@@ -99,16 +99,16 @@ func TestGetTestDatasetKeys(t *testing.T) {
 
 	// Input DataManager
 	inpDataManager := inputDataManager{}
-	args := inpDataManager.createSample()
+	args := inpDataManager.createDefault()
 	mockStub.MockInvoke("42", args)
 
 	// Add both train and test dataSample
 	inpDataSample := inputDataSample{Hashes: testDataSampleHash1}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	mockStub.MockInvoke("42", args)
 	inpDataSample.Hashes = testDataSampleHash2
 	inpDataSample.TestOnly = "true"
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	mockStub.MockInvoke("42", args)
 
 	// Querry the DataManager
@@ -132,13 +132,13 @@ func TestDataset(t *testing.T) {
 	inpDataSample := inputDataSample{
 		Hashes: "aaa",
 	}
-	args := inpDataSample.createSample()
+	args := inpDataSample.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding dataSample with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Add dataSample with unexiting dataManager
 	inpDataSample = inputDataSample{}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding dataSample with unexisting dataManager, status %d and message %s", resp.Status, resp.Message)
 	// TODO Would be nice to check failure when adding dataSample to a dataManager owned by a different people
@@ -146,11 +146,11 @@ func TestDataset(t *testing.T) {
 	// Properly add dataSample
 	// 1. add associated dataManager
 	inpDataManager := inputDataManager{}
-	args = inpDataManager.createSample()
+	args = inpDataManager.createDefault()
 	mockStub.MockInvoke("42", args)
 	// 2. add dataSample
 	inpDataSample = inputDataSample{}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding dataSample, status %d and message %s", resp.Status, resp.Message)
 	// check payload correspond to input dataSample keys
