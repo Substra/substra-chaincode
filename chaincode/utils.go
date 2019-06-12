@@ -218,7 +218,7 @@ func getElementsPayload(stub shim.ChaincodeStubInterface, elementsKeys []string)
 func AssetFromJSON(args string, asset interface{}) error {
 	err := json.Unmarshal([]byte(args), &asset)
 	if err != nil {
-		return fmt.Errorf("Problem when reading json arg : %s, errror is : %s", args, err.Error())
+		return fmt.Errorf("Problem when reading json arg : %s, error is : %s", args, err.Error())
 	}
 	return nil
 }
