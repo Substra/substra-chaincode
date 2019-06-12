@@ -46,7 +46,7 @@ type Traintuple struct {
 	AlgoKey      string     `json:"algoKey"`
 	Creator      string     `json:"creator"`
 	Dataset      *Dataset   `json:"dataset"`
-	FLtask       string     `json:"fltask"`
+	FLTask       string     `json:"fltask"`
 	InModelKeys  []string   `json:"inModels"`
 	Log          string     `json:"log"`
 	ObjectiveKey string     `json:"objectiveKey"`

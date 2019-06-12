@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -14,24 +13,25 @@ import (
 )
 
 func TestSpecifiqArgSeq(t *testing.T) {
+	t.SkipNow()
 	// This test is a POC and a example of a test base on the output of the log
 	// parameters directly copied in a test. It can be realy usesul for debugging
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
-	fmt.Println(logger.IsEnabledFor(shim.LogNotice))
 	argSeq := [][]string{
-		[]string{"registerDataManager", "Titanic", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223", "http://owkin.substrabac:8000/data_manager/17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223/opener/", "csv", "48c89276972363250ea949c32809020e9d7fda786547a570bcaecedcc5092627", "http://owkin.substrabac:8000/data_manager/17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223/description/", "", "all"},
-		[]string{"registerDataSample", "47f9af29d34d737acfb0e37d93bfa650979292297ed263e8536ef3d13f70c83e,df94060511117dd25da1d2b1846f9be17340128233c8b24694d5e780d909b22c,50b7a4b4f2541674958fd09a061276862e1e2ea4dbdd0e1af06e70051804e33b,1befb03ceed3ab7ec9fa4bebe9b681bbc7725a402e03f9e64f9f1677cf619183", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223", "false"},
-		[]string{"registerDataSample", "1a8532bd84d5ef785a4abe503a12bc7040c666a9f6264f982aa4ad77ff7217a8", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223", "true"},
-		[]string{"registerObjective", "Titanic: Machine Learning From Disaster", "1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb", "http://owkin.substrabac:8000/objective/1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb/description/", "accuracy", "0bc13ad2e481c1a52959a228984bbee2e31271d567ea55a458e9ae92d481fedb", "http://owkin.substrabac:8000/objective/1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb/metrics/", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223:1a8532bd84d5ef785a4abe503a12bc7040c666a9f6264f982aa4ad77ff7217a8", "all"},
-		[]string{"registerAlgo", "Constant death predictor", "10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9", "http://owkin.substrabac:8000/algo/10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9/file/", "1dae14e339c94ae04cc8846d353c07c8de96a38d6c5b5ee4486c4102ff011450", "http://owkin.substrabac:8000/algo/10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9/description/", "all"},
-		[]string{"createTraintuple", "10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9", "1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb", "", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223", "47f9af29d34d737acfb0e37d93bfa650979292297ed263e8536ef3d13f70c83e,df94060511117dd25da1d2b1846f9be17340128233c8b24694d5e780d909b22c,50b7a4b4f2541674958fd09a061276862e1e2ea4dbdd0e1af06e70051804e33b", "", "", "titanic v0"},
-		[]string{"createTesttuple", "8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223", "1befb03ceed3ab7ec9fa4bebe9b681bbc7725a402e03f9e64f9f1677cf619183", "titanic v0"},
-		[]string{"createTesttuple", "8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4", "", "", ""},
-		[]string{"logStartTrain", "8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4"},
-		[]string{"logSuccessTrain", "8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4", "6f6f2c318ff95ea7de9e4c01395b78b9217ddb134279275dae7842e7d4eb4c16, http://owkin.substrabac:8000/model/6f6f2c318ff95ea7de9e4c01395b78b9217ddb134279275dae7842e7d4eb4c16/file/", "0.6161048689138576", "Train - CPU:119.66 % - Mem:0.04 GB - GPU:0.00 % - GPU Mem:0.00 GB; "},
-		[]string{"logStartTest", "81bad50d76898ba6ea5af9d0a4816726bd46b947730a1bc2dd1d6755e8ab682b"},
-		[]string{"logSuccessTest", "81bad50d76898ba6ea5af9d0a4816726bd46b947730a1bc2dd1d6755e8ab682b", "0.6179775280898876", "Test - CPU:0.00 % - Mem:0.00 GB - GPU:0.00 % - GPU Mem:0.00 GB; "},
+		// []string{"registerDataManager", "Titanic", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223", "http://owkin.substrabac:8000/data_manager/17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223/opener/", "csv", "48c89276972363250ea949c32809020e9d7fda786547a570bcaecedcc5092627", "http://owkin.substrabac:8000/data_manager/17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223/description/", "", "all"},
+		[]string{"registerDataManager", "\"{\\\"Name\\\":\\\"Titanic\\\",\\\"OpenerHash\\\":\\\"17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223\\\",\\\"OpenerStorageAddress\\\":\\\"http://owkin.substrabac:8000/data_manager/17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223/opener/\\\",\\\"Type\\\":\\\"csv\\\",\\\"DescriptionHash\\\":\\\"48c89276972363250ea949c32809020e9d7fda786547a570bcaecedcc5092627\\\",\\\"DescriptionStorageAddress\\\":\\\"http://owkin.substrabac:8000/data_manager/17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223/description/\\\",\\\"ObjectiveKey\\\":\\\"\\\",\\\"Permissions\\\":\\\"all\\\"}\""},
+		[]string{"registerDataSample", "\"{\\\"Hashes\\\":\\\"47f9af29d34d737acfb0e37d93bfa650979292297ed263e8536ef3d13f70c83e,df94060511117dd25da1d2b1846f9be17340128233c8b24694d5e780d909b22c,50b7a4b4f2541674958fd09a061276862e1e2ea4dbdd0e1af06e70051804e33b,1befb03ceed3ab7ec9fa4bebe9b681bbc7725a402e03f9e64f9f1677cf619183\\\",\\\"DataManagerKeys\\\":\\\"17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223\\\",\\\"TestOnly\\\":\\\"false\\\"}\""},
+		[]string{"registerDataSample", "\"{\\\"Hashes\\\":\\\"1a8532bd84d5ef785a4abe503a12bc7040c666a9f6264f982aa4ad77ff7217a8\\\",\\\"DataManagerKeys\\\":\\\"17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223\\\",\\\"TestOnly\\\":\\\"true\\\"}\""},
+		[]string{"registerObjective", "\"{\\\"Name\\\":\\\"Titanic: Machine Learning From Disaster\\\",\\\"DescriptionHash\\\":\\\"1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb\\\",\\\"DescriptionStorageAddress\\\":\\\"http://owkin.substrabac:8000/objective/1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb/description/\\\",\\\"MetricsName\\\":\\\"accuracy\\\",\\\"MetricsHash\\\":\\\"0bc13ad2e481c1a52959a228984bbee2e31271d567ea55a458e9ae92d481fedb\\\",\\\"MetricsStorageAddress\\\":\\\"http://owkin.substrabac:8000/objective/1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb/metrics/\\\",\\\"TestDataset\\\":\\\"17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223:1a8532bd84d5ef785a4abe503a12bc7040c666a9f6264f982aa4ad77ff7217a8\\\",\\\"Permissions\\\":\\\"all\\\"}\""},
+		[]string{"registerAlgo", "\"{\\\"Name\\\":\\\"Constant death predictor\\\",\\\"Hash\\\":\\\"10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9\\\",\\\"StorageAddress\\\":\\\"http://owkin.substrabac:8000/algo/10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9/file/\\\",\\\"DescriptionHash\\\":\\\"1dae14e339c94ae04cc8846d353c07c8de96a38d6c5b5ee4486c4102ff011450\\\",\\\"DescriptionStorageAddress\\\":\\\"http://owkin.substrabac:8000/algo/10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9/description/\\\",\\\"Permissions\\\":\\\"all\\\"}\""},
+		[]string{"createTraintuple", "\"{\\\"AlgoKey\\\":\\\"10a16f1b96beb3c07550103a9f15b3c2a77b15046cc7c70b762606590fb99de9\\\",\\\"ObjectiveKey\\\":\\\"1158d2f5c0cf9f80155704ca0faa28823b145b42ebdba2ca38bd726a1377e1cb\\\",\\\"InModels\\\":\\\"\\\",\\\"DataManagerKey\\\":\\\"17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223\\\",\\\"DataSampleKeys\\\":\\\"47f9af29d34d737acfb0e37d93bfa650979292297ed263e8536ef3d13f70c83e,df94060511117dd25da1d2b1846f9be17340128233c8b24694d5e780d909b22c,50b7a4b4f2541674958fd09a061276862e1e2ea4dbdd0e1af06e70051804e33b\\\",\\\"FLTask\\\":\\\"\\\",\\\"Rank\\\":\\\"\\\",\\\"Tag\\\":\\\"titanic v0\\\"}\""},
+		[]string{"createTesttuple", "\"{\\\"TraintupleKey\\\":\\\"8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4\\\",\\\"DataManagerKey\\\":\\\"17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223\\\",\\\"DataSampleKeys\\\":\\\"1befb03ceed3ab7ec9fa4bebe9b681bbc7725a402e03f9e64f9f1677cf619183\\\",\\\"Tag\\\":\\\"titanic v0\\\"}\""},
+		[]string{"createTesttuple", "\"{\\\"TraintupleKey\\\":\\\"8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4\\\",\\\"DataManagerKey\\\":\\\"\\\",\\\"DataSampleKeys\\\":\\\"\\\",\\\"Tag\\\":\\\"\\\"}\""},
+		[]string{"logStartTrain", "\"{\\\"Key\\\":\\\"8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4\\\"}\""},
+		[]string{"logSuccessTrain", "\"{\\\"Key\\\":\\\"8daf7d448d0318dd8b06648cf32dde35f36171b308dec8675c8ff8e718acdac4\\\",\\\"Log\\\":\\\"Train - CPU:119.66 % - Mem:0.04 GB - GPU:0.00 % - GPU Mem:0.00 GB; \\\",\\\"OutModel\\\":{\\\"Hash\\\":\\\"6f6f2c318ff95ea7de9e4c01395b78b9217ddb134279275dae7842e7d4eb4c16\\\",\\\"StorageAddress\\\":\\\"http://owkin.substrabac:8000/model/6f6f2c318ff95ea7de9e4c01395b78b9217ddb134279275dae7842e7d4eb4c16/file/\\\"},\\\"Perf\\\":0.61610484}\""},
+		[]string{"logStartTest", "\"{\\\"Key\\\":\\\"81bad50d76898ba6ea5af9d0a4816726bd46b947730a1bc2dd1d6755e8ab682b\\\"}\""},
+		[]string{"logSuccessTest", "\"{\\\"Key\\\":\\\"81bad50d76898ba6ea5af9d0a4816726bd46b947730a1bc2dd1d6755e8ab682b\\\",\\\"Log\\\":\\\"Test - CPU:0.00 % - Mem:0.00 GB - GPU:0.00 % - GPU Mem:0.00 GB; \\\",\\\"Perf\\\":0.6179775}\""},
 	}
 	for _, argList := range argSeq {
 		args := [][]byte{}
@@ -39,9 +39,10 @@ func TestSpecifiqArgSeq(t *testing.T) {
 			args = append(args, []byte(arg))
 		}
 		resp := mockStub.MockInvoke("42", args)
-		assert.EqualValues(t, 200, resp.Status, resp.Message)
+		assert.EqualValues(t, 200, resp.Status, resp.Message, argList[0])
 	}
 }
+
 func TestTraintupleWithNoTestDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
@@ -49,21 +50,21 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 
 	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
 	inpObjective := inputObjective{DescriptionHash: objHash, TestDataset: ":"}
-	args := inpObjective.createSample()
+	args := inpObjective.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
 
 	inpAlgo := inputAlgo{}
-	args = inpAlgo.createSample()
+	args = inpAlgo.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
 	inpTraintuple := inputTraintuple{ObjectiveKey: objHash}
-	args = inpTraintuple.createSample()
+	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding traintuple without test dataset it should work: ", resp.Message)
 
-	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
 }
@@ -76,14 +77,14 @@ func TestTagTuple(t *testing.T) {
 	noTag := "This is not a tag because it's waaaaaaaaaaaaaaaayyyyyyyyyyyyyyyyyyyyyyy too long."
 
 	inpTraintuple := inputTraintuple{Tag: noTag}
-	args := inpTraintuple.createSample()
+	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status, resp.Message)
 
 	tag := "This is a tag"
 
 	inpTraintuple = inputTraintuple{Tag: tag}
-	args = inpTraintuple.createSample()
+	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message)
 
@@ -96,7 +97,7 @@ func TestTagTuple(t *testing.T) {
 	assert.EqualValues(t, tag, traintuples[0].Tag)
 
 	inpTesttuple := inputTesttuple{Tag: tag}
-	args = inpTesttuple.createSample()
+	args = inpTesttuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message)
 
@@ -108,7 +109,11 @@ func TestTagTuple(t *testing.T) {
 	assert.Len(t, testtuples, 1, "there should be one traintuple")
 	assert.EqualValues(t, tag, testtuples[0].Tag)
 
-	args = [][]byte{[]byte("queryFilter"), []byte("testtuple~tag"), []byte(tag)}
+	filter := inputQueryFilter{
+		IndexName:  "testtuple~tag",
+		Attributes: tag,
+	}
+	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message)
 	filtertuples := []outputTesttuple{}
@@ -143,27 +148,27 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 		getOutputTraintuple(mockStub, traintupleKey)
 	})
 }
-func TestTraintupleFLtaskCreation(t *testing.T) {
+func TestTraintupleFLTaskCreation(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
 	// Add dataManager, dataSample and algo
 	registerItem(t, *mockStub, "algo")
 
-	inpTraintuple := inputTraintuple{FLtask: "someFLtask"}
-	args := inpTraintuple.createSample()
+	inpTraintuple := inputTraintuple{FLTask: "someFLTask"}
+	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 500, resp.Status, "should failed for missing rank")
-	require.Contains(t, resp.Message, "invalit inputs, a FLtask should have a rank", "invalid error message")
+	require.Contains(t, resp.Message, "invalit inputs, a FLTask should have a rank", "invalid error message")
 
 	inpTraintuple = inputTraintuple{Rank: "1"}
-	args = inpTraintuple.createSample()
+	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 500, resp.Status, "should failed for invalid rank")
-	require.Contains(t, resp.Message, "invalid inputs, a new FLtask should have a rank 0")
+	require.Contains(t, resp.Message, "invalid inputs, a new FLTask should have a rank 0")
 
 	inpTraintuple = inputTraintuple{Rank: "0"}
-	args = inpTraintuple.createSample()
+	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 	res := map[string]string{}
@@ -174,13 +179,13 @@ func TestTraintupleFLtaskCreation(t *testing.T) {
 	require.EqualValues(t, key, traintupleKey)
 
 	inpTraintuple = inputTraintuple{Rank: "0"}
-	args = inpTraintuple.createSample()
+	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	require.EqualValues(t, 500, resp.Status, "should failed for existing FLtask")
+	require.EqualValues(t, 500, resp.Status, "should failed for existing FLTask")
 	require.Contains(t, resp.Message, "this traintuple already exists")
 }
 
-func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
+func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
@@ -188,7 +193,7 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 	registerItem(t, *mockStub, "algo")
 
 	inpTraintuple := inputTraintuple{Rank: "0"}
-	args := inpTraintuple.createSample()
+	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 	res := map[string]string{}
@@ -200,8 +205,8 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 	inpTraintuple = inputTraintuple{
 		InModels: key,
 		Rank:     "0",
-		FLtask:   key}
-	args = inpTraintuple.createSample()
+		FLTask:   key}
+	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status, resp.Message, "should failed to add a traintuple of the same rank")
 
@@ -209,19 +214,19 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 	inpTraintuple = inputTraintuple{
 		InModels: key,
 		Rank:     "1",
-		FLtask:   "notarealone"}
-	args = inpTraintuple.createSample()
+		FLTask:   "notarealone"}
+	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 500, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting FLtask")
+	assert.EqualValues(t, 500, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting FLTask")
 
-	// Succesfully add a traintuple to the same FLtask
+	// Succesfully add a traintuple to the same FLTask
 	inpTraintuple = inputTraintuple{
 		InModels: key,
 		Rank:     "1",
-		FLtask:   key}
-	args = inpTraintuple.createSample()
+		FLTask:   key}
+	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same FLtask")
+	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same FLTask")
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
@@ -229,7 +234,7 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 	// Add new algo to check all fltask algo consistency
 	newAlgoHash := strings.Replace(algoHash, "a", "b", 1)
 	inpAlgo := inputAlgo{Hash: newAlgoHash}
-	args = inpAlgo.createSample()
+	args = inpAlgo.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 
@@ -237,8 +242,8 @@ func TestTraintupleMultipleFLtaskCreations(t *testing.T) {
 		AlgoKey:  newAlgoHash,
 		InModels: ttkey,
 		Rank:     "2",
-		FLtask:   key}
-	args = inpTraintuple.createSample()
+		FLTask:   key}
+	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status, resp.Message, "sould fail for it doesn't have the same algo key")
 	assert.Contains(t, resp.Message, "does not have the same algo key")
@@ -258,13 +263,15 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	traintupleKey := res["key"]
 
 	// Mark the traintuple as failed
-	args := [][]byte{[]byte("logFailTrain"), []byte(traintupleKey), []byte("pas glop")}
+	fail := inputLogFailTrain{}
+	fail.Key = traintupleKey
+	args := fail.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "should be able to log traintuple as failed")
 
 	// Fail to add a testtuple to this failed traintuple
 	inpTesttuple := inputTesttuple{}
-	args = inpTesttuple.createSample()
+	args = inpTesttuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status, "status should show an error since the traintuple is failed")
 	assert.Contains(t, resp.Message, "could not register this testtuple")
@@ -282,7 +289,7 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 	inpTesttuple := inputTesttuple{
 		DataSampleKeys: testDataSampleHash2 + "," + testDataSampleHash1,
 		DataManagerKey: dataManagerOpenerHash}
-	args := inpTesttuple.createSample()
+	args := inpTesttuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 
@@ -304,13 +311,13 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 
 	// Add a certified testtuple
 	inpTesttuple1 := inputTesttuple{}
-	args := inpTesttuple1.createSample()
+	args := inpTesttuple1.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 
 	// Fail to add an incomplete uncertified testtuple
 	inpTesttuple2 := inputTesttuple{DataSampleKeys: trainDataSampleHash1}
-	args = inpTesttuple2.createSample()
+	args = inpTesttuple2.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status)
 	assert.Contains(t, resp.Message, "invalid input: dataManagerKey and dataSampleKey should be provided together")
@@ -319,7 +326,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	inpTesttuple3 := inputTesttuple{
 		DataSampleKeys: trainDataSampleHash1 + "," + trainDataSampleHash2,
 		DataManagerKey: dataManagerOpenerHash}
-	args = inpTesttuple3.createSample()
+	args = inpTesttuple3.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 
@@ -327,7 +334,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	inpTesttuple4 := inputTesttuple{
 		DataSampleKeys: trainDataSampleHash2 + "," + trainDataSampleHash1,
 		DataManagerKey: dataManagerOpenerHash}
-	args = inpTesttuple4.createSample()
+	args = inpTesttuple4.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 500, resp.Status)
 	assert.Contains(t, resp.Message, "this testtuple already exists")
@@ -341,13 +348,13 @@ func TestTraintuple(t *testing.T) {
 	inpTraintuple := inputTraintuple{
 		AlgoKey: "aaa",
 	}
-	args := inpTraintuple.createSample()
+	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Add traintuple with unexisting algo
 	inpTraintuple = inputTraintuple{}
-	args = inpTraintuple.createSample()
+	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding traintuple with unexisting algo, status %d and message %s", resp.Status, resp.Message)
 
@@ -361,7 +368,7 @@ func TestTraintuple(t *testing.T) {
 	assert.Contains(t, res, "key")
 	traintupleKey := res["key"]
 	// Query traintuple from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 	out := outputTraintuple{}
@@ -409,13 +416,17 @@ func TestTraintuple(t *testing.T) {
 	inpWaitingTraintuple := inputTraintuple{
 		InModels: string(traintupleKey),
 	}
-	args = inpWaitingTraintuple.createSample()
+	args = inpWaitingTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
 	//waitingTraintupleKey := string(resp.Payload)
 
 	// Query traintuple with status todo and worker as trainworker and check consistency
-	args = [][]byte{[]byte("queryFilter"), []byte("traintuple~worker~status"), []byte(worker + ", todo")}
+	filter := inputQueryFilter{
+		IndexName:  "traintuple~worker~status",
+		Attributes: worker + ", todo",
+	}
+	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple of worker with todo status - status %d and message %s", resp.Status, resp.Message)
 	err = json.Unmarshal(resp.Payload, &queryTraintuples)
@@ -423,18 +434,22 @@ func TestTraintuple(t *testing.T) {
 	assert.Exactly(t, out, queryTraintuples[0])
 
 	// Update status and check consistency
-	perf := "0.9"
-	log := "no error, ah ah ah"
+	success := inputLogSuccessTrain{}
+	success.Key = traintupleKey
+
 	argsSlice := [][][]byte{
-		[][]byte{[]byte("logStartTrain"), []byte(traintupleKey)},
-		[][]byte{[]byte("logSuccessTrain"), []byte(traintupleKey), []byte(modelHash + ", " + modelAddress),
-			[]byte(perf), []byte(log)},
+		[][]byte{[]byte("logStartTrain"), keyToJSON(traintupleKey)},
+		success.createDefault(),
 	}
 	traintupleStatus := []string{"doing", "done"}
 	for i := range traintupleStatus {
 		resp = mockStub.MockInvoke("42", argsSlice[i])
-		assert.EqualValuesf(t, 200, resp.Status, "when logging start %s with message %s", traintupleStatus[i], resp.Message)
-		args = [][]byte{[]byte("queryFilter"), []byte("traintuple~worker~status"), []byte(worker + ", " + traintupleStatus[i])}
+		require.EqualValuesf(t, 200, resp.Status, "when logging start %s with message %s", traintupleStatus[i], resp.Message)
+		filter := inputQueryFilter{
+			IndexName:  "traintuple~worker~status",
+			Attributes: worker + ", " + traintupleStatus[i],
+		}
+		args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 		resp = mockStub.MockInvoke("42", args)
 		assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple of worker with %s status - message %s", traintupleStatus[i], resp.Message)
 		sPayload := make([]map[string]interface{}, 1)
@@ -444,13 +459,13 @@ func TestTraintuple(t *testing.T) {
 	}
 
 	// Query Traintuple From key
-	args = [][]byte{[]byte("queryTraintuple"), []byte(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple with status %d and message %s", resp.Status, resp.Message)
 	endTraintuple := outputTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
-	expected.Dataset.Perf = 0.9
-	expected.Log = log
+	expected.Dataset.Perf = success.Perf
+	expected.Log = success.Log
 	expected.OutModel = &HashDress{
 		Hash:           modelHash,
 		StorageAddress: modelAddress}
@@ -458,7 +473,7 @@ func TestTraintuple(t *testing.T) {
 	assert.Exactly(t, expected, endTraintuple, "retreived Traintuple does not correspond to what is expected")
 
 	// query all traintuples related to a traintuple with the same algo
-	args = [][]byte{[]byte("queryModelDetails"), []byte(traintupleKey)}
+	args = [][]byte{[]byte("queryModelDetails"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying model details with status %d and message %s", resp.Status, resp.Message)
 	payload := map[string]interface{}{}
@@ -484,13 +499,13 @@ func TestTesttuple(t *testing.T) {
 	inpTraintuple := inputTraintuple{
 		AlgoKey: "aaa",
 	}
-	args := inpTesttuple.createSample()
+	args := inpTesttuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 assert.EqualValuesf(t, 500, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Add traintuple with unexisting algo
 	inpTraintuple = inputTraintuple{}
-	args = inpTraintuple.createSample()
+	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 assert.EqualValuesf(t, 500, resp.Status, "when adding traintuple with unexisting algo, status %d and message %s", resp.Status, resp.Message)
 

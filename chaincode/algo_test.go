@@ -16,7 +16,7 @@ func TestAlgo(t *testing.T) {
 	inpAlgo := inputAlgo{
 		DescriptionHash: "aaa",
 	}
-	args := inpAlgo.createSample()
+	args := inpAlgo.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding algo with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
@@ -32,7 +32,7 @@ func TestAlgo(t *testing.T) {
 	assert.Equalf(t, inpAlgo.Hash, algoKey, "when adding algo, key does not corresponds to its hash - key: %s and hash %s", algoKey, inpAlgo.Hash)
 
 	// Query algo from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryAlgo"), []byte(algoKey)}
+	args = [][]byte{[]byte("queryAlgo"), keyToJSON(algoKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying an algo with status %d and message %s", resp.Status, resp.Message)
 	algo := outputAlgo{}

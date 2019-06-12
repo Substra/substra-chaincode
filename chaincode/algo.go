@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
 	"encoding/json"
 
@@ -44,15 +43,11 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 // registerAlgo stores a new algo in the ledger.
 // If the key exists, it will override the value with the new one
 func registerAlgo(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
-	expectedArgs := getFieldNames(&inputAlgo{})
-	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+	inp := inputAlgo{}
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
 		return
 	}
-
-	// convert input strings args to input struct inputAlgo
-	inp := inputAlgo{}
-	stringToInputStruct(args, &inp)
 	// check validity of input args and convert it to Algo
 	algo := Algo{}
 	algoKey, err := algo.Set(stub, inp)
@@ -81,16 +76,16 @@ func registerAlgo(stub shim.ChaincodeStubInterface, args []string) (resp map[str
 
 // queryAlgo returns an algo of the ledger given its key
 func queryAlgo(stub shim.ChaincodeStubInterface, args []string) (out outputAlgo, err error) {
-	if len(args) != 1 || len(args[0]) != 64 {
-		err = fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+	inp := inputHashe{}
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
 		return
 	}
-	key := args[0]
 	var algo Algo
-	if err = getElementStruct(stub, key, &algo); err != nil {
+	if err = getElementStruct(stub, inp.Key, &algo); err != nil {
 		return
 	}
-	out.Fill(key, algo)
+	out.Fill(inp.Key, algo)
 	return
 }
 

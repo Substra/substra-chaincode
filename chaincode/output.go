@@ -92,7 +92,7 @@ type outputTraintuple struct {
 	Algo        *HashDressName `json:"algo"`
 	Creator     string         `json:"creator"`
 	Dataset     *TtDataset     `json:"dataset"`
-	FLtask      string         `json:"fltask"`
+	FLTask      string         `json:"fltask"`
 	InModels    []*Model       `json:"inModels"`
 	Log         string         `json:"log"`
 	Objective   *TtObjective   `json:"objective"`
@@ -112,7 +112,7 @@ func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface,
 	outputTraintuple.Log = traintuple.Log
 	outputTraintuple.Status = traintuple.Status
 	outputTraintuple.Rank = traintuple.Rank
-	outputTraintuple.FLtask = traintuple.FLtask
+	outputTraintuple.FLTask = traintuple.FLTask
 	outputTraintuple.OutModel = traintuple.OutModel
 	outputTraintuple.Tag = traintuple.Tag
 	// fill algo

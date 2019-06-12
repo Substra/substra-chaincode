@@ -10,6 +10,18 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+func TestJsonInputsDataManager(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+
+	inpDataManager := inputDataManager{}
+	inpDataManager.createDefault()
+	payload, err := json.Marshal(inpDataManager)
+	assert.NoError(t, err)
+	args := [][]byte{[]byte("registerDataManager"), payload}
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status)
+}
 func TestDataManager(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
@@ -18,7 +30,7 @@ func TestDataManager(t *testing.T) {
 	inpDataManager := inputDataManager{
 		OpenerHash: "aaa",
 	}
-	args := inpDataManager.createSample()
+	args := inpDataManager.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding dataManager with invalid opener hash, status %d and message %s", resp.Status, resp.Message)
 	// Properly add dataManager
@@ -37,7 +49,7 @@ func TestDataManager(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding dataManager which already exists, status %d and message %s", resp.Status, resp.Message)
 	// Query dataManager and check fields match expectations
-	args = [][]byte{[]byte("queryDataManager"), []byte(dataManagerKey)}
+	args = [][]byte{[]byte("queryDataManager"), keyToJSON(dataManagerKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the dataManager, status %d and message %s", resp.Status, resp.Message)
 	dataManager := outputDataManager{}
@@ -71,7 +83,7 @@ func TestDataManager(t *testing.T) {
 	assert.Len(t, dataManagers, 1)
 	assert.Exactly(t, expectedDataManager, dataManagers[0], "return objective different from registered one")
 
-	args = [][]byte{[]byte("queryDataset"), []byte(inpDataManager.OpenerHash)}
+	args = [][]byte{[]byte("queryDataset"), keyToJSON(inpDataManager.OpenerHash)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying Dataset, status %d and message %s", resp.Status, resp.Message)
 	out := outputDataset{}
@@ -87,20 +99,20 @@ func TestGetTestDatasetKeys(t *testing.T) {
 
 	// Input DataManager
 	inpDataManager := inputDataManager{}
-	args := inpDataManager.createSample()
+	args := inpDataManager.createDefault()
 	mockStub.MockInvoke("42", args)
 
 	// Add both train and test dataSample
 	inpDataSample := inputDataSample{Hashes: testDataSampleHash1}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	mockStub.MockInvoke("42", args)
 	inpDataSample.Hashes = testDataSampleHash2
 	inpDataSample.TestOnly = "true"
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	mockStub.MockInvoke("42", args)
 
 	// Querry the DataManager
-	args = [][]byte{[]byte("queryDataset"), []byte(inpDataManager.OpenerHash)}
+	args = [][]byte{[]byte("queryDataset"), keyToJSON(inpDataManager.OpenerHash)}
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "querrying the dataManager should return an ok status")
 	payload := map[string]interface{}{}
@@ -120,13 +132,13 @@ func TestDataset(t *testing.T) {
 	inpDataSample := inputDataSample{
 		Hashes: "aaa",
 	}
-	args := inpDataSample.createSample()
+	args := inpDataSample.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding dataSample with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Add dataSample with unexiting dataManager
 	inpDataSample = inputDataSample{}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 500, resp.Status, "when adding dataSample with unexisting dataManager, status %d and message %s", resp.Status, resp.Message)
 	// TODO Would be nice to check failure when adding dataSample to a dataManager owned by a different people
@@ -134,11 +146,11 @@ func TestDataset(t *testing.T) {
 	// Properly add dataSample
 	// 1. add associated dataManager
 	inpDataManager := inputDataManager{}
-	args = inpDataManager.createSample()
+	args = inpDataManager.createDefault()
 	mockStub.MockInvoke("42", args)
 	// 2. add dataSample
 	inpDataSample = inputDataSample{}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding dataSample, status %d and message %s", resp.Status, resp.Message)
 	// check payload correspond to input dataSample keys
@@ -155,7 +167,7 @@ func TestDataset(t *testing.T) {
 	assert.EqualValuesf(t, 500, resp.Status, "when adding dataSample which already exist, status %d and message %s", resp.Status, resp.Message)
 
 	// Query dataSample and check it corresponds to what was input
-	args = [][]byte{[]byte("queryDataset"), []byte(inpDataManager.OpenerHash)}
+	args = [][]byte{[]byte("queryDataset"), keyToJSON(inpDataManager.OpenerHash)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying dataManager dataSample with status %d and message %s", resp.Status, resp.Message)
 	out := outputDataset{}
