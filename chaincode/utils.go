@@ -115,7 +115,7 @@ func getElementBytes(stub shim.ChaincodeStubInterface, elementKey string) ([]byt
 func getElementStruct(stub shim.ChaincodeStubInterface, elementKey string, element interface{}) error {
 	elementBytes, err := getElementBytes(stub, elementKey)
 	if err != nil {
-		return err
+		return NewError(err, NotFound)
 	}
 	return bytesToStruct(elementBytes, element)
 }

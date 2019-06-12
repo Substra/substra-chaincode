@@ -114,10 +114,10 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 func formatErrorResponse(err error) peer.Response {
 	var status int
 
-	if e, ok := err.(Error); !ok {
-		status = Default.StatusCode()
+	if e, ok := err.(Error); ok {
+		status = e.HTTPStatusCode()
 	} else {
-		status = e.Kind.StatusCode()
+		status = Default.HTTPStatusCode()
 	}
 	errStruct := map[string]string{"error": err.Error()}
 	payload, _ := json.Marshal(errStruct)
