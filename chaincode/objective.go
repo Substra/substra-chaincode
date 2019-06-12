@@ -62,18 +62,16 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 // registerObjective stores a new objective in the ledger.
 // If the key exists, it will override the value with the new one
 func registerObjective(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
-	expectedArgs := getFieldNames(&inputObjective{})
-	if nbArgs := len(expectedArgs); nbArgs != len(args) {
-		err = fmt.Errorf("incorrect arguments, expecting %d args: %s", nbArgs, strings.Join(expectedArgs, ", "))
+	// convert input strings args to input struct inputObjective
+	inp := inputObjective{}
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
 		return
 	}
 
-	// convert input strings args to input struct inputObjective
-	inpc := inputObjective{}
-	stringToInputStruct(args, &inpc)
 	// check validity of input args and convert it to Objective
 	objective := Objective{}
-	objectiveKey, dataManagerKey, err := objective.Set(stub, inpc)
+	objectiveKey, dataManagerKey, err := objective.Set(stub, inp)
 	if err != nil {
 		return
 	}
@@ -99,16 +97,16 @@ func registerObjective(stub shim.ChaincodeStubInterface, args []string) (resp ma
 
 // queryObjective returns a objective of the ledger given its key
 func queryObjective(stub shim.ChaincodeStubInterface, args []string) (out outputObjective, err error) {
-	if len(args) != 1 || len(args[0]) != 64 {
-		err = fmt.Errorf("incorrect arguments, expecting key, received: %s", args[0])
+	inp := inputHashe{}
+	err = AssetFromJSON(args[0], &inp)
+	if err != nil {
 		return
 	}
-	key := args[0]
 	var objective Objective
-	if err = getElementStruct(stub, key, &objective); err != nil {
+	if err = getElementStruct(stub, inp.Key, &objective); err != nil {
 		return
 	}
-	out.Fill(key, objective)
+	out.Fill(inp.Key, objective)
 	return
 }
 
