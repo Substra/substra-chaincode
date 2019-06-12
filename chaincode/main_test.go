@@ -79,7 +79,7 @@ func prettyPrintStructElements(buf io.Writer, margin string, strucType reflect.T
 			if f.Anonymous {
 				prettyPrintStructElements(buf, margin, f.Type)
 			} else {
-				fmt.Fprintf(buf, "%s%s: ", margin, f.Type.Name())
+				fmt.Fprintf(buf, "%s\"%s\": (%s)", margin, f.Tag.Get("json"), f.Tag.Get("validate"))
 				prettyPrintStruct(buf, margin+"  ", f.Type)
 				fmt.Fprint(buf, margin)
 			}
