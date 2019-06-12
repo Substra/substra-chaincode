@@ -418,7 +418,7 @@ Smart contract: `logSucessTrain`
 {
  "key": string (required,len=64,hexadecimal),
  "log": string (required,lte=200),
- inputHashDress: {
+ "outModel": (required){
     "hash": string (required,len=64,hexadecimal),
     "storageAddress": string (required),
    }
