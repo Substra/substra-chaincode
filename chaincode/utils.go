@@ -116,7 +116,7 @@ func getElementBytes(stub shim.ChaincodeStubInterface, elementKey string) ([]byt
 func getElementStruct(stub shim.ChaincodeStubInterface, elementKey string, element interface{}) error {
 	elementBytes, err := getElementBytes(stub, elementKey)
 	if err != nil {
-		return errors.E(err, errors.NotFound)
+		return errors.NotFound(err)
 	}
 	return bytesToStruct(elementBytes, element)
 }
@@ -219,8 +219,7 @@ func getElementsPayload(stub shim.ChaincodeStubInterface, elementsKeys []string)
 func AssetFromJSON(args string, asset interface{}) error {
 	err := json.Unmarshal([]byte(args), &asset)
 	if err != nil {
-		err = fmt.Errorf("Problem when reading json arg : %s, error is : %s", args, err.Error())
-		return errors.E(err, errors.BadRequest)
+		return errors.BadRequest(err, "Problem when reading json arg: %s, error is:", args)
 	}
 	return nil
 }

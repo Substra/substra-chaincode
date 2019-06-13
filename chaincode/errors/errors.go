@@ -15,33 +15,79 @@ type Error struct {
 }
 
 func (e Error) Error() string {
+	if e.Err == nil {
+		return ""
+	}
 	return e.Err.Error()
 }
 
-// E return a error according to the args passed
+// E return an error according to the args passed.
+// The type of the arg determines its meaning.
+// If more than one arg of a type is passed (string put aside)
+// Only the last one is applied. In case of string, when encountering one
+// all the other args are passed as parameters for the string formatter.
+//
+// The possible arg type are:
+//	errors.Error
+//		It will be copied
+//	errors.Kind
+//		The class of error, such as a key conflict
+//	error
+//		The underlying error
+//	string
+//		The string to add to the existing error message. As mention above
+//		all the args following the first string will be handle as format
+//		parameters.
 func E(args ...interface{}) error {
 	e := Error{}
-	for _, arg := range args {
+	for i, arg := range args {
 		switch arg := arg.(type) {
 		case Error:
 			e = arg
 		case Kind:
 			e.Kind = arg
-		case string:
-			if e.Err == nil {
-				e.Err = fmt.Errorf(arg)
-				continue
-			}
-			e.Err = fmt.Errorf("%s %s", arg, e.Error())
 		case error:
 			if e.Err == nil {
 				e.Err = arg
 				continue
 			}
 			e.Err = fmt.Errorf("%s %s", arg.Error(), e.Error())
+		case string:
+			parameters := args[i+1:]
+			msg := fmt.Sprintf(arg, parameters...)
+			if e.Err == nil {
+				e.Err = fmt.Errorf(msg)
+			} else {
+				e.Err = fmt.Errorf("%s %s", msg, e.Error())
+			}
+			return e
 		}
 	}
 	return e
+}
+
+// Wrap take an error, check its type and return it as a type Error,
+// with the same parameter Kind if there was one
+func Wrap(err error) Error {
+	if e, ok := err.(Error); ok {
+		return e
+	}
+	return Error{Err: err}
+}
+
+// NotFound returns an Error of a this specific type
+func NotFound(args ...interface{}) error {
+	return E(notFound, args)
+}
+
+// Conflict returns an Error of a this specific type
+func Conflict(args ...interface{}) error {
+	return E(conflict, args)
+}
+
+// BadRequest returns an Error of a this specific type
+func BadRequest(args ...interface{}) error {
+	return E(badRequest, args)
 }
 
 // HTTPStatusCode wrap the HTTPStatusCode methods of the Kind parameter
@@ -55,22 +101,22 @@ type Kind uint8
 
 // Possible errors kinds. Beware, this declaration is order sensitive.
 const (
-	Default    Kind = iota // default unrecognized error
-	NotFound               // Asset has not been found
-	Conflict               // Asset already exists
-	BadRequest             // Invalid request
+	internal   Kind = iota // default error
+	notFound               // Asset has not been found
+	conflict               // Asset already exists
+	badRequest             // Invalid request
 )
 
 // HTTPStatusCode returns for an error kind the associated http status
 func (k Kind) HTTPStatusCode() int {
 	switch k {
-	case Default:
+	case internal:
 		return http.StatusInternalServerError
-	case NotFound:
+	case notFound:
 		return http.StatusNotFound
-	case Conflict:
+	case conflict:
 		return http.StatusConflict
-	case BadRequest:
+	case badRequest:
 		return http.StatusBadRequest
 	}
 	return http.StatusInternalServerError
