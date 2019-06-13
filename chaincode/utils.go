@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chaincode/errors"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -115,7 +116,7 @@ func getElementBytes(stub shim.ChaincodeStubInterface, elementKey string) ([]byt
 func getElementStruct(stub shim.ChaincodeStubInterface, elementKey string, element interface{}) error {
 	elementBytes, err := getElementBytes(stub, elementKey)
 	if err != nil {
-		return NewError(err, NotFound)
+		return errors.E(err, errors.NotFound)
 	}
 	return bytesToStruct(elementBytes, element)
 }
@@ -219,7 +220,7 @@ func AssetFromJSON(args string, asset interface{}) error {
 	err := json.Unmarshal([]byte(args), &asset)
 	if err != nil {
 		err = fmt.Errorf("Problem when reading json arg : %s, error is : %s", args, err.Error())
-		return NewError(err, BadRequest)
+		return errors.E(err, errors.BadRequest)
 	}
 	return nil
 }

@@ -1,4 +1,4 @@
-package main
+package errors
 
 import (
 	"fmt"
@@ -18,8 +18,8 @@ func (e Error) Error() string {
 	return e.Err.Error()
 }
 
-// NewError return a error according to the args passed
-func NewError(args ...interface{}) error {
+// E return a error according to the args passed
+func E(args ...interface{}) error {
 	e := Error{}
 	for _, arg := range args {
 		switch arg := arg.(type) {
