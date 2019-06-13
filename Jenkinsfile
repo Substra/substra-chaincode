@@ -36,7 +36,7 @@ pipeline {
       steps {
         dir("chaincode") {
           sh "go mod init chaincode"
-          sh "go test chaincode"
+          sh "go test chaincode/..."
         }
       }
     }

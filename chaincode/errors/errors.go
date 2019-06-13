@@ -66,8 +66,8 @@ func E(args ...interface{}) error {
 	return e
 }
 
-// Wrap take an error, check its type and return it as a type Error,
-// with the same parameter Kind if there was one
+// Wrap converts an error interface to the internal Error type.
+// Does nothing if an internal Error type is passed.
 func Wrap(err error) Error {
 	if e, ok := err.(Error); ok {
 		return e
@@ -77,17 +77,20 @@ func Wrap(err error) Error {
 
 // NotFound returns an Error of a this specific type
 func NotFound(args ...interface{}) error {
-	return E(notFound, args)
+	args = append([]interface{}{notFound}, args...)
+	return E(args...)
 }
 
 // Conflict returns an Error of a this specific type
 func Conflict(args ...interface{}) error {
-	return E(conflict, args)
+	args = append([]interface{}{conflict}, args...)
+	return E(args...)
 }
 
 // BadRequest returns an Error of a this specific type
 func BadRequest(args ...interface{}) error {
-	return E(badRequest, args)
+	args = append([]interface{}{badRequest}, args...)
+	return E(args...)
 }
 
 // HTTPStatusCode wrap the HTTPStatusCode methods of the Kind parameter
@@ -111,7 +114,6 @@ const (
 func (k Kind) HTTPStatusCode() int {
 	switch k {
 	case internal:
-		return http.StatusInternalServerError
 	case notFound:
 		return http.StatusNotFound
 	case conflict:
