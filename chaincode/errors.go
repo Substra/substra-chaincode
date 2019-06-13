@@ -55,9 +55,10 @@ type Kind uint8
 
 // Possible errors kinds. Beware, this declaration is order sensitive.
 const (
-	Default  Kind = iota // default unrecognized error
-	NotFound             // Asset has not been found
-	Conflict             // Asset already exists
+	Default    Kind = iota // default unrecognized error
+	NotFound               // Asset has not been found
+	Conflict               // Asset already exists
+	BadRequest             // Invalid request
 )
 
 // HTTPStatusCode returns for an error kind the associated http status
@@ -69,6 +70,8 @@ func (k Kind) HTTPStatusCode() int {
 		return http.StatusNotFound
 	case Conflict:
 		return http.StatusConflict
+	case BadRequest:
+		return http.StatusBadRequest
 	}
 	return http.StatusInternalServerError
 }

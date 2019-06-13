@@ -16,6 +16,7 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 	validate := validator.New()
 	if err = validate.Struct(inp); err != nil {
 		err = fmt.Errorf("invalid algo inputs %s", err.Error())
+		err = NewError(err, BadRequest)
 		return
 	}
 
@@ -56,7 +57,9 @@ func registerAlgo(stub shim.ChaincodeStubInterface, args []string) (resp map[str
 	}
 	// check data is not already in ledgert
 	if elementBytes, _ := stub.GetState(algoKey); elementBytes != nil {
+		// TODO add hash key to error
 		err = fmt.Errorf("algo with this hash already exists")
+		err = NewError(err, Conflict)
 		return
 	}
 	// submit to ledger
@@ -93,6 +96,7 @@ func queryAlgo(stub shim.ChaincodeStubInterface, args []string) (out outputAlgo,
 func queryAlgos(stub shim.ChaincodeStubInterface, args []string) (outAlgos []outputAlgo, err error) {
 	if len(args) != 0 {
 		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
+		err = NewError(err, BadRequest)
 		return
 	}
 	var indexName = "algo~owner~key"

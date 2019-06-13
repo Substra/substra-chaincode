@@ -18,7 +18,7 @@ func TestAlgo(t *testing.T) {
 	}
 	args := inpAlgo.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding algo with invalid hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding algo with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add algo
 	resp, tt := registerItem(t, *mockStub, "algo")
