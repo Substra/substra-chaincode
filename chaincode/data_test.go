@@ -142,7 +142,7 @@ func TestDataset(t *testing.T) {
 	inpDataSample = inputDataSample{}
 	args = inpDataSample.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding dataSample with unexisting dataManager, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding dataSample with unexisting dataManager, status %d and message %s", resp.Status, resp.Message)
 	// TODO Would be nice to check failure when adding dataSample to a dataManager owned by a different people
 
 	// Properly add dataSample

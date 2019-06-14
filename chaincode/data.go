@@ -355,7 +355,7 @@ func checkDataManagerOwner(stub shim.ChaincodeStubInterface, dataManagerKeys []s
 	for _, dataManagerKey := range dataManagerKeys {
 		dataManager := DataManager{}
 		if err = getElementStruct(stub, dataManagerKey, &dataManager); err != nil {
-			err = errors.Forbidden(err, "could not retrieve dataManager with key %s", dataManagerKey)
+			err = errors.BadRequest(err, "could not retrieve dataManager with key %s", dataManagerKey)
 			return
 		}
 		// check transaction requester is the dataManager owner
@@ -417,7 +417,7 @@ func getDataManagerOwner(stub shim.ChaincodeStubInterface, dataManagerKey string
 
 	dataManager := DataManager{}
 	if err = getElementStruct(stub, dataManagerKey, &dataManager); err != nil {
-		err = fmt.Errorf("could not retrieve dataManager with key %s - %s", dataManagerKey, err.Error())
+		err = errors.BadRequest(err, "could not retrieve dataManager with key %s -", dataManagerKey)
 		return
 	}
 	worker = dataManager.Owner

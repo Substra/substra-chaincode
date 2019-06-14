@@ -28,8 +28,6 @@ func (e Error) Error() string {
 // all the other args are passed as parameters for the string formatter.
 //
 // The possible arg type are:
-//	errors.Error
-//		It will be copied
 //	errors.Kind
 //		The class of error, such as a key conflict
 //	error
@@ -42,8 +40,6 @@ func E(args ...interface{}) error {
 	e := Error{}
 	for i, arg := range args {
 		switch arg := arg.(type) {
-		case Error:
-			e = arg
 		case Kind:
 			e.Kind = arg
 		case error:
@@ -126,7 +122,6 @@ const (
 // HTTPStatusCode returns for an error kind the associated http status
 func (k Kind) HTTPStatusCode() int {
 	switch k {
-	case internal:
 	case notFound:
 		return http.StatusNotFound
 	case conflict:

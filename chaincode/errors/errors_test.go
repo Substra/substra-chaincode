@@ -93,6 +93,13 @@ func TestErrorCases(t *testing.T) {
 			expectedMsg:    "",
 			expectedStatus: http.StatusBadRequest,
 		},
+		{
+			desc:           "Forbidden overides",
+			errorFunc:      Forbidden,
+			args:           []interface{}{Internal()},
+			expectedMsg:    "",
+			expectedStatus: http.StatusForbidden,
+		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
