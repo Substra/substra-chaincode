@@ -75,6 +75,12 @@ func Wrap(err error) Error {
 	return Error{Err: err}
 }
 
+// Internal returns an Error of a this specific type
+func Internal(args ...interface{}) error {
+	args = append([]interface{}{internal}, args...)
+	return E(args...)
+}
+
 // NotFound returns an Error of a this specific type
 func NotFound(args ...interface{}) error {
 	args = append([]interface{}{notFound}, args...)
@@ -93,6 +99,12 @@ func BadRequest(args ...interface{}) error {
 	return E(args...)
 }
 
+// Forbidden returns an Error of a this specific type
+func Forbidden(args ...interface{}) error {
+	args = append([]interface{}{forbidden}, args...)
+	return E(args...)
+}
+
 // HTTPStatusCode wrap the HTTPStatusCode methods of the Kind parameter
 func (e Error) HTTPStatusCode() int {
 	return e.Kind.HTTPStatusCode()
@@ -108,6 +120,7 @@ const (
 	notFound               // Asset has not been found
 	conflict               // Asset already exists
 	badRequest             // Invalid request
+	forbidden              // Forbidden request
 )
 
 // HTTPStatusCode returns for an error kind the associated http status
@@ -120,6 +133,8 @@ func (k Kind) HTTPStatusCode() int {
 		return http.StatusConflict
 	case badRequest:
 		return http.StatusBadRequest
+	case forbidden:
+		return http.StatusForbidden
 	}
 	return http.StatusInternalServerError
 }
