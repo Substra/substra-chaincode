@@ -237,7 +237,7 @@ func TestPipeline(t *testing.T) {
 	traintupleKey := res["key"]
 	// check not possible to create same traintuple
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding same traintuple with status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 409, resp.Status, "when adding same traintuple with status %d and message %s", resp.Status, resp.Message)
 	// Get owner of the traintuple
 	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
@@ -303,7 +303,7 @@ func TestPipeline(t *testing.T) {
 	testtupleKey := res["key"]
 	// check not possible to create same testtuple
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding same testtuple with status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 409, resp.Status, "when adding same testtuple with status %d and message %s", resp.Status, resp.Message)
 	// Get owner of the testtuple
 	args = [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
 	resp = mockStub.MockInvoke("42", args)

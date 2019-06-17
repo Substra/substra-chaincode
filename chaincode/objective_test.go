@@ -46,7 +46,7 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	inpObjective := inputObjective{TestDataset: testDataSampleHash1 + ":" + testDataSampleHash2}
 	args = inpObjective.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 500, resp.Status, "status should indicate an error since the dataManager key is a dataSample key")
+	assert.EqualValues(t, 400, resp.Status, "status should indicate an error since the dataManager key is a dataSample key")
 }
 func TestObjective(t *testing.T) {
 	scc := new(SubstraChaincode)
@@ -58,13 +58,13 @@ func TestObjective(t *testing.T) {
 	}
 	args := inpObjective.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Add objective with unexisting test dataSample
 	inpObjective = inputObjective{}
 	args = inpObjective.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding objective with unexisting test dataSample, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with unexisting test dataSample, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add objective
 	resp, tt := registerItem(t, *mockStub, "objective")

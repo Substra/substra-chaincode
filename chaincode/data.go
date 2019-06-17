@@ -30,7 +30,7 @@ func (dataManager *DataManager) Set(stub shim.ChaincodeStubInterface, inp inputD
 	// check validity of associated objective
 	if len(inp.ObjectiveKey) > 0 {
 		if _, err := getElementBytes(stub, inp.ObjectiveKey); err != nil {
-			err = errors.Internal(err, "error checking associated objective")
+			err = errors.E(err, "error checking associated objective")
 			return "", "", err
 		}
 		dataManager.ObjectiveKey = inp.ObjectiveKey
@@ -145,7 +145,7 @@ func registerDataManager(stub shim.ChaincodeStubInterface, args []string) (resp 
 	dataManagerBytes, _ := json.Marshal(dataManager)
 	err = stub.PutState(dataManagerKey, dataManagerBytes)
 	if err != nil {
-		err = errors.Internal(err, "failed to add dataManager with opener hash %s", inp.OpenerHash)
+		err = errors.E(err, "failed to add dataManager with opener hash %s", inp.OpenerHash)
 		return
 	}
 	// create composite keys (one for each associated objective) to find dataSample associated with a objective

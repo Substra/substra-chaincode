@@ -79,7 +79,7 @@ func TestTagTuple(t *testing.T) {
 	inpTraintuple := inputTraintuple{Tag: noTag}
 	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 500, resp.Status, resp.Message)
+	assert.EqualValues(t, 400, resp.Status, resp.Message)
 
 	tag := "This is a tag"
 
@@ -158,13 +158,13 @@ func TestTraintupleFLTaskCreation(t *testing.T) {
 	inpTraintuple := inputTraintuple{FLTask: "someFLTask"}
 	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	require.EqualValues(t, 500, resp.Status, "should failed for missing rank")
+	require.EqualValues(t, 400, resp.Status, "should failed for missing rank")
 	require.Contains(t, resp.Message, "invalit inputs, a FLTask should have a rank", "invalid error message")
 
 	inpTraintuple = inputTraintuple{Rank: "1"}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	require.EqualValues(t, 500, resp.Status, "should failed for invalid rank")
+	require.EqualValues(t, 400, resp.Status, "should failed for invalid rank")
 	require.Contains(t, resp.Message, "invalid inputs, a new FLTask should have a rank 0")
 
 	inpTraintuple = inputTraintuple{Rank: "0"}
@@ -181,7 +181,7 @@ func TestTraintupleFLTaskCreation(t *testing.T) {
 	inpTraintuple = inputTraintuple{Rank: "0"}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	require.EqualValues(t, 500, resp.Status, "should failed for existing FLTask")
+	require.EqualValues(t, 409, resp.Status, "should failed for existing FLTask")
 	require.Contains(t, resp.Message, "this traintuple already exists")
 }
 
@@ -208,7 +208,7 @@ func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 		FLTask:   key}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 500, resp.Status, resp.Message, "should failed to add a traintuple of the same rank")
+	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add a traintuple of the same rank")
 
 	// Failed to add a traintuple to an unexisting Fltask
 	inpTraintuple = inputTraintuple{
@@ -217,7 +217,7 @@ func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 		FLTask:   "notarealone"}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 500, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting FLTask")
+	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting FLTask")
 
 	// Succesfully add a traintuple to the same FLTask
 	inpTraintuple = inputTraintuple{
@@ -245,7 +245,7 @@ func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 		FLTask:   key}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 500, resp.Status, resp.Message, "sould fail for it doesn't have the same algo key")
+	assert.EqualValues(t, 400, resp.Status, resp.Message, "sould fail for it doesn't have the same algo key")
 	assert.Contains(t, resp.Message, "does not have the same algo key")
 }
 
@@ -273,7 +273,7 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	inpTesttuple := inputTesttuple{}
 	args = inpTesttuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 500, resp.Status, "status should show an error since the traintuple is failed")
+	assert.EqualValues(t, 400, resp.Status, "status should show an error since the traintuple is failed")
 	assert.Contains(t, resp.Message, "could not register this testtuple")
 }
 
@@ -319,7 +319,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	inpTesttuple2 := inputTesttuple{DataSampleKeys: trainDataSampleHash1}
 	args = inpTesttuple2.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 500, resp.Status)
+	assert.EqualValues(t, 400, resp.Status)
 	assert.Contains(t, resp.Message, "invalid input: dataManagerKey and dataSampleKey should be provided together")
 
 	// Add an uncertified testtuple successfully
@@ -336,7 +336,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 		DataManagerKey: dataManagerOpenerHash}
 	args = inpTesttuple4.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 500, resp.Status)
+	assert.EqualValues(t, 409, resp.Status)
 	assert.Contains(t, resp.Message, "this testtuple already exists")
 }
 
@@ -350,13 +350,13 @@ func TestTraintuple(t *testing.T) {
 	}
 	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Add traintuple with unexisting algo
 	inpTraintuple = inputTraintuple{}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding traintuple with unexisting algo, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding traintuple with unexisting algo, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add traintuple
 	resp, tt := registerItem(t, *mockStub, "traintuple")
