@@ -327,10 +327,12 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 		return nil, err
 	}
 
-	// We can only send one event
+	// https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/shim/interfaces.go#L339:L343
+	// We can only send one event per transaction
+	// https://stackoverflow.com/questions/50344232/not-able-to-set-multiple-events-in-chaincode-per-transaction-getting-only-last
 	if traintuple.Status == "todo" {
 		err = SetEvent(stub, "traintuple-ready", out)
-	} else {
+	} else { // status = "waiting" or "failed"
 		err = SetEvent(stub, "traintuple-created", out)
 	}
 
@@ -384,10 +386,12 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 	out := outputTesttuple{}
 	out.Fill(testtupleKey, testtuple)
 
-	// We can only send one event
+	// https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/shim/interfaces.go#L339:L343
+	// We can only send one event per transaction
+	// https://stackoverflow.com/questions/50344232/not-able-to-set-multiple-events-in-chaincode-per-transaction-getting-only-last
 	if testtuple.Status == "todo" {
 		err = SetEvent(stub, "testtuple-ready", out)
-	} else {
+	} else { // status = "waiting" or "failed"
 		err = SetEvent(stub, "testtuple-created", out)
 	}
 
