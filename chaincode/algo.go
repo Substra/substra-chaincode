@@ -58,7 +58,7 @@ func registerAlgo(stub shim.ChaincodeStubInterface, args []string) (resp map[str
 	// check data is not already in ledgert
 	if elementBytes, _ := stub.GetState(algoKey); elementBytes != nil {
 		// TODO add hash key to error
-		err = errors.Conflict("algo with this hash already exists")
+		err = errors.Conflict("this algo already exists (tkey: %s)", algoKey)
 		return
 	}
 	// submit to ledger

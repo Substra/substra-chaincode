@@ -69,7 +69,8 @@ func setDataSample(stub shim.ChaincodeStubInterface, inp inputDataSample) (dataS
 	}
 	// check dataSample is not already in the ledger
 	if existingKeys := checkExist(stub, dataSampleHashes); existingKeys != nil {
-		err = errors.Conflict("dataSample with these hashes already exist - %s", existingKeys)
+		// TODO should return a proper conflict with all conflicting keys
+		err = errors.BadRequest("dataSample with these hashes already exist - %s", existingKeys)
 		return
 	}
 

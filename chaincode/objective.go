@@ -78,7 +78,7 @@ func registerObjective(stub shim.ChaincodeStubInterface, args []string) (resp ma
 	}
 	// check objective is not already in ledger
 	if elementBytes, _ := stub.GetState(objectiveKey); elementBytes != nil {
-		err = errors.Conflict("objective with this description already exists - %s", string(elementBytes))
+		err = errors.Conflict("this objective already exists (tkey: %s)", objectiveKey)
 		return
 	}
 	// submit to ledger
