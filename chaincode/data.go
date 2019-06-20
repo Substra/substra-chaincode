@@ -30,7 +30,7 @@ func (dataManager *DataManager) Set(stub shim.ChaincodeStubInterface, inp inputD
 	// check validity of associated objective
 	if len(inp.ObjectiveKey) > 0 {
 		if _, err := getElementBytes(stub, inp.ObjectiveKey); err != nil {
-			err = errors.E(err, "error checking associated objective")
+			err = errors.BadRequest(err, "error checking associated objective")
 			return "", "", err
 		}
 		dataManager.ObjectiveKey = inp.ObjectiveKey
