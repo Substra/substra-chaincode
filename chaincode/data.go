@@ -24,7 +24,7 @@ func (dataManager *DataManager) Set(stub shim.ChaincodeStubInterface, inp inputD
 	// check dataManager is not already in the ledger
 	dataManagerKey := inp.OpenerHash
 	if elementBytes, _ := stub.GetState(dataManagerKey); elementBytes != nil {
-		err := errors.BadRequest("dataManager with this opener already exists")
+		err := errors.Conflict("this dataManager already exists (tkey: %s)", dataManagerKey)
 		return dataManagerKey, "", err
 	}
 	// check validity of associated objective
