@@ -321,18 +321,25 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 		}
 	}
 
-	if traintuple.Status == "todo" {
-
-		out := outputTraintuple{}
-		err = out.Fill(stub, traintuple, traintupleKey)
-		if err != nil {
-			return nil, err
-		}
-		err = SetEvent(stub, "traintuple-creation", out)
-		if err != nil {
-			return nil, err
-		}
+	out := outputTraintuple{}
+	err = out.Fill(stub, traintuple, traintupleKey)
+	if err != nil {
+		return nil, err
 	}
+
+	// https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/shim/interfaces.go#L339:L343
+	// We can only send one event per transaction
+	// https://stackoverflow.com/questions/50344232/not-able-to-set-multiple-events-in-chaincode-per-transaction-getting-only-last
+	if traintuple.Status == "todo" {
+		err = SetEvent(stub, "traintuple-ready", out)
+	} else { // status = "waiting" or "failed"
+		err = SetEvent(stub, "traintuple-created", out)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
 	return map[string]string{"key": traintupleKey}, nil
 }
 
@@ -376,13 +383,20 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 		}
 	}
 
+	out := outputTesttuple{}
+	out.Fill(testtupleKey, testtuple)
+
+	// https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/shim/interfaces.go#L339:L343
+	// We can only send one event per transaction
+	// https://stackoverflow.com/questions/50344232/not-able-to-set-multiple-events-in-chaincode-per-transaction-getting-only-last
 	if testtuple.Status == "todo" {
-		out := outputTesttuple{}
-		out.Fill(testtupleKey, testtuple)
-		err = SetEvent(stub, "testtuple-creation", out)
-		if err != nil {
-			return nil, err
-		}
+		err = SetEvent(stub, "testtuple-ready", out)
+	} else { // status = "waiting" or "failed"
+		err = SetEvent(stub, "testtuple-created", out)
+	}
+
+	if err != nil {
+		return nil, err
 	}
 
 	return map[string]string{"key": testtupleKey}, nil
@@ -892,7 +906,7 @@ func updateWaitingTraintuples(stub shim.ChaincodeStubInterface, modelTraintupleK
 				if err != nil {
 					return err
 				}
-				err = SetEvent(stub, "traintuple-creation", out)
+				err = SetEvent(stub, "traintuple-ready", out)
 				if err != nil {
 					return err
 				}
@@ -1005,7 +1019,7 @@ func updateWaitingTesttuples(stub shim.ChaincodeStubInterface, traintupleKey str
 		if testtuple.Status == "todo" {
 			out := outputTesttuple{}
 			out.Fill(testtupleKey, testtuple)
-			err = SetEvent(stub, "testtuple-creation", out)
+			err = SetEvent(stub, "testtuple-ready", out)
 			if err != nil {
 				return err
 			}
