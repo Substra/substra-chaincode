@@ -54,6 +54,18 @@ func (out *outputDataManager) Fill(key string, in DataManager) {
 	out.Type = in.Type
 }
 
+type outputDataSample struct {
+	DataManagerKeys []string `json:"dataManagerKeys"`
+	Owner           string   `json:"owner"`
+	Key             string   `json:"key"`
+}
+
+func (out *outputDataSample) Fill(key string, in DataSample) {
+	out.Key = key
+	out.DataManagerKeys = in.DataManagerKeys
+	out.Owner = in.Owner
+}
+
 type outputDataset struct {
 	outputDataManager
 	TrainDataSampleKeys []string `json:"trainDataSampleKeys"`

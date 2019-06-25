@@ -267,7 +267,7 @@ func updateDataManager(stub shim.ChaincodeStubInterface, args []string) (resp ma
 	return map[string]string{"key": inp.DataManagerKey}, nil
 }
 
-// queryObjective returns a objective of the ledger given its key
+// queryDataManager returns dataManager and its key
 func queryDataManager(stub shim.ChaincodeStubInterface, args []string) (out outputDataManager, err error) {
 	inp := inputHashe{}
 	err = AssetFromJSON(args[0], &inp)
@@ -282,7 +282,7 @@ func queryDataManager(stub shim.ChaincodeStubInterface, args []string) (out outp
 	return
 }
 
-// queryObjectives returns all objectives of the ledger
+// queryDataManagers returns all DataManagers of the ledger
 func queryDataManagers(stub shim.ChaincodeStubInterface, args []string) (outDataManagers []outputDataManager, err error) {
 	if len(args) != 0 {
 		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
@@ -295,12 +295,12 @@ func queryDataManagers(stub shim.ChaincodeStubInterface, args []string) (outData
 		return
 	}
 	for _, key := range elementsKeys {
-		var objective DataManager
-		if err = getElementStruct(stub, key, &objective); err != nil {
+		var dataManager DataManager
+		if err = getElementStruct(stub, key, &dataManager); err != nil {
 			return
 		}
 		var out outputDataManager
-		out.Fill(key, objective)
+		out.Fill(key, dataManager)
 		outDataManagers = append(outDataManagers, out)
 	}
 	return
@@ -331,6 +331,29 @@ func queryDataset(stub shim.ChaincodeStubInterface, args []string) (out outputDa
 	}
 
 	out.Fill(inp.Key, dataManager, trainDataSampleKeys, testDataSampleKeys)
+	return
+}
+
+func queryDataSamples(stub shim.ChaincodeStubInterface, args []string) (outDataSamples []outputDataSample, err error) {
+	if len(args) != 0 {
+		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
+		return
+	}
+	var indexName = "dataSample~owner~key"
+	elementsKeys, err := getKeysFromComposite(stub, indexName, []string{"dataSample"})
+	if err != nil {
+		err = fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
+		return
+	}
+	for _, key := range elementsKeys {
+		var dataSample DataSample
+		if err = getElementStruct(stub, key, &dataSample); err != nil {
+			return
+		}
+		var out outputDataSample
+		out.Fill(key, dataSample)
+		outDataSamples = append(outDataSamples, out)
+	}
 	return
 }
 

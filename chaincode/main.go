@@ -63,6 +63,8 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = queryDataManager(stub, args)
 	case "queryDataManagers":
 		result, err = queryDataManagers(stub, args)
+	case "queryDataSamples":
+		result, err = queryDataSamples(stub, args)
 	case "queryDataset":
 		result, err = queryDataset(stub, args)
 	case "queryFilter":
