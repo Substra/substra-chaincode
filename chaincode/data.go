@@ -339,7 +339,7 @@ func queryDataSamples(stub shim.ChaincodeStubInterface, args []string) (outDataS
 		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
 		return
 	}
-	var indexName = "dataSample~owner~key"
+	var indexName = "dataSample~dataManager~key"
 	elementsKeys, err := getKeysFromComposite(stub, indexName, []string{"dataSample"})
 	if err != nil {
 		err = fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())

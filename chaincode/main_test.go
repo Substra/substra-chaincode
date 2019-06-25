@@ -221,6 +221,10 @@ func TestPipeline(t *testing.T) {
 	args = [][]byte{[]byte("queryDataManagers")}
 	callAssertAndPrint("query", "queryDataManagers", args, nil)
 
+	fmt.Fprintln(&out, "#### ------------ Query DataSamples ------------")
+	args = [][]byte{[]byte("queryDataSamples")}
+	callAssertAndPrint("query", "queryDataSamples", args, nil)
+
 	fmt.Fprintln(&out, "#### ------------ Query Objectives ------------")
 	args = [][]byte{[]byte("queryObjectives")}
 	callAssertAndPrint("query", "queryObjectives", args, nil)
