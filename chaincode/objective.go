@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chaincode/errors"
 	"fmt"
 	"strings"
 
@@ -16,7 +17,7 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 	// checking validity of submitted fields
 	validate := validator.New()
 	if err = validate.Struct(inp); err != nil {
-		err = fmt.Errorf("invalid objective inputs %s", err.Error())
+		err = errors.BadRequest(err, "invalid objective inputs")
 		return
 	}
 	dataManagerKey = strings.Split(inp.TestDataset, ":")[0]
@@ -25,10 +26,10 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 		dataSampleKeys := strings.Split(strings.Replace(strings.Split(inp.TestDataset, ":")[1], " ", "", -1), ",")
 		testOnly, _, err = checkSameDataManager(stub, dataManagerKey, dataSampleKeys)
 		if err != nil {
-			err = fmt.Errorf("invalid test dataSample %s", err.Error())
+			err = errors.BadRequest(err, "invalid test dataSample")
 			return
 		} else if !testOnly {
-			err = fmt.Errorf("test dataSample are not tagged as testOnly dataSample")
+			err = errors.BadRequest("test dataSample are not tagged as testOnly dataSample")
 			return
 		}
 		objective.TestDataset = &Dataset{
@@ -77,13 +78,13 @@ func registerObjective(stub shim.ChaincodeStubInterface, args []string) (resp ma
 	}
 	// check objective is not already in ledger
 	if elementBytes, _ := stub.GetState(objectiveKey); elementBytes != nil {
-		err = fmt.Errorf("objective with this description already exists - %s", string(elementBytes))
+		err = errors.Conflict("this objective already exists (tkey: %s)", objectiveKey)
 		return
 	}
 	// submit to ledger
 	objectiveBytes, _ := json.Marshal(objective)
 	if err = stub.PutState(objectiveKey, objectiveBytes); err != nil {
-		err = fmt.Errorf("failed to submit to ledger the objective with key %s, error is %s", objectiveKey, err.Error())
+		err = errors.E(err, "failed to submit to ledger the objective with key %s", objectiveKey)
 		return
 	}
 	// create composite key
@@ -145,7 +146,7 @@ func addObjectiveDataManager(stub shim.ChaincodeStubInterface, dataManagerKey st
 		return nil
 	}
 	if dataManager.ObjectiveKey != "" {
-		return fmt.Errorf("dataManager is already associated with a objective")
+		return errors.BadRequest("dataManager is already associated with a objective")
 	}
 	dataManager.ObjectiveKey = objectiveKey
 	dataManagerBytes, _ := json.Marshal(dataManager)

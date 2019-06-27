@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chaincode/errors"
 	"encoding/json"
 	"fmt"
 
@@ -100,26 +101,32 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	}
 	// Return the result as success payload
 	if err != nil {
-		return formatErrorResponse(err.Error(), 500)
+		return formatErrorResponse(err)
 	}
 	// Marshal to json the smartcontract result
 	resp, err := json.Marshal(result)
 	if err != nil {
-		return formatErrorResponse("could not format response for unknown reason", 500)
+		return formatErrorResponse(fmt.Errorf("could not format response for unknown reason"))
 	}
 
 	return shim.Success(resp)
 }
 
-func formatErrorResponse(errMessage string, status int32) peer.Response {
-	errStruct := map[string]string{"error": errMessage}
-	payload, _ := json.Marshal(errStruct)
+func formatErrorResponse(err error) peer.Response {
+	e := errors.Wrap(err)
+	status := e.HTTPStatusCode()
 
+	errStruct := map[string]interface{}{"error": e.Error()}
+	payload, _ := json.Marshal(errStruct)
 	// For now we still return both payload and message.
+	// We also need to serialize the status into the message until fabrik-sdk-py
+	// allow substrabac to access the status
+	errStruct["status"] = status
+	message, _ := json.Marshal(errStruct)
 	return peer.Response{
-		Message: errMessage,
+		Message: string(message),
 		Payload: payload,
-		Status:  status,
+		Status:  int32(status),
 	}
 }
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chaincode/errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -17,19 +18,20 @@ func (dataManager *DataManager) Set(stub shim.ChaincodeStubInterface, inp inputD
 	// check validity of submitted fields
 	validate := validator.New()
 	if err := validate.Struct(inp); err != nil {
-		err = fmt.Errorf("invalid dataManager inputs %s", err.Error())
+		err = errors.BadRequest(err, "invalid dataManager inputs")
 		return "", "", err
 	}
 	// check dataManager is not already in the ledger
 	dataManagerKey := inp.OpenerHash
 	if elementBytes, _ := stub.GetState(dataManagerKey); elementBytes != nil {
-		return dataManagerKey, "", fmt.Errorf("dataManager with this opener already exists")
+		err := errors.Conflict("this dataManager already exists (tkey: %s)", dataManagerKey)
+		return dataManagerKey, "", err
 	}
 	// check validity of associated objective
 	if len(inp.ObjectiveKey) > 0 {
 		if _, err := getElementBytes(stub, inp.ObjectiveKey); err != nil {
-			err = fmt.Errorf("error checking associated objective %s", err.Error())
-			return "", "", nil
+			err = errors.BadRequest(err, "error checking associated objective")
+			return "", "", err
 		}
 		dataManager.ObjectiveKey = inp.ObjectiveKey
 	}
@@ -55,18 +57,20 @@ func setDataSample(stub shim.ChaincodeStubInterface, inp inputDataSample) (dataS
 	// validate input dataSample
 	validate := validator.New()
 	if err = validate.Struct(inp); err != nil {
-		err = fmt.Errorf("invalid dataSample inputs %s", err.Error())
+		err = errors.BadRequest(err, "invalid dataSample inputs")
 		return
 	}
 	// Get dataSample keys (=hashes)
 	dataSampleHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
 	// check validity of dataSampleHashes
 	if err = checkHashes(dataSampleHashes); err != nil {
+		err = errors.BadRequest(err)
 		return
 	}
 	// check dataSample is not already in the ledger
 	if existingKeys := checkExist(stub, dataSampleHashes); existingKeys != nil {
-		err = fmt.Errorf("dataSample with these hashes already exist - %s", existingKeys)
+		// TODO should return a proper conflict with all conflicting keys
+		err = errors.BadRequest("dataSample with these hashes already exist - %s", existingKeys)
 		return
 	}
 
@@ -103,13 +107,14 @@ func validateUpdateDataSample(stub shim.ChaincodeStubInterface, inp inputUpdateD
 	// validate input to updatedataSample
 	validate := validator.New()
 	if err = validate.Struct(inp); err != nil {
-		err = fmt.Errorf("invalid inputs to update dataSample %s", err.Error())
+		err = errors.BadRequest(err, "invalid inputs to update dataSample")
 		return
 	}
 	// Get dataSample keys (=hashes)
 	dataSampleHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
 	// check validity of dataSampleHashes
 	if err = checkHashes(dataSampleHashes); err != nil {
+		err = errors.BadRequest(err)
 		return
 	}
 	// check dataManagers exist and are owned by the transaction requester
@@ -141,7 +146,7 @@ func registerDataManager(stub shim.ChaincodeStubInterface, args []string) (resp 
 	dataManagerBytes, _ := json.Marshal(dataManager)
 	err = stub.PutState(dataManagerKey, dataManagerBytes)
 	if err != nil {
-		err = fmt.Errorf("failed to add dataManager with opener hash %s, error is %s", inp.OpenerHash, err.Error())
+		err = errors.E(err, "failed to add dataManager with opener hash %s", inp.OpenerHash)
 		return
 	}
 	// create composite keys (one for each associated objective) to find dataSample associated with a objective
@@ -285,7 +290,7 @@ func queryDataManager(stub shim.ChaincodeStubInterface, args []string) (out outp
 // queryObjectives returns all objectives of the ledger
 func queryDataManagers(stub shim.ChaincodeStubInterface, args []string) (outDataManagers []outputDataManager, err error) {
 	if len(args) != 0 {
-		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
+		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return
 	}
 	var indexName = "dataManager~owner~key"
@@ -351,12 +356,12 @@ func checkDataManagerOwner(stub shim.ChaincodeStubInterface, dataManagerKeys []s
 	for _, dataManagerKey := range dataManagerKeys {
 		dataManager := DataManager{}
 		if err = getElementStruct(stub, dataManagerKey, &dataManager); err != nil {
-			err = fmt.Errorf("could not retrieve dataManager with key %s - %s", dataManagerKey, err.Error())
+			err = errors.BadRequest(err, "could not retrieve dataManager with key %s", dataManagerKey)
 			return
 		}
 		// check transaction requester is the dataManager owner
 		if txCreator != dataManager.Owner {
-			err = fmt.Errorf("%s is not the owner of the dataManager %s", txCreator, dataManagerKey)
+			err = errors.Forbidden("%s is not the owner of the dataManager %s", txCreator, dataManagerKey)
 			return
 		}
 	}
@@ -370,7 +375,8 @@ func checkDataSampleOwner(stub shim.ChaincodeStubInterface, dataSample DataSampl
 		return
 	}
 	if txRequester != dataSample.Owner {
-		err = fmt.Errorf("%s is not the dataSample's owner", txRequester)
+		err = errors.Forbidden("%s is not the dataSample's owner", txRequester)
+		return
 	}
 	return
 }
@@ -412,7 +418,7 @@ func getDataManagerOwner(stub shim.ChaincodeStubInterface, dataManagerKey string
 
 	dataManager := DataManager{}
 	if err = getElementStruct(stub, dataManagerKey, &dataManager); err != nil {
-		err = fmt.Errorf("could not retrieve dataManager with key %s - %s", dataManagerKey, err.Error())
+		err = errors.BadRequest(err, "could not retrieve dataManager with key %s -", dataManagerKey)
 		return
 	}
 	worker = dataManager.Owner

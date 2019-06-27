@@ -32,7 +32,7 @@ func TestDataManager(t *testing.T) {
 	}
 	args := inpDataManager.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding dataManager with invalid opener hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding dataManager with invalid opener hash, status %d and message %s", resp.Status, resp.Message)
 	// Properly add dataManager
 	resp, tt := registerItem(t, *mockStub, "dataManager")
 
@@ -46,8 +46,10 @@ func TestDataManager(t *testing.T) {
 	assert.EqualValuesf(t, dataManagerOpenerHash, dataManagerKey, "when adding dataManager: dataManager key does not correspond to dataManager opener hash: %s - %s", dataManagerKey, dataManagerOpenerHash)
 
 	// Add dataManager which already exist
+	inpDataManager = inputDataManager{}
+	args = inpDataManager.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding dataManager which already exists, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 409, resp.Status, "when adding dataManager which already exists, status %d and message %s", resp.Status, resp.Message)
 	// Query dataManager and check fields match expectations
 	args = [][]byte{[]byte("queryDataManager"), keyToJSON(dataManagerKey)}
 	resp = mockStub.MockInvoke("42", args)
@@ -134,13 +136,13 @@ func TestDataset(t *testing.T) {
 	}
 	args := inpDataSample.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding dataSample with invalid hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding dataSample with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Add dataSample with unexiting dataManager
 	inpDataSample = inputDataSample{}
 	args = inpDataSample.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding dataSample with unexisting dataManager, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding dataSample with unexisting dataManager, status %d and message %s", resp.Status, resp.Message)
 	// TODO Would be nice to check failure when adding dataSample to a dataManager owned by a different people
 
 	// Properly add dataSample
@@ -164,7 +166,8 @@ func TestDataset(t *testing.T) {
 
 	// Add dataSample which already exist
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding dataSample which already exist, status %d and message %s", resp.Status, resp.Message)
+	// TODO should return q 409
+	assert.EqualValuesf(t, 400, resp.Status, "when adding dataSample which already exist, status %d and message %s", resp.Status, resp.Message)
 
 	// Query dataSample and check it corresponds to what was input
 	args = [][]byte{[]byte("queryDataset"), keyToJSON(inpDataManager.OpenerHash)}
