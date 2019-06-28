@@ -3,6 +3,19 @@ package main
 // ---------------------------------------------------------------------------------
 // Representation of elements stored in the ledger
 // ---------------------------------------------------------------------------------
+type assetType string
+
+const ()
+
+// Asset is something
+type Asset struct {
+	Type assetType
+}
+
+// Is is a function
+func (a Asset) Is() bool {
+	return false
+}
 
 // Objective is the representation of one of the element type stored in the ledger
 type Objective struct {
