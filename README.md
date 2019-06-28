@@ -390,6 +390,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"8e29bacef
 ```json
 {
  "algoKey": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+ "assetType": 4,
  "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
  "dataset": {
   "dataManagerKey": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -433,6 +434,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"8e29bac
 ```json
 {
  "algoKey": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+ "assetType": 4,
  "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
  "dataset": {
   "dataManagerKey": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -594,6 +596,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
    "name": "hog + svm",
    "storageAddress": "https://toto/algo/222/algo"
   },
+  "assetType": 5,
   "certified": true,
   "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
   "dataset": {
@@ -629,6 +632,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
    "name": "hog + svm",
    "storageAddress": "https://toto/algo/222/algo"
   },
+  "assetType": 5,
   "certified": false,
   "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
   "dataset": {
@@ -681,6 +685,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"6581232b89
   "name": "hog + svm",
   "storageAddress": "https://toto/algo/222/algo"
  },
+ "assetType": 5,
  "certified": true,
  "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
  "dataset": {
@@ -733,6 +738,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"6581232b
   "name": "hog + svm",
   "storageAddress": "https://toto/algo/222/algo"
  },
+ "assetType": 5,
  "certified": true,
  "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
  "dataset": {
@@ -783,6 +789,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"6581232b8
   "name": "hog + svm",
   "storageAddress": "https://toto/algo/222/algo"
  },
+ "assetType": 5,
  "certified": true,
  "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
  "dataset": {
@@ -827,6 +834,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    "name": "hog + svm",
    "storageAddress": "https://toto/algo/222/algo"
   },
+  "assetType": 5,
   "certified": true,
   "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
   "dataset": {
@@ -862,6 +870,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    "name": "hog + svm",
    "storageAddress": "https://toto/algo/222/algo"
   },
+  "assetType": 5,
   "certified": false,
   "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
   "dataset": {
@@ -897,6 +906,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    "name": "hog + svm",
    "storageAddress": "https://toto/algo/222/algo"
   },
+  "assetType": 5,
   "certified": true,
   "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
   "dataset": {
@@ -951,6 +961,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"8e29ba
     "name": "hog + svm",
     "storageAddress": "https://toto/algo/222/algo"
    },
+   "assetType": 5,
    "certified": false,
    "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
    "dataset": {
@@ -987,6 +998,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"8e29ba
    "name": "hog + svm",
    "storageAddress": "https://toto/algo/222/algo"
   },
+  "assetType": 5,
   "certified": true,
   "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
   "dataset": {
@@ -1069,6 +1081,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     "name": "hog + svm",
     "storageAddress": "https://toto/algo/222/algo"
    },
+   "assetType": 5,
    "certified": true,
    "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
    "dataset": {
@@ -1145,6 +1158,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     "name": "hog + svm",
     "storageAddress": "https://toto/algo/222/algo"
    },
+   "assetType": 5,
    "certified": true,
    "creator": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
    "dataset": {

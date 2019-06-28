@@ -35,6 +35,7 @@ func (dataManager *DataManager) Set(stub shim.ChaincodeStubInterface, inp inputD
 		}
 		dataManager.ObjectiveKey = inp.ObjectiveKey
 	}
+	dataManager.AssetType = DataManagerType
 	dataManager.Name = inp.Name
 	dataManager.OpenerStorageAddress = inp.OpenerStorageAddress
 	dataManager.Type = inp.Type
@@ -281,6 +282,10 @@ func queryDataManager(stub shim.ChaincodeStubInterface, args []string) (out outp
 	}
 	var dataManager DataManager
 	if err = getElementStruct(stub, inp.Key, &dataManager); err != nil {
+		return
+	}
+	if dataManager.AssetType != DataManagerType {
+		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
 	out.Fill(inp.Key, dataManager)

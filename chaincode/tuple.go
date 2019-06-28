@@ -37,6 +37,7 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	if err != nil {
 		return
 	}
+	traintuple.AssetType = TraintupleType
 	traintuple.Creator = creator
 	traintuple.Permissions = "all"
 	traintuple.Tag = inp.Tag
@@ -189,6 +190,7 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	// fill info from associated traintuple
 	outputTraintuple := &outputTraintuple{}
 	outputTraintuple.Fill(stub, traintuple, inp.TraintupleKey)
+	testtuple.AssetType = TesttupleType
 	testtuple.Objective = outputTraintuple.Objective
 	testtuple.Algo = outputTraintuple.Algo
 	testtuple.Model = &Model{
@@ -618,6 +620,10 @@ func queryTraintuple(stub shim.ChaincodeStubInterface, args []string) (outputTra
 	if err = getElementStruct(stub, inp.Key, &traintuple); err != nil {
 		return
 	}
+	if traintuple.AssetType != TraintupleType {
+		err = errors.NotFound("no element with key %s", inp.Key)
+		return
+	}
 	outputTraintuple.Fill(stub, traintuple, inp.Key)
 	return
 }
@@ -656,6 +662,10 @@ func queryTesttuple(stub shim.ChaincodeStubInterface, args []string) (out output
 	}
 	var testtuple Testtuple
 	if err = getElementStruct(stub, inp.Key, &testtuple); err != nil {
+		return
+	}
+	if testtuple.AssetType != TesttupleType {
+		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
 	out.Fill(inp.Key, testtuple)
