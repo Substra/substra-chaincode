@@ -506,3 +506,18 @@ func TestQueryTraintupleNotFound(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 }
+
+func TestQueryTraintuplesEmptyResponse(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+	registerItem(t, *mockStub, "dataManager")
+
+	args := [][]byte{[]byte("queryTraintuples")}
+	resp := mockStub.MockInvoke("42", args)
+
+	traintuples := [](map[string]interface{}){}
+	err := json.Unmarshal(resp.Payload, &traintuples)
+
+	assert.NoError(t, err, "should be unmarshaled")
+	assert.Len(t, traintuples, 0, "there should no traintuple")
+}
