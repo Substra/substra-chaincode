@@ -476,10 +476,9 @@ func TestTraintuple(t *testing.T) {
 	args = [][]byte{[]byte("queryModelDetails"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying model details with status %d and message %s", resp.Status, resp.Message)
-	payload := map[string]interface{}{}
+	payload := outputModelDetails{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &payload))
-	assert.Contains(t, payload, "traintuple")
-	assert.NotNil(t, payload["traintuple"], "when querying model tuples, payload should contain one traintuple")
+	assert.NotNil(t, payload.Traintuple, "when querying model tuples, payload should contain one traintuple")
 
 	// query all traintuples related to a traintuple with the same algo
 	args = [][]byte{[]byte("queryModels")}

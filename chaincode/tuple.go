@@ -411,7 +411,7 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 }
 
 // logStartTrain modifies a traintuple by changing its status from todo to doing
-func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple Traintuple, err error) {
+func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (outputTraintuple outputTraintuple, err error) {
 	inp := inputHashe{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
@@ -420,7 +420,7 @@ func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple 
 
 	status := "doing"
 	// get traintuple, check validity of the update, and update its status
-	traintuple = Traintuple{}
+	traintuple := Traintuple{}
 
 	if err = getElementStruct(stub, inp.Key, &traintuple); err != nil {
 		return
@@ -434,11 +434,12 @@ func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple 
 	if err = traintuple.commitUpdate(stub, inp.Key, status); err != nil {
 		return
 	}
+	outputTraintuple.Fill(stub, traintuple, inp.Key)
 	return
 }
 
 // logStartTest modifies a testtuple by changing its status from todo to doing
-func logStartTest(stub shim.ChaincodeStubInterface, args []string) (testtuple Testtuple, err error) {
+func logStartTest(stub shim.ChaincodeStubInterface, args []string) (outputTesttuple outputTesttuple, err error) {
 	inp := inputHashe{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
@@ -448,7 +449,7 @@ func logStartTest(stub shim.ChaincodeStubInterface, args []string) (testtuple Te
 	oldStatus := "todo"
 	status := "doing"
 	// get testtuple, check validity of the update, and update its status
-	testtuple, oldStatus, err = updateStatusTesttuple(stub, inp.Key, status)
+	testtuple, oldStatus, err := updateStatusTesttuple(stub, inp.Key, status)
 	if err != nil {
 		return
 	}
@@ -465,12 +466,13 @@ func logStartTest(stub shim.ChaincodeStubInterface, args []string) (testtuple Te
 	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
 		return
 	}
+	outputTesttuple.Fill(inp.Key, testtuple)
 	return
 }
 
 // logSuccessTrain modifies a traintuple by changing its status from doing to done
 // reports logs and associated performances
-func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple Traintuple, err error) {
+func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (outputTraintuple outputTraintuple, err error) {
 	inp := inputLogSuccessTrain{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
@@ -479,7 +481,7 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintupl
 
 	status := "done"
 	// get traintuple, check validity of the update, and update its status
-	traintuple = Traintuple{}
+	traintuple := Traintuple{}
 	if err = getElementStruct(stub, inp.Key, &traintuple); err != nil {
 		return
 	}
@@ -507,11 +509,12 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (traintupl
 	if err = updateWaitingTesttuples(stub, inp.Key, traintuple.OutModel, "todo"); err != nil {
 		return
 	}
+	outputTraintuple.Fill(stub, traintuple, inp.Key)
 	return
 }
 
 // logSuccessTest modifies a testtuple by changing its status to done, reports perf and logs
-func logSuccessTest(stub shim.ChaincodeStubInterface, args []string) (testtuple Testtuple, err error) {
+func logSuccessTest(stub shim.ChaincodeStubInterface, args []string) (outputTesttuple outputTesttuple, err error) {
 	inp := inputLogSuccessTest{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
@@ -541,11 +544,12 @@ func logSuccessTest(stub shim.ChaincodeStubInterface, args []string) (testtuple 
 	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
 		return
 	}
+	outputTesttuple.Fill(inp.Key, testtuple)
 	return
 }
 
 // logFailTrain modifies a traintuple by changing its status to fail and reports associated logs
-func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple Traintuple, err error) {
+func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (outputTraintuple outputTraintuple, err error) {
 	inp := inputLogFailTrain{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
@@ -554,7 +558,7 @@ func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple T
 
 	// get traintuple and updates its status
 	status := "failed"
-	traintuple = Traintuple{}
+	traintuple := Traintuple{}
 	if err = getElementStruct(stub, inp.Key, &traintuple); err != nil {
 		return
 	}
@@ -576,11 +580,12 @@ func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (traintuple T
 	if err = updateWaitingTraintuples(stub, inp.Key, status); err != nil {
 		return
 	}
+	outputTraintuple.Fill(stub, traintuple, inp.Key)
 	return
 }
 
 // logFailTest modifies a testtuple by changing its status to fail and reports associated logs
-func logFailTest(stub shim.ChaincodeStubInterface, args []string) (testtuple Testtuple, err error) {
+func logFailTest(stub shim.ChaincodeStubInterface, args []string) (outputTesttuple outputTesttuple, err error) {
 	inp := inputLogFailTest{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
@@ -606,6 +611,7 @@ func logFailTest(stub shim.ChaincodeStubInterface, args []string) (testtuple Tes
 	if err = updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
 		return
 	}
+	outputTesttuple.Fill(inp.Key, testtuple)
 	return
 }
 
@@ -629,7 +635,7 @@ func queryTraintuple(stub shim.ChaincodeStubInterface, args []string) (outputTra
 }
 
 // queryTraintuples returns all traintuples
-func queryTraintuples(stub shim.ChaincodeStubInterface, args []string) (elements []map[string]interface{}, err error) {
+func queryTraintuples(stub shim.ChaincodeStubInterface, args []string) (outTraintuples []outputTraintuple, err error) {
 	if len(args) != 0 {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return
@@ -639,16 +645,12 @@ func queryTraintuples(stub shim.ChaincodeStubInterface, args []string) (elements
 		return
 	}
 	for _, key := range elementsKeys {
-		var element map[string]interface{}
 		var outputTraintuple outputTraintuple
 		outputTraintuple, err = getOutputTraintuple(stub, key)
 		if err != nil {
 			return
 		}
-		oo, _ := json.Marshal(outputTraintuple)
-		json.Unmarshal(oo, &element)
-		element["key"] = key
-		elements = append(elements, element)
+		outTraintuples = append(outTraintuples, outputTraintuple)
 	}
 	return
 }
@@ -685,19 +687,18 @@ func queryTesttuples(stub shim.ChaincodeStubInterface, args []string) (outTesttu
 		return
 	}
 	for _, key := range elementsKeys {
-		var testtuple Testtuple
 		var out outputTesttuple
-		if err = getElementStruct(stub, key, &testtuple); err != nil {
+		out, err = getOutputTesttuple(stub, key)
+		if err != nil {
 			return
 		}
-		out.Fill(key, testtuple)
 		outTesttuples = append(outTesttuples, out)
 	}
 	return
 }
 
 // queryModelDetails returns info about the testtuple and algo related to a traintuple
-func queryModelDetails(stub shim.ChaincodeStubInterface, args []string) (mPayload map[string]interface{}, err error) {
+func queryModelDetails(stub shim.ChaincodeStubInterface, args []string) (outModelDetails outputModelDetails, err error) {
 	inp := inputHashe{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
@@ -705,41 +706,37 @@ func queryModelDetails(stub shim.ChaincodeStubInterface, args []string) (mPayloa
 	}
 
 	// get associated traintuple
-	var element map[string]interface{}
-	outputTraintuple, err := getOutputTraintuple(stub, inp.Key)
+	outModelDetails.Traintuple, err = getOutputTraintuple(stub, inp.Key)
 	if err != nil {
 		return
 	}
-	oo, _ := json.Marshal(outputTraintuple)
-	json.Unmarshal(oo, &element)
-	element["key"] = inp.Key
-	mPayload = map[string]interface{}{"traintuple": element}
+
 	// get certified and non-certified testtuples related to traintuple
-	var nonCertifiedTesttuples []map[string]interface{}
+	var nonCertifiedTesttuples []outputTesttuple
 	testtupleKeys, err := getKeysFromComposite(stub, "testtuple~traintuple~certified~key", []string{"testtuple", inp.Key})
 	if err != nil {
 		return
 	}
 	for _, testtupleKey := range testtupleKeys {
 		// get testtuple and serialize it
-		var testtuple map[string]interface{}
-		if err = getElementStruct(stub, testtupleKey, &testtuple); err != nil {
+		var outputTesttuple outputTesttuple
+		outputTesttuple, err = getOutputTesttuple(stub, testtupleKey)
+		if err != nil {
 			return
 		}
-		testtuple["key"] = testtupleKey
-		if testtuple["certified"] == true {
-			mPayload["testtuple"] = testtuple
+
+		if outputTesttuple.Certified == true {
+			outModelDetails.Testtuple = outputTesttuple
 		} else {
-			nonCertifiedTesttuples = append(nonCertifiedTesttuples, testtuple)
+			nonCertifiedTesttuples = append(nonCertifiedTesttuples, outputTesttuple)
 		}
-		mPayload["nonCertifiedTesttuples"] = nonCertifiedTesttuples
 	}
+	outModelDetails.NonCertifiedTesttuples = nonCertifiedTesttuples
 	return
 }
 
 // queryModels returns all traintuples and associated testuples
-// TODO
-func queryModels(stub shim.ChaincodeStubInterface, args []string) (elements []map[string]interface{}, err error) {
+func queryModels(stub shim.ChaincodeStubInterface, args []string) (outModels []outputModel, err error) {
 	if len(args) != 0 {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return
@@ -750,20 +747,15 @@ func queryModels(stub shim.ChaincodeStubInterface, args []string) (elements []ma
 		return
 	}
 	for _, traintupleKey := range traintupleKeys {
-		var outputTraintuple outputTraintuple
-		element := make(map[string]interface{})
-		traintuple := make(map[string]interface{})
+		var outputModel outputModel
+
 		// get traintuple
-		outputTraintuple, err = getOutputTraintuple(stub, traintupleKey)
+		outputModel.Traintuple, err = getOutputTraintuple(stub, traintupleKey)
 		if err != nil {
 			return
 		}
-		oo, _ := json.Marshal(outputTraintuple)
-		json.Unmarshal(oo, &traintuple)
-		traintuple["key"] = traintupleKey
-		element["traintuple"] = traintuple
 
-		// get testtuple related to traintuple
+		// get associated testtuple
 		var testtupleKeys []string
 		testtupleKeys, err = getKeysFromComposite(stub, "testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey, "true"})
 		if err != nil {
@@ -772,14 +764,12 @@ func queryModels(stub shim.ChaincodeStubInterface, args []string) (elements []ma
 		if len(testtupleKeys) == 1 {
 			// get testtuple and serialize it
 			testtupleKey := testtupleKeys[0]
-			testtuple := make(map[string]interface{})
-			if err = getElementStruct(stub, testtupleKey, &testtuple); err != nil {
+			outputModel.Testtuple, err = getOutputTesttuple(stub, testtupleKey)
+			if err != nil {
 				return
 			}
-			testtuple["key"] = testtupleKey
-			element["testtuple"] = testtuple
 		}
-		elements = append(elements, element)
+		outModels = append(outModels, outputModel)
 	}
 	return
 }
@@ -789,14 +779,49 @@ func queryModels(stub shim.ChaincodeStubInterface, args []string) (elements []ma
 // --------------------------------------------------------------
 
 // getOutputTraintuple takes as input a traintuple key and returns the outputTraintuple
-func getOutputTraintuple(stub shim.ChaincodeStubInterface, traintupleKey string) (outputTraintuple, error) {
+func getOutputTraintuple(stub shim.ChaincodeStubInterface, traintupleKey string) (outTraintuple outputTraintuple, err error) {
 	traintuple := Traintuple{}
-	outputTraintuple := outputTraintuple{}
-	if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
-		return outputTraintuple, err
+	if err = getElementStruct(stub, traintupleKey, &traintuple); err != nil {
+		return
 	}
-	outputTraintuple.Fill(stub, traintuple, traintupleKey)
-	return outputTraintuple, nil
+	outTraintuple.Fill(stub, traintuple, traintupleKey)
+	return
+}
+
+// getOutputTraintuples takes as input a list of keys and returns a paylaod containing a list of associated retrieved elements
+func getOutputTraintuples(stub shim.ChaincodeStubInterface, traintupleKeys []string) (outTraintuples []outputTraintuple, err error) {
+	for _, key := range traintupleKeys {
+		var outputTraintuple outputTraintuple
+		outputTraintuple, err = getOutputTraintuple(stub, key)
+		if err != nil {
+			return
+		}
+		outTraintuples = append(outTraintuples, outputTraintuple)
+	}
+	return
+}
+
+// getOutputTesttuple takes as input a testtuple key and returns the outputTesttuple
+func getOutputTesttuple(stub shim.ChaincodeStubInterface, testtupleKey string) (outTesttuple outputTesttuple, err error) {
+	testtuple := Testtuple{}
+	if err = getElementStruct(stub, testtupleKey, &testtuple); err != nil {
+		return
+	}
+	outTesttuple.Fill(testtupleKey, testtuple)
+	return
+}
+
+// getOutputTesttuples takes as input a list of keys and returns a paylaod containing a list of associated retrieved elements
+func getOutputTesttuples(stub shim.ChaincodeStubInterface, testtupleKeys []string) (outTesttuples []outputTesttuple, err error) {
+	for _, key := range testtupleKeys {
+		var outputTesttuple outputTesttuple
+		outputTesttuple, err = getOutputTesttuple(stub, key)
+		if err != nil {
+			return
+		}
+		outTesttuples = append(outTesttuples, outputTesttuple)
+	}
+	return
 }
 
 // checkLog checks the validity of logs
@@ -1043,27 +1068,6 @@ func updateWaitingTesttuples(stub shim.ChaincodeStubInterface, traintupleKey str
 
 	}
 	return nil
-}
-
-// getTraintuplesPayload takes as input a list of keys and returns a paylaod containing a list of associated retrieved elements
-func getTraintuplesPayload(stub shim.ChaincodeStubInterface, traintupleKeys []string) ([]map[string]interface{}, error) {
-
-	var elements []map[string]interface{}
-	for _, key := range traintupleKeys {
-		var element map[string]interface{}
-		outputTraintuple, err := getOutputTraintuple(stub, key)
-		if err != nil {
-			return nil, err
-		}
-		oo, err := json.Marshal(outputTraintuple)
-		if err != nil {
-			return nil, err
-		}
-		json.Unmarshal(oo, &element)
-		element["key"] = key
-		elements = append(elements, element)
-	}
-	return elements, nil
 }
 
 // HashForKey to generate key for an asset
