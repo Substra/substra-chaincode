@@ -210,14 +210,14 @@ func (out *outputTesttuple) Fill(key string, in Testtuple) {
 }
 
 type outputModelDetails struct {
-	Traintuple             outputTraintuple  `json:traintuple`
-	Testtuple              outputTesttuple   `json:testtuple`
-	NonCertifiedTesttuples []outputTesttuple `json:nonCertifiedTesttuples`
+	Traintuple             outputTraintuple  `json:"traintuple"`
+	Testtuple              outputTesttuple   `json:"testtuple"`
+	NonCertifiedTesttuples []outputTesttuple `json:"nonCertifiedTesttuples"`
 }
 
 type outputModel struct {
-	Traintuple outputTraintuple `json:traintuple`
-	Testtuple  outputTesttuple  `json:testtuple`
+	Traintuple outputTraintuple `json:"traintuple"`
+	Testtuple  outputTesttuple  `json:"testtuple"`
 }
 
 // SetEvent wrap the steps for sending a struct as payload for a event

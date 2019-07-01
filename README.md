@@ -970,7 +970,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"8e29ba
 ##### Command output:
 ```json
 {
- "NonCertifiedTesttuples": [
+ "nonCertifiedTesttuples": [
   {
    "algo": {
     "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -1007,7 +1007,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"8e29ba
    "tag": ""
   }
  ],
- "Testtuple": {
+ "testtuple": {
   "algo": {
    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "name": "hog + svm",
@@ -1042,7 +1042,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"8e29ba
   "status": "done",
   "tag": ""
  },
- "Traintuple": {
+ "traintuple": {
   "algo": {
    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "name": "hog + svm",
@@ -1089,7 +1089,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
 ```json
 [
  {
-  "Testtuple": {
+  "testtuple": {
    "algo": {
     "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "name": "hog + svm",
@@ -1124,7 +1124,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    "status": "waiting",
    "tag": ""
   },
-  "Traintuple": {
+  "traintuple": {
    "algo": {
     "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "name": "hog + svm",
@@ -1165,7 +1165,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
   }
  },
  {
-  "Testtuple": {
+  "testtuple": {
    "algo": {
     "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "name": "hog + svm",
@@ -1200,7 +1200,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    "status": "done",
    "tag": ""
   },
-  "Traintuple": {
+  "traintuple": {
    "algo": {
     "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "name": "hog + svm",
