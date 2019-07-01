@@ -231,6 +231,44 @@ peer chaincode query -n mycc -c '{"Args":["queryDataManagers"]}' -C myc
  }
 ]
 ```
+#### ------------ Query DataSamples ------------
+##### Command peer example:
+```bash
+peer chaincode query -n mycc -c '{"Args":["queryDataSamples"]}' -C myc
+```
+##### Command output:
+```json
+[
+ {
+  "dataManagerKeys": [
+   "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+  ],
+  "key": "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "owner": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0"
+ },
+ {
+  "dataManagerKeys": [
+   "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+  ],
+  "key": "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "owner": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0"
+ },
+ {
+  "dataManagerKeys": [
+   "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+  ],
+  "key": "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "owner": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0"
+ },
+ {
+  "dataManagerKeys": [
+   "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+  ],
+  "key": "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "owner": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0"
+ }
+]
+```
 #### ------------ Query Objectives ------------
 ##### Command peer example:
 ```bash
