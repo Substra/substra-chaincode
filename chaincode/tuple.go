@@ -712,7 +712,6 @@ func queryModelDetails(stub shim.ChaincodeStubInterface, args []string) (outMode
 	}
 
 	// get certified and non-certified testtuples related to traintuple
-	var nonCertifiedTesttuples []outputTesttuple
 	testtupleKeys, err := getKeysFromComposite(stub, "testtuple~traintuple~certified~key", []string{"testtuple", inp.Key})
 	if err != nil {
 		return
@@ -728,10 +727,9 @@ func queryModelDetails(stub shim.ChaincodeStubInterface, args []string) (outMode
 		if outputTesttuple.Certified == true {
 			outModelDetails.Testtuple = outputTesttuple
 		} else {
-			nonCertifiedTesttuples = append(nonCertifiedTesttuples, outputTesttuple)
+			outModelDetails.NonCertifiedTesttuples = append(outModelDetails.NonCertifiedTesttuples, outputTesttuple)
 		}
 	}
-	outModelDetails.NonCertifiedTesttuples = nonCertifiedTesttuples
 	return
 }
 
