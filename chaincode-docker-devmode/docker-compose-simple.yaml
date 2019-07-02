@@ -29,13 +29,13 @@ services:
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer:7051
       - CORE_PEER_LOCALMSPID=DEFAULT
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_LOGGING_LEVEL=DEBUG
+      - FABRIC_LOGGING_SPEC=INFO
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp
     volumes:
         - /var/run/:/host/var/run/
         - ./msp:/etc/hyperledger/msp
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-    command: peer node start --peer-chaincodedev=true -o orderer:7050
+    command: peer node start --peer-chaincodedev=true
     ports:
       - 7051:7051
       - 7053:7053
@@ -49,7 +49,7 @@ services:
     environment:
       - GOPATH=/opt/gopath
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_LOGGING_LEVEL=DEBUG
+      - FABRIC_LOGGING_SPEC=INFO
       - CORE_PEER_ID=cli
       - CORE_PEER_ADDRESS=peer:7051
       - CORE_PEER_LOCALMSPID=DEFAULT
@@ -59,7 +59,7 @@ services:
     volumes:
         - /var/run/:/host/var/run/
         - ./msp:/etc/hyperledger/msp
-        - ./../chaincode:/opt/gopath/src/chaincodedev/chaincode
+        - ./../chaincode:/opt/gopath/src/chaincode
         - ./:/opt/gopath/src/chaincodedev/
     depends_on:
       - orderer
@@ -72,13 +72,13 @@ services:
     environment:
       - GOPATH=/opt/gopath
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_LOGGING_LEVEL=DEBUG
+      - FABRIC_LOGGING_SPEC=INFO
       - CORE_PEER_ID=example02
       - CORE_PEER_ADDRESS=peer:7051
       - CORE_PEER_LOCALMSPID=DEFAULT
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp
     working_dir: /opt/gopath/src/chaincode
-    command: /bin/bash -c 'sleep 6000000'
+    command: /bin/bash -c 'CORE_PEER_ADDRESS=peer:7052 CORE_CHAINCODE_ID_NAME=mycc:0 go run chaincode'
     volumes:
         - /var/run/:/host/var/run/
         - ./msp:/etc/hyperledger/msp
