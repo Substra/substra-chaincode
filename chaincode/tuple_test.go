@@ -515,9 +515,6 @@ func TestQueryTraintuplesEmptyResponse(t *testing.T) {
 	args := [][]byte{[]byte("queryTraintuples")}
 	resp := mockStub.MockInvoke("42", args)
 
-	traintuples := [](map[string]interface{}){}
-	err := json.Unmarshal(resp.Payload, &traintuples)
-
-	assert.NoError(t, err, "should be unmarshaled")
-	assert.Len(t, traintuples, 0, "there should no traintuple")
+	nilBytes, _ := json.Marshal(nil)
+	assert.NotEqual(t, nilBytes, resp.Payload, "payload is nil")
 }
