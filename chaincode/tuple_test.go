@@ -142,7 +142,6 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 	assert.NoError(t, err)
 	err = mockStub.PutState(objectiveDescriptionHash, objBytes)
 	assert.NoError(t, err)
-
 	// It should not panic
 	require.NotPanics(t, func() {
 		getOutputTraintuple(mockStub, traintupleKey)
@@ -510,6 +509,7 @@ func TestQueryTraintupleNotFound(t *testing.T) {
 func TestQueryTraintuplesEmptyResponse(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
+	// call registerItem to ensure the test suite is properly setup
 	registerItem(t, *mockStub, "dataManager")
 
 	args := [][]byte{[]byte("queryTraintuples")}
