@@ -408,3 +408,28 @@ func TestMain(m *testing.M) {
 	logger.SetLevel(shim.LogCritical)
 	os.Exit(m.Run())
 }
+
+func TestQueryEmptyResponse(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+	// call registerItem to ensure the test suite is properly setup
+	registerItem(t, *mockStub, "dataManager")
+
+	smartContracts := []string{
+		"queryAlgos",
+		"queryDataSamples",
+		"queryObjectives",
+		// "queryDataManagers", not working due to test suite registration
+		"queryTraintuples",
+		"queryTesttuples",
+		"queryModels",
+	}
+
+	for _, contractName := range smartContracts {
+		args := [][]byte{[]byte(contractName)}
+		resp := mockStub.MockInvoke("42", args)
+
+		expectedPayload, _ := json.Marshal(make([]string, 0))
+		assert.Equal(t, expectedPayload, resp.Payload, "payload is not an empty list")
+	}
+}
