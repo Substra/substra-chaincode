@@ -28,8 +28,8 @@ func (dataSample *inputDataSample) createDefault() [][]byte {
 	if dataSample.Hashes == "" {
 		dataSample.Hashes = trainDataSampleHash1 + ", " + trainDataSampleHash2
 	}
-	if dataSample.DataManagerKeys == "" {
-		dataSample.DataManagerKeys = dataManagerOpenerHash
+	if dataSample.DataManagerKeys == nil {
+		dataSample.DataManagerKeys = []string{dataManagerOpenerHash}
 	}
 	if dataSample.TestOnly == "" {
 		dataSample.TestOnly = "false"
@@ -90,8 +90,8 @@ func (traintuple *inputTraintuple) createDefault() [][]byte {
 	if traintuple.AlgoKey == "" {
 		traintuple.AlgoKey = algoHash
 	}
-	if traintuple.InModels == "" {
-		traintuple.InModels = ""
+	if traintuple.InModels == nil {
+		traintuple.InModels = []string{}
 	}
 	if traintuple.ObjectiveKey == "" {
 		traintuple.ObjectiveKey = objectiveDescriptionHash
@@ -99,8 +99,8 @@ func (traintuple *inputTraintuple) createDefault() [][]byte {
 	if traintuple.DataManagerKey == "" {
 		traintuple.DataManagerKey = dataManagerOpenerHash
 	}
-	if traintuple.DataSampleKeys == "" {
-		traintuple.DataSampleKeys = trainDataSampleHash1 + ", " + trainDataSampleHash2
+	if traintuple.DataSampleKeys == nil {
+		traintuple.DataSampleKeys = []string{trainDataSampleHash1, trainDataSampleHash2}
 	}
 	args := append([][]byte{[]byte("createTraintuple")}, assetToJSON(traintuple))
 	return args

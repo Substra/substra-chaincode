@@ -47,35 +47,35 @@ type inputUpdateDataManager struct {
 
 // inputDataSample is the representation of input args to register one or more dataSample
 type inputDataSample struct {
-	Hashes          string `validate:"required" json:"hashes"`
-	DataManagerKeys string `validate:"omitempty" json:"dataManagerKeys"`
-	TestOnly        string `validate:"required,oneof=true false" json:"testOnly"`
+	Hashes          string   `validate:"required" json:"hashes"`
+	DataManagerKeys []string `validate:"omitempty,dive,len=64,hexadecimal" json:"dataManagerKeys"`
+	TestOnly        string   `validate:"required,oneof=true false" json:"testOnly"`
 }
 
 // inputUpdateDataSample is the representation of input args to update one or more dataSample
 type inputUpdateDataSample struct {
-	Hashes          string `validate:"required" json:"hashes"`
-	DataManagerKeys string `validate:"required" json:"dataManagerKeys"`
+	Hashes          string   `validate:"required" json:"hashes"`
+	DataManagerKeys []string `validate:"required,dive,len=64,hexadecimal" json:"dataManagerKeys"`
 }
 
 // inputTraintuple is the representation of input args to register a Traintuple
 type inputTraintuple struct {
-	AlgoKey        string `validate:"required,len=64,hexadecimal" json:"algoKey"`
-	ObjectiveKey   string `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
-	InModels       string `validate:"omitempty" json:"inModels"`
-	DataManagerKey string `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
-	DataSampleKeys string `validate:"required" json:"dataSampleKeys"`
-	FLTask         string `validate:"omitempty" json:"flTask"`
-	Rank           string `validate:"omitempty" json:"rank"`
-	Tag            string `validate:"omitempty,lte=64" json:"tag"`
+	AlgoKey        string   `validate:"required,len=64,hexadecimal" json:"algoKey"`
+	ObjectiveKey   string   `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
+	InModels       []string `validate:"omitempty,dive,len=64,hexadecimal" json:"inModels"`
+	DataManagerKey string   `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys []string `validate:"required,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	FLTask         string   `validate:"omitempty" json:"flTask"`
+	Rank           string   `validate:"omitempty" json:"rank"`
+	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
 }
 
 // inputTestuple is the representation of input args to register a Testtuple
 type inputTesttuple struct {
-	TraintupleKey  string `validate:"required,len=64,hexadecimal" json:"traintupleKey"`
-	DataManagerKey string `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
-	DataSampleKeys string `validate:"omitempty" json:"dataSampleKeys"`
-	Tag            string `validate:"omitempty,lte=64" json:"tag"`
+	TraintupleKey  string   `validate:"required,len=64,hexadecimal" json:"traintupleKey"`
+	DataManagerKey string   `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys []string `validate:"omitempty,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
 }
 
 type inputHashe struct {

@@ -28,14 +28,14 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	mockStub.MockInvoke("42", args)
 	inpDataSample := inputDataSample{
 		Hashes:          testDataSampleHash1,
-		DataManagerKeys: dataManagerOpenerHash,
+		DataManagerKeys: []string{dataManagerOpenerHash},
 		TestOnly:        "true",
 	}
 	args = inpDataSample.createDefault()
 	mockStub.MockInvoke("42", args)
 	inpDataSample = inputDataSample{
 		Hashes:          testDataSampleHash2,
-		DataManagerKeys: dataManagerOpenerHash,
+		DataManagerKeys: []string{dataManagerOpenerHash},
 		TestOnly:        "true",
 	}
 	args = inpDataSample.createDefault()

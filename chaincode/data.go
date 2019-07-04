@@ -70,7 +70,7 @@ func setDataSample(stub shim.ChaincodeStubInterface, inp inputDataSample) (dataS
 	// check if associated dataManager(s) exists
 	var dataManagerKeys []string
 	if len(inp.DataManagerKeys) > 0 {
-		dataManagerKeys = strings.Split(strings.Replace(inp.DataManagerKeys, " ", "", -1), ",")
+		dataManagerKeys = inp.DataManagerKeys
 		if err = checkDataManagerOwner(stub, dataManagerKeys); err != nil {
 			return
 		}
@@ -100,8 +100,7 @@ func validateUpdateDataSample(stub shim.ChaincodeStubInterface, inp inputUpdateD
 		return
 	}
 	// check dataManagers exist and are owned by the transaction requester
-	dataManagerKeys = strings.Split(strings.Replace(inp.DataManagerKeys, " ", "", -1), ",")
-	if err = checkDataManagerOwner(stub, dataManagerKeys); err != nil {
+	if err = checkDataManagerOwner(stub, inp.DataManagerKeys); err != nil {
 		return
 	}
 	return

@@ -202,7 +202,7 @@ func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 	key := res["key"]
 	// Failed to add a traintuple with the same rank
 	inpTraintuple = inputTraintuple{
-		InModels: key,
+		InModels: []string{key},
 		Rank:     "0",
 		FLTask:   key}
 	args = inpTraintuple.createDefault()
@@ -211,7 +211,7 @@ func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 
 	// Failed to add a traintuple to an unexisting Fltask
 	inpTraintuple = inputTraintuple{
-		InModels: key,
+		InModels: []string{key},
 		Rank:     "1",
 		FLTask:   "notarealone"}
 	args = inpTraintuple.createDefault()
@@ -220,7 +220,7 @@ func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 
 	// Succesfully add a traintuple to the same FLTask
 	inpTraintuple = inputTraintuple{
-		InModels: key,
+		InModels: []string{key},
 		Rank:     "1",
 		FLTask:   key}
 	args = inpTraintuple.createDefault()
@@ -239,7 +239,7 @@ func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 
 	inpTraintuple = inputTraintuple{
 		AlgoKey:  newAlgoHash,
-		InModels: ttkey,
+		InModels: []string{ttkey},
 		Rank:     "2",
 		FLTask:   key}
 	args = inpTraintuple.createDefault()
@@ -286,7 +286,7 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 	// Add a testtuple that shoulb be certified since it's the same dataManager and
 	// dataSample than the objective but explicitly pass as arguments and in disorder
 	inpTesttuple := inputTesttuple{
-		DataSampleKeys: testDataSampleHash2 + "," + testDataSampleHash1,
+		DataSampleKeys: []string{testDataSampleHash2, testDataSampleHash1},
 		DataManagerKey: dataManagerOpenerHash}
 	args := inpTesttuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
@@ -315,7 +315,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status)
 
 	// Fail to add an incomplete uncertified testtuple
-	inpTesttuple2 := inputTesttuple{DataSampleKeys: trainDataSampleHash1}
+	inpTesttuple2 := inputTesttuple{DataSampleKeys: []string{trainDataSampleHash1}}
 	args = inpTesttuple2.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status)
@@ -323,7 +323,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 
 	// Add an uncertified testtuple successfully
 	inpTesttuple3 := inputTesttuple{
-		DataSampleKeys: trainDataSampleHash1 + "," + trainDataSampleHash2,
+		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 		DataManagerKey: dataManagerOpenerHash}
 	args = inpTesttuple3.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -331,7 +331,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 
 	// Fail to add the same testtuple with a different order for dataSampleKeys
 	inpTesttuple4 := inputTesttuple{
-		DataSampleKeys: trainDataSampleHash2 + "," + trainDataSampleHash1,
+		DataSampleKeys: []string{trainDataSampleHash2, trainDataSampleHash1},
 		DataManagerKey: dataManagerOpenerHash}
 	args = inpTesttuple4.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -413,7 +413,7 @@ func TestTraintuple(t *testing.T) {
 
 	// Add traintuple with inmodel from the above-submitted traintuple
 	inpWaitingTraintuple := inputTraintuple{
-		InModels: string(traintupleKey),
+		InModels: []string{string(traintupleKey)},
 	}
 	args = inpWaitingTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)

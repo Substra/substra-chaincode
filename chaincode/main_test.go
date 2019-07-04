@@ -85,7 +85,14 @@ func prettyPrintStructElements(buf io.Writer, margin string, strucType reflect.T
 			}
 			continue
 		}
-		fmt.Fprintf(buf, "%s\"%s\": %s (%s),\n", margin, f.Tag.Get("json"), f.Type.Kind(), f.Tag.Get("validate"))
+		fieldType := f.Type.Kind()
+		fieldStr := ""
+		if fieldType == reflect.Slice {
+			fieldStr = fmt.Sprintf("[%s]", f.Type.Elem().Kind())
+		} else {
+			fieldStr = fmt.Sprint(fieldType)
+		}
+		fmt.Fprintf(buf, "%s\"%s\": %s (%s),\n", margin, f.Tag.Get("json"), fieldStr, f.Tag.Get("validate"))
 	}
 }
 
@@ -107,7 +114,7 @@ func registerItem(t *testing.T, mockStub shim.MockStub, itemType string) (peer.R
 	// 2. add test dataSample
 	inpDataSample := inputDataSample{
 		Hashes:          testDataSampleHash1 + ", " + testDataSampleHash2,
-		DataManagerKeys: dataManagerOpenerHash,
+		DataManagerKeys: []string{dataManagerOpenerHash},
 		TestOnly:        "true",
 	}
 	args = inpDataSample.createDefault()
@@ -255,7 +262,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Add Traintuple with inModel from previous traintuple ------------")
 	inpTraintuple = inputTraintuple{}
-	inpTraintuple.InModels = traintupleKey
+	inpTraintuple.InModels = []string{traintupleKey}
 	args = inpTraintuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTraintuple", args, inpTraintuple)
 	printResp(&out, resp.Payload)
@@ -290,7 +297,7 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintln(&out, "#### ------------ Add Non-Certified Testtuple ------------")
 	inpTesttuple := inputTesttuple{
 		DataManagerKey: dataManagerOpenerHash,
-		DataSampleKeys: trainDataSampleHash1 + ", " + trainDataSampleHash2,
+		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 	}
 	args = inpTesttuple.createDefault()
 	callAssertAndPrint("invoke", "createTesttuple", args, inputHashe{})
@@ -370,7 +377,7 @@ func TestPipeline(t *testing.T) {
 	mockStub.MockInvoke("42", args)
 	// associate a data sample with the old data manager with the updateDataSample
 	updateData := inputUpdateDataSample{
-		DataManagerKeys: newDataManagerKey,
+		DataManagerKeys: []string{newDataManagerKey},
 		Hashes:          trainDataSampleHash1,
 	}
 	args = [][]byte{[]byte("updateDataSample"), assetToJSON(updateData)}

@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
-	"strings"
 
 	"encoding/json"
 
@@ -57,11 +56,8 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 
 	// check if InModels is empty or if mentionned models do exist and fill inModels
 	status := StatusTodo
-	parentTraintupleKeys := strings.Split(strings.Replace(inp.InModels, " ", "", -1), ",")
+	parentTraintupleKeys := inp.InModels
 	for _, parentTraintupleKey := range parentTraintupleKeys {
-		if parentTraintupleKey == "" {
-			break
-		}
 		parentTraintuple := Traintuple{}
 		if err = getElementStruct(stub, parentTraintupleKey, &parentTraintuple); err != nil {
 			err = errors.BadRequest(err, "could not retrieve parent traintuple with key %s %d", parentTraintupleKeys, len(parentTraintupleKeys))
@@ -76,8 +72,7 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	traintuple.Status = status
 
 	// check if DataSampleKeys are from the same dataManager and if they are not test only dataSample
-	dataSampleKeys := strings.Split(strings.Replace(inp.DataSampleKeys, " ", "", -1), ",")
-	_, trainOnly, err := checkSameDataManager(stub, inp.DataManagerKey, dataSampleKeys)
+	_, trainOnly, err := checkSameDataManager(stub, inp.DataManagerKey, inp.DataSampleKeys)
 	if err != nil {
 		return
 	}
@@ -93,7 +88,7 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	}
 	traintuple.Dataset = &Dataset{
 		DataManagerKey: inp.DataManagerKey,
-		DataSampleKeys: dataSampleKeys,
+		DataSampleKeys: inp.DataSampleKeys,
 	}
 	traintuple.Dataset.Worker, err = getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
 	if err != nil {
@@ -227,7 +222,7 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	if len(inp.DataManagerKey) > 0 && len(inp.DataSampleKeys) > 0 {
 		// non-certified testtuple
 		// test dataset are specified by the user
-		dataSampleKeys = strings.Split(strings.Replace(inp.DataSampleKeys, " ", "", -1), ",")
+		dataSampleKeys = inp.DataSampleKeys
 		_, _, err = checkSameDataManager(stub, inp.DataManagerKey, dataSampleKeys)
 		if err != nil {
 			return testtupleKey, err
