@@ -4,13 +4,13 @@ import (
 	"chaincode/errors"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
 
-	"encoding/json"
-
 	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // stringInSlice check if a string is in a slice
@@ -201,11 +201,15 @@ func updateCompositeKey(stub shim.ChaincodeStubInterface, indexName string, oldA
 }
 
 // AssetFromJSON unmarshal a stringify json into the passed interface
-// TODO: Validate the interface here if possible
 func AssetFromJSON(args string, asset interface{}) error {
 	err := json.Unmarshal([]byte(args), &asset)
 	if err != nil {
 		return errors.BadRequest(err, "Problem when reading json arg: %s, error is:", args)
+	}
+	v := validator.New()
+	err = v.Struct(asset)
+	if err != nil {
+		return errors.BadRequest(err, "Inputs validation failed: %s, error is:", args)
 	}
 	return nil
 }
