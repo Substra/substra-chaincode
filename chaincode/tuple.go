@@ -13,7 +13,6 @@ import (
 	"encoding/json"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 const (
@@ -30,12 +29,6 @@ const (
 
 // Set is a method of the receiver Traintuple. It checks the validity of inputTraintuple and uses its fields to set the Traintuple
 func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTraintuple) (traintupleKey string, err error) {
-
-	validate := validator.New()
-	if err = validate.Struct(inp); err != nil {
-		err = errors.BadRequest(err, "invalid inputs to update data")
-		return
-	}
 
 	// TODO later: check permissions
 	// find associated creator and check permissions (TODO later)
@@ -171,11 +164,6 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 
 // Set is a method of the receiver Testtuple. It checks the validity of inputTesttuple and uses its fields to set the Testtuple
 func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTesttuple) (testtupleKey string, err error) {
-
-	validate := validator.New()
-	if err = validate.Struct(inp); err != nil {
-		return "", errors.BadRequest(err, "invalid inputs to update data")
-	}
 
 	// check associated traintuple
 	traintuple := Traintuple{}

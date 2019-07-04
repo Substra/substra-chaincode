@@ -9,18 +9,11 @@ import (
 	"encoding/json"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"gopkg.in/go-playground/validator.v9"
 )
 
-// Set is a method of the receiver DataManager. It checks the validity of inputDataManager and uses its fields to set the DataManager
+// Set is a method of the receiver DataManager. It uses inputDataManager fields to set the DataManager
 // Returns the dataManagerKey and associated objectiveKeys
 func (dataManager *DataManager) Set(stub shim.ChaincodeStubInterface, inp inputDataManager) (string, string, error) {
-	// check validity of submitted fields
-	validate := validator.New()
-	if err := validate.Struct(inp); err != nil {
-		err = errors.BadRequest(err, "invalid dataManager inputs")
-		return "", "", err
-	}
 	// check dataManager is not already in the ledger
 	dataManagerKey := inp.OpenerHash
 	if elementBytes, _ := stub.GetState(dataManagerKey); elementBytes != nil {
@@ -55,12 +48,6 @@ func (dataManager *DataManager) Set(stub shim.ChaincodeStubInterface, inp inputD
 // setDataSample is a method checking the validity of inputDataSample to be registered in the ledger
 // and returning corresponding dataSample hashes, associated dataManagers, testOnly and errors
 func setDataSample(stub shim.ChaincodeStubInterface, inp inputDataSample) (dataSampleHashes []string, dataSample DataSample, err error) {
-	// validate input dataSample
-	validate := validator.New()
-	if err = validate.Struct(inp); err != nil {
-		err = errors.BadRequest(err, "invalid dataSample inputs")
-		return
-	}
 	// Get dataSample keys (=hashes)
 	dataSampleHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
 	// check validity of dataSampleHashes
@@ -105,12 +92,6 @@ func validateUpdateDataSample(stub shim.ChaincodeStubInterface, inp inputUpdateD
 
 	// TODO return full dataSample
 
-	// validate input to updatedataSample
-	validate := validator.New()
-	if err = validate.Struct(inp); err != nil {
-		err = errors.BadRequest(err, "invalid inputs to update dataSample")
-		return
-	}
 	// Get dataSample keys (=hashes)
 	dataSampleHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
 	// check validity of dataSampleHashes
@@ -261,11 +242,7 @@ func updateDataManager(stub shim.ChaincodeStubInterface, args []string) (resp ma
 	if err != nil {
 		return
 	}
-	validate := validator.New()
-	if err = validate.Struct(inp); err != nil {
-		err = fmt.Errorf("invalid update dataManager inputs %s", err.Error())
-		return
-	}
+
 	// update dataManager.ObjectiveKey
 	if err = addObjectiveDataManager(stub, inp.DataManagerKey, inp.ObjectiveKey); err != nil {
 		return

@@ -8,18 +8,11 @@ import (
 	"encoding/json"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 // Set is a method of the receiver Objective. It checks the validity of inputObjective and uses its fields to set the Objective.
 // Returns the objectiveKey and the dataManagerKey associated to test dataSample
 func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjective) (objectiveKey string, dataManagerKey string, err error) {
-	// checking validity of submitted fields
-	validate := validator.New()
-	if err = validate.Struct(inp); err != nil {
-		err = errors.BadRequest(err, "invalid objective inputs")
-		return
-	}
 	dataManagerKey = strings.Split(inp.TestDataset, ":")[0]
 	if dataManagerKey != "" {
 		var testOnly bool

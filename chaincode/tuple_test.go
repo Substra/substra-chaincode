@@ -496,7 +496,8 @@ func TestQueryTraintupleNotFound(t *testing.T) {
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryTraintuple: key does not exist
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSON("notfoundkey")}
+	notFoundKey := "eedbb7c31f62244c0f34461cc168804227115793d01c270021fe3f7935482eed"
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(notFoundKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 
