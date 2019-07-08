@@ -39,6 +39,7 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 	} else {
 		objective.TestDataset = nil
 	}
+	objective.AssetType = ObjectiveType
 	objective.Name = inp.Name
 	objective.DescriptionStorageAddress = inp.DescriptionStorageAddress
 	objective.Metrics = &HashDressName{
@@ -105,6 +106,10 @@ func queryObjective(stub shim.ChaincodeStubInterface, args []string) (out output
 	}
 	var objective Objective
 	if err = getElementStruct(stub, inp.Key, &objective); err != nil {
+		return
+	}
+	if objective.AssetType != ObjectiveType {
+		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
 	out.Fill(inp.Key, objective)

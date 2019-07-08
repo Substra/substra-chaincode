@@ -476,13 +476,33 @@ func TestTraintuple(t *testing.T) {
 	args = [][]byte{[]byte("queryModelDetails"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying model details with status %d and message %s", resp.Status, resp.Message)
-	payload := map[string]interface{}{}
+	payload := outputModelDetails{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &payload))
-	assert.Contains(t, payload, "traintuple")
-	assert.NotNil(t, payload["traintuple"], "when querying model tuples, payload should contain one traintuple")
+	assert.NotNil(t, payload.Traintuple, "when querying model tuples, payload should contain one traintuple")
 
 	// query all traintuples related to a traintuple with the same algo
 	args = [][]byte{[]byte("queryModels")}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying models with status %d and message %s", resp.Status, resp.Message)
+}
+
+func TestQueryTraintupleNotFound(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+	registerItem(t, *mockStub, "traintuple")
+
+	// queryTraintuple: normal case
+	args := [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValuesf(t, 200, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
+
+	// queryTraintuple: key does not exist
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON("notfoundkey")}
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValuesf(t, 404, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
+
+	// queryTraintuple: key does not exist and use existing other asset type key
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(algoHash)}
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValuesf(t, 404, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 }

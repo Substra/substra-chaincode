@@ -194,13 +194,42 @@ func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface,
 }
 
 type outputTesttuple struct {
-	Key string `json:"key"`
-	Testtuple
+	Key         string         `json:"key"`
+	Algo        *HashDressName `json:"algo"`
+	Certified   bool           `json:"certified"`
+	Creator     string         `json:"creator"`
+	Dataset     *TtDataset     `json:"dataset"`
+	Log         string         `json:"log"`
+	Model       *Model         `json:"model"`
+	Objective   *TtObjective   `json:"objective"`
+	Permissions string         `json:"permissions"`
+	Status      string         `json:"status"`
+	Tag         string         `json:"tag"`
 }
 
 func (out *outputTesttuple) Fill(key string, in Testtuple) {
-	out.Testtuple = in
 	out.Key = key
+	out.Algo = in.Algo
+	out.Certified = in.Certified
+	out.Creator = in.Creator
+	out.Dataset = in.Dataset
+	out.Log = in.Log
+	out.Model = in.Model
+	out.Objective = in.Objective
+	out.Permissions = in.Permissions
+	out.Status = in.Status
+	out.Tag = in.Tag
+}
+
+type outputModelDetails struct {
+	Traintuple             outputTraintuple  `json:"traintuple"`
+	Testtuple              outputTesttuple   `json:"testtuple"`
+	NonCertifiedTesttuples []outputTesttuple `json:"nonCertifiedTesttuples"`
+}
+
+type outputModel struct {
+	Traintuple outputTraintuple `json:"traintuple"`
+	Testtuple  outputTesttuple  `json:"testtuple"`
 }
 
 // SetEvent wrap the steps for sending a struct as payload for a event

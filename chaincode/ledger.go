@@ -3,10 +3,21 @@ package main
 // ---------------------------------------------------------------------------------
 // Representation of elements stored in the ledger
 // ---------------------------------------------------------------------------------
+type AssetType uint8
+
+const (
+	ObjectiveType AssetType = iota
+	DataManagerType
+	DataSampleType
+	AlgoType
+	TraintupleType
+	TesttupleType
+)
 
 // Objective is the representation of one of the element type stored in the ledger
 type Objective struct {
 	Name                      string         `json:"name"`
+	AssetType                 AssetType      `json:"assetType"`
 	DescriptionStorageAddress string         `json:"descriptionStorageAddress"`
 	Metrics                   *HashDressName `json:"metrics"`
 	Owner                     string         `json:"owner"`
@@ -17,6 +28,7 @@ type Objective struct {
 // DataManager is the representation of one of the elements type stored in the ledger
 type DataManager struct {
 	Name                 string     `json:"name"`
+	AssetType            AssetType  `json:"assetType"`
 	OpenerStorageAddress string     `json:"openerStorageAddress"`
 	Type                 string     `json:"type"`
 	Description          *HashDress `json:"description"`
@@ -27,14 +39,16 @@ type DataManager struct {
 
 // DataSample is the representation of one of the element type stored in the ledger
 type DataSample struct {
-	DataManagerKeys []string `json:"dataManagerKeys"`
-	Owner           string   `json:"owner"`
-	TestOnly        bool     `json:"testOnly"`
+	AssetType       AssetType `json:"assetType"`
+	DataManagerKeys []string  `json:"dataManagerKeys"`
+	Owner           string    `json:"owner"`
+	TestOnly        bool      `json:"testOnly"`
 }
 
 // Algo is the representation of one of the element type stored in the ledger
 type Algo struct {
 	Name           string     `json:"name"`
+	AssetType      AssetType  `json:"assetType"`
 	StorageAddress string     `json:"storageAddress"`
 	Description    *HashDress `json:"description"`
 	Owner          string     `json:"owner"`
@@ -43,6 +57,7 @@ type Algo struct {
 
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
+	AssetType    AssetType  `json:"assetType"`
 	AlgoKey      string     `json:"algoKey"`
 	Creator      string     `json:"creator"`
 	Dataset      *Dataset   `json:"dataset"`
@@ -60,6 +75,7 @@ type Traintuple struct {
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Testtuple struct {
+	AssetType   AssetType      `json:"assetType"`
 	Algo        *HashDressName `json:"algo"`
 	Certified   bool           `json:"certified"`
 	Creator     string         `json:"creator"`

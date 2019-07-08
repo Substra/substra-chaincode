@@ -27,6 +27,7 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 		return
 	}
 	// set algo
+	algo.AssetType = AlgoType
 	algo.Name = inp.Name
 	algo.StorageAddress = inp.StorageAddress
 	algo.Description = &HashDress{
@@ -85,6 +86,10 @@ func queryAlgo(stub shim.ChaincodeStubInterface, args []string) (out outputAlgo,
 	}
 	var algo Algo
 	if err = getElementStruct(stub, inp.Key, &algo); err != nil {
+		return
+	}
+	if algo.AssetType != AlgoType {
+		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
 	out.Fill(inp.Key, algo)

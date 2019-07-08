@@ -200,20 +200,6 @@ func updateCompositeKey(stub shim.ChaincodeStubInterface, indexName string, oldA
 	return stub.PutState(newCompositeKey, value)
 }
 
-// getElementsPayload takes as input a list of keys and returns a paylaod containing a list of associated retrieved elements
-func getElementsPayload(stub shim.ChaincodeStubInterface, elementsKeys []string) (elements []map[string]interface{}, err error) {
-
-	for _, key := range elementsKeys {
-		var element map[string]interface{}
-		if err = getElementStruct(stub, key, &element); err != nil {
-			return
-		}
-		element["key"] = key
-		elements = append(elements, element)
-	}
-	return
-}
-
 // AssetFromJSON unmarshal a stringify json into the passed interface
 // TODO: Validate the interface here if possible
 func AssetFromJSON(args string, asset interface{}) error {

@@ -9,7 +9,7 @@ import (
 
 // queryFilter returns all elements of the ledger matching some filters
 // For now, ok for everything. Later returns if the requester has permission to see it
-func queryFilter(stub shim.ChaincodeStubInterface, args []string) (elements []map[string]interface{}, err error) {
+func queryFilter(stub shim.ChaincodeStubInterface, args []string) (elements interface{}, err error) {
 	inp := inputQueryFilter{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
@@ -37,9 +37,9 @@ func queryFilter(stub shim.ChaincodeStubInterface, args []string) (elements []ma
 	// get elements with filtererd keys
 	switch indexName {
 	case "testtuple~worker~status~key", "testtuple~tag~key":
-		elements, err = getElementsPayload(stub, filteredKeys)
+		elements, err = getOutputTesttuples(stub, filteredKeys)
 	case "traintuple~worker~status~key", "traintuple~tag~key":
-		elements, err = getTraintuplesPayload(stub, filteredKeys)
+		elements, err = getOutputTraintuples(stub, filteredKeys)
 	}
 	return
 }
