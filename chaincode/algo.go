@@ -98,6 +98,7 @@ func queryAlgo(stub shim.ChaincodeStubInterface, args []string) (out outputAlgo,
 
 // queryAlgos returns all algos of the ledger
 func queryAlgos(stub shim.ChaincodeStubInterface, args []string) (outAlgos []outputAlgo, err error) {
+	outAlgos = []outputAlgo{}
 	if len(args) != 0 {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return

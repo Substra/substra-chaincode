@@ -589,6 +589,8 @@ func queryTraintuple(stub shim.ChaincodeStubInterface, args []string) (outputTra
 
 // queryTraintuples returns all traintuples
 func queryTraintuples(stub shim.ChaincodeStubInterface, args []string) (outTraintuples []outputTraintuple, err error) {
+	outTraintuples = []outputTraintuple{}
+
 	if len(args) != 0 {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return
@@ -629,6 +631,8 @@ func queryTesttuple(stub shim.ChaincodeStubInterface, args []string) (out output
 
 // queryTesttuples returns all testtuples of the ledger
 func queryTesttuples(stub shim.ChaincodeStubInterface, args []string) (outTesttuples []outputTesttuple, err error) {
+	outTesttuples = []outputTesttuple{}
+
 	if len(args) != 0 {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return
@@ -688,6 +692,8 @@ func queryModelDetails(stub shim.ChaincodeStubInterface, args []string) (outMode
 
 // queryModels returns all traintuples and associated testuples
 func queryModels(stub shim.ChaincodeStubInterface, args []string) (outModels []outputModel, err error) {
+	outModels = []outputModel{}
+
 	if len(args) != 0 {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return

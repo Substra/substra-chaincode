@@ -294,6 +294,7 @@ func queryDataManager(stub shim.ChaincodeStubInterface, args []string) (out outp
 
 // queryDataManagers returns all DataManagers of the ledger
 func queryDataManagers(stub shim.ChaincodeStubInterface, args []string) (outDataManagers []outputDataManager, err error) {
+	outDataManagers = []outputDataManager{}
 	if len(args) != 0 {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return
@@ -345,6 +346,7 @@ func queryDataset(stub shim.ChaincodeStubInterface, args []string) (out outputDa
 }
 
 func queryDataSamples(stub shim.ChaincodeStubInterface, args []string) (outDataSamples []outputDataSample, err error) {
+	outDataSamples = []outputDataSample{}
 	if len(args) != 0 {
 		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
 		return

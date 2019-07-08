@@ -142,7 +142,6 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 	assert.NoError(t, err)
 	err = mockStub.PutState(objectiveDescriptionHash, objBytes)
 	assert.NoError(t, err)
-
 	// It should not panic
 	require.NotPanics(t, func() {
 		getOutputTraintuple(mockStub, traintupleKey)

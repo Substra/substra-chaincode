@@ -118,6 +118,7 @@ func queryObjective(stub shim.ChaincodeStubInterface, args []string) (out output
 
 // queryObjectives returns all objectives of the ledger
 func queryObjectives(stub shim.ChaincodeStubInterface, args []string) (outObjectives []outputObjective, err error) {
+	outObjectives = []outputObjective{}
 	if len(args) != 0 {
 		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
 		return

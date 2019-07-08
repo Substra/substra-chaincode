@@ -408,3 +408,34 @@ func TestMain(m *testing.M) {
 	logger.SetLevel(shim.LogCritical)
 	os.Exit(m.Run())
 }
+
+func initializeMockStateDB(t *testing.T, stub *shim.MockStub) {
+	stub.MockTransactionStart("42")
+	stub.PutState("key", []byte("value"))
+}
+
+func TestQueryEmptyResponse(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+	initializeMockStateDB(t, mockStub)
+
+	smartContracts := []string{
+		"queryAlgos",
+		"queryDataSamples",
+		"queryObjectives",
+		"queryDataManagers",
+		"queryTraintuples",
+		"queryTesttuples",
+		"queryModels",
+	}
+
+	for _, contractName := range smartContracts {
+		t.Run(contractName, func(t *testing.T) {
+			args := [][]byte{[]byte(contractName)}
+			resp := mockStub.MockInvoke("42", args)
+
+			expectedPayload, _ := json.Marshal(make([]string, 0))
+			assert.Equal(t, expectedPayload, resp.Payload, "payload is not an empty list")
+		})
+	}
+}
