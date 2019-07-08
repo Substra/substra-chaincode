@@ -16,7 +16,13 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-const lenKey int = 64
+const (
+	StatusDoing   = "doing"
+	StatusTodo    = "todo"
+	StatusWaiting = "waiting"
+	StatusFailed  = "failed"
+	StatusDone    = "done"
+)
 
 // -------------------------------------------------------------------------------------------
 // Methods on receivers traintuple and testuples
@@ -57,7 +63,7 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	traintuple.ObjectiveKey = inp.ObjectiveKey
 
 	// check if InModels is empty or if mentionned models do exist and fill inModels
-	status := "todo"
+	status := StatusTodo
 	parentTraintupleKeys := strings.Split(strings.Replace(inp.InModels, " ", "", -1), ",")
 	for _, parentTraintupleKey := range parentTraintupleKeys {
 		if parentTraintupleKey == "" {
@@ -70,7 +76,7 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 		}
 		// set traintuple to waiting if one of the parent traintuples is not done
 		if parentTraintuple.OutModel == nil {
-			status = "waiting"
+			status = StatusWaiting
 		}
 		traintuple.InModelKeys = append(traintuple.InModelKeys, parentTraintupleKey)
 	}
@@ -202,15 +208,15 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	}
 
 	switch status := traintuple.Status; status {
-	case "done":
-		testtuple.Status = "todo"
-	case "failed":
+	case StatusDone:
+		testtuple.Status = StatusTodo
+	case StatusFailed:
 		err = errors.BadRequest(
 			"could not register this testtuple, the traintuple %s has a failed status",
 			inp.TraintupleKey)
 		return
 	default:
-		testtuple.Status = "waiting"
+		testtuple.Status = StatusWaiting
 	}
 
 	// Get test dataset from objective
@@ -338,9 +344,9 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 	// https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/shim/interfaces.go#L339:L343
 	// We can only send one event per transaction
 	// https://stackoverflow.com/questions/50344232/not-able-to-set-multiple-events-in-chaincode-per-transaction-getting-only-last
-	if traintuple.Status == "todo" {
+	if traintuple.Status == StatusTodo {
 		err = SetEvent(stub, "traintuple-ready", out)
-	} else { // status = "waiting" or "failed"
+	} else { // status = StatusWaiting or StatusFailed
 		err = SetEvent(stub, "traintuple-created", out)
 	}
 
@@ -397,9 +403,9 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 	// https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/shim/interfaces.go#L339:L343
 	// We can only send one event per transaction
 	// https://stackoverflow.com/questions/50344232/not-able-to-set-multiple-events-in-chaincode-per-transaction-getting-only-last
-	if testtuple.Status == "todo" {
+	if testtuple.Status == StatusTodo {
 		err = SetEvent(stub, "testtuple-ready", out)
-	} else { // status = "waiting" or "failed"
+	} else { // status = StatusWaiting or StatusFailed
 		err = SetEvent(stub, "testtuple-created", out)
 	}
 
@@ -423,7 +429,7 @@ func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (outputTrain
 	if err = getElementStruct(stub, inp.Key, &traintuple); err != nil {
 		return
 	}
-	if err = traintuple.commitStatusUpdate(stub, inp.Key, "doing"); err != nil {
+	if err = traintuple.commitStatusUpdate(stub, inp.Key, StatusDoing); err != nil {
 		return
 	}
 	outputTraintuple.Fill(stub, traintuple, inp.Key)
@@ -443,7 +449,7 @@ func logStartTest(stub shim.ChaincodeStubInterface, args []string) (outputTesttu
 	if err = getElementStruct(stub, inp.Key, &testtuple); err != nil {
 		return
 	}
-	if err = testtuple.commitStatusUpdate(stub, inp.Key, "doing"); err != nil {
+	if err = testtuple.commitStatusUpdate(stub, inp.Key, StatusDoing); err != nil {
 		return
 	}
 	outputTesttuple.Fill(inp.Key, testtuple)
@@ -471,7 +477,7 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (outputTra
 		StorageAddress: inp.OutModel.StorageAddress}
 	traintuple.Log += inp.Log
 
-	if err = traintuple.commitStatusUpdate(stub, traintupleKey, "done"); err != nil {
+	if err = traintuple.commitStatusUpdate(stub, traintupleKey, StatusDone); err != nil {
 		return
 	}
 
@@ -502,7 +508,7 @@ func logSuccessTest(stub shim.ChaincodeStubInterface, args []string) (outputTest
 	testtuple.Dataset.Perf = inp.Perf
 	testtuple.Log += inp.Log
 
-	if err = testtuple.commitStatusUpdate(stub, inp.Key, "done"); err != nil {
+	if err = testtuple.commitStatusUpdate(stub, inp.Key, StatusDone); err != nil {
 		return
 	}
 	outputTesttuple.Fill(inp.Key, testtuple)
@@ -524,7 +530,7 @@ func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (outputTraint
 	}
 	traintuple.Log += inp.Log
 
-	if err = traintuple.commitStatusUpdate(stub, inp.Key, "failed"); err != nil {
+	if err = traintuple.commitStatusUpdate(stub, inp.Key, StatusFailed); err != nil {
 		return
 	}
 
@@ -555,7 +561,7 @@ func logFailTest(stub shim.ChaincodeStubInterface, args []string) (outputTesttup
 
 	testtuple.Log += inp.Log
 
-	if err = testtuple.commitStatusUpdate(stub, inp.Key, "failed"); err != nil {
+	if err = testtuple.commitStatusUpdate(stub, inp.Key, StatusFailed); err != nil {
 		return
 	}
 	outputTesttuple.Fill(inp.Key, testtuple)
@@ -788,10 +794,10 @@ func checkUpdateTuple(stub shim.ChaincodeStubInterface, worker string, oldStatus
 		return fmt.Errorf("%s is not allowed to update tuple", txCreator)
 	}
 	statusPossibilities := map[string]string{
-		"waiting": "todo",
-		"todo":    "doing",
-		"doing":   "done"}
-	if statusPossibilities[oldStatus] != newStatus && newStatus != "failed" {
+		StatusWaiting: StatusTodo,
+		StatusTodo:    StatusDoing,
+		StatusDoing:   StatusDone}
+	if statusPossibilities[oldStatus] != newStatus && newStatus != StatusFailed {
 		return errors.BadRequest("cannot change status from %s to %s", oldStatus, newStatus)
 	}
 	return nil
@@ -843,25 +849,25 @@ func (parentTraintuple *Traintuple) updateTraintupleChildren(stub shim.Chaincode
 		}
 
 		// traintuple is already failed, don't update it
-		if traintuple.Status == "failed" {
+		if traintuple.Status == StatusFailed {
 			continue
 		}
 
-		if traintuple.Status != "waiting" {
+		if traintuple.Status != StatusWaiting {
 			return fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", traintupleKey, traintuple.Status)
 		}
 
 		// get traintuple new status
 		var newStatus string
-		if parentTraintuple.Status == "failed" {
-			newStatus = "failed"
-		} else if parentTraintuple.Status == "done" {
+		if parentTraintuple.Status == StatusFailed {
+			newStatus = StatusFailed
+		} else if parentTraintuple.Status == StatusDone {
 			ready, err := traintuple.isReady(stub, parentTraintupleKey)
 			if err != nil {
 				return err
 			}
 			if ready {
-				newStatus = "todo"
+				newStatus = StatusTodo
 			}
 		}
 
@@ -872,7 +878,7 @@ func (parentTraintuple *Traintuple) updateTraintupleChildren(stub shim.Chaincode
 		if err := traintuple.commitStatusUpdate(stub, traintupleKey, newStatus); err != nil {
 			return err
 		}
-		if newStatus == "todo" {
+		if newStatus == StatusTodo {
 			out := outputTraintuple{}
 			err = out.Fill(stub, traintuple, traintupleKey)
 			if err != nil {
@@ -899,7 +905,7 @@ func (traintuple *Traintuple) isReady(stub shim.ChaincodeStubInterface, newDoneT
 		if err := getElementStruct(stub, key, &tt); err != nil {
 			return false, err
 		}
-		if tt.Status != "done" {
+		if tt.Status != StatusDone {
 			return false, nil
 		}
 	}
@@ -958,10 +964,10 @@ func (traintuple *Traintuple) commitStatusUpdate(stub shim.ChaincodeStubInterfac
 func (parentTraintuple *Traintuple) updateTesttupleChildren(stub shim.ChaincodeStubInterface, parentTraintupleKey string) error {
 
 	var newStatus string
-	if parentTraintuple.Status == "failed" {
-		newStatus = "failed"
-	} else if parentTraintuple.Status == "done" {
-		newStatus = "todo"
+	if parentTraintuple.Status == StatusFailed {
+		newStatus = StatusFailed
+	} else if parentTraintuple.Status == StatusDone {
+		newStatus = StatusTodo
 	} else {
 		return nil
 	}
@@ -981,7 +987,7 @@ func (parentTraintuple *Traintuple) updateTesttupleChildren(stub shim.ChaincodeS
 		testtuple.Model = &Model{
 			TraintupleKey: parentTraintupleKey,
 		}
-		if newStatus == "todo" {
+		if newStatus == StatusTodo {
 			testtuple.Model.Hash = parentTraintuple.OutModel.Hash
 			testtuple.Model.StorageAddress = parentTraintuple.OutModel.StorageAddress
 		}
@@ -990,7 +996,7 @@ func (parentTraintuple *Traintuple) updateTesttupleChildren(stub shim.ChaincodeS
 			return err
 		}
 
-		if newStatus == "todo" {
+		if newStatus == StatusTodo {
 			out := outputTesttuple{}
 			out.Fill(testtupleKey, testtuple)
 			err = SetEvent(stub, "testtuple-ready", out)

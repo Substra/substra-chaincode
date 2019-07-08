@@ -396,7 +396,7 @@ func TestTraintuple(t *testing.T) {
 			},
 		},
 		Permissions: "all",
-		Status:      "todo",
+		Status:      StatusTodo,
 	}
 	assert.Exactly(t, expected, out, "the traintuple queried from the ledger differ from expected")
 
@@ -441,7 +441,7 @@ func TestTraintuple(t *testing.T) {
 		[][]byte{[]byte("logStartTrain"), keyToJSON(traintupleKey)},
 		success.createDefault(),
 	}
-	traintupleStatus := []string{"doing", "done"}
+	traintupleStatus := []string{StatusDoing, StatusDone}
 	for i := range traintupleStatus {
 		resp = mockStub.MockInvoke("42", argsSlice[i])
 		require.EqualValuesf(t, 200, resp.Status, "when logging start %s with message %s", traintupleStatus[i], resp.Message)
