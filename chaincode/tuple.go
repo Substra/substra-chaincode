@@ -724,7 +724,7 @@ func queryModelDetails(stub shim.ChaincodeStubInterface, args []string) (outMode
 			return
 		}
 
-		if outputTesttuple.Certified == true {
+		if outputTesttuple.Certified {
 			outModelDetails.Testtuple = outputTesttuple
 		} else {
 			outModelDetails.NonCertifiedTesttuples = append(outModelDetails.NonCertifiedTesttuples, outputTesttuple)
