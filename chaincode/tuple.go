@@ -547,6 +547,8 @@ func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (outputTraint
 		return
 	}
 
+	outputTraintuple.Fill(stub, traintuple, inp.Key)
+
 	// update depending tuples
 	testtuples_event, err := traintuple.updateTesttupleChildren(stub, inp.Key)
 	if err != nil {
