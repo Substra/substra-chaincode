@@ -232,6 +232,19 @@ type outputModel struct {
 	Testtuple  outputTesttuple  `json:"testtuple"`
 }
 
+type TuplesEvent struct {
+	Testtuples  []outputTesttuple  `json:"testtuple"`
+	Traintuples []outputTraintuple `json:"traintuple"`
+}
+
+func (te *TuplesEvent) SetTesttuples(otuples ...outputTesttuple) {
+    te.Testtuples = otuples
+}
+
+func (te *TuplesEvent) SetTraintuples(otuples ...outputTraintuple) {
+    te.Traintuples = otuples
+}
+
 // SetEvent wrap the steps for sending a struct as payload for a event
 func SetEvent(stub shim.ChaincodeStubInterface, eventName string, eventObject interface{}) error {
 	payload, err := json.Marshal(eventObject)

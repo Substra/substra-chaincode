@@ -344,12 +344,10 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 	// https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/shim/interfaces.go#L339:L343
 	// We can only send one event per transaction
 	// https://stackoverflow.com/questions/50344232/not-able-to-set-multiple-events-in-chaincode-per-transaction-getting-only-last
-	if traintuple.Status == StatusTodo {
-		err = SetEvent(stub, "traintuple-ready", out)
-	} else { // status = StatusWaiting or StatusFailed
-		err = SetEvent(stub, "traintuple-created", out)
-	}
+	event := TuplesEvent{}
+	event.SetTraintuples(out)
 
+	err = SetEvent(stub, "tuples-updated", event)
 	if err != nil {
 		return nil, err
 	}
@@ -403,12 +401,10 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 	// https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/shim/interfaces.go#L339:L343
 	// We can only send one event per transaction
 	// https://stackoverflow.com/questions/50344232/not-able-to-set-multiple-events-in-chaincode-per-transaction-getting-only-last
-	if testtuple.Status == StatusTodo {
-		err = SetEvent(stub, "testtuple-ready", out)
-	} else { // status = StatusWaiting or StatusFailed
-		err = SetEvent(stub, "testtuple-created", out)
-	}
+	event := TuplesEvent{}
+	event.SetTesttuples(out)
 
+	err = SetEvent(stub, "tuples-updated", event)
 	if err != nil {
 		return nil, err
 	}
@@ -482,13 +478,30 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (outputTra
 	}
 
 	// update depending tuples
-	if err = traintuple.updateTraintupleChildren(stub, traintupleKey); err != nil {
+	traintuples_event, err := traintuple.updateTraintupleChildren(stub, traintupleKey)
+	if err != nil {
 		return
 	}
-	if err = traintuple.updateTesttupleChildren(stub, traintupleKey); err != nil {
+
+	testtuples_event, err := traintuple.updateTesttupleChildren(stub, traintupleKey)
+	if err != nil {
 		return
 	}
+
 	outputTraintuple.Fill(stub, traintuple, inp.Key)
+
+	// https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/shim/interfaces.go#L339:L343
+	// We can only send one event per transaction
+	// https://stackoverflow.com/questions/50344232/not-able-to-set-multiple-events-in-chaincode-per-transaction-getting-only-last
+	event := TuplesEvent{}
+	event.SetTraintuples(traintuples_event...)
+	event.SetTesttuples(testtuples_event...)
+
+	err = SetEvent(stub, "tuples-updated", event)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
@@ -535,13 +548,28 @@ func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (outputTraint
 	}
 
 	// update depending tuples
-	if err = traintuple.updateTesttupleChildren(stub, inp.Key); err != nil {
+	testtuples_event, err := traintuple.updateTesttupleChildren(stub, inp.Key)
+	if err != nil {
 		return
 	}
-	if err = traintuple.updateTraintupleChildren(stub, inp.Key); err != nil {
+
+	traintuples_event, err := traintuple.updateTraintupleChildren(stub, inp.Key)
+	if err != nil {
 		return
 	}
-	outputTraintuple.Fill(stub, traintuple, inp.Key)
+
+	// https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/shim/interfaces.go#L339:L343
+	// We can only send one event per transaction
+	// https://stackoverflow.com/questions/50344232/not-able-to-set-multiple-events-in-chaincode-per-transaction-getting-only-last
+	event := TuplesEvent{}
+	event.SetTraintuples(traintuples_event...)
+	event.SetTesttuples(testtuples_event...)
+
+	err = SetEvent(stub, "tuples-updated", event)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
@@ -834,24 +862,27 @@ func (testtuple *Testtuple) validateNewStatus(stub shim.ChaincodeStubInterface, 
 }
 
 // updateTraintupleChildren updates the status of waiting trainuples  InModels of traintuples once they have been trained (succesfully or failed)
-func (parentTraintuple *Traintuple) updateTraintupleChildren(stub shim.ChaincodeStubInterface, parentTraintupleKey string) error {
+func (parentTraintuple *Traintuple) updateTraintupleChildren(stub shim.ChaincodeStubInterface, parentTraintupleKey string) ([]outputTraintuple, error) {
+
+	// tuples to be sent in event
+	otuples := []outputTraintuple{}
 
 	// get traintuples having as inModels the input traintuple
 	indexName := "traintuple~inModel~key"
 	traintupleKeys, err := getKeysFromComposite(stub, indexName, []string{"traintuple", parentTraintupleKey})
 	if err != nil {
-		return fmt.Errorf("error while getting associated traintuples to update their inModel")
+		return  otuples, fmt.Errorf("error while getting associated traintuples to update their inModel")
 	}
 	for _, traintupleKey := range traintupleKeys {
 		// get and update traintuple
 		traintuple := Traintuple{}
 		if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
-			return err
+			return  otuples, err
 		}
 
 		// remove associated composite key
 		if err := traintuple.removeModelCompositeKey(stub, parentTraintupleKey); err != nil {
-			return err
+			return  otuples, err
 		}
 
 		// traintuple is already failed, don't update it
@@ -860,7 +891,7 @@ func (parentTraintuple *Traintuple) updateTraintupleChildren(stub shim.Chaincode
 		}
 
 		if traintuple.Status != StatusWaiting {
-			return fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", traintupleKey, traintuple.Status)
+			return  otuples, fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", traintupleKey, traintuple.Status)
 		}
 
 		// get traintuple new status
@@ -870,7 +901,7 @@ func (parentTraintuple *Traintuple) updateTraintupleChildren(stub shim.Chaincode
 		} else if parentTraintuple.Status == StatusDone {
 			ready, err := traintuple.isReady(stub, parentTraintupleKey)
 			if err != nil {
-				return err
+				return  otuples, err
 			}
 			if ready {
 				newStatus = StatusTodo
@@ -882,21 +913,18 @@ func (parentTraintuple *Traintuple) updateTraintupleChildren(stub shim.Chaincode
 			continue
 		}
 		if err := traintuple.commitStatusUpdate(stub, traintupleKey, newStatus); err != nil {
-			return err
+			return  otuples, err
 		}
 		if newStatus == StatusTodo {
 			out := outputTraintuple{}
 			err = out.Fill(stub, traintuple, traintupleKey)
 			if err != nil {
-				return err
+				return otuples, err
 			}
-			err = SetEvent(stub, "traintuple-ready", out)
-			if err != nil {
-				return err
-			}
+			otuples = append(otuples, out)
 		}
 	}
-	return nil
+	return otuples, nil
 }
 
 // isReady checks if inModels of a traintuple have been trained, except the newDoneTraintupleKey (since the transaction is not commited)
@@ -966,8 +994,11 @@ func (traintuple *Traintuple) commitStatusUpdate(stub shim.ChaincodeStubInterfac
 	return nil
 }
 
+
 // updateTesttupleChildren update testtuples status associated with a done or failed traintuple
-func (parentTraintuple *Traintuple) updateTesttupleChildren(stub shim.ChaincodeStubInterface, parentTraintupleKey string) error {
+func (parentTraintuple *Traintuple) updateTesttupleChildren(stub shim.ChaincodeStubInterface, parentTraintupleKey string) ([]outputTesttuple, error) {
+
+	otuples := []outputTesttuple{}
 
 	var newStatus string
 	if parentTraintuple.Status == StatusFailed {
@@ -975,44 +1006,41 @@ func (parentTraintuple *Traintuple) updateTesttupleChildren(stub shim.ChaincodeS
 	} else if parentTraintuple.Status == StatusDone {
 		newStatus = StatusTodo
 	} else {
-		return nil
+		return otuples, nil
 	}
 
 	indexName := "testtuple~traintuple~certified~key"
 	// get testtuple associated with this traintuple and updates its status
 	testtupleKeys, err := getKeysFromComposite(stub, indexName, []string{"testtuple", parentTraintupleKey})
 	if err != nil {
-		return err
+		return otuples, err
 	}
 	for _, testtupleKey := range testtupleKeys {
 		// get and update testtuple
 		testtuple := Testtuple{}
 		if err := getElementStruct(stub, testtupleKey, &testtuple); err != nil {
-			return err
+			return otuples, err
 		}
 		testtuple.Model = &Model{
 			TraintupleKey: parentTraintupleKey,
 		}
+
 		if newStatus == StatusTodo {
 			testtuple.Model.Hash = parentTraintuple.OutModel.Hash
 			testtuple.Model.StorageAddress = parentTraintuple.OutModel.StorageAddress
 		}
 
 		if err := testtuple.commitStatusUpdate(stub, testtupleKey, newStatus); err != nil {
-			return err
+			return otuples, err
 		}
 
 		if newStatus == StatusTodo {
 			out := outputTesttuple{}
 			out.Fill(testtupleKey, testtuple)
-			err = SetEvent(stub, "testtuple-ready", out)
-			if err != nil {
-				return err
-			}
+			otuples = append(otuples, out)
 		}
-
 	}
-	return nil
+	return otuples, nil
 }
 
 // commitStatusUpdate update the testtuple status in the ledger
