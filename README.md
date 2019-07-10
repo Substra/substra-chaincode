@@ -296,7 +296,8 @@ peer chaincode query -n mycc -c '{"Args":["queryObjectives"]}' -C myc
    "dataSampleKeys": [
     "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-   ]
+   ],
+   "worker": ""
   }
  }
 ]

@@ -116,7 +116,7 @@ type Model struct {
 type Dataset struct {
 	DataManagerKey string   `json:"dataManagerKey"`
 	DataSampleKeys []string `json:"dataSampleKeys"`
-	Worker         string   `json:"-"`
+	Worker         string   `json:"worker"`
 }
 
 // ---------------------------------------------------------------------------------
