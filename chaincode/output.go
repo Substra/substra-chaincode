@@ -177,14 +177,9 @@ func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface,
 		outputTraintuple.InModels = append(outputTraintuple.InModels, inModel)
 	}
 
-	// fill dataset from dataManager and dataSample
-	dataManager := DataManager{}
-	if err = getElementStruct(stub, traintuple.Dataset.DataManagerKey, &dataManager); err != nil {
-		err = fmt.Errorf("could not retrieve dataManager with key %s - %s", traintuple.Dataset.DataManagerKey, err.Error())
-		return
-	}
+	// fill dataset
 	outputTraintuple.Dataset = &TtDataset{
-		Worker:         dataManager.Owner,
+		Worker:         traintuple.Dataset.Worker,
 		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
 		OpenerHash:     traintuple.Dataset.DataManagerKey,
 		Perf:           traintuple.Perf,
@@ -238,11 +233,11 @@ type TuplesEvent struct {
 }
 
 func (te *TuplesEvent) SetTesttuples(otuples ...outputTesttuple) {
-    te.Testtuples = otuples
+	te.Testtuples = otuples
 }
 
 func (te *TuplesEvent) SetTraintuples(otuples ...outputTraintuple) {
-    te.Traintuples = otuples
+	te.Traintuples = otuples
 }
 
 // SetEvent wrap the steps for sending a struct as payload for a event
