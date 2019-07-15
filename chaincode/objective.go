@@ -59,7 +59,7 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 func registerObjective(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	// convert input strings args to input struct inputObjective
 	inp := inputObjective{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
@@ -93,7 +93,7 @@ func registerObjective(stub shim.ChaincodeStubInterface, args []string) (resp ma
 // queryObjective returns a objective of the ledger given its key
 func queryObjective(stub shim.ChaincodeStubInterface, args []string) (out outputObjective, err error) {
 	inp := inputHash{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}

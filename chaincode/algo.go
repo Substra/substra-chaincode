@@ -38,7 +38,7 @@ func (algo *Algo) Set(stub shim.ChaincodeStubInterface, inp inputAlgo) (algoKey 
 // If the key exists, it will override the value with the new one
 func registerAlgo(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	inp := inputAlgo{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
@@ -72,7 +72,7 @@ func registerAlgo(stub shim.ChaincodeStubInterface, args []string) (resp map[str
 // queryAlgo returns an algo of the ledger given its key
 func queryAlgo(stub shim.ChaincodeStubInterface, args []string) (out outputAlgo, err error) {
 	inp := inputHash{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}

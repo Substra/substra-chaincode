@@ -113,7 +113,7 @@ func validateUpdateDataSample(stub shim.ChaincodeStubInterface, inp inputUpdateD
 // registerDataManager stores a new dataManager in the ledger.
 func registerDataManager(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	inp := inputDataManager{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
@@ -148,7 +148,7 @@ func registerDataManager(stub shim.ChaincodeStubInterface, args []string) (resp 
 func registerDataSample(stub shim.ChaincodeStubInterface, args []string) (dataSampleKeys map[string][]string, err error) {
 	// convert input strings args to input struct inputDataSample
 	inp := inputDataSample{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
@@ -186,7 +186,7 @@ func registerDataSample(stub shim.ChaincodeStubInterface, args []string) (dataSa
 // updateDataSample associates one or more dataManagerKeys to one or more dataSample
 func updateDataSample(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	inp := inputUpdateDataSample{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
@@ -237,7 +237,7 @@ func updateDataSample(stub shim.ChaincodeStubInterface, args []string) (resp map
 // updateDataManager associates a objectiveKey to an existing dataManager
 func updateDataManager(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	inp := inputUpdateDataManager{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
@@ -252,7 +252,7 @@ func updateDataManager(stub shim.ChaincodeStubInterface, args []string) (resp ma
 // queryDataManager returns dataManager and its key
 func queryDataManager(stub shim.ChaincodeStubInterface, args []string) (out outputDataManager, err error) {
 	inp := inputHash{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
@@ -296,7 +296,7 @@ func queryDataManagers(stub shim.ChaincodeStubInterface, args []string) (outData
 // queryDataset returns info about a dataManager and all related dataSample
 func queryDataset(stub shim.ChaincodeStubInterface, args []string) (out outputDataset, err error) {
 	inp := inputHash{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}

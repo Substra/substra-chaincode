@@ -201,15 +201,19 @@ func updateCompositeKey(stub shim.ChaincodeStubInterface, indexName string, oldA
 }
 
 // AssetFromJSON unmarshal a stringify json into the passed interface
-func AssetFromJSON(args string, asset interface{}) error {
-	err := json.Unmarshal([]byte(args), &asset)
+func AssetFromJSON(args []string, asset interface{}) error {
+	if len(args) != 1 {
+		return errors.BadRequest("arguments should only contains 1 json string, received: %s", args)
+	}
+	arg := args[0]
+	err := json.Unmarshal([]byte(arg), &asset)
 	if err != nil {
-		return errors.BadRequest(err, "Problem when reading json arg: %s, error is:", args)
+		return errors.BadRequest(err, "problem when reading json arg: %s, error is:", arg)
 	}
 	v := validator.New()
 	err = v.Struct(asset)
 	if err != nil {
-		return errors.BadRequest(err, "Inputs validation failed: %s, error is:", args)
+		return errors.BadRequest(err, "inputs validation failed: %s, error is:", arg)
 	}
 	return nil
 }
