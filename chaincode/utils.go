@@ -83,15 +83,15 @@ func getTxCreator(stub shim.ChaincodeStubInterface) (string, error) {
 	}
 	// get pem certificate only. This might be slightly dirty, but this is to avoid installing external packages
 	// change it once github.com/hyperledger/fabric/core/chaincode/lib/cid is in fabric chaincode docker
-	cert_prefix := "-----BEGIN CERTIFICATE-----"
-	cert_suffix := "-----END CERTIFICATE-----\n"
+	certPrefix := "-----BEGIN CERTIFICATE-----"
+	certSuffix := "-----END CERTIFICATE-----\n"
 	var creator string
-	if sCreator := strings.Split(string(bCreator), cert_prefix); len(sCreator) > 1 {
-		creator = strings.Split(sCreator[1], cert_suffix)[0]
+	if sCreator := strings.Split(string(bCreator), certPrefix); len(sCreator) > 1 {
+		creator = strings.Split(sCreator[1], certSuffix)[0]
 	} else {
 		creator = "test"
 	}
-	creator = cert_prefix + creator + cert_suffix
+	creator = certPrefix + creator + certSuffix
 	tt := sha256.Sum256([]byte(creator))
 	return hex.EncodeToString(tt[:]), nil
 }

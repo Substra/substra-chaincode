@@ -14,6 +14,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+// List of the possible tuple's status
 const (
 	StatusDoing   = "doing"
 	StatusTodo    = "todo"
@@ -470,12 +471,12 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (outputTra
 	}
 
 	// update depending tuples
-	traintuples_event, err := traintuple.updateTraintupleChildren(stub, traintupleKey)
+	traintuplesEvent, err := traintuple.updateTraintupleChildren(stub, traintupleKey)
 	if err != nil {
 		return
 	}
 
-	testtuples_event, err := traintuple.updateTesttupleChildren(stub, traintupleKey)
+	testtuplesEvent, err := traintuple.updateTesttupleChildren(stub, traintupleKey)
 	if err != nil {
 		return
 	}
@@ -486,8 +487,8 @@ func logSuccessTrain(stub shim.ChaincodeStubInterface, args []string) (outputTra
 	// We can only send one event per transaction
 	// https://stackoverflow.com/questions/50344232/not-able-to-set-multiple-events-in-chaincode-per-transaction-getting-only-last
 	event := TuplesEvent{}
-	event.SetTraintuples(traintuples_event...)
-	event.SetTesttuples(testtuples_event...)
+	event.SetTraintuples(traintuplesEvent...)
+	event.SetTesttuples(testtuplesEvent...)
 
 	err = SetEvent(stub, "tuples-updated", event)
 	if err != nil {
@@ -548,12 +549,12 @@ func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (outputTraint
 	outputTraintuple.Fill(stub, traintuple, inp.Key)
 
 	// update depending tuples
-	testtuples_event, err := traintuple.updateTesttupleChildren(stub, inp.Key)
+	testtuplesEvent, err := traintuple.updateTesttupleChildren(stub, inp.Key)
 	if err != nil {
 		return
 	}
 
-	traintuples_event, err := traintuple.updateTraintupleChildren(stub, inp.Key)
+	traintuplesEvent, err := traintuple.updateTraintupleChildren(stub, inp.Key)
 	if err != nil {
 		return
 	}
@@ -562,8 +563,8 @@ func logFailTrain(stub shim.ChaincodeStubInterface, args []string) (outputTraint
 	// We can only send one event per transaction
 	// https://stackoverflow.com/questions/50344232/not-able-to-set-multiple-events-in-chaincode-per-transaction-getting-only-last
 	event := TuplesEvent{}
-	event.SetTraintuples(traintuples_event...)
-	event.SetTesttuples(testtuples_event...)
+	event.SetTraintuples(traintuplesEvent...)
+	event.SetTesttuples(testtuplesEvent...)
 
 	err = SetEvent(stub, "tuples-updated", event)
 	if err != nil {

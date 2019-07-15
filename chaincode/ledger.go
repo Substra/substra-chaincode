@@ -3,8 +3,11 @@ package main
 // ---------------------------------------------------------------------------------
 // Representation of elements stored in the ledger
 // ---------------------------------------------------------------------------------
+
+// AssetType is use to check the type of an asset
 type AssetType uint8
 
+// Const representing the types of asset findable in the ledger
 const (
 	ObjectiveType AssetType = iota
 	DataManagerType
