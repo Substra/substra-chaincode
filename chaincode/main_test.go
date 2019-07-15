@@ -55,7 +55,7 @@ func assetToJSON(asset interface{}) []byte {
 }
 
 func keyToJSON(key string) []byte {
-	return assetToJSON(inputHashe{Key: key})
+	return assetToJSON(inputHash{Key: key})
 }
 func printArgs(buf io.Writer, args [][]byte, command string) {
 	fmt.Fprintln(buf, "##### Command peer example:")
@@ -199,7 +199,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Query DataManager From key ------------")
 	args = [][]byte{[]byte("queryDataManager"), keyToJSON(dataManagerKey)}
-	callAssertAndPrint("invoke", "queryDataManager", args, inputHashe{})
+	callAssertAndPrint("invoke", "queryDataManager", args, inputHash{})
 
 	fmt.Fprintln(&out, "#### ------------ Add test DataSample ------------")
 	inpDataSample := inputDataSample{
@@ -282,7 +282,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Training ------------")
 	args = [][]byte{[]byte("logStartTrain"), keyToJSON(traintupleKey)}
-	callAssertAndPrint("invoke", "logStartTrain", args, inputHashe{})
+	callAssertAndPrint("invoke", "logStartTrain", args, inputHash{})
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Training ------------")
 	inp := inputLogSuccessTrain{}
@@ -292,7 +292,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Query Traintuple From key ------------")
 	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
-	callAssertAndPrint("invoke", "queryTraintuple", args, inputHashe{})
+	callAssertAndPrint("invoke", "queryTraintuple", args, inputHash{})
 
 	fmt.Fprintln(&out, "#### ------------ Add Non-Certified Testtuple ------------")
 	inpTesttuple := inputTesttuple{
@@ -300,7 +300,7 @@ func TestPipeline(t *testing.T) {
 		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 	}
 	args = inpTesttuple.createDefault()
-	callAssertAndPrint("invoke", "createTesttuple", args, inputHashe{})
+	callAssertAndPrint("invoke", "createTesttuple", args, inputHash{})
 
 	fmt.Fprintln(&out, "#### ------------ Add Certified Testtuple ------------")
 	inpTesttuple = inputTesttuple{}
@@ -341,7 +341,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Testing ------------")
 	args = [][]byte{[]byte("logStartTest"), keyToJSON(testtupleKey)}
-	callAssertAndPrint("invoke", "logStartTest", args, inputHashe{})
+	callAssertAndPrint("invoke", "logStartTest", args, inputHash{})
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Testing ------------")
 	success := inputLogSuccessTest{}
@@ -351,7 +351,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Query Testtuple from its key ------------")
 	args = [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
-	callAssertAndPrint("query", "queryTesttuple", args, inputHashe{})
+	callAssertAndPrint("query", "queryTesttuple", args, inputHash{})
 
 	fmt.Fprintln(&out, "#### ------------ Query all Testtuples ------------")
 	args = [][]byte{[]byte("queryTesttuples")}
@@ -359,7 +359,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Query details about a model ------------")
 	args = [][]byte{[]byte("queryModelDetails"), keyToJSON(traintupleKey)}
-	callAssertAndPrint("query", "queryModelDetails", args, inputHashe{})
+	callAssertAndPrint("query", "queryModelDetails", args, inputHash{})
 
 	fmt.Fprintln(&out, "#### ------------ Query all models ------------")
 	args = [][]byte{[]byte("queryModels")}
@@ -367,7 +367,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Query Dataset ------------")
 	args = [][]byte{[]byte("queryDataset"), keyToJSON(dataManagerOpenerHash)}
-	callAssertAndPrint("query", "queryDataset", args, inputHashe{})
+	callAssertAndPrint("query", "queryDataset", args, inputHash{})
 
 	// 3. add new data manager and dataSample
 	fmt.Fprintln(&out, "#### ------------ Update Data Sample with new data manager ------------")
@@ -385,7 +385,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Query the new Dataset ------------")
 	args = [][]byte{[]byte("queryDataset"), keyToJSON(newDataManagerKey)}
-	callAssertAndPrint("query", "queryDataset", args, inputHashe{})
+	callAssertAndPrint("query", "queryDataset", args, inputHash{})
 
 	// Use the output to check the README file and if asked update it
 	doc := out.String()

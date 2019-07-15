@@ -92,7 +92,7 @@ func registerObjective(stub shim.ChaincodeStubInterface, args []string) (resp ma
 
 // queryObjective returns a objective of the ledger given its key
 func queryObjective(stub shim.ChaincodeStubInterface, args []string) (out outputObjective, err error) {
-	inp := inputHashe{}
+	inp := inputHash{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
 		return

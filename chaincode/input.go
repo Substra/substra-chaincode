@@ -78,7 +78,7 @@ type inputTesttuple struct {
 	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
 }
 
-type inputHashe struct {
+type inputHash struct {
 	Key string `validate:"required,len=64,hexadecimal" json:"key"`
 }
 

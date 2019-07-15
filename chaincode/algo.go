@@ -71,7 +71,7 @@ func registerAlgo(stub shim.ChaincodeStubInterface, args []string) (resp map[str
 
 // queryAlgo returns an algo of the ledger given its key
 func queryAlgo(stub shim.ChaincodeStubInterface, args []string) (out outputAlgo, err error) {
-	inp := inputHashe{}
+	inp := inputHash{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
 		return

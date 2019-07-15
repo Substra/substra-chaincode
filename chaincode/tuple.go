@@ -397,7 +397,7 @@ func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[
 
 // logStartTrain modifies a traintuple by changing its status from todo to doing
 func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (outputTraintuple outputTraintuple, err error) {
-	inp := inputHashe{}
+	inp := inputHash{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
 		return
@@ -420,7 +420,7 @@ func logStartTrain(stub shim.ChaincodeStubInterface, args []string) (outputTrain
 
 // logStartTest modifies a testtuple by changing its status from todo to doing
 func logStartTest(stub shim.ChaincodeStubInterface, args []string) (outputTesttuple outputTesttuple, err error) {
-	inp := inputHashe{}
+	inp := inputHash{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
 		return
@@ -601,7 +601,7 @@ func logFailTest(stub shim.ChaincodeStubInterface, args []string) (outputTesttup
 
 // queryTraintuple returns info about a traintuple given its key
 func queryTraintuple(stub shim.ChaincodeStubInterface, args []string) (outputTraintuple outputTraintuple, err error) {
-	inp := inputHashe{}
+	inp := inputHash{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
 		return
@@ -643,7 +643,7 @@ func queryTraintuples(stub shim.ChaincodeStubInterface, args []string) (outTrain
 
 // queryTesttuple returns a testtuple of the ledger given its key
 func queryTesttuple(stub shim.ChaincodeStubInterface, args []string) (out outputTesttuple, err error) {
-	inp := inputHashe{}
+	inp := inputHash{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
 		return
@@ -687,7 +687,7 @@ func queryTesttuples(stub shim.ChaincodeStubInterface, args []string) (outTesttu
 
 // queryModelDetails returns info about the testtuple and algo related to a traintuple
 func queryModelDetails(stub shim.ChaincodeStubInterface, args []string) (outModelDetails outputModelDetails, err error) {
-	inp := inputHashe{}
+	inp := inputHash{}
 	err = AssetFromJSON(args[0], &inp)
 	if err != nil {
 		return
