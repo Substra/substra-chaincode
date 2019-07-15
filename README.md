@@ -17,7 +17,7 @@ Note for internal use only: See the [technical specifications](https://github.co
 
 ### Implemented smart contracts
 
-
+- `createComputePlan`
 - `createTesttuple`
 - `createTraintuple`
 - `logFailTest`
@@ -462,7 +462,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"8e29bacef
 }
 ```
 #### ------------ Log Success Training ------------
-Smart contract: `logSucessTrain`
+Smart contract: `logSuccessTrain`
 
 ##### JSON Inputs:
 ```go
@@ -577,7 +577,10 @@ Smart contract: `createTesttuple`
 ##### JSON Inputs:
 ```go
 {
- "key": string (required,len=64,hexadecimal),
+ "traintupleKey": string (required,len=64,hexadecimal),
+ "dataManagerKey": string (omitempty,len=64,hexadecimal),
+ "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
+ "tag": string (omitempty,lte=64),
 }
 ```
 ##### Command peer example:
@@ -775,7 +778,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"6581232b89
 }
 ```
 #### ------------ Log Success Testing ------------
-Smart contract: `logSucessTest`
+Smart contract: `logSuccessTest`
 
 ##### JSON Inputs:
 ```go
