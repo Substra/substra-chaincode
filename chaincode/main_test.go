@@ -99,7 +99,12 @@ func prettyPrintStructElements(buf io.Writer, margin string, strucType reflect.T
 		}
 		fieldType := f.Type.Kind()
 		fieldStr := ""
-		if fieldType == reflect.Slice {
+		if fieldType == reflect.Slice && f.Type.Elem().Kind() == reflect.Struct {
+			fmt.Fprintf(buf, "%s\"%s\": (%s) [\n%s", margin, f.Tag.Get("json"), f.Tag.Get("validate"), margin+"  ")
+			prettyPrintStruct(buf, margin+"  ", f.Type.Elem())
+			fmt.Fprintf(buf, "%s],\n", margin)
+			continue
+		} else if fieldType == reflect.Slice {
 			fieldStr = fmt.Sprintf("[%s]", f.Type.Elem().Kind())
 		} else {
 			fieldStr = fmt.Sprint(fieldType)
@@ -398,6 +403,9 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintln(&out, "#### ------------ Query the new Dataset ------------")
 	args = [][]byte{[]byte("queryDataset"), keyToJSON(newDataManagerKey)}
 	callAssertAndPrint("query", "queryDataset", args, inputHash{})
+
+	fmt.Fprintln(&out, "#### ------------ Create a ComputePlan ------------")
+	callAssertAndPrint("invoke", "createComputePlan", methodAndAssetToByte("createComputePlan", defaultComputePlan), inputComputePlan{})
 
 	// Use the output to check the README file and if asked update it
 	doc := out.String()

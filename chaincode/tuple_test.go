@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"net/http"
 	"strings"
 	"testing"
 
@@ -48,13 +47,6 @@ func TestCreateComputePlan(t *testing.T) {
 
 	assert.Len(t, second.InModels, 1)
 	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
-}
-func TestCreateComputePlanCall(t *testing.T) {
-	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
-	registerItem(t, *mockStub, "traintuple")
-	resp := mockStub.MockInvoke("42", methodAndAssetToByte("createComputePlan", defaultComputePlan))
-	assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
 }
 func TestSpecifiqArgSeq(t *testing.T) {
 	t.SkipNow()
