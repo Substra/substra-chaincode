@@ -112,3 +112,16 @@ type inputQueryFilter struct {
 	//TODO : Make Attributes a real list
 	Attributes string `validate:"required" json:"attributes"`
 }
+type inputComputePlan struct {
+	AlgoKey      string            `validate:"required,len=64,hexadecimal" json:"algoKey"`
+	ObjectiveKey string            `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
+	Traintuples  []inputSubstruple `validate:"required,gt=0" json:"traintuples"`
+}
+
+type inputSubstruple struct {
+	DataManagerKey string   `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys []string `validate:"required,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	InModelsUUID   []string `validate:"omitempty,dive,lte=64" json:"inModels"`
+	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
+	UUID           string   `validate:"required,lte=64" json:"uuid"`
+}

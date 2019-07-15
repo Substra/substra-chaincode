@@ -40,6 +40,8 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	var result interface{}
 	var err error
 	switch fn {
+	case "createComputePlan":
+		result, err = createComputePlan(stub, args)
 	case "createTesttuple":
 		result, err = createTesttuple(stub, args)
 	case "createTraintuple":

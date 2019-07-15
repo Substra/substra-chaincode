@@ -1,5 +1,25 @@
 package main
 
+var (
+	defaultComputePlan = inputComputePlan{
+		AlgoKey:      algoHash,
+		ObjectiveKey: objectiveDescriptionHash,
+		Traintuples: []inputSubstruple{
+			inputSubstruple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				UUID:           "first",
+			},
+			inputSubstruple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash2},
+				UUID:           "second",
+				InModelsUUID:   []string{"first"},
+			},
+		},
+	}
+)
+
 func (dataManager *inputDataManager) createDefault() [][]byte {
 	if dataManager.Name == "" {
 		dataManager.Name = "liver slide"

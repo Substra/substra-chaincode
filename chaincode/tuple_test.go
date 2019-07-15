@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -12,6 +13,49 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+func TestCreateComputePlan(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+	registerItem(t, *mockStub, "algo")
+
+	mockStub.MockTransactionStart("42")
+
+	inCP := defaultComputePlan
+	firstUUID := "first"
+	secondUUID := "second"
+	outCP, err := createComputePlan(mockStub, assetToArgs(inCP))
+	assert.NoError(t, err)
+	assert.NotNil(t, outCP)
+	assert.Contains(t, outCP.Keys, firstUUID)
+	assert.Contains(t, outCP.Keys, secondUUID)
+	assert.EqualValues(t, outCP.Keys[firstUUID], outCP.FLTask)
+
+	traintples, err := queryTraintuples(mockStub, []string{})
+	assert.NoError(t, err)
+	assert.Len(t, traintples, 2)
+	var first, second outputTraintuple
+	for _, el := range traintples {
+		switch el.Key {
+		case outCP.Keys[firstUUID]:
+			first = el
+		case outCP.Keys[secondUUID]:
+			second = el
+		}
+	}
+
+	assert.EqualValues(t, first.Key, first.FLTask)
+	assert.EqualValues(t, first.FLTask, second.FLTask)
+
+	assert.Len(t, second.InModels, 1)
+	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
+}
+func TestCreateComputePlanCall(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+	registerItem(t, *mockStub, "traintuple")
+	resp := mockStub.MockInvoke("42", methodAndAssetToByte("createComputePlan", defaultComputePlan))
+	assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
+}
 func TestSpecifiqArgSeq(t *testing.T) {
 	t.SkipNow()
 	// This test is a POC and a example of a test base on the output of the log

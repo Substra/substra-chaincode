@@ -49,6 +49,18 @@ func TestInit(t *testing.T) {
 	assert.EqualValuesf(t, 200, resp.Status, "init failed with status %d and message %s", resp.Status, resp.Message)
 }
 
+func methodAndAssetToByte(methodName string, asset interface{}) [][]byte {
+	return [][]byte{[]byte(methodName), assetToJSON(asset)}
+}
+
+func methodAndKeyToByte(key string, asset interface{}) [][]byte {
+	return [][]byte{[]byte("queryAlgo"), keyToJSON(key)}
+}
+
+func assetToArgs(asset interface{}) []string {
+	return []string{string(assetToJSON(asset))}
+}
+
 func assetToJSON(asset interface{}) []byte {
 	assetjson, _ := json.Marshal(asset)
 	return assetjson

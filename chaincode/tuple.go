@@ -264,10 +264,93 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	return testtupleKey, err
 }
 
+func (traintuple *Traintuple) create(stub shim.ChaincodeStubInterface, inp inputTraintuple) (string, error) {
+	// check validity of input arg and set traintuples
+	traintupleKey, err := traintuple.Set(stub, inp)
+	if err != nil {
+		return "", err
+	}
+
+	// store in ledger
+	traintupleBytes, _ := json.Marshal(traintuple)
+	if err = stub.PutState(traintupleKey, traintupleBytes); err != nil {
+		err = fmt.Errorf("could not put in ledger traintuple with algo %s inModels %s - %s", inp.AlgoKey, inp.InModels, err.Error())
+		return "", err
+	}
+
+	// create composite keys
+	if err = createCompositeKey(stub, "traintuple~algo~key", []string{"traintuple", traintuple.AlgoKey, traintupleKey}); err != nil {
+		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+		return "", err
+	}
+	if err = createCompositeKey(stub, "traintuple~worker~status~key", []string{"traintuple", traintuple.Dataset.Worker, traintuple.Status, traintupleKey}); err != nil {
+		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+		return "", err
+	}
+	for _, inModelKey := range traintuple.InModelKeys {
+		if err = createCompositeKey(stub, "traintuple~inModel~key", []string{"traintuple", inModelKey, traintupleKey}); err != nil {
+			err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+			return "", err
+		}
+	}
+	if traintuple.FLTask != "" {
+		if err = createCompositeKey(stub, "traintuple~fltask~worker~rank~key", []string{"traintuple", traintuple.FLTask, traintuple.Dataset.Worker, inp.Rank, traintupleKey}); err != nil {
+			err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+			return "", err
+		}
+	}
+	if traintuple.Tag != "" {
+		err = createCompositeKey(stub, "traintuple~tag~key", []string{"traintuple", traintuple.Tag, traintupleKey})
+		if err != nil {
+			return "", err
+		}
+	}
+	return traintupleKey, nil
+}
+
 // -------------------------------------------------------------------------------------------
 // Smart contracts related to traintuples and testuples
 // args  [][]byte or []string, it is not possible to input a string looking like a json
 // -------------------------------------------------------------------------------------------
+
+// createComputePlan is the wrapper for the substra smartcontract CreateComputePlan
+func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp outputComputePlan, err error) {
+	inp := inputComputePlan{}
+	err = AssetFromJSON(args, &inp)
+	if err != nil {
+		return
+	}
+
+	resp.Keys = map[string]string{}
+	for i, computeItem := range inp.Traintuples {
+		inpTraintuple := inputTraintuple{}
+		inpTraintuple.AlgoKey = inp.AlgoKey
+		inpTraintuple.ObjectiveKey = inp.ObjectiveKey
+		inpTraintuple.DataManagerKey = computeItem.DataManagerKey
+		inpTraintuple.DataSampleKeys = computeItem.DataSampleKeys
+		inpTraintuple.Tag = computeItem.Tag
+		inpTraintuple.FLTask = resp.FLTask
+		inpTraintuple.Rank = strconv.Itoa(i)
+
+		for _, InModelUUID := range computeItem.InModelsUUID {
+			if inModelKey, ok := resp.Keys[InModelUUID]; ok {
+				inpTraintuple.InModels = append(inpTraintuple.InModels, inModelKey)
+			} else {
+				return resp, errors.BadRequest("don't know the UUID \"%s\", beware of the order")
+			}
+		}
+		traintuple := Traintuple{}
+		traintupleKey, err := traintuple.create(stub, inpTraintuple)
+		if err != nil {
+			return resp, errors.E(err, "could not create traintuple with uuid %s", computeItem.UUID)
+		}
+		resp.Keys[computeItem.UUID] = traintupleKey
+		if i == 0 {
+			resp.FLTask = traintuple.FLTask
+		}
+	}
+	return resp, err
+}
 
 // createTraintuple adds a Traintuple in the ledger
 func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
@@ -277,48 +360,11 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 		return
 	}
 
-	// check validity of input arg and set traintuples
 	traintuple := Traintuple{}
-	traintupleKey, err := traintuple.Set(stub, inp)
+	traintupleKey, err := traintuple.create(stub, inp)
 	if err != nil {
-		return
+		return nil, err
 	}
-
-	// store in ledger
-	traintupleBytes, _ := json.Marshal(traintuple)
-	if err = stub.PutState(traintupleKey, traintupleBytes); err != nil {
-		err = fmt.Errorf("could not put in ledger traintuple with algo %s inModels %s - %s", inp.AlgoKey, inp.InModels, err.Error())
-		return
-	}
-
-	// create composite keys
-	if err = createCompositeKey(stub, "traintuple~algo~key", []string{"traintuple", traintuple.AlgoKey, traintupleKey}); err != nil {
-		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
-		return
-	}
-	if err = createCompositeKey(stub, "traintuple~worker~status~key", []string{"traintuple", traintuple.Dataset.Worker, traintuple.Status, traintupleKey}); err != nil {
-		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
-		return
-	}
-	for _, inModelKey := range traintuple.InModelKeys {
-		if err = createCompositeKey(stub, "traintuple~inModel~key", []string{"traintuple", inModelKey, traintupleKey}); err != nil {
-			err = fmt.Errorf("issue creating composite keys - %s", err.Error())
-			return
-		}
-	}
-	if traintuple.FLTask != "" {
-		if err = createCompositeKey(stub, "traintuple~fltask~worker~rank~key", []string{"traintuple", traintuple.FLTask, traintuple.Dataset.Worker, inp.Rank, traintupleKey}); err != nil {
-			err = fmt.Errorf("issue creating composite keys - %s", err.Error())
-			return
-		}
-	}
-	if traintuple.Tag != "" {
-		err = createCompositeKey(stub, "traintuple~tag~key", []string{"traintuple", traintuple.Tag, traintupleKey})
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	out := outputTraintuple{}
 	err = out.Fill(stub, traintuple, traintupleKey)
 	if err != nil {
