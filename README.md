@@ -113,14 +113,14 @@ Smart contract: `registerDataSample`
 ##### JSON Inputs:
 ```go
 {
- "hashes": string (required),
+ "hashes": [string] (required,dive,len=64,hexadecimal),
  "dataManagerKeys": [string] (omitempty,dive,len=64,hexadecimal),
  "testOnly": string (required,oneof=true false),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataManagerKeys\":[\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"testOnly\":\"true\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"dataManagerKeys\":[\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"testOnly\":\"true\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -143,13 +143,16 @@ Smart contract: `registerObjective`
  "metricsName": string (required,gte=1,lte=100),
  "metricsHash": string (required,len=64,hexadecimal),
  "metricsStorageAddress": string (required,url),
- "testDataset": string (required),
- "permissions": string (required,oneof=all),
+ "testDataset": (omitempty){
+    "dataManagerKey": string (omitempty,len=64,hexadecimal),
+    "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
+   }
+  "permissions": string (required,oneof=all),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerObjective","{\"name\":\"MSI classification\",\"descriptionHash\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"descriptionStorageAddress\":\"https://toto/objective/222/description\",\"metricsName\":\"accuracy\",\"metricsHash\":\"4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"metricsStorageAddress\":\"https://toto/objective/222/metrics\",\"testDataset\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc:bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"permissions\":\"all\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerObjective","{\"name\":\"MSI classification\",\"descriptionHash\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"descriptionStorageAddress\":\"https://toto/objective/222/description\",\"metricsName\":\"accuracy\",\"metricsHash\":\"4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"metricsStorageAddress\":\"https://toto/objective/222/metrics\",\"testDataset\":{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"]},\"permissions\":\"all\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -187,14 +190,14 @@ Smart contract: `registerDataSample`
 ##### JSON Inputs:
 ```go
 {
- "hashes": string (required),
+ "hashes": [string] (required,dive,len=64,hexadecimal),
  "dataManagerKeys": [string] (omitempty,dive,len=64,hexadecimal),
  "testOnly": string (required,oneof=true false),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataManagerKeys\":[\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"testOnly\":\"false\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"dataManagerKeys\":[\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"testOnly\":\"false\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -312,7 +315,7 @@ Smart contract: `createTraintuple`
  "objectiveKey": string (required,len=64,hexadecimal),
  "inModels": [string] (omitempty,dive,len=64,hexadecimal),
  "dataManagerKey": string (required,len=64,hexadecimal),
- "dataSampleKeys": [string] (required,dive,len=64,hexadecimal),
+ "dataSampleKeys": [string] (required,gt=1,dive,len=64,hexadecimal),
  "flTask": string (omitempty),
  "rank": string (omitempty),
  "tag": string (omitempty,lte=64),
@@ -338,7 +341,7 @@ Smart contract: `createTraintuple`
  "objectiveKey": string (required,len=64,hexadecimal),
  "inModels": [string] (omitempty,dive,len=64,hexadecimal),
  "dataManagerKey": string (required,len=64,hexadecimal),
- "dataSampleKeys": [string] (required,dive,len=64,hexadecimal),
+ "dataSampleKeys": [string] (required,gt=1,dive,len=64,hexadecimal),
  "flTask": string (omitempty),
  "rank": string (omitempty),
  "tag": string (omitempty,lte=64),
@@ -1327,13 +1330,13 @@ Smart contract: `updateDataSample`
 ##### JSON Inputs:
 ```go
 {
- "hashes": string (required),
+ "hashes": [string] (required,dive,len=64,hexadecimal),
  "dataManagerKeys": [string] (required,dive,len=64,hexadecimal),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["updateDataSample","{\"hashes\":\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataManagerKeys\":[\"38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee\"]}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["updateDataSample","{\"hashes\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"dataManagerKeys\":[\"38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee\"]}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -1371,7 +1374,9 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"38a320b2a67
  "owner": "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
  "permissions": "all",
  "testDataSampleKeys": [],
- "trainDataSampleKeys": [],
+ "trainDataSampleKeys": [
+  "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+ ],
  "type": "images"
 }
 ```

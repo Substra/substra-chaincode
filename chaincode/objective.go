@@ -3,7 +3,6 @@ package main
 import (
 	"chaincode/errors"
 	"fmt"
-	"strings"
 
 	"encoding/json"
 
@@ -13,10 +12,10 @@ import (
 // Set is a method of the receiver Objective. It checks the validity of inputObjective and uses its fields to set the Objective.
 // Returns the objectiveKey and the dataManagerKey associated to test dataSample
 func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjective) (objectiveKey string, dataManagerKey string, err error) {
-	dataManagerKey = strings.Split(inp.TestDataset, ":")[0]
+	dataManagerKey = inp.TestDataset.DataManagerKey
 	if dataManagerKey != "" {
 		var testOnly bool
-		dataSampleKeys := strings.Split(strings.Replace(strings.Split(inp.TestDataset, ":")[1], " ", "", -1), ",")
+		dataSampleKeys := inp.TestDataset.DataSampleKeys
 		testOnly, _, err = checkSameDataManager(stub, dataManagerKey, dataSampleKeys)
 		if err != nil {
 			err = errors.BadRequest(err, "invalid test dataSample")

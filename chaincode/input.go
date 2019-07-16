@@ -7,14 +7,20 @@ package main
 
 // inputObjective is the representation of input args to register a Objective
 type inputObjective struct {
-	Name                      string `validate:"required,gte=1,lte=100" json:"name"`
-	DescriptionHash           string `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
-	DescriptionStorageAddress string `validate:"required,url" json:"descriptionStorageAddress"`
-	MetricsName               string `validate:"required,gte=1,lte=100" json:"metricsName"`
-	MetricsHash               string `validate:"required,len=64,hexadecimal" json:"metricsHash"`
-	MetricsStorageAddress     string `validate:"required,url" json:"metricsStorageAddress"`
-	TestDataset               string `validate:"required" json:"testDataset"`
-	Permissions               string `validate:"required,oneof=all" json:"permissions"`
+	Name                      string       `validate:"required,gte=1,lte=100" json:"name"`
+	DescriptionHash           string       `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
+	DescriptionStorageAddress string       `validate:"required,url" json:"descriptionStorageAddress"`
+	MetricsName               string       `validate:"required,gte=1,lte=100" json:"metricsName"`
+	MetricsHash               string       `validate:"required,len=64,hexadecimal" json:"metricsHash"`
+	MetricsStorageAddress     string       `validate:"required,url" json:"metricsStorageAddress"`
+	TestDataset               inputDataset `validate:"omitempty" json:"testDataset"`
+	Permissions               string       `validate:"required,oneof=all" json:"permissions"`
+}
+
+// inputDataset is the representation in input args to register a dataset
+type inputDataset struct {
+	DataManagerKey string   `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys []string `validate:"omitempty,dive,len=64,hexadecimal" json:"dataSampleKeys"`
 }
 
 // inputAlgo is the representation of input args to register an Algo
@@ -47,14 +53,14 @@ type inputUpdateDataManager struct {
 
 // inputDataSample is the representation of input args to register one or more dataSample
 type inputDataSample struct {
-	Hashes          string   `validate:"required" json:"hashes"`
+	Hashes          []string `validate:"required,dive,len=64,hexadecimal" json:"hashes"`
 	DataManagerKeys []string `validate:"omitempty,dive,len=64,hexadecimal" json:"dataManagerKeys"`
 	TestOnly        string   `validate:"required,oneof=true false" json:"testOnly"`
 }
 
 // inputUpdateDataSample is the representation of input args to update one or more dataSample
 type inputUpdateDataSample struct {
-	Hashes          string   `validate:"required" json:"hashes"`
+	Hashes          []string `validate:"required,dive,len=64,hexadecimal" json:"hashes"`
 	DataManagerKeys []string `validate:"required,dive,len=64,hexadecimal" json:"dataManagerKeys"`
 }
 
@@ -64,7 +70,7 @@ type inputTraintuple struct {
 	ObjectiveKey   string   `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
 	InModels       []string `validate:"omitempty,dive,len=64,hexadecimal" json:"inModels"`
 	DataManagerKey string   `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
-	DataSampleKeys []string `validate:"required,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	DataSampleKeys []string `validate:"required,gt=1,dive,len=64,hexadecimal" json:"dataSampleKeys"`
 	FLTask         string   `validate:"omitempty" json:"flTask"`
 	Rank           string   `validate:"omitempty" json:"rank"`
 	Tag            string   `validate:"omitempty,lte=64" json:"tag"`

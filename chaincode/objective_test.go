@@ -13,9 +13,10 @@ func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
 
-	inpObjective := inputObjective{TestDataset: ":"}
-	args := inpObjective.createDefault()
-	resp := mockStub.MockInvoke("42", args)
+	inpObjective := inputObjective{}
+	inpObjective.createDefault()
+	inpObjective.TestDataset = inputDataset{}
+	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
 	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
 }
 func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
@@ -27,14 +28,14 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	args := inpDataManager.createDefault()
 	mockStub.MockInvoke("42", args)
 	inpDataSample := inputDataSample{
-		Hashes:          testDataSampleHash1,
+		Hashes:          []string{testDataSampleHash1},
 		DataManagerKeys: []string{dataManagerOpenerHash},
 		TestOnly:        "true",
 	}
 	args = inpDataSample.createDefault()
 	mockStub.MockInvoke("42", args)
 	inpDataSample = inputDataSample{
-		Hashes:          testDataSampleHash2,
+		Hashes:          []string{testDataSampleHash2},
 		DataManagerKeys: []string{dataManagerOpenerHash},
 		TestOnly:        "true",
 	}
@@ -43,7 +44,10 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	assert.EqualValues(t, 200, r.Status)
 
 	// Fail to insert the objective
-	inpObjective := inputObjective{TestDataset: testDataSampleHash1 + ":" + testDataSampleHash2}
+	inpObjective := inputObjective{
+		TestDataset: inputDataset{
+			DataManagerKey: testDataSampleHash1,
+			DataSampleKeys: []string{testDataSampleHash2}}}
 	args = inpObjective.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status, "status should indicate an error since the dataManager key is a dataSample key")

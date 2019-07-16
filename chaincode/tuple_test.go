@@ -85,13 +85,14 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 	registerItem(t, *mockStub, "trainDataset")
 
 	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash, TestDataset: ":"}
-	args := inpObjective.createDefault()
-	resp := mockStub.MockInvoke("42", args)
+	inpObjective := inputObjective{DescriptionHash: objHash}
+	inpObjective.createDefault()
+	inpObjective.TestDataset = inputDataset{}
+	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
 	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
 
 	inpAlgo := inputAlgo{}
-	args = inpAlgo.createDefault()
+	args := inpAlgo.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 

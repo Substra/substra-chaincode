@@ -48,9 +48,7 @@ func (dataManager *DataManager) Set(stub shim.ChaincodeStubInterface, inp inputD
 // setDataSample is a method checking the validity of inputDataSample to be registered in the ledger
 // and returning corresponding dataSample hashes, associated dataManagers, testOnly and errors
 func setDataSample(stub shim.ChaincodeStubInterface, inp inputDataSample) (dataSampleHashes []string, dataSample DataSample, err error) {
-	// Get dataSample keys (=hashes)
-	dataSampleHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
-	// check validity of dataSampleHashes
+	dataSampleHashes = inp.Hashes
 	if err = checkHashes(dataSampleHashes); err != nil {
 		err = errors.BadRequest(err)
 		return
@@ -89,13 +87,9 @@ func setDataSample(stub shim.ChaincodeStubInterface, inp inputDataSample) (dataS
 // validateUpdateDataSample is a method checking the validity of elements sent to update
 // one or more dataSamplef
 func validateUpdateDataSample(stub shim.ChaincodeStubInterface, inp inputUpdateDataSample) (dataSampleHashes []string, dataManagerKeys []string, err error) {
-
 	// TODO return full dataSample
-
-	// Get dataSample keys (=hashes)
-	dataSampleHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
 	// check validity of dataSampleHashes
-	if err = checkHashes(dataSampleHashes); err != nil {
+	if err = checkHashes(inp.Hashes); err != nil {
 		err = errors.BadRequest(err)
 		return
 	}
@@ -103,7 +97,7 @@ func validateUpdateDataSample(stub shim.ChaincodeStubInterface, inp inputUpdateD
 	if err = checkDataManagerOwner(stub, inp.DataManagerKeys); err != nil {
 		return
 	}
-	return
+	return inp.Hashes, inp.DataManagerKeys, nil
 }
 
 // -----------------------------------------------------------------

@@ -134,7 +134,7 @@ func registerItem(t *testing.T, mockStub shim.MockStub, itemType string) (peer.R
 	}
 	// 2. add test dataSample
 	inpDataSample := inputDataSample{
-		Hashes:          testDataSampleHash1 + ", " + testDataSampleHash2,
+		Hashes:          []string{testDataSampleHash1, testDataSampleHash2},
 		DataManagerKeys: []string{dataManagerOpenerHash},
 		TestOnly:        "true",
 	}
@@ -227,7 +227,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Add test DataSample ------------")
 	inpDataSample := inputDataSample{
-		Hashes:   testDataSampleHash1 + ", " + testDataSampleHash2,
+		Hashes:   []string{testDataSampleHash1, testDataSampleHash2},
 		TestOnly: "true",
 	}
 	inpDataSample.createDefault()
@@ -390,7 +390,7 @@ func TestPipeline(t *testing.T) {
 	// associate a data sample with the old data manager with the updateDataSample
 	updateData := inputUpdateDataSample{
 		DataManagerKeys: []string{newDataManagerKey},
-		Hashes:          trainDataSampleHash1,
+		Hashes:          []string{trainDataSampleHash1},
 	}
 	callAssertAndPrint("invoke", "updateDataSample", updateData)
 

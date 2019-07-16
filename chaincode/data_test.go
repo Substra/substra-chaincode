@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -105,10 +104,10 @@ func TestGetTestDatasetKeys(t *testing.T) {
 	mockStub.MockInvoke("42", args)
 
 	// Add both train and test dataSample
-	inpDataSample := inputDataSample{Hashes: testDataSampleHash1}
+	inpDataSample := inputDataSample{Hashes: []string{testDataSampleHash1}}
 	args = inpDataSample.createDefault()
 	mockStub.MockInvoke("42", args)
-	inpDataSample.Hashes = testDataSampleHash2
+	inpDataSample.Hashes = []string{testDataSampleHash2}
 	inpDataSample.TestOnly = "true"
 	args = inpDataSample.createDefault()
 	mockStub.MockInvoke("42", args)
@@ -132,7 +131,7 @@ func TestDataset(t *testing.T) {
 
 	// Add dataSample with invalid field
 	inpDataSample := inputDataSample{
-		Hashes: "aaa",
+		Hashes: []string{"aaa"},
 	}
 	args := inpDataSample.createDefault()
 	resp := mockStub.MockInvoke("42", args)
@@ -161,7 +160,7 @@ func TestDataset(t *testing.T) {
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "keys")
 	dataSampleKeys := res["keys"]
-	expectedResp := strings.Split(strings.ReplaceAll(inpDataSample.Hashes, " ", ""), ",")
+	expectedResp := inpDataSample.Hashes
 	assert.ElementsMatch(t, expectedResp, dataSampleKeys, "when adding dataSample: dataSample keys does not correspond to dataSample hashes")
 
 	// Add dataSample which already exist
@@ -176,6 +175,6 @@ func TestDataset(t *testing.T) {
 	out := outputDataset{}
 	err = json.Unmarshal(resp.Payload, &out)
 	assert.NoError(t, err, "while unmarshalling dataset")
-	assert.ElementsMatch(t, out.TrainDataSampleKeys, strings.Split(strings.ReplaceAll(inpDataSample.Hashes, " ", ""), ","), "when querying dataManager dataSample, unexpected train keys")
+	assert.ElementsMatch(t, out.TrainDataSampleKeys, inpDataSample.Hashes, "when querying dataManager dataSample, unexpected train keys")
 
 }

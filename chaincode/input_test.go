@@ -45,10 +45,10 @@ func (dataManager *inputDataManager) createDefault() [][]byte {
 	return args
 }
 func (dataSample *inputDataSample) createDefault() [][]byte {
-	if dataSample.Hashes == "" {
-		dataSample.Hashes = trainDataSampleHash1 + ", " + trainDataSampleHash2
+	if dataSample.Hashes == nil || len(dataSample.Hashes) == 0 {
+		dataSample.Hashes = []string{trainDataSampleHash1, trainDataSampleHash2}
 	}
-	if dataSample.DataManagerKeys == nil {
+	if dataSample.DataManagerKeys == nil || len(dataSample.DataManagerKeys) == 0 {
 		dataSample.DataManagerKeys = []string{dataManagerOpenerHash}
 	}
 	if dataSample.TestOnly == "" {
@@ -77,8 +77,11 @@ func (objective *inputObjective) createDefault() [][]byte {
 	if objective.MetricsStorageAddress == "" {
 		objective.MetricsStorageAddress = objectiveMetricsStorageAddress
 	}
-	if objective.TestDataset == "" {
-		objective.TestDataset = dataManagerOpenerHash + ":" + testDataSampleHash1 + ", " + testDataSampleHash2
+	if objective.TestDataset.DataManagerKey == "" {
+		objective.TestDataset.DataManagerKey = dataManagerOpenerHash
+	}
+	if objective.TestDataset.DataSampleKeys == nil || len(objective.TestDataset.DataSampleKeys) == 0 {
+		objective.TestDataset.DataSampleKeys = []string{testDataSampleHash1, testDataSampleHash2}
 	}
 	objective.Permissions = "all"
 	args := append([][]byte{[]byte("registerObjective")}, assetToJSON(objective))
@@ -119,7 +122,7 @@ func (traintuple *inputTraintuple) createDefault() [][]byte {
 	if traintuple.DataManagerKey == "" {
 		traintuple.DataManagerKey = dataManagerOpenerHash
 	}
-	if traintuple.DataSampleKeys == nil {
+	if traintuple.DataSampleKeys == nil || len(traintuple.DataSampleKeys) == 0 {
 		traintuple.DataSampleKeys = []string{trainDataSampleHash1, trainDataSampleHash2}
 	}
 	args := append([][]byte{[]byte("createTraintuple")}, assetToJSON(traintuple))
