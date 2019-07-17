@@ -103,6 +103,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	default:
 		err = fmt.Errorf("function not implemented")
 	}
+	logger.Infof("Response from chaincode: %#v, error: %s", result, err)
 	// Return the result as success payload
 	if err != nil {
 		return formatErrorResponse(err)

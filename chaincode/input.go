@@ -91,11 +91,11 @@ type inputHash struct {
 type inputLogSuccessTrain struct {
 	inputLog
 	OutModel inputHashDress `validate:"required" json:"outModel"`
-	Perf     float32        `validate:"required" json:"perf"`
+	Perf     float32        `validate:"omitempty" json:"perf"`
 }
 type inputLogSuccessTest struct {
 	inputLog
-	Perf float32 `validate:"required" json:"perf"`
+	Perf float32 `validate:"omitempty" json:"perf"`
 }
 type inputLogFailTrain struct {
 	inputLog

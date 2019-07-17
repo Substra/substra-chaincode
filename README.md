@@ -476,7 +476,7 @@ Smart contract: `logSuccessTrain`
     "hash": string (required,len=64,hexadecimal),
     "storageAddress": string (required),
    }
-  "perf": float32 (required),
+  "perf": float32 (omitempty),
 }
 ```
 ##### Command peer example:
@@ -788,7 +788,7 @@ Smart contract: `logSuccessTest`
 {
  "key": string (required,len=64,hexadecimal),
  "log": string (required,lte=200),
- "perf": float32 (required),
+ "perf": float32 (omitempty),
 }
 ```
 ##### Command peer example:
