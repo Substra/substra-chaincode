@@ -4,17 +4,17 @@ var (
 	defaultComputePlan = inputComputePlan{
 		AlgoKey:      algoHash,
 		ObjectiveKey: objectiveDescriptionHash,
-		Traintuples: []inputSubstruple{
-			inputSubstruple{
+		Traintuples: []inputComputePlanTraintuple{
+			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash1},
-				UUID:           "first",
+				ID:             "first",
 			},
-			inputSubstruple{
+			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash2},
-				UUID:           "second",
-				InModelsUUID:   []string{"first"},
+				ID:             "second",
+				InModelsIDs:    []string{"first"},
 			},
 		},
 	}

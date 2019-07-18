@@ -257,6 +257,6 @@ func SetEvent(stub shim.ChaincodeStubInterface, eventName string, eventObject in
 }
 
 type outputComputePlan struct {
-	FLTask string            `json:"fltask"`
-	Keys   map[string]string `json:"keys"`
+	FLTask    string            `json:"fltask"`
+	TupleKeys map[string]string `json:"tupleKeys"`
 }

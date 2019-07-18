@@ -321,7 +321,7 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 		return
 	}
 
-	resp.Keys = map[string]string{}
+	resp.TupleKeys = map[string]string{}
 	for i, computeItem := range inp.Traintuples {
 		inpTraintuple := inputTraintuple{}
 		inpTraintuple.AlgoKey = inp.AlgoKey
@@ -332,19 +332,19 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 		inpTraintuple.FLTask = resp.FLTask
 		inpTraintuple.Rank = strconv.Itoa(i)
 
-		for _, InModelUUID := range computeItem.InModelsUUID {
-			if inModelKey, ok := resp.Keys[InModelUUID]; ok {
+		for _, InModelID := range computeItem.InModelsIDs {
+			if inModelKey, ok := resp.TupleKeys[InModelID]; ok {
 				inpTraintuple.InModels = append(inpTraintuple.InModels, inModelKey)
 			} else {
-				return resp, errors.BadRequest("don't know the UUID \"%s\", beware of the order")
+				return resp, errors.BadRequest("don't know the ID \"%s\", beware of the order")
 			}
 		}
 		traintuple := Traintuple{}
 		traintupleKey, err := traintuple.create(stub, inpTraintuple)
 		if err != nil {
-			return resp, errors.E(err, "could not create traintuple with uuid %s", computeItem.UUID)
+			return resp, errors.E(err, "could not create traintuple with ID %s", computeItem.ID)
 		}
-		resp.Keys[computeItem.UUID] = traintupleKey
+		resp.TupleKeys[computeItem.ID] = traintupleKey
 		if i == 0 {
 			resp.FLTask = traintuple.FLTask
 		}

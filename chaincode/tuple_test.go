@@ -20,14 +20,14 @@ func TestCreateComputePlan(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 
 	inCP := defaultComputePlan
-	firstUUID := "first"
-	secondUUID := "second"
+	firstID := "first"
+	secondID := "second"
 	outCP, err := createComputePlan(mockStub, assetToArgs(inCP))
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	assert.Contains(t, outCP.Keys, firstUUID)
-	assert.Contains(t, outCP.Keys, secondUUID)
-	assert.EqualValues(t, outCP.Keys[firstUUID], outCP.FLTask)
+	assert.Contains(t, outCP.TupleKeys, firstID)
+	assert.Contains(t, outCP.TupleKeys, secondID)
+	assert.EqualValues(t, outCP.TupleKeys[firstID], outCP.FLTask)
 
 	traintples, err := queryTraintuples(mockStub, []string{})
 	assert.NoError(t, err)
@@ -35,9 +35,9 @@ func TestCreateComputePlan(t *testing.T) {
 	var first, second outputTraintuple
 	for _, el := range traintples {
 		switch el.Key {
-		case outCP.Keys[firstUUID]:
+		case outCP.TupleKeys[firstID]:
 			first = el
-		case outCP.Keys[secondUUID]:
+		case outCP.TupleKeys[secondID]:
 			second = el
 		}
 	}

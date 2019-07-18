@@ -118,16 +118,22 @@ type inputQueryFilter struct {
 	//TODO : Make Attributes a real list
 	Attributes string `validate:"required" json:"attributes"`
 }
+
+// inputConputePlan represent a coherent set of tuples uploaded together.
+// They share the same Algo and Objective represented by their respective keys.
+// Traintuples is the list of all the traintuples planed by the compute plan
+// Beware, it's order sensitive since the `InModelsIDs` can only be interpreted
+// if the traintuples matching those IDs have already been created.
 type inputComputePlan struct {
-	AlgoKey      string            `validate:"required,len=64,hexadecimal" json:"algoKey"`
-	ObjectiveKey string            `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
-	Traintuples  []inputSubstruple `validate:"required,gt=0" json:"traintuples"`
+	AlgoKey      string                       `validate:"required,len=64,hexadecimal" json:"algoKey"`
+	ObjectiveKey string                       `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
+	Traintuples  []inputComputePlanTraintuple `validate:"required,gt=0" json:"traintuples"`
 }
 
-type inputSubstruple struct {
+type inputComputePlanTraintuple struct {
 	DataManagerKey string   `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
 	DataSampleKeys []string `validate:"required,dive,len=64,hexadecimal" json:"dataSampleKeys"`
-	InModelsUUID   []string `validate:"omitempty,dive,lte=64" json:"inModels"`
+	ID             string   `validate:"required,lte=64" json:"id"`
+	InModelsIDs    []string `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
 	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
-	UUID           string   `validate:"required,lte=64" json:"uuid"`
 }
