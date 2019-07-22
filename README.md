@@ -1392,16 +1392,16 @@ Smart contract: `createComputePlan`
    {
     "dataManagerKey": string (required,len=64,hexadecimal),
     "dataSampleKeys": [string] (required,dive,len=64,hexadecimal),
-    "inModelsID": [string] (omitempty,dive,lte=64),
-    "tag": string (omitempty,lte=64),
     "id": string (required,lte=64),
+    "inModelsIDs": [string] (omitempty,dive,lte=64),
+    "tag": string (omitempty,lte=64),
    }
  ],
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"traintuples\":[{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"inModelsID\":null,\"tag\":\"\",\"id\":\"first\"},{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"inModelsID\":[\"first\"],\"tag\":\"\",\"id\":\"second\"}]}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"traintuples\":[{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"id\":\"first\",\"inModelsIDs\":null,\"tag\":\"\"},{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"id\":\"second\",\"inModelsIDs\":[\"first\"],\"tag\":\"\"}]}"]}' -C myc
 ```
 ##### Command output:
 ```json

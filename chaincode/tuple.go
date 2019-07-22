@@ -105,56 +105,6 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 		return
 	}
 
-	// check FLTask and Rank and set it when required
-	if inp.Rank == "" {
-		if inp.FLTask != "" {
-			err = errors.BadRequest("invalit inputs, a FLTask should have a rank")
-			return
-		}
-	} else {
-		traintuple.Rank, err = strconv.Atoi(inp.Rank)
-		if err != nil {
-			return
-		}
-		if inp.FLTask == "" {
-			if traintuple.Rank != 0 {
-				err = errors.BadRequest("invalid inputs, a new FLTask should have a rank 0")
-				return
-			}
-			traintuple.FLTask = traintupleKey
-		} else {
-			var ttKeys []string
-			attributes := []string{"traintuple", inp.FLTask}
-			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
-			if err != nil {
-				return
-			} else if len(ttKeys) == 0 {
-				err = errors.BadRequest("cannot find the FLTask %s", inp.FLTask)
-				return
-			}
-			for _, ttKey := range ttKeys {
-				FLTraintuple := Traintuple{}
-				err = getElementStruct(stub, ttKey, &FLTraintuple)
-				if err != nil {
-					return
-				} else if FLTraintuple.AlgoKey != inp.AlgoKey {
-					err = errors.BadRequest("previous traintuple for FLTask %s does not have the same algo key %s", inp.FLTask, inp.AlgoKey)
-					return
-				}
-			}
-
-			attributes = []string{"traintuple", inp.FLTask, traintuple.Dataset.Worker, inp.Rank}
-			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
-			if err != nil {
-				return
-			} else if len(ttKeys) > 0 {
-				err = errors.BadRequest("FLTask %s with worker %s rank %d already exists", inp.FLTask, traintuple.Dataset.Worker, traintuple.Rank)
-				return
-			}
-
-			traintuple.FLTask = inp.FLTask
-		}
-	}
 	return
 }
 
@@ -264,48 +214,99 @@ func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTestt
 	return testtupleKey, err
 }
 
-func (traintuple *Traintuple) create(stub shim.ChaincodeStubInterface, inp inputTraintuple) (string, error) {
-	// check validity of input arg and set traintuples
-	traintupleKey, err := traintuple.Set(stub, inp)
-	if err != nil {
-		return "", err
+func (traintuple *Traintuple) SetFLTask(stub shim.ChaincodeStubInterface, inp inputTraintuple, traintupleKey string) error {
+	// check FLTask and Rank and set it when required
+	var err error
+	if inp.Rank == "" {
+		if inp.FLTask != "" {
+			err = errors.BadRequest("invalit inputs, a FLTask should have a rank")
+			return err
+		}
+	} else {
+		traintuple.Rank, err = strconv.Atoi(inp.Rank)
+		if err != nil {
+			return err
+		}
+		if inp.FLTask == "" {
+			if traintuple.Rank != 0 {
+				err = errors.BadRequest("invalid inputs, a new FLTask should have a rank 0")
+				return err
+			}
+			traintuple.FLTask = traintupleKey
+		} else {
+			var ttKeys []string
+			attributes := []string{"traintuple", inp.FLTask}
+			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
+			if err != nil {
+				return err
+			} else if len(ttKeys) == 0 {
+				err = errors.BadRequest("cannot find the FLTask %s", inp.FLTask)
+				return err
+			}
+			for _, ttKey := range ttKeys {
+				FLTraintuple := Traintuple{}
+				err = getElementStruct(stub, ttKey, &FLTraintuple)
+				if err != nil {
+					return err
+				} else if FLTraintuple.AlgoKey != inp.AlgoKey {
+					err = errors.BadRequest("previous traintuple for FLTask %s does not have the same algo key %s", inp.FLTask, inp.AlgoKey)
+					return err
+				}
+			}
+
+			attributes = []string{"traintuple", inp.FLTask, traintuple.Dataset.Worker, inp.Rank}
+			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
+			if err != nil {
+				return err
+			} else if len(ttKeys) > 0 {
+				err = errors.BadRequest("FLTask %s with worker %s rank %d already exists", inp.FLTask, traintuple.Dataset.Worker, traintuple.Rank)
+				return err
+			}
+
+			traintuple.FLTask = inp.FLTask
+		}
 	}
+
+	return nil
+}
+
+func (traintuple *Traintuple) Save(stub shim.ChaincodeStubInterface, traintupleKey string) error {
 
 	// store in ledger
 	traintupleBytes, _ := json.Marshal(traintuple)
-	if err = stub.PutState(traintupleKey, traintupleBytes); err != nil {
-		err = fmt.Errorf("could not put in ledger traintuple with algo %s inModels %s - %s", inp.AlgoKey, inp.InModels, err.Error())
-		return "", err
+	if err := stub.PutState(traintupleKey, traintupleBytes); err != nil {
+		err = fmt.Errorf("could not put in ledger traintuple with algo %s inModels %s - %s", traintuple.AlgoKey, traintuple.InModelKeys, err.Error())
+		return err
 	}
 
 	// create composite keys
-	if err = createCompositeKey(stub, "traintuple~algo~key", []string{"traintuple", traintuple.AlgoKey, traintupleKey}); err != nil {
+	if err := createCompositeKey(stub, "traintuple~algo~key", []string{"traintuple", traintuple.AlgoKey, traintupleKey}); err != nil {
 		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
-		return "", err
+		return err
 	}
-	if err = createCompositeKey(stub, "traintuple~worker~status~key", []string{"traintuple", traintuple.Dataset.Worker, traintuple.Status, traintupleKey}); err != nil {
+	if err := createCompositeKey(stub, "traintuple~worker~status~key", []string{"traintuple", traintuple.Dataset.Worker, traintuple.Status, traintupleKey}); err != nil {
 		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
-		return "", err
+		return err
 	}
 	for _, inModelKey := range traintuple.InModelKeys {
-		if err = createCompositeKey(stub, "traintuple~inModel~key", []string{"traintuple", inModelKey, traintupleKey}); err != nil {
+		if err := createCompositeKey(stub, "traintuple~inModel~key", []string{"traintuple", inModelKey, traintupleKey}); err != nil {
 			err = fmt.Errorf("issue creating composite keys - %s", err.Error())
-			return "", err
+			return err
 		}
 	}
 	if traintuple.FLTask != "" {
-		if err = createCompositeKey(stub, "traintuple~fltask~worker~rank~key", []string{"traintuple", traintuple.FLTask, traintuple.Dataset.Worker, inp.Rank, traintupleKey}); err != nil {
+		if err := createCompositeKey(stub, "traintuple~fltask~worker~rank~key", []string{"traintuple", traintuple.FLTask, traintuple.Dataset.Worker, strconv.Itoa(traintuple.Rank), traintupleKey}); err != nil {
 			err = fmt.Errorf("issue creating composite keys - %s", err.Error())
-			return "", err
+			return err
 		}
 	}
 	if traintuple.Tag != "" {
-		err = createCompositeKey(stub, "traintuple~tag~key", []string{"traintuple", traintuple.Tag, traintupleKey})
+		err := createCompositeKey(stub, "traintuple~tag~key", []string{"traintuple", traintuple.Tag, traintupleKey})
 		if err != nil {
-			return "", err
+			return err
 		}
 	}
-	return traintupleKey, nil
+	return nil
 }
 
 // -------------------------------------------------------------------------------------------
@@ -329,7 +330,6 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 		inpTraintuple.DataManagerKey = computeItem.DataManagerKey
 		inpTraintuple.DataSampleKeys = computeItem.DataSampleKeys
 		inpTraintuple.Tag = computeItem.Tag
-		inpTraintuple.FLTask = resp.FLTask
 		inpTraintuple.Rank = strconv.Itoa(i)
 
 		for _, InModelID := range computeItem.InModelsIDs {
@@ -340,14 +340,21 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 			}
 		}
 		traintuple := Traintuple{}
-		traintupleKey, err := traintuple.create(stub, inpTraintuple)
+		traintupleKey, err := traintuple.Set(stub, inpTraintuple)
+		if err != nil {
+			return resp, err
+		}
+		if i == 0 {
+			traintuple.FLTask = traintupleKey
+			resp.FLTask = traintuple.FLTask
+		} else {
+			traintuple.FLTask = resp.FLTask
+		}
+		err = traintuple.Save(stub, traintupleKey)
 		if err != nil {
 			return resp, errors.E(err, "could not create traintuple with ID %s", computeItem.ID)
 		}
 		resp.TupleKeys[computeItem.ID] = traintupleKey
-		if i == 0 {
-			resp.FLTask = traintuple.FLTask
-		}
 	}
 	return resp, err
 }
@@ -361,7 +368,15 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 	}
 
 	traintuple := Traintuple{}
-	traintupleKey, err := traintuple.create(stub, inp)
+	traintupleKey, err := traintuple.Set(stub, inp)
+	if err != nil {
+		return nil, err
+	}
+	err = traintuple.SetFLTask(stub, inp, traintupleKey)
+	if err != nil {
+		return nil, err
+	}
+	err = traintuple.Save(stub, traintupleKey)
 	if err != nil {
 		return nil, err
 	}
