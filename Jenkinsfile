@@ -40,5 +40,12 @@ pipeline {
         }
       }
     }
+
+    stage('Test with substra-network') {
+      steps {
+        build job: 'substra-network/PR-82', parameters: [string(name: 'CHAINCODE', value: env.CHANGE_BRANCH)], propagate: true
+      }
+    }
+
   }
 }
