@@ -202,18 +202,46 @@ type outputTesttuple struct {
 	Tag         string         `json:"tag"`
 }
 
-func (out *outputTesttuple) Fill(key string, in Testtuple) {
+func (out *outputTesttuple) Fill(stub shim.ChaincodeStubInterface, key string, in Testtuple) error {
 	out.Key = key
-	out.Algo = in.Algo
 	out.Certified = in.Certified
 	out.Creator = in.Creator
 	out.Dataset = in.Dataset
 	out.Log = in.Log
 	out.Model = in.Model
-	out.Objective = in.Objective
 	out.Permissions = in.Permissions
 	out.Status = in.Status
 	out.Tag = in.Tag
+
+	// fill algo
+	algo := Algo{}
+	err := getElementStruct(stub, in.AlgoKey, &algo)
+	if err != nil {
+		return fmt.Errorf("could not retrieve algo with key %s - %s", in.AlgoKey, err.Error())
+	}
+	out.Algo = &HashDressName{
+		Name:           algo.Name,
+		Hash:           in.AlgoKey,
+		StorageAddress: algo.StorageAddress}
+
+	// fill objective
+	objective := Objective{}
+	err = getElementStruct(stub, in.ObjectiveKey, &objective)
+	if err != nil {
+		return fmt.Errorf("could not retrieve associated objective with key %s- %s", in.ObjectiveKey, err.Error())
+	}
+	if objective.Metrics == nil {
+		return fmt.Errorf("objective %s is missing metrics values", in.ObjectiveKey)
+	}
+	metrics := HashDress{
+		Hash:           objective.Metrics.Hash,
+		StorageAddress: objective.Metrics.StorageAddress,
+	}
+	out.Objective = &TtObjective{
+		Key:     in.ObjectiveKey,
+		Metrics: &metrics,
+	}
+	return nil
 }
 
 type outputModelDetails struct {

@@ -24,17 +24,24 @@ const (
 )
 
 // -------------------------------------------------------------------------------------------
-// Methods on receivers traintuple and testuples
+// Methods on receivers traintuple
 // -------------------------------------------------------------------------------------------
 
-// Set is a method of the receiver Traintuple. It checks the validity of inputTraintuple and uses its fields to set the Traintuple
-func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTraintuple) (traintupleKey string, err error) {
+// SetFromInput is a method of the receiver Traintuple.
+// It uses the inputTraintuple to check and set the traintuple's parameters
+// which don't depend on previous traintuples values :
+//  - AssetType
+//  - Creator & permissions
+//  - Tag
+//  - AlgoKey & ObjectiveKey
+//  - Dataset
+func (traintuple *Traintuple) SetFromInput(stub shim.ChaincodeStubInterface, inp inputTraintuple) error {
 
 	// TODO later: check permissions
 	// find associated creator and check permissions (TODO later)
 	creator, err := getTxCreator(stub)
 	if err != nil {
-		return
+		return err
 	}
 	traintuple.AssetType = TraintupleType
 	traintuple.Creator = creator
@@ -42,27 +49,49 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 	traintuple.Tag = inp.Tag
 	// check if algo exists
 	if _, err = getElementBytes(stub, inp.AlgoKey); err != nil {
-		err = errors.BadRequest(err, "could not retrieve algo with key %s", inp.AlgoKey)
-		return
+		return errors.BadRequest(err, "could not retrieve algo with key %s", inp.AlgoKey)
 	}
 	traintuple.AlgoKey = inp.AlgoKey
 
-	// check objective and add it
-	obj := Objective{}
-	if err = getElementStruct(stub, inp.ObjectiveKey, &obj); err != nil {
-		err = errors.BadRequest(err, "could not retrieve objective with key %s", inp.ObjectiveKey)
-		return
+	// check objective exists
+	if _, err = getElementBytes(stub, inp.ObjectiveKey); err != nil {
+		return errors.BadRequest(err, "could not retrieve objective with key %s", inp.ObjectiveKey)
 	}
 	traintuple.ObjectiveKey = inp.ObjectiveKey
 
-	// check if InModels is empty or if mentionned models do exist and fill inModels
+	// check if DataSampleKeys are from the same dataManager and if they are not test only dataSample
+	_, trainOnly, err := checkSameDataManager(stub, inp.DataManagerKey, inp.DataSampleKeys)
+	if err != nil {
+		return err
+	}
+	if !trainOnly {
+		return errors.BadRequest("not possible to create a traintuple with test only data")
+	}
+	if _, err = getElementBytes(stub, inp.DataManagerKey); err != nil {
+		return errors.BadRequest(err, "could not retrieve dataManager with key %s", inp.DataManagerKey)
+	}
+
+	// fill traintuple.Dataset from dataManager and dataSample
+	traintuple.Dataset = &Dataset{
+		DataManagerKey: inp.DataManagerKey,
+		DataSampleKeys: inp.DataSampleKeys,
+	}
+	traintuple.Dataset.Worker, err = getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
+	return err
+}
+
+// SetFromParents set the status of the traintuple depending on its "parents",
+// i.e. the traintuples from which it received the outModels as inModels.
+// Also it's InModelKeys are set.
+func (traintuple *Traintuple) SetFromParents(stub shim.ChaincodeStubInterface, inModels []string) error {
+	var err error
 	status := StatusTodo
-	parentTraintupleKeys := inp.InModels
+	parentTraintupleKeys := inModels
 	for _, parentTraintupleKey := range parentTraintupleKeys {
 		parentTraintuple := Traintuple{}
 		if err = getElementStruct(stub, parentTraintupleKey, &parentTraintuple); err != nil {
 			err = errors.BadRequest(err, "could not retrieve parent traintuple with key %s %d", parentTraintupleKeys, len(parentTraintupleKeys))
-			return
+			return err
 		}
 		// set traintuple to waiting if one of the parent traintuples is not done
 		if parentTraintuple.OutModel == nil {
@@ -71,205 +100,81 @@ func (traintuple *Traintuple) Set(stub shim.ChaincodeStubInterface, inp inputTra
 		traintuple.InModelKeys = append(traintuple.InModelKeys, parentTraintupleKey)
 	}
 	traintuple.Status = status
+	return nil
+}
 
-	// check if DataSampleKeys are from the same dataManager and if they are not test only dataSample
-	_, trainOnly, err := checkSameDataManager(stub, inp.DataManagerKey, inp.DataSampleKeys)
-	if err != nil {
-		return
-	}
-	if !trainOnly {
-		err = errors.BadRequest("not possible to create a traintuple with test only data")
-		return
-	}
-
-	// fill traintuple.Dataset from dataManager and dataSample
-	if _, err = getElementBytes(stub, inp.DataManagerKey); err != nil {
-		err = errors.BadRequest(err, "could not retrieve dataManager with key %s", inp.DataManagerKey)
-		return
-	}
-	traintuple.Dataset = &Dataset{
-		DataManagerKey: inp.DataManagerKey,
-		DataSampleKeys: inp.DataSampleKeys,
-	}
-	traintuple.Dataset.Worker, err = getDataManagerOwner(stub, traintuple.Dataset.DataManagerKey)
-	if err != nil {
-		return
-	}
-
-	hashKeys := []string{creator, traintuple.AlgoKey, traintuple.Dataset.DataManagerKey}
+// GetKey return the key of the traintuple depending on its key parameters.
+func (traintuple *Traintuple) GetKey(stub shim.ChaincodeStubInterface) (string, error) {
+	hashKeys := []string{traintuple.Creator, traintuple.AlgoKey, traintuple.Dataset.DataManagerKey}
 	hashKeys = append(hashKeys, traintuple.Dataset.DataSampleKeys...)
 	hashKeys = append(hashKeys, traintuple.InModelKeys...)
-	traintupleKey, err = HashForKey(stub, "traintuple", hashKeys...)
-	if err != nil {
-		err = errors.Conflict(err)
-		return
-	}
+	return HashForKey(stub, "traintuple", hashKeys...)
 
-	return
 }
 
-// Set is a method of the receiver Testtuple. It checks the validity of inputTesttuple and uses its fields to set the Testtuple
-func (testtuple *Testtuple) Set(stub shim.ChaincodeStubInterface, inp inputTesttuple) (testtupleKey string, err error) {
-
-	// check associated traintuple
-	traintuple := Traintuple{}
-	if err = getElementStruct(stub, inp.TraintupleKey, &traintuple); err != nil {
-		return testtupleKey, errors.BadRequest(err, "could not retrieve traintuple with key %s", inp.TraintupleKey)
-	}
-
-	// TODO later: check permissions
-	// find associated creator and check permissions (TODO later)
-	creator, err := getTxCreator(stub)
-	if err != nil {
-		return testtupleKey, err
-	}
-	testtuple.Creator = creator
-	testtuple.Permissions = "all"
-	testtuple.Tag = inp.Tag
-
-	// fill info from associated traintuple
-	outputTraintuple := &outputTraintuple{}
-	outputTraintuple.Fill(stub, traintuple, inp.TraintupleKey)
-	testtuple.AssetType = TesttupleType
-	testtuple.Objective = outputTraintuple.Objective
-	testtuple.Algo = outputTraintuple.Algo
-	testtuple.Model = &Model{
-		TraintupleKey: inp.TraintupleKey,
-	}
-	if traintuple.OutModel != nil {
-		testtuple.Model.Hash = outputTraintuple.OutModel.Hash
-		testtuple.Model.StorageAddress = outputTraintuple.OutModel.StorageAddress
-	}
-
-	switch status := traintuple.Status; status {
-	case StatusDone:
-		testtuple.Status = StatusTodo
-	case StatusFailed:
-		err = errors.BadRequest(
-			"could not register this testtuple, the traintuple %s has a failed status",
-			inp.TraintupleKey)
-		return
-	default:
-		testtuple.Status = StatusWaiting
-	}
-
-	// Get test dataset from objective
-	objective := Objective{}
-	if err = getElementStruct(stub, testtuple.Objective.Key, &objective); err != nil {
-		return testtupleKey, errors.BadRequest(err, "could not retrieve objective with key %s", testtuple.Objective.Key)
-	}
-	var objectiveDataManagerKey string
-	var objectiveDataSampleKeys []string
-	if objective.TestDataset != nil {
-		objectiveDataManagerKey = objective.TestDataset.DataManagerKey
-		objectiveDataSampleKeys = objective.TestDataset.DataSampleKeys
-	}
-	// For now we need to sort it but in fine it should be save sorted
-	// TODO
-	sort.Strings(objectiveDataSampleKeys)
-
-	var dataManagerKey string
-	var dataSampleKeys []string
-	if len(inp.DataManagerKey) > 0 && len(inp.DataSampleKeys) > 0 {
-		// non-certified testtuple
-		// test dataset are specified by the user
-		dataSampleKeys = inp.DataSampleKeys
-		_, _, err = checkSameDataManager(stub, inp.DataManagerKey, dataSampleKeys)
-		if err != nil {
-			return testtupleKey, err
-		}
-		dataManagerKey = inp.DataManagerKey
-		sort.Strings(dataSampleKeys)
-		testtuple.Certified = objectiveDataManagerKey == dataManagerKey && reflect.DeepEqual(objectiveDataSampleKeys, dataSampleKeys)
-	} else if len(inp.DataManagerKey) > 0 || len(inp.DataSampleKeys) > 0 {
-		return testtupleKey, errors.BadRequest("invalid input: dataManagerKey and dataSampleKey should be provided together")
-	} else if objective.TestDataset != nil {
-		dataSampleKeys = objectiveDataSampleKeys
-		dataManagerKey = objectiveDataManagerKey
-		testtuple.Certified = true
-	} else {
-		err = errors.BadRequest("can not create a certified testtuple, no data associated with objective %s", testtuple.Objective.Key)
-		return
-	}
-	// retrieve dataManager owner
-	dataManager := DataManager{}
-	if err = getElementStruct(stub, dataManagerKey, &dataManager); err != nil {
-		return testtupleKey, errors.BadRequest(err, "could not retrieve dataManager with key %s", dataManagerKey)
-	}
-	testtuple.Dataset = &TtDataset{
-		Worker:         dataManager.Owner,
-		DataSampleKeys: dataSampleKeys,
-		OpenerHash:     dataManagerKey,
-	}
-
-	// create testtuple key and check if it already exists
-	hashKeys := []string{testtuple.Model.TraintupleKey, dataManagerKey, creator}
-	hashKeys = append(hashKeys, dataSampleKeys...)
-	testtupleKey, err = HashForKey(stub, "testtuple", hashKeys...)
-	if err != nil {
-		err = errors.Conflict(err)
-		return
-	}
-
-	return testtupleKey, err
-}
-
-func (traintuple *Traintuple) SetFLTask(stub shim.ChaincodeStubInterface, inp inputTraintuple, traintupleKey string) error {
+// AddToFLTask set the traintuple's parameters that determines if it's part of on FLTask and how.
+// It uses the inputTraintuple values as follow:
+//  - If neither FLTask nor rank is set it returns immediately
+//  - If rank is 0 and FLTask empty, it's start a new one using this traintuple key
+//  - If rank and FLTask are set, it checks if there are coherent with previous ones and set it.
+func (traintuple *Traintuple) AddToFLTask(stub shim.ChaincodeStubInterface, inp inputTraintuple, traintupleKey string) error {
 	// check FLTask and Rank and set it when required
 	var err error
 	if inp.Rank == "" {
 		if inp.FLTask != "" {
-			err = errors.BadRequest("invalit inputs, a FLTask should have a rank")
+			err = errors.BadRequest("invalid inputs, a FLTask should have a rank")
 			return err
 		}
-	} else {
-		traintuple.Rank, err = strconv.Atoi(inp.Rank)
+		return nil
+	}
+	traintuple.Rank, err = strconv.Atoi(inp.Rank)
+	if err != nil {
+		return err
+	}
+	if inp.FLTask == "" {
+		if traintuple.Rank != 0 {
+			err = errors.BadRequest("invalid inputs, a new FLTask should have a rank 0")
+			return err
+		}
+		traintuple.FLTask = traintupleKey
+		return nil
+	}
+	var ttKeys []string
+	attributes := []string{"traintuple", inp.FLTask}
+	ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
+	if err != nil {
+		return err
+	} else if len(ttKeys) == 0 {
+		err = errors.BadRequest("cannot find the FLTask %s", inp.FLTask)
+		return err
+	}
+	for _, ttKey := range ttKeys {
+		FLTraintuple := Traintuple{}
+		err = getElementStruct(stub, ttKey, &FLTraintuple)
 		if err != nil {
 			return err
-		}
-		if inp.FLTask == "" {
-			if traintuple.Rank != 0 {
-				err = errors.BadRequest("invalid inputs, a new FLTask should have a rank 0")
-				return err
-			}
-			traintuple.FLTask = traintupleKey
-		} else {
-			var ttKeys []string
-			attributes := []string{"traintuple", inp.FLTask}
-			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
-			if err != nil {
-				return err
-			} else if len(ttKeys) == 0 {
-				err = errors.BadRequest("cannot find the FLTask %s", inp.FLTask)
-				return err
-			}
-			for _, ttKey := range ttKeys {
-				FLTraintuple := Traintuple{}
-				err = getElementStruct(stub, ttKey, &FLTraintuple)
-				if err != nil {
-					return err
-				} else if FLTraintuple.AlgoKey != inp.AlgoKey {
-					err = errors.BadRequest("previous traintuple for FLTask %s does not have the same algo key %s", inp.FLTask, inp.AlgoKey)
-					return err
-				}
-			}
-
-			attributes = []string{"traintuple", inp.FLTask, traintuple.Dataset.Worker, inp.Rank}
-			ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
-			if err != nil {
-				return err
-			} else if len(ttKeys) > 0 {
-				err = errors.BadRequest("FLTask %s with worker %s rank %d already exists", inp.FLTask, traintuple.Dataset.Worker, traintuple.Rank)
-				return err
-			}
-
-			traintuple.FLTask = inp.FLTask
+		} else if FLTraintuple.AlgoKey != inp.AlgoKey {
+			err = errors.BadRequest("previous traintuple for FLTask %s does not have the same algo key %s", inp.FLTask, inp.AlgoKey)
+			return err
 		}
 	}
+
+	attributes = []string{"traintuple", inp.FLTask, traintuple.Dataset.Worker, inp.Rank}
+	ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
+	if err != nil {
+		return err
+	} else if len(ttKeys) > 0 {
+		err = errors.BadRequest("FLTask %s with worker %s rank %d already exists", inp.FLTask, traintuple.Dataset.Worker, traintuple.Rank)
+		return err
+	}
+
+	traintuple.FLTask = inp.FLTask
 
 	return nil
 }
 
+// Save will put in the legder interface both the traintuple with its key
+// and all the associated composite keys
 func (traintuple *Traintuple) Save(stub shim.ChaincodeStubInterface, traintupleKey string) error {
 
 	// store in ledger
@@ -310,6 +215,162 @@ func (traintuple *Traintuple) Save(stub shim.ChaincodeStubInterface, traintupleK
 }
 
 // -------------------------------------------------------------------------------------------
+// Methods on receivers testtuple
+// -------------------------------------------------------------------------------------------
+
+// SetFromInput is a method of the receiver Testtuple.
+// It uses the inputTesttuple to check and set the testtuple's parameters
+// which don't depend on previous testtuples values :
+//  - AssetType
+//  - Creator & permissions
+//  - Tag
+//  - AlgoKey & ObjectiveKey
+//  - Dataset
+//  - Certified
+func (testtuple *Testtuple) SetFromInput(stub shim.ChaincodeStubInterface, inp inputTesttuple) error {
+
+	// TODO later: check permissions
+	// find associated creator and check permissions (TODO later)
+	creator, err := getTxCreator(stub)
+	if err != nil {
+		return err
+	}
+	testtuple.Creator = creator
+	testtuple.Permissions = "all"
+	testtuple.Tag = inp.Tag
+	testtuple.AssetType = TesttupleType
+
+	// Get test dataset from objective
+	objective := Objective{}
+	if err = getElementStruct(stub, testtuple.ObjectiveKey, &objective); err != nil {
+		return errors.BadRequest(err, "could not retrieve objective with key %s", testtuple.ObjectiveKey)
+	}
+	var objectiveDataManagerKey string
+	var objectiveDataSampleKeys []string
+	if objective.TestDataset != nil {
+		objectiveDataManagerKey = objective.TestDataset.DataManagerKey
+		objectiveDataSampleKeys = objective.TestDataset.DataSampleKeys
+	}
+	// For now we need to sort it but in fine it should be save sorted
+	// TODO
+	sort.Strings(objectiveDataSampleKeys)
+
+	var dataManagerKey string
+	var dataSampleKeys []string
+	if len(inp.DataManagerKey) > 0 && len(inp.DataSampleKeys) > 0 {
+		// non-certified testtuple
+		// test dataset are specified by the user
+		dataSampleKeys = inp.DataSampleKeys
+		_, _, err = checkSameDataManager(stub, inp.DataManagerKey, dataSampleKeys)
+		if err != nil {
+			return err
+		}
+		dataManagerKey = inp.DataManagerKey
+		sort.Strings(dataSampleKeys)
+		testtuple.Certified = objectiveDataManagerKey == dataManagerKey && reflect.DeepEqual(objectiveDataSampleKeys, dataSampleKeys)
+	} else if len(inp.DataManagerKey) > 0 || len(inp.DataSampleKeys) > 0 {
+		return errors.BadRequest("invalid input: dataManagerKey and dataSampleKey should be provided together")
+	} else if objective.TestDataset != nil {
+		dataSampleKeys = objectiveDataSampleKeys
+		dataManagerKey = objectiveDataManagerKey
+		testtuple.Certified = true
+	} else {
+		return errors.BadRequest("can not create a certified testtuple, no data associated with objective %s", testtuple.ObjectiveKey)
+	}
+	// retrieve dataManager owner
+	dataManager := DataManager{}
+	if err = getElementStruct(stub, dataManagerKey, &dataManager); err != nil {
+		return errors.BadRequest(err, "could not retrieve dataManager with key %s", dataManagerKey)
+	}
+	testtuple.Dataset = &TtDataset{
+		Worker:         dataManager.Owner,
+		DataSampleKeys: dataSampleKeys,
+		OpenerHash:     dataManagerKey,
+	}
+	return nil
+}
+
+// SetFromTraintuple set the parameters of the testuple depending on traintuple
+// it depends on. It sets:
+//  - AlgoKey
+//  - ObjectiveKey
+//  - Model
+//  - Status
+func (testtuple *Testtuple) SetFromTraintuple(stub shim.ChaincodeStubInterface, traintupleKey string) error {
+
+	// check associated traintuple
+	traintuple := Traintuple{}
+	if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
+		return errors.BadRequest(err, "could not retrieve traintuple with key %s", traintupleKey)
+	}
+	testtuple.ObjectiveKey = traintuple.ObjectiveKey
+	testtuple.AlgoKey = traintuple.AlgoKey
+	testtuple.Model = &Model{
+		TraintupleKey: traintupleKey,
+	}
+	if traintuple.OutModel != nil {
+		testtuple.Model.Hash = traintuple.OutModel.Hash
+		testtuple.Model.StorageAddress = traintuple.OutModel.StorageAddress
+	}
+
+	switch status := traintuple.Status; status {
+	case StatusDone:
+		testtuple.Status = StatusTodo
+	case StatusFailed:
+		return errors.BadRequest(
+			"could not register this testtuple, the traintuple %s has a failed status",
+			traintupleKey)
+	default:
+		testtuple.Status = StatusWaiting
+	}
+	return nil
+}
+
+// GetKey return the key of the testuple depending on its key parameters.
+func (testtuple *Testtuple) GetKey(stub shim.ChaincodeStubInterface) (string, error) {
+	// create testtuple key and check if it already exists
+	hashKeys := []string{
+		testtuple.Model.TraintupleKey,
+		testtuple.Dataset.OpenerHash,
+		testtuple.Creator,
+	}
+	hashKeys = append(hashKeys, testtuple.Dataset.DataSampleKeys...)
+	return HashForKey(stub, "testtuple", hashKeys...)
+}
+
+// Save will put in the legder interface both the testtuple with its key
+// and all the associated composite keys
+func (testtuple *Testtuple) Save(stub shim.ChaincodeStubInterface, testtupleKey string) error {
+	var err error
+	testtupleBytes, _ := json.Marshal(testtuple)
+	if err = stub.PutState(testtupleKey, testtupleBytes); err != nil {
+		err = fmt.Errorf("could not put in ledger testtuple associated with traintuple %s - %s", testtuple.Model.TraintupleKey, err.Error())
+		return err
+	}
+
+	// create composite keys
+	if err = createCompositeKey(stub, "testtuple~algo~key", []string{"testtuple", testtuple.AlgoKey, testtupleKey}); err != nil {
+		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+		return err
+	}
+	if err = createCompositeKey(stub, "testtuple~worker~status~key", []string{"testtuple", testtuple.Dataset.Worker, testtuple.Status, testtupleKey}); err != nil {
+		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+		return err
+	}
+	if err = createCompositeKey(stub, "testtuple~traintuple~certified~key", []string{"testtuple", testtuple.Model.TraintupleKey, strconv.FormatBool(testtuple.Certified), testtupleKey}); err != nil {
+		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
+		return err
+	}
+	if testtuple.Tag != "" {
+		err = createCompositeKey(stub, "testtuple~tag~key", []string{"traintuple", testtuple.Tag, testtupleKey})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// -------------------------------------------------------------------------------------------
 // Smart contracts related to traintuples and testuples
 // args  [][]byte or []string, it is not possible to input a string looking like a json
 // -------------------------------------------------------------------------------------------
@@ -323,56 +384,103 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 	}
 
 	resp.TupleKeys = map[string]string{}
-	for i, computeItem := range inp.Traintuples {
+	for i, computeTraintuple := range inp.Traintuples {
 		inpTraintuple := inputTraintuple{}
 		inpTraintuple.AlgoKey = inp.AlgoKey
 		inpTraintuple.ObjectiveKey = inp.ObjectiveKey
-		inpTraintuple.DataManagerKey = computeItem.DataManagerKey
-		inpTraintuple.DataSampleKeys = computeItem.DataSampleKeys
-		inpTraintuple.Tag = computeItem.Tag
+		inpTraintuple.DataManagerKey = computeTraintuple.DataManagerKey
+		inpTraintuple.DataSampleKeys = computeTraintuple.DataSampleKeys
+		inpTraintuple.Tag = computeTraintuple.Tag
 		inpTraintuple.Rank = strconv.Itoa(i)
 
-		for _, InModelID := range computeItem.InModelsIDs {
-			if inModelKey, ok := resp.TupleKeys[InModelID]; ok {
-				inpTraintuple.InModels = append(inpTraintuple.InModels, inModelKey)
-			} else {
-				return resp, errors.BadRequest("don't know the ID \"%s\", beware of the order")
-			}
-		}
 		traintuple := Traintuple{}
-		traintupleKey, err := traintuple.Set(stub, inpTraintuple)
+		err := traintuple.SetFromInput(stub, inpTraintuple)
 		if err != nil {
 			return resp, err
 		}
+
+		for _, InModelID := range computeTraintuple.InModelsIDs {
+			inModelKey, ok := resp.TupleKeys[InModelID]
+			if !ok {
+				return resp, errors.BadRequest("don't know the ID \"%s\", beware of the order", InModelID)
+			}
+			traintuple.InModelKeys = append(traintuple.InModelKeys, inModelKey)
+		}
+
+		traintupleKey, err := traintuple.GetKey(stub)
+		if err != nil {
+			return resp, errors.Conflict(err)
+		}
+
 		if i == 0 {
 			traintuple.FLTask = traintupleKey
+			traintuple.Status = StatusTodo
 			resp.FLTask = traintuple.FLTask
 		} else {
 			traintuple.FLTask = resp.FLTask
+			traintuple.Status = StatusWaiting
 		}
 		err = traintuple.Save(stub, traintupleKey)
 		if err != nil {
-			return resp, errors.E(err, "could not create traintuple with ID %s", computeItem.ID)
+			return resp, errors.E(err, "could not create traintuple with ID %s", computeTraintuple.ID)
 		}
-		resp.TupleKeys[computeItem.ID] = traintupleKey
+		resp.TupleKeys[computeTraintuple.ID] = traintupleKey
 	}
+
+	for _, computeTesttuple := range inp.Testtuples {
+		traintupleKey, ok := resp.TupleKeys[computeTesttuple.TraintupleID]
+		if !ok {
+			return resp, errors.BadRequest("don't know the ID \"%s\", beware of the order", computeTesttuple.TraintupleID)
+		}
+		testtuple := Testtuple{}
+		testtuple.Model = &Model{TraintupleKey: traintupleKey}
+		testtuple.ObjectiveKey = inp.ObjectiveKey
+		testtuple.AlgoKey = inp.AlgoKey
+
+		inputTesttuple := inputTesttuple{}
+		inputTesttuple.DataManagerKey = computeTesttuple.DataManagerKey
+		inputTesttuple.DataSampleKeys = computeTesttuple.DataSampleKeys
+		inputTesttuple.Tag = computeTesttuple.Tag
+		err = testtuple.SetFromInput(stub, inputTesttuple)
+		if err != nil {
+			return resp, err
+		}
+		testtupleKey, err := testtuple.GetKey(stub)
+		if err != nil {
+			return resp, errors.Conflict(err)
+		}
+		err = testtuple.Save(stub, testtupleKey)
+		if err != nil {
+			return resp, err
+		}
+		resp.TupleKeys[computeTesttuple.ID] = testtupleKey
+	}
+
 	return resp, err
 }
 
 // createTraintuple adds a Traintuple in the ledger
-func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
+func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (map[string]string, error) {
 	inp := inputTraintuple{}
-	err = AssetFromJSON(args, &inp)
-	if err != nil {
-		return
-	}
-
-	traintuple := Traintuple{}
-	traintupleKey, err := traintuple.Set(stub, inp)
+	err := AssetFromJSON(args, &inp)
 	if err != nil {
 		return nil, err
 	}
-	err = traintuple.SetFLTask(stub, inp, traintupleKey)
+
+	traintuple := Traintuple{}
+	err = traintuple.SetFromInput(stub, inp)
+	if err != nil {
+		return nil, err
+	}
+	err = traintuple.SetFromParents(stub, inp.InModels)
+	if err != nil {
+		return nil, err
+	}
+	traintupleKey, err := traintuple.GetKey(stub)
+	if err != nil {
+		return nil, errors.Conflict(err)
+	}
+	err = traintuple.AddToFLTask(stub, inp, traintupleKey)
 	if err != nil {
 		return nil, err
 	}
@@ -401,48 +509,36 @@ func createTraintuple(stub shim.ChaincodeStubInterface, args []string) (resp map
 }
 
 // createTesttuple adds a Testtuple in the ledger
-func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
+func createTesttuple(stub shim.ChaincodeStubInterface, args []string) (map[string]string, error) {
 	inp := inputTesttuple{}
-	err = AssetFromJSON(args, &inp)
+	err := AssetFromJSON(args, &inp)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	// check validity of input arg and set testtuple
 	testtuple := Testtuple{}
-	testtupleKey, err := testtuple.Set(stub, inp)
+	err = testtuple.SetFromTraintuple(stub, inp.TraintupleKey)
 	if err != nil {
-		return
+		return nil, err
 	}
-	testtupleBytes, _ := json.Marshal(testtuple)
-	if err = stub.PutState(testtupleKey, testtupleBytes); err != nil {
-		err = fmt.Errorf("could not put in ledger testtuple associated with traintuple %s - %s", inp.TraintupleKey, err.Error())
-		return
+	err = testtuple.SetFromInput(stub, inp)
+	if err != nil {
+		return nil, err
 	}
-
-	// create composite keys
-	if err = createCompositeKey(stub, "testtuple~algo~key", []string{"testtuple", testtuple.Algo.Hash, testtupleKey}); err != nil {
-		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
-		return
+	testtupleKey, err := testtuple.GetKey(stub)
+	if err != nil {
+		return nil, errors.Conflict(err)
 	}
-	if err = createCompositeKey(stub, "testtuple~worker~status~key", []string{"testtuple", testtuple.Dataset.Worker, testtuple.Status, testtupleKey}); err != nil {
-		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
-		return
+	err = testtuple.Save(stub, testtupleKey)
+	if err != nil {
+		return nil, err
 	}
-	if err = createCompositeKey(stub, "testtuple~traintuple~certified~key", []string{"testtuple", inp.TraintupleKey, strconv.FormatBool(testtuple.Certified), testtupleKey}); err != nil {
-		err = fmt.Errorf("issue creating composite keys - %s", err.Error())
-		return
-	}
-	if testtuple.Tag != "" {
-		err = createCompositeKey(stub, "testtuple~tag~key", []string{"traintuple", testtuple.Tag, testtupleKey})
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	out := outputTesttuple{}
-	out.Fill(testtupleKey, testtuple)
-
+	err = out.Fill(stub, testtupleKey, testtuple)
+	if err != nil {
+		return nil, err
+	}
 	// https://github.com/hyperledger/fabric/blob/release-1.4/core/chaincode/shim/interfaces.go#L339:L343
 	// We can only send one event per transaction
 	// https://stackoverflow.com/questions/50344232/not-able-to-set-multiple-events-in-chaincode-per-transaction-getting-only-last
@@ -499,7 +595,10 @@ func logStartTest(stub shim.ChaincodeStubInterface, args []string) (outputTesttu
 	if err = testtuple.commitStatusUpdate(stub, inp.Key, StatusDoing); err != nil {
 		return
 	}
-	outputTesttuple.Fill(inp.Key, testtuple)
+	err = outputTesttuple.Fill(stub, inp.Key, testtuple)
+	if err != nil {
+		return
+	}
 	return
 }
 
@@ -581,7 +680,7 @@ func logSuccessTest(stub shim.ChaincodeStubInterface, args []string) (outputTest
 	if err = testtuple.commitStatusUpdate(stub, inp.Key, StatusDone); err != nil {
 		return
 	}
-	outputTesttuple.Fill(inp.Key, testtuple)
+	err = outputTesttuple.Fill(stub, inp.Key, testtuple)
 	return
 }
 
@@ -657,7 +756,7 @@ func logFailTest(stub shim.ChaincodeStubInterface, args []string) (outputTesttup
 	if err = testtuple.commitStatusUpdate(stub, inp.Key, StatusFailed); err != nil {
 		return
 	}
-	outputTesttuple.Fill(inp.Key, testtuple)
+	err = outputTesttuple.Fill(stub, inp.Key, testtuple)
 	return
 }
 
@@ -718,7 +817,7 @@ func queryTesttuple(stub shim.ChaincodeStubInterface, args []string) (out output
 		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
-	out.Fill(inp.Key, testtuple)
+	err = out.Fill(stub, inp.Key, testtuple)
 	return
 }
 
@@ -857,7 +956,7 @@ func getOutputTesttuple(stub shim.ChaincodeStubInterface, testtupleKey string) (
 	if err = getElementStruct(stub, testtupleKey, &testtuple); err != nil {
 		return
 	}
-	outTesttuple.Fill(testtupleKey, testtuple)
+	err = outTesttuple.Fill(stub, testtupleKey, testtuple)
 	return
 }
 
@@ -1092,7 +1191,10 @@ func (parentTraintuple *Traintuple) updateTesttupleChildren(stub shim.ChaincodeS
 
 		if newStatus == StatusTodo {
 			out := outputTesttuple{}
-			out.Fill(testtupleKey, testtuple)
+			err = out.Fill(stub, testtupleKey, testtuple)
+			if err != nil {
+				return nil, err
+			}
 			otuples = append(otuples, out)
 		}
 	}

@@ -128,6 +128,7 @@ type inputComputePlan struct {
 	AlgoKey      string                       `validate:"required,len=64,hexadecimal" json:"algoKey"`
 	ObjectiveKey string                       `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
 	Traintuples  []inputComputePlanTraintuple `validate:"required,gt=0" json:"traintuples"`
+	Testtuples   []inputComputePlanTesttuple  `validate:"omitempty" json:"testtuples"`
 }
 
 type inputComputePlanTraintuple struct {
@@ -136,4 +137,12 @@ type inputComputePlanTraintuple struct {
 	ID             string   `validate:"required,lte=64" json:"id"`
 	InModelsIDs    []string `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
 	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
+}
+
+type inputComputePlanTesttuple struct {
+	DataManagerKey string   `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys []string `validate:"required,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	ID             string   `validate:"required,lte=64" json:"id"`
+	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
+	TraintupleID   string   `validate:"required,lte=64" json:"traintupleID"`
 }

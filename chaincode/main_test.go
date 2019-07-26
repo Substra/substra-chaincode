@@ -337,7 +337,7 @@ func TestPipeline(t *testing.T) {
 	args = [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	respTesttuple := resp.Payload
-	testtuple := Testtuple{}
+	testtuple := outputTesttuple{}
 	if err := bytesToStruct(respTesttuple, &testtuple); err != nil {
 		t.Errorf("when unmarshalling queried testtuple with error %s", err)
 	}

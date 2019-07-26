@@ -3,6 +3,7 @@ package main
 var (
 	traintupleID1      = "firstTraintupleID"
 	traintupleID2      = "secondTraintupleID"
+	testtupleID        = "testtupleID"
 	defaultComputePlan = inputComputePlan{
 		AlgoKey:      algoHash,
 		ObjectiveKey: objectiveDescriptionHash,
@@ -17,6 +18,14 @@ var (
 				DataSampleKeys: []string{trainDataSampleHash2},
 				ID:             traintupleID2,
 				InModelsIDs:    []string{traintupleID1},
+			},
+		},
+		Testtuples: []inputComputePlanTesttuple{
+			inputComputePlanTesttuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				ID:             testtupleID,
+				TraintupleID:   traintupleID2,
 			},
 		},
 	}

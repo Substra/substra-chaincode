@@ -59,9 +59,9 @@ func TestCreateComputePlan(t *testing.T) {
 	outCP, err := createComputePlan(&myStub, assetToArgs(inCP))
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	assert.Contains(t, outCP.TupleKeys, traintupleID1)
-	assert.Contains(t, outCP.TupleKeys, traintupleID2)
-	assert.Contains(t, outCP.TupleKeys, testtupleID)
+	require.Contains(t, outCP.TupleKeys, traintupleID1)
+	require.Contains(t, outCP.TupleKeys, traintupleID2)
+	require.Contains(t, outCP.TupleKeys, testtupleID)
 	assert.EqualValues(t, outCP.TupleKeys[traintupleID1], outCP.FLTask)
 
 	// Save all that was written in the mocked ledger
@@ -88,6 +88,13 @@ func TestCreateComputePlan(t *testing.T) {
 	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
 	assert.Equal(t, first.Status, StatusTodo)
 	assert.Equal(t, second.Status, StatusWaiting)
+
+	// Check the testtuples
+	testtuples, err := queryTesttuples(&myStub, []string{})
+	assert.NoError(t, err)
+	require.Len(t, testtuples, 1)
+	testtuple := testtuples[0]
+	assert.EqualValues(t, second.Key, testtuple.Model.TraintupleKey)
 }
 func TestSpecifiqArgSeq(t *testing.T) {
 	t.SkipNow()
@@ -236,7 +243,7 @@ func TestTraintupleFLTaskCreation(t *testing.T) {
 	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 400, resp.Status, "should failed for missing rank")
-	require.Contains(t, resp.Message, "invalit inputs, a FLTask should have a rank", "invalid error message")
+	require.Contains(t, resp.Message, "invalid inputs, a FLTask should have a rank", "invalid error message")
 
 	inpTraintuple = inputTraintuple{Rank: "1"}
 	args = inpTraintuple.createDefault()
