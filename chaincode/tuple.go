@@ -384,6 +384,7 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 	}
 
 	resp.TupleKeys = map[string]string{}
+	var traintuplesTodo []outputTraintuple
 	for i, computeTraintuple := range inp.Traintuples {
 		inpTraintuple := inputTraintuple{}
 		inpTraintuple.AlgoKey = inp.AlgoKey
@@ -399,6 +400,8 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 			return resp, err
 		}
 
+		// Set the inModels by matching the id to traintuples key previously
+		// encontered in this compute plan
 		for _, InModelID := range computeTraintuple.InModelsIDs {
 			inModelKey, ok := resp.TupleKeys[InModelID]
 			if !ok {
@@ -412,19 +415,34 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 			return resp, errors.Conflict(err)
 		}
 
+		// Set the Fltask
 		if i == 0 {
 			traintuple.FLTask = traintupleKey
-			traintuple.Status = StatusTodo
 			resp.FLTask = traintuple.FLTask
 		} else {
 			traintuple.FLTask = resp.FLTask
-			traintuple.Status = StatusWaiting
 		}
+
+		// Set status: if it has parents it's waiting
+		// if not it's todo and it has to be included in the event
+		if len(computeTraintuple.InModelsIDs) > 0 {
+			traintuple.Status = StatusWaiting
+		} else {
+			traintuple.Status = StatusTodo
+			out := outputTraintuple{}
+			err = out.Fill(stub, traintuple, traintupleKey)
+			if err != nil {
+				return resp, err
+			}
+			traintuplesTodo = append(traintuplesTodo, out)
+		}
+
 		err = traintuple.Save(stub, traintupleKey)
 		if err != nil {
 			return resp, errors.E(err, "could not create traintuple with ID %s", computeTraintuple.ID)
 		}
 		resp.TupleKeys[computeTraintuple.ID] = traintupleKey
+
 	}
 
 	for _, computeTesttuple := range inp.Testtuples {
@@ -454,6 +472,14 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 			return resp, err
 		}
 		resp.TupleKeys[computeTesttuple.ID] = testtupleKey
+	}
+
+	event := TuplesEvent{}
+	event.SetTraintuples(traintuplesTodo...)
+
+	err = SetEvent(stub, "tuples-updated", event)
+	if err != nil {
+		return resp, err
 	}
 
 	return resp, err

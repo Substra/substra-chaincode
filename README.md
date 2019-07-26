@@ -1399,8 +1399,8 @@ Smart contract: `createComputePlan`
  ],
  "testtuples": (omitempty) [
    {
-    "dataManagerKey": string (required,len=64,hexadecimal),
-    "dataSampleKeys": [string] (required,dive,len=64,hexadecimal),
+    "dataManagerKey": string (omitempty,len=64,hexadecimal),
+    "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
     "id": string (required,lte=64),
     "tag": string (omitempty,lte=64),
     "traintupleID": string (required,lte=64),

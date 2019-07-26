@@ -95,6 +95,7 @@ func TestCreateComputePlan(t *testing.T) {
 	require.Len(t, testtuples, 1)
 	testtuple := testtuples[0]
 	assert.EqualValues(t, second.Key, testtuple.Model.TraintupleKey)
+	assert.True(t, testtuple.Certified)
 }
 func TestSpecifiqArgSeq(t *testing.T) {
 	t.SkipNow()
