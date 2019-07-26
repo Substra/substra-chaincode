@@ -12,41 +12,82 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+// myMockStub is here to simulate the fact that in real condition you cannot read
+// what you just write. It should be improved and more generally used.
+type myMockStub struct {
+	saveWhenWriting bool
+	writenState     map[string][]byte
+	*shim.MockStub
+}
+
+func (stub *myMockStub) PutState(key string, value []byte) error {
+	if !stub.saveWhenWriting {
+		if stub.writenState == nil {
+			stub.writenState = make(map[string][]byte)
+		}
+		stub.writenState[key] = value
+		return nil
+	}
+	return stub.PutState(key, value)
+}
+
+func (stub *myMockStub) saveWritenState(t *testing.T) {
+	if stub.writenState == nil {
+		return
+	}
+	for k, v := range stub.writenState {
+		err := stub.MockStub.PutState(k, v)
+		if err != nil {
+			t.Fatalf("ennable to `PutStae` in saveWritenState %s", err)
+		}
+	}
+	stub.writenState = nil
+	return
+}
+
 func TestCreateComputePlan(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := shim.NewMockStub("substra", scc)
+	myStub := myMockStub{MockStub: mockStub}
+	myStub.saveWhenWriting = true
 	registerItem(t, *mockStub, "algo")
+	myStub.MockTransactionStart("42")
+	myStub.saveWhenWriting = false
 
-	mockStub.MockTransactionStart("42")
-
+	// Simply test method and return values
 	inCP := defaultComputePlan
-	firstID := "first"
-	secondID := "second"
-	outCP, err := createComputePlan(mockStub, assetToArgs(inCP))
+	outCP, err := createComputePlan(&myStub, assetToArgs(inCP))
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	assert.Contains(t, outCP.TupleKeys, firstID)
-	assert.Contains(t, outCP.TupleKeys, secondID)
-	assert.EqualValues(t, outCP.TupleKeys[firstID], outCP.FLTask)
+	assert.Contains(t, outCP.TupleKeys, traintupleID1)
+	assert.Contains(t, outCP.TupleKeys, traintupleID2)
+	assert.Contains(t, outCP.TupleKeys, testtupleID)
+	assert.EqualValues(t, outCP.TupleKeys[traintupleID1], outCP.FLTask)
 
-	traintples, err := queryTraintuples(mockStub, []string{})
+	// Save all that was written in the mocked ledger
+	myStub.saveWritenState(t)
+
+	// Check the traintuples
+	traintuples, err := queryTraintuples(&myStub, []string{})
 	assert.NoError(t, err)
-	assert.Len(t, traintples, 2)
+	assert.Len(t, traintuples, 2)
 	var first, second outputTraintuple
-	for _, el := range traintples {
+	for _, el := range traintuples {
 		switch el.Key {
-		case outCP.TupleKeys[firstID]:
+		case outCP.TupleKeys[traintupleID1]:
 			first = el
-		case outCP.TupleKeys[secondID]:
+		case outCP.TupleKeys[traintupleID2]:
 			second = el
 		}
 	}
-
+	assert.NotZero(t, first)
+	assert.NotZero(t, second)
 	assert.EqualValues(t, first.Key, first.FLTask)
 	assert.EqualValues(t, first.FLTask, second.FLTask)
-
 	assert.Len(t, second.InModels, 1)
 	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
+	assert.Equal(t, first.Status, StatusTodo)
+	assert.Equal(t, second.Status, StatusWaiting)
 }
 func TestSpecifiqArgSeq(t *testing.T) {
 	t.SkipNow()
