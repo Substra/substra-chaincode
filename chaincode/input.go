@@ -14,7 +14,7 @@ type inputObjective struct {
 	MetricsHash               string `validate:"required,len=64,hexadecimal" json:"metricsHash"`
 	MetricsStorageAddress     string `validate:"required,url" json:"metricsStorageAddress"`
 	TestDataset               string `validate:"required" json:"testDataset"`
-	Permissions               string `validate:"required,oneof=all" json:"permissions"`
+	Permissions               string `validate:"required" json:"permissions"`
 }
 
 // inputAlgo is the representation of input args to register an Algo
@@ -24,7 +24,7 @@ type inputAlgo struct {
 	StorageAddress            string `validate:"required,url" json:"storageAddress"`
 	DescriptionHash           string `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
 	DescriptionStorageAddress string `validate:"required,url" json:"descriptionStorageAddress"`
-	Permissions               string `validate:"required,oneof=all" json:"permissions"`
+	Permissions               string `validate:"required" json:"permissions"`
 }
 
 // inputDataManager is the representation of input args to register a DataManager
@@ -36,7 +36,7 @@ type inputDataManager struct {
 	DescriptionHash           string `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
 	DescriptionStorageAddress string `validate:"required,url" json:"descriptionStorageAddress"`
 	ObjectiveKey              string `validate:"omitempty" json:"objectiveKey"` //`validate:"required"`
-	Permissions               string `validate:"required,oneof=all" json:"permissions"`
+	Permissions               string `validate:"required" json:"permissions"`
 }
 
 // inputUpdateDataManager is the representation of input args to update a dataManager with a objective
