@@ -463,6 +463,7 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 		if err != nil {
 			return resp, err
 		}
+		testtuple.Status = StatusWaiting
 		testtupleKey, err := testtuple.GetKey(stub)
 		if err != nil {
 			return resp, errors.Conflict(err)
