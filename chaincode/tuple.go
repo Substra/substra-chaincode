@@ -405,7 +405,7 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 		for _, InModelID := range computeTraintuple.InModelsIDs {
 			inModelKey, ok := resp.TupleKeys[InModelID]
 			if !ok {
-				return resp, errors.BadRequest("don't know the ID \"%s\", beware of the order", InModelID)
+				return resp, errors.BadRequest("traintuple ID %s: model ID %s not found, check traintuple list order", computeTraintuple.ID, InModelID)
 			}
 			traintuple.InModelKeys = append(traintuple.InModelKeys, inModelKey)
 		}
@@ -448,7 +448,7 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 	for _, computeTesttuple := range inp.Testtuples {
 		traintupleKey, ok := resp.TupleKeys[computeTesttuple.TraintupleID]
 		if !ok {
-			return resp, errors.BadRequest("don't know the ID \"%s\", beware of the order", computeTesttuple.TraintupleID)
+			return resp, errors.BadRequest("testtuple ID %s: traintuple ID %s not found", computeTesttuple.ID, computeTesttuple.TraintupleID)
 		}
 		testtuple := Testtuple{}
 		testtuple.Model = &Model{TraintupleKey: traintupleKey}
@@ -1156,7 +1156,7 @@ func (traintuple *Traintuple) commitStatusUpdate(stub shim.ChaincodeStubInterfac
 	}
 
 	if err := traintuple.validateNewStatus(stub, newStatus); err != nil {
-		return err
+		return fmt.Errorf("update traintuple %s failed: %s", traintupleKey, err.Error())
 	}
 
 	oldStatus := traintuple.Status
@@ -1173,6 +1173,7 @@ func (traintuple *Traintuple) commitStatusUpdate(stub shim.ChaincodeStubInterfac
 	if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
+	logger.Infof("traintuple %s status updated: %s (from=%s)", traintupleKey, newStatus, oldStatus)
 	return nil
 }
 
@@ -1230,7 +1231,7 @@ func (parentTraintuple *Traintuple) updateTesttupleChildren(stub shim.ChaincodeS
 // commitStatusUpdate update the testtuple status in the ledger
 func (testtuple *Testtuple) commitStatusUpdate(stub shim.ChaincodeStubInterface, testtupleKey string, newStatus string) error {
 	if err := testtuple.validateNewStatus(stub, newStatus); err != nil {
-		return err
+		return fmt.Errorf("update testtuple %s failed: %s", testtupleKey, err.Error())
 	}
 
 	oldStatus := testtuple.Status
@@ -1248,6 +1249,7 @@ func (testtuple *Testtuple) commitStatusUpdate(stub shim.ChaincodeStubInterface,
 	if err := updateCompositeKey(stub, indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
+	logger.Infof("testtuple %s status updated: %s (from=%s)", testtupleKey, newStatus, oldStatus)
 	return nil
 }
 
