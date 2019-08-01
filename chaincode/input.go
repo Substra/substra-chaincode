@@ -142,7 +142,6 @@ type inputComputePlanTraintuple struct {
 type inputComputePlanTesttuple struct {
 	DataManagerKey string   `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
 	DataSampleKeys []string `validate:"omitempty,dive,len=64,hexadecimal" json:"dataSampleKeys"`
-	ID             string   `validate:"required,lte=64" json:"id"`
 	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
 	TraintupleID   string   `validate:"required,lte=64" json:"traintupleID"`
 }

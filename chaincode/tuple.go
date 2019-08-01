@@ -383,7 +383,8 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 		return
 	}
 
-	resp.TupleKeys = map[string]string{}
+	traintupleKeysByID := map[string]string{}
+	resp.TraintupleKeys = []string{}
 	var traintuplesTodo []outputTraintuple
 	for i, computeTraintuple := range inp.Traintuples {
 		inpTraintuple := inputTraintuple{}
@@ -403,7 +404,7 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 		// Set the inModels by matching the id to traintuples key previously
 		// encontered in this compute plan
 		for _, InModelID := range computeTraintuple.InModelsIDs {
-			inModelKey, ok := resp.TupleKeys[InModelID]
+			inModelKey, ok := traintupleKeysByID[InModelID]
 			if !ok {
 				return resp, errors.BadRequest("traintuple ID %s: model ID %s not found, check traintuple list order", computeTraintuple.ID, InModelID)
 			}
@@ -441,14 +442,15 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 		if err != nil {
 			return resp, errors.E(err, "could not create traintuple with ID %s", computeTraintuple.ID)
 		}
-		resp.TupleKeys[computeTraintuple.ID] = traintupleKey
-
+		traintupleKeysByID[computeTraintuple.ID] = traintupleKey
+		resp.TraintupleKeys = append(resp.TraintupleKeys, traintupleKey)
 	}
 
-	for _, computeTesttuple := range inp.Testtuples {
-		traintupleKey, ok := resp.TupleKeys[computeTesttuple.TraintupleID]
+	resp.TesttupleKeys = []string{}
+	for index, computeTesttuple := range inp.Testtuples {
+		traintupleKey, ok := traintupleKeysByID[computeTesttuple.TraintupleID]
 		if !ok {
-			return resp, errors.BadRequest("testtuple ID %s: traintuple ID %s not found", computeTesttuple.ID, computeTesttuple.TraintupleID)
+			return resp, errors.BadRequest("testtuple index %s: traintuple ID %s not found", index, computeTesttuple.TraintupleID)
 		}
 		testtuple := Testtuple{}
 		testtuple.Model = &Model{TraintupleKey: traintupleKey}
@@ -472,7 +474,7 @@ func createComputePlan(stub shim.ChaincodeStubInterface, args []string) (resp ou
 		if err != nil {
 			return resp, err
 		}
-		resp.TupleKeys[computeTesttuple.ID] = testtupleKey
+		resp.TesttupleKeys = append(resp.TesttupleKeys, testtupleKey)
 	}
 
 	event := TuplesEvent{}

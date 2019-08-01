@@ -59,10 +59,7 @@ func TestCreateComputePlan(t *testing.T) {
 	outCP, err := createComputePlan(&myStub, assetToArgs(inCP))
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	require.Contains(t, outCP.TupleKeys, traintupleID1)
-	require.Contains(t, outCP.TupleKeys, traintupleID2)
-	require.Contains(t, outCP.TupleKeys, testtupleID)
-	assert.EqualValues(t, outCP.TupleKeys[traintupleID1], outCP.FLTask)
+	assert.EqualValues(t, outCP.FLTask, outCP.TraintupleKeys[0])
 
 	// Save all that was written in the mocked ledger
 	myStub.saveWritenState(t)
@@ -71,12 +68,14 @@ func TestCreateComputePlan(t *testing.T) {
 	traintuples, err := queryTraintuples(&myStub, []string{})
 	assert.NoError(t, err)
 	assert.Len(t, traintuples, 2)
+	require.Contains(t, outCP.TraintupleKeys, traintuples[0].Key)
+	require.Contains(t, outCP.TraintupleKeys, traintuples[1].Key)
 	var first, second outputTraintuple
 	for _, el := range traintuples {
 		switch el.Key {
-		case outCP.TupleKeys[traintupleID1]:
+		case outCP.TraintupleKeys[0]:
 			first = el
-		case outCP.TupleKeys[traintupleID2]:
+		case outCP.TraintupleKeys[1]:
 			second = el
 		}
 	}
@@ -94,6 +93,7 @@ func TestCreateComputePlan(t *testing.T) {
 	assert.NoError(t, err)
 	require.Len(t, testtuples, 1)
 	testtuple := testtuples[0]
+	require.Contains(t, outCP.TesttupleKeys, testtuple.Key)
 	assert.EqualValues(t, second.Key, testtuple.Model.TraintupleKey)
 	assert.True(t, testtuple.Certified)
 }

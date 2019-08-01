@@ -24,7 +24,6 @@ var (
 			inputComputePlanTesttuple{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
-				ID:             testtupleID,
 				TraintupleID:   traintupleID2,
 			},
 		},
