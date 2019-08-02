@@ -62,7 +62,7 @@ Smart contract: `registerDataManager`
  "descriptionHash": string (required,len=64,hexadecimal),
  "descriptionStorageAddress": string (required,url),
  "objectiveKey": string (omitempty),
- "permissions": string (required,oneof=all),
+ "permissions": string (required),
 }
 ```
 ##### Command peer example:
@@ -144,7 +144,7 @@ Smart contract: `registerObjective`
  "metricsHash": string (required,len=64,hexadecimal),
  "metricsStorageAddress": string (required,url),
  "testDataset": string (required),
- "permissions": string (required,oneof=all),
+ "permissions": string (required),
 }
 ```
 ##### Command peer example:
@@ -168,7 +168,7 @@ Smart contract: `registerAlgo`
  "storageAddress": string (required,url),
  "descriptionHash": string (required,len=64,hexadecimal),
  "descriptionStorageAddress": string (required,url),
- "permissions": string (required,oneof=all),
+ "permissions": string (required),
 }
 ```
 ##### Command peer example:
