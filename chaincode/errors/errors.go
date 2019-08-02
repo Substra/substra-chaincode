@@ -12,6 +12,8 @@ type Error struct {
 	Kind Kind
 	// The underlying error if any
 	Err error
+	// Additional data
+	Data map[string]interface{}
 }
 
 func (e Error) Error() string {
@@ -30,6 +32,8 @@ func (e Error) Error() string {
 // The possible arg type are:
 //	errors.Kind
 //		The class of error, such as a key conflict
+//  map[string]interface{}
+//      Additional data that will be added to the error payload
 //	error
 //		The underlying error
 //	string
@@ -42,6 +46,8 @@ func E(args ...interface{}) error {
 		switch arg := arg.(type) {
 		case Kind:
 			e.Kind = arg
+		case map[string]interface{}:
+			e.Data = arg
 		case error:
 			if e.Err == nil {
 				e.Err = arg

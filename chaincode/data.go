@@ -39,8 +39,8 @@ func setDataSample(db LedgerDB, inp inputDataSample) (dataSampleHashes []string,
 	}
 	// check dataSample is not already in the ledger
 	if existingKeys := checkDataSamplesExist(db, dataSampleHashes); existingKeys != nil {
-		// TODO should return a proper conflict with all conflicting keys
-		err = errors.BadRequest("dataSample with these hashes already exist - %s", existingKeys)
+		data := map[string]interface{}{"keys": existingKeys}
+		err = errors.Conflict(data, "data samples with keys %s already exist", existingKeys)
 		return
 	}
 
