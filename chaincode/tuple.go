@@ -1053,44 +1053,44 @@ func (testtuple *Testtuple) validateNewStatus(stub shim.ChaincodeStubInterface, 
 }
 
 // updateTraintupleChildren updates the status of waiting trainuples  InModels of traintuples once they have been trained (succesfully or failed)
-func (parentTraintuple *Traintuple) updateTraintupleChildren(stub shim.ChaincodeStubInterface, parentTraintupleKey string) ([]outputTraintuple, error) {
+func (traintuple *Traintuple) updateTraintupleChildren(stub shim.ChaincodeStubInterface, traintupleKey string) ([]outputTraintuple, error) {
 
 	// tuples to be sent in event
 	otuples := []outputTraintuple{}
 
 	// get traintuples having as inModels the input traintuple
 	indexName := "traintuple~inModel~key"
-	traintupleKeys, err := getKeysFromComposite(stub, indexName, []string{"traintuple", parentTraintupleKey})
+	childTraintupleKeys, err := getKeysFromComposite(stub, indexName, []string{"traintuple", traintupleKey})
 	if err != nil {
 		return otuples, fmt.Errorf("error while getting associated traintuples to update their inModel")
 	}
-	for _, traintupleKey := range traintupleKeys {
+	for _, childTraintupleKey := range childTraintupleKeys {
 		// get and update traintuple
-		traintuple := Traintuple{}
-		if err := getElementStruct(stub, traintupleKey, &traintuple); err != nil {
+		childTraintuple := Traintuple{}
+		if err := getElementStruct(stub, childTraintupleKey, &childTraintuple); err != nil {
 			return otuples, err
 		}
 
 		// remove associated composite key
-		if err := traintuple.removeModelCompositeKey(stub, parentTraintupleKey); err != nil {
+		if err := childTraintuple.removeModelCompositeKey(stub, traintupleKey); err != nil {
 			return otuples, err
 		}
 
 		// traintuple is already failed, don't update it
-		if traintuple.Status == StatusFailed {
+		if childTraintuple.Status == StatusFailed {
 			continue
 		}
 
-		if traintuple.Status != StatusWaiting {
-			return otuples, fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", traintupleKey, traintuple.Status)
+		if childTraintuple.Status != StatusWaiting {
+			return otuples, fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", childTraintupleKey, childTraintuple.Status)
 		}
 
 		// get traintuple new status
 		var newStatus string
-		if parentTraintuple.Status == StatusFailed {
+		if traintuple.Status == StatusFailed {
 			newStatus = StatusFailed
-		} else if parentTraintuple.Status == StatusDone {
-			ready, err := traintuple.isReady(stub, parentTraintupleKey)
+		} else if traintuple.Status == StatusDone {
+			ready, err := childTraintuple.isReady(stub, traintupleKey)
 			if err != nil {
 				return otuples, err
 			}
@@ -1103,12 +1103,12 @@ func (parentTraintuple *Traintuple) updateTraintupleChildren(stub shim.Chaincode
 		if newStatus == "" {
 			continue
 		}
-		if err := traintuple.commitStatusUpdate(stub, traintupleKey, newStatus); err != nil {
+		if err := childTraintuple.commitStatusUpdate(stub, childTraintupleKey, newStatus); err != nil {
 			return otuples, err
 		}
 		if newStatus == StatusTodo {
 			out := outputTraintuple{}
-			err = out.Fill(stub, traintuple, traintupleKey)
+			err = out.Fill(stub, childTraintuple, childTraintupleKey)
 			if err != nil {
 				return otuples, err
 			}
@@ -1181,14 +1181,14 @@ func (traintuple *Traintuple) commitStatusUpdate(stub shim.ChaincodeStubInterfac
 }
 
 // updateTesttupleChildren update testtuples status associated with a done or failed traintuple
-func (parentTraintuple *Traintuple) updateTesttupleChildren(stub shim.ChaincodeStubInterface, parentTraintupleKey string) ([]outputTesttuple, error) {
+func (traintuple *Traintuple) updateTesttupleChildren(stub shim.ChaincodeStubInterface, traintupleKey string) ([]outputTesttuple, error) {
 
 	otuples := []outputTesttuple{}
 
 	var newStatus string
-	if parentTraintuple.Status == StatusFailed {
+	if traintuple.Status == StatusFailed {
 		newStatus = StatusFailed
-	} else if parentTraintuple.Status == StatusDone {
+	} else if traintuple.Status == StatusDone {
 		newStatus = StatusTodo
 	} else {
 		return otuples, nil
@@ -1196,7 +1196,7 @@ func (parentTraintuple *Traintuple) updateTesttupleChildren(stub shim.ChaincodeS
 
 	indexName := "testtuple~traintuple~certified~key"
 	// get testtuple associated with this traintuple and updates its status
-	testtupleKeys, err := getKeysFromComposite(stub, indexName, []string{"testtuple", parentTraintupleKey})
+	testtupleKeys, err := getKeysFromComposite(stub, indexName, []string{"testtuple", traintupleKey})
 	if err != nil {
 		return otuples, err
 	}
@@ -1207,12 +1207,12 @@ func (parentTraintuple *Traintuple) updateTesttupleChildren(stub shim.ChaincodeS
 			return otuples, err
 		}
 		testtuple.Model = &Model{
-			TraintupleKey: parentTraintupleKey,
+			TraintupleKey: traintupleKey,
 		}
 
 		if newStatus == StatusTodo {
-			testtuple.Model.Hash = parentTraintuple.OutModel.Hash
-			testtuple.Model.StorageAddress = parentTraintuple.OutModel.StorageAddress
+			testtuple.Model.Hash = traintuple.OutModel.Hash
+			testtuple.Model.StorageAddress = traintuple.OutModel.StorageAddress
 		}
 
 		if err := testtuple.commitStatusUpdate(stub, testtupleKey, newStatus); err != nil {
