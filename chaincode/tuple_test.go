@@ -16,32 +16,32 @@ import (
 // what you just write. It should be improved and more generally used.
 type myMockStub struct {
 	saveWhenWriting bool
-	writenState     map[string][]byte
+	writtenState    map[string][]byte
 	*shim.MockStub
 }
 
 func (stub *myMockStub) PutState(key string, value []byte) error {
 	if !stub.saveWhenWriting {
-		if stub.writenState == nil {
-			stub.writenState = make(map[string][]byte)
+		if stub.writtenState == nil {
+			stub.writtenState = make(map[string][]byte)
 		}
-		stub.writenState[key] = value
+		stub.writtenState[key] = value
 		return nil
 	}
 	return stub.PutState(key, value)
 }
 
-func (stub *myMockStub) saveWritenState(t *testing.T) {
-	if stub.writenState == nil {
+func (stub *myMockStub) saveWrittenState(t *testing.T) {
+	if stub.writtenState == nil {
 		return
 	}
-	for k, v := range stub.writenState {
+	for k, v := range stub.writtenState {
 		err := stub.MockStub.PutState(k, v)
 		if err != nil {
-			t.Fatalf("ennable to `PutStae` in saveWritenState %s", err)
+			t.Fatalf("unable to `PutState` in saveWrittenState %s", err)
 		}
 	}
-	stub.writenState = nil
+	stub.writtenState = nil
 	return
 }
 
@@ -62,7 +62,7 @@ func TestCreateComputePlan(t *testing.T) {
 	assert.EqualValues(t, outCP.FLTask, outCP.TraintupleKeys[0])
 
 	// Save all that was written in the mocked ledger
-	myStub.saveWritenState(t)
+	myStub.saveWrittenState(t)
 
 	// Check the traintuples
 	traintuples, err := queryTraintuples(&myStub, []string{})
