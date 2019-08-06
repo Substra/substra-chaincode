@@ -122,8 +122,7 @@ func (traintuple *Traintuple) AddToFLTask(stub shim.ChaincodeStubInterface, inp 
 	var err error
 	if inp.Rank == "" {
 		if inp.FLTask != "" {
-			err = errors.BadRequest("invalid inputs, a FLTask should have a rank")
-			return err
+			return errors.BadRequest("invalid inputs, a FLTask should have a rank")
 		}
 		return nil
 	}
@@ -144,18 +143,18 @@ func (traintuple *Traintuple) AddToFLTask(stub shim.ChaincodeStubInterface, inp 
 	ttKeys, err = getKeysFromComposite(stub, "traintuple~fltask~worker~rank~key", attributes)
 	if err != nil {
 		return err
-	} else if len(ttKeys) == 0 {
-		err = errors.BadRequest("cannot find the FLTask %s", inp.FLTask)
-		return err
+	}
+	if len(ttKeys) == 0 {
+		return errors.BadRequest("cannot find the FLTask %s", inp.FLTask)
 	}
 	for _, ttKey := range ttKeys {
 		FLTraintuple := Traintuple{}
 		err = getElementStruct(stub, ttKey, &FLTraintuple)
 		if err != nil {
 			return err
-		} else if FLTraintuple.AlgoKey != inp.AlgoKey {
-			err = errors.BadRequest("previous traintuple for FLTask %s does not have the same algo key %s", inp.FLTask, inp.AlgoKey)
-			return err
+		}
+		if FLTraintuple.AlgoKey != inp.AlgoKey {
+			return errors.BadRequest("previous traintuple for FLTask %s does not have the same algo key %s", inp.FLTask, inp.AlgoKey)
 		}
 	}
 
