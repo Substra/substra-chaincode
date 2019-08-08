@@ -10,7 +10,8 @@ import (
 
 // LedgerDB to access the chaincode database during the lifetime of a SmartContract
 type LedgerDB struct {
-	cc shim.ChaincodeStubInterface
+	cc           shim.ChaincodeStubInterface
+	pendingState map[string]([]byte)
 }
 
 // NewLedgerDB create a new db to access the chaincode during a SmartContract
@@ -18,6 +19,7 @@ func NewLedgerDB(stub shim.ChaincodeStubInterface) LedgerDB {
 	db := LedgerDB{
 		cc: stub,
 	}
+	db.pendingState = make(map[string]([]byte))
 	return db
 }
 
@@ -25,14 +27,39 @@ func NewLedgerDB(stub shim.ChaincodeStubInterface) LedgerDB {
 // Low-level functions to handle asset structs
 // ----------------------------------------------
 
+// getPendingState returns a copy of an asset that has been cached during the transmission
+func (db *LedgerDB) getPendingState(key string) ([]byte, bool) {
+	pendingState, ok := db.pendingState[key]
+	if !ok {
+		return nil, false
+	}
+	state := make([]byte, len(pendingState))
+	copy(state, pendingState)
+	return state, true
+}
+
+// putPendingState stores a copy of an asset during a transmission lifetime
+func (db *LedgerDB) putPendingState(key string, state []byte) {
+	stateCopy := make([]byte, len(state))
+	copy(stateCopy, state)
+	db.pendingState[key] = stateCopy
+}
+
 // Get retrieves an object stored in the chaincode db and set the input object value
 func (db *LedgerDB) Get(key string, object interface{}) error {
-	buff, err := db.cc.GetState(key)
-	if err != nil {
-		return errors.NotFound(err)
-	}
-	if buff == nil {
-		return errors.NotFound()
+	var buff []byte
+	var err error
+
+	buff, ok := db.getPendingState(key)
+	if !ok {
+		buff, err = db.cc.GetState(key)
+		if err != nil {
+			return errors.NotFound(err)
+		}
+		if buff == nil {
+			return errors.NotFound()
+		}
+		db.putPendingState(key, buff)
 	}
 	if err = json.Unmarshal(buff, &object); err != nil {
 		return err
@@ -52,6 +79,10 @@ func (db *LedgerDB) Put(key string, object interface{}) error {
 	if err := db.cc.PutState(key, buff); err != nil {
 		return err
 	}
+	// PendingState is updated to ensure that even if the data is not committed, a further
+	// call to get this struct will returned the updated one (and not the original one).
+	// This is currently required when setting the statuses of the traintuple children.
+	db.putPendingState(key, buff)
 	return nil
 }
 
