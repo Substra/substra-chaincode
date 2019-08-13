@@ -17,7 +17,7 @@ Note for internal use only: See the [technical specifications](https://github.co
 
 ### Implemented smart contracts
 
-
+- `createComputePlan`
 - `createTesttuple`
 - `createTraintuple`
 - `logFailTest`
@@ -113,14 +113,14 @@ Smart contract: `registerDataSample`
 ##### JSON Inputs:
 ```go
 {
- "hashes": string (required),
- "dataManagerKeys": string (omitempty),
+ "hashes": [string] (required,dive,len=64,hexadecimal),
+ "dataManagerKeys": [string] (omitempty,dive,len=64,hexadecimal),
  "testOnly": string (required,oneof=true false),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataManagerKeys\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"testOnly\":\"true\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"dataManagerKeys\":[\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"testOnly\":\"true\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -143,13 +143,16 @@ Smart contract: `registerObjective`
  "metricsName": string (required,gte=1,lte=100),
  "metricsHash": string (required,len=64,hexadecimal),
  "metricsStorageAddress": string (required,url),
- "testDataset": string (required),
- "permissions": string (required,oneof=all),
+ "testDataset": (omitempty){
+    "dataManagerKey": string (omitempty,len=64,hexadecimal),
+    "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
+   }
+  "permissions": string (required,oneof=all),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerObjective","{\"name\":\"MSI classification\",\"descriptionHash\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"descriptionStorageAddress\":\"https://toto/objective/222/description\",\"metricsName\":\"accuracy\",\"metricsHash\":\"4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"metricsStorageAddress\":\"https://toto/objective/222/metrics\",\"testDataset\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc:bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"permissions\":\"all\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerObjective","{\"name\":\"MSI classification\",\"descriptionHash\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"descriptionStorageAddress\":\"https://toto/objective/222/description\",\"metricsName\":\"accuracy\",\"metricsHash\":\"4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"metricsStorageAddress\":\"https://toto/objective/222/metrics\",\"testDataset\":{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"]},\"permissions\":\"all\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -187,14 +190,14 @@ Smart contract: `registerDataSample`
 ##### JSON Inputs:
 ```go
 {
- "hashes": string (required),
- "dataManagerKeys": string (omitempty),
+ "hashes": [string] (required,dive,len=64,hexadecimal),
+ "dataManagerKeys": [string] (omitempty,dive,len=64,hexadecimal),
  "testOnly": string (required,oneof=true false),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataManagerKeys\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"testOnly\":\"false\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"dataManagerKeys\":[\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"testOnly\":\"false\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -310,9 +313,9 @@ Smart contract: `createTraintuple`
 {
  "algoKey": string (required,len=64,hexadecimal),
  "objectiveKey": string (required,len=64,hexadecimal),
- "inModels": string (omitempty),
+ "inModels": [string] (omitempty,dive,len=64,hexadecimal),
  "dataManagerKey": string (required,len=64,hexadecimal),
- "dataSampleKeys": string (required),
+ "dataSampleKeys": [string] (required,gt=1,dive,len=64,hexadecimal),
  "flTask": string (omitempty),
  "rank": string (omitempty),
  "tag": string (omitempty,lte=64),
@@ -320,7 +323,7 @@ Smart contract: `createTraintuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":\"\",\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"flTask\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":[],\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"flTask\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -336,9 +339,9 @@ Smart contract: `createTraintuple`
 {
  "algoKey": string (required,len=64,hexadecimal),
  "objectiveKey": string (required,len=64,hexadecimal),
- "inModels": string (omitempty),
+ "inModels": [string] (omitempty,dive,len=64,hexadecimal),
  "dataManagerKey": string (required,len=64,hexadecimal),
- "dataSampleKeys": string (required),
+ "dataSampleKeys": [string] (required,gt=1,dive,len=64,hexadecimal),
  "flTask": string (omitempty),
  "rank": string (omitempty),
  "tag": string (omitempty,lte=64),
@@ -346,7 +349,7 @@ Smart contract: `createTraintuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":\"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687\",\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"flTask\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":[\"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687\"],\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"flTask\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -462,7 +465,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"8e29bacef
 }
 ```
 #### ------------ Log Success Training ------------
-Smart contract: `logSucessTrain`
+Smart contract: `logSuccessTrain`
 
 ##### JSON Inputs:
 ```go
@@ -473,7 +476,7 @@ Smart contract: `logSucessTrain`
     "hash": string (required,len=64,hexadecimal),
     "storageAddress": string (required),
    }
-  "perf": float32 (required),
+  "perf": float32 (omitempty),
 }
 ```
 ##### Command peer example:
@@ -577,12 +580,15 @@ Smart contract: `createTesttuple`
 ##### JSON Inputs:
 ```go
 {
- "key": string (required,len=64,hexadecimal),
+ "traintupleKey": string (required,len=64,hexadecimal),
+ "dataManagerKey": string (omitempty,len=64,hexadecimal),
+ "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
+ "tag": string (omitempty,lte=64),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"traintupleKey\":\"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687\",\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc, aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"tag\":\"\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"traintupleKey\":\"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687\",\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"tag\":\"\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -598,13 +604,13 @@ Smart contract: `createTesttuple`
 {
  "traintupleKey": string (required,len=64,hexadecimal),
  "dataManagerKey": string (omitempty,len=64,hexadecimal),
- "dataSampleKeys": string (omitempty),
+ "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
  "tag": string (omitempty,lte=64),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"traintupleKey\":\"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687\",\"dataManagerKey\":\"\",\"dataSampleKeys\":\"\",\"tag\":\"\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"traintupleKey\":\"8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687\",\"dataManagerKey\":\"\",\"dataSampleKeys\":null,\"tag\":\"\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -620,13 +626,13 @@ Smart contract: `createTesttuple`
 {
  "traintupleKey": string (required,len=64,hexadecimal),
  "dataManagerKey": string (omitempty,len=64,hexadecimal),
- "dataSampleKeys": string (omitempty),
+ "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
  "tag": string (omitempty,lte=64),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"traintupleKey\":\"46ab1f11d49795f41e847e29e30fbd511a07dc231cf6991aa6da05cdc4a87cce\",\"dataManagerKey\":\"\",\"dataSampleKeys\":\"\",\"tag\":\"\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"traintupleKey\":\"46ab1f11d49795f41e847e29e30fbd511a07dc231cf6991aa6da05cdc4a87cce\",\"dataManagerKey\":\"\",\"dataSampleKeys\":null,\"tag\":\"\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -775,14 +781,14 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"6581232b89
 }
 ```
 #### ------------ Log Success Testing ------------
-Smart contract: `logSucessTest`
+Smart contract: `logSuccessTest`
 
 ##### JSON Inputs:
 ```go
 {
  "key": string (required,len=64,hexadecimal),
  "log": string (required,lte=200),
- "perf": float32 (required),
+ "perf": float32 (omitempty),
 }
 ```
 ##### Command peer example:
@@ -1324,13 +1330,13 @@ Smart contract: `updateDataSample`
 ##### JSON Inputs:
 ```go
 {
- "hashes": string (required),
- "dataManagerKeys": string (required),
+ "hashes": [string] (required,dive,len=64,hexadecimal),
+ "dataManagerKeys": [string] (required,dive,len=64,hexadecimal),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["updateDataSample","{\"hashes\":\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataManagerKeys\":\"38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["updateDataSample","{\"hashes\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"dataManagerKeys\":[\"38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee\"]}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -1372,5 +1378,49 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"38a320b2a67
   "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
  ],
  "type": "images"
+}
+```
+#### ------------ Create a ComputePlan ------------
+Smart contract: `createComputePlan`
+
+##### JSON Inputs:
+```go
+{
+ "algoKey": string (required,len=64,hexadecimal),
+ "objectiveKey": string (required,len=64,hexadecimal),
+ "traintuples": (required,gt=0) [
+   {
+    "dataManagerKey": string (required,len=64,hexadecimal),
+    "dataSampleKeys": [string] (required,dive,len=64,hexadecimal),
+    "id": string (required,lte=64),
+    "inModelsIDs": [string] (omitempty,dive,lte=64),
+    "tag": string (omitempty,lte=64),
+   }
+ ],
+ "testtuples": (omitempty) [
+   {
+    "dataManagerKey": string (omitempty,len=64,hexadecimal),
+    "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
+    "tag": string (omitempty,lte=64),
+    "traintupleID": string (required,lte=64),
+   }
+ ],
+}
+```
+##### Command peer example:
+```bash
+peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"traintuples\":[{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"id\":\"firstTraintupleID\",\"inModelsIDs\":null,\"tag\":\"\"},{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"id\":\"secondTraintupleID\",\"inModelsIDs\":[\"firstTraintupleID\"],\"tag\":\"\"}],\"testtuples\":[{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"tag\":\"\",\"traintupleID\":\"secondTraintupleID\"}]}"]}' -C myc
+```
+##### Command output:
+```json
+{
+ "fltask": "de4505fc7fdaa4e6d451d950fe340a7605d646a69974e4e6fecdca21793706ca",
+ "testtupleKeys": [
+  "6edba0b589a064183dd3611f35ecf6f5b3e5328b722263547c571c317139ecf9"
+ ],
+ "traintupleKeys": [
+  "de4505fc7fdaa4e6d451d950fe340a7605d646a69974e4e6fecdca21793706ca",
+  "b14f21819de6e7408e68a4f70647c3b7a63f89f14912a081e6c76bb13a74fef2"
+ ]
 }
 ```

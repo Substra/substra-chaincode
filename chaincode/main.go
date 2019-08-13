@@ -40,6 +40,8 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	var result interface{}
 	var err error
 	switch fn {
+	case "createComputePlan":
+		result, err = createComputePlan(stub, args)
 	case "createTesttuple":
 		result, err = createTesttuple(stub, args)
 	case "createTraintuple":
@@ -101,6 +103,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	default:
 		err = fmt.Errorf("function not implemented")
 	}
+	logger.Infof("Response from chaincode: %#v, error: %s", result, err)
 	// Return the result as success payload
 	if err != nil {
 		return formatErrorResponse(err)

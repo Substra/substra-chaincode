@@ -4,13 +4,13 @@ import (
 	"chaincode/errors"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
 
-	"encoding/json"
-
 	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // stringInSlice check if a string is in a slice
@@ -83,15 +83,15 @@ func getTxCreator(stub shim.ChaincodeStubInterface) (string, error) {
 	}
 	// get pem certificate only. This might be slightly dirty, but this is to avoid installing external packages
 	// change it once github.com/hyperledger/fabric/core/chaincode/lib/cid is in fabric chaincode docker
-	cert_prefix := "-----BEGIN CERTIFICATE-----"
-	cert_suffix := "-----END CERTIFICATE-----\n"
+	certPrefix := "-----BEGIN CERTIFICATE-----"
+	certSuffix := "-----END CERTIFICATE-----\n"
 	var creator string
-	if sCreator := strings.Split(string(bCreator), cert_prefix); len(sCreator) > 1 {
-		creator = strings.Split(sCreator[1], cert_suffix)[0]
+	if sCreator := strings.Split(string(bCreator), certPrefix); len(sCreator) > 1 {
+		creator = strings.Split(sCreator[1], certSuffix)[0]
 	} else {
 		creator = "test"
 	}
-	creator = cert_prefix + creator + cert_suffix
+	creator = certPrefix + creator + certSuffix
 	tt := sha256.Sum256([]byte(creator))
 	return hex.EncodeToString(tt[:]), nil
 }
@@ -201,11 +201,19 @@ func updateCompositeKey(stub shim.ChaincodeStubInterface, indexName string, oldA
 }
 
 // AssetFromJSON unmarshal a stringify json into the passed interface
-// TODO: Validate the interface here if possible
-func AssetFromJSON(args string, asset interface{}) error {
-	err := json.Unmarshal([]byte(args), &asset)
+func AssetFromJSON(args []string, asset interface{}) error {
+	if len(args) != 1 {
+		return errors.BadRequest("arguments should only contains 1 json string, received: %s", args)
+	}
+	arg := args[0]
+	err := json.Unmarshal([]byte(arg), &asset)
 	if err != nil {
-		return errors.BadRequest(err, "Problem when reading json arg: %s, error is:", args)
+		return errors.BadRequest(err, "problem when reading json arg: %s, error is:", arg)
+	}
+	v := validator.New()
+	err = v.Struct(asset)
+	if err != nil {
+		return errors.BadRequest(err, "inputs validation failed: %s, error is:", arg)
 	}
 	return nil
 }

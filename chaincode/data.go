@@ -9,18 +9,11 @@ import (
 	"encoding/json"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"gopkg.in/go-playground/validator.v9"
 )
 
-// Set is a method of the receiver DataManager. It checks the validity of inputDataManager and uses its fields to set the DataManager
+// Set is a method of the receiver DataManager. It uses inputDataManager fields to set the DataManager
 // Returns the dataManagerKey and associated objectiveKeys
 func (dataManager *DataManager) Set(stub shim.ChaincodeStubInterface, inp inputDataManager) (string, string, error) {
-	// check validity of submitted fields
-	validate := validator.New()
-	if err := validate.Struct(inp); err != nil {
-		err = errors.BadRequest(err, "invalid dataManager inputs")
-		return "", "", err
-	}
 	// check dataManager is not already in the ledger
 	dataManagerKey := inp.OpenerHash
 	if elementBytes, _ := stub.GetState(dataManagerKey); elementBytes != nil {
@@ -55,15 +48,7 @@ func (dataManager *DataManager) Set(stub shim.ChaincodeStubInterface, inp inputD
 // setDataSample is a method checking the validity of inputDataSample to be registered in the ledger
 // and returning corresponding dataSample hashes, associated dataManagers, testOnly and errors
 func setDataSample(stub shim.ChaincodeStubInterface, inp inputDataSample) (dataSampleHashes []string, dataSample DataSample, err error) {
-	// validate input dataSample
-	validate := validator.New()
-	if err = validate.Struct(inp); err != nil {
-		err = errors.BadRequest(err, "invalid dataSample inputs")
-		return
-	}
-	// Get dataSample keys (=hashes)
-	dataSampleHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
-	// check validity of dataSampleHashes
+	dataSampleHashes = inp.Hashes
 	if err = checkHashes(dataSampleHashes); err != nil {
 		err = errors.BadRequest(err)
 		return
@@ -83,7 +68,7 @@ func setDataSample(stub shim.ChaincodeStubInterface, inp inputDataSample) (dataS
 	// check if associated dataManager(s) exists
 	var dataManagerKeys []string
 	if len(inp.DataManagerKeys) > 0 {
-		dataManagerKeys = strings.Split(strings.Replace(inp.DataManagerKeys, " ", "", -1), ",")
+		dataManagerKeys = inp.DataManagerKeys
 		if err = checkDataManagerOwner(stub, dataManagerKeys); err != nil {
 			return
 		}
@@ -102,28 +87,17 @@ func setDataSample(stub shim.ChaincodeStubInterface, inp inputDataSample) (dataS
 // validateUpdateDataSample is a method checking the validity of elements sent to update
 // one or more dataSamplef
 func validateUpdateDataSample(stub shim.ChaincodeStubInterface, inp inputUpdateDataSample) (dataSampleHashes []string, dataManagerKeys []string, err error) {
-
 	// TODO return full dataSample
-
-	// validate input to updatedataSample
-	validate := validator.New()
-	if err = validate.Struct(inp); err != nil {
-		err = errors.BadRequest(err, "invalid inputs to update dataSample")
-		return
-	}
-	// Get dataSample keys (=hashes)
-	dataSampleHashes = strings.Split(strings.Replace(inp.Hashes, " ", "", -1), ",")
 	// check validity of dataSampleHashes
-	if err = checkHashes(dataSampleHashes); err != nil {
+	if err = checkHashes(inp.Hashes); err != nil {
 		err = errors.BadRequest(err)
 		return
 	}
 	// check dataManagers exist and are owned by the transaction requester
-	dataManagerKeys = strings.Split(strings.Replace(inp.DataManagerKeys, " ", "", -1), ",")
-	if err = checkDataManagerOwner(stub, dataManagerKeys); err != nil {
+	if err = checkDataManagerOwner(stub, inp.DataManagerKeys); err != nil {
 		return
 	}
-	return
+	return inp.Hashes, inp.DataManagerKeys, nil
 }
 
 // -----------------------------------------------------------------
@@ -133,7 +107,7 @@ func validateUpdateDataSample(stub shim.ChaincodeStubInterface, inp inputUpdateD
 // registerDataManager stores a new dataManager in the ledger.
 func registerDataManager(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	inp := inputDataManager{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
@@ -168,7 +142,7 @@ func registerDataManager(stub shim.ChaincodeStubInterface, args []string) (resp 
 func registerDataSample(stub shim.ChaincodeStubInterface, args []string) (dataSampleKeys map[string][]string, err error) {
 	// convert input strings args to input struct inputDataSample
 	inp := inputDataSample{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
@@ -206,7 +180,7 @@ func registerDataSample(stub shim.ChaincodeStubInterface, args []string) (dataSa
 // updateDataSample associates one or more dataManagerKeys to one or more dataSample
 func updateDataSample(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	inp := inputUpdateDataSample{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
@@ -257,15 +231,11 @@ func updateDataSample(stub shim.ChaincodeStubInterface, args []string) (resp map
 // updateDataManager associates a objectiveKey to an existing dataManager
 func updateDataManager(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	inp := inputUpdateDataManager{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
-	validate := validator.New()
-	if err = validate.Struct(inp); err != nil {
-		err = fmt.Errorf("invalid update dataManager inputs %s", err.Error())
-		return
-	}
+
 	// update dataManager.ObjectiveKey
 	if err = addObjectiveDataManager(stub, inp.DataManagerKey, inp.ObjectiveKey); err != nil {
 		return
@@ -275,8 +245,8 @@ func updateDataManager(stub shim.ChaincodeStubInterface, args []string) (resp ma
 
 // queryDataManager returns dataManager and its key
 func queryDataManager(stub shim.ChaincodeStubInterface, args []string) (out outputDataManager, err error) {
-	inp := inputHashe{}
-	err = AssetFromJSON(args[0], &inp)
+	inp := inputHash{}
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
@@ -319,8 +289,8 @@ func queryDataManagers(stub shim.ChaincodeStubInterface, args []string) (outData
 
 // queryDataset returns info about a dataManager and all related dataSample
 func queryDataset(stub shim.ChaincodeStubInterface, args []string) (out outputDataset, err error) {
-	inp := inputHashe{}
-	err = AssetFromJSON(args[0], &inp)
+	inp := inputHash{}
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}

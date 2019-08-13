@@ -12,6 +12,91 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+// myMockStub is here to simulate the fact that in real condition you cannot read
+// what you just write. It should be improved and more generally used.
+type myMockStub struct {
+	saveWhenWriting bool
+	writtenState    map[string][]byte
+	*shim.MockStub
+}
+
+func (stub *myMockStub) PutState(key string, value []byte) error {
+	if !stub.saveWhenWriting {
+		if stub.writtenState == nil {
+			stub.writtenState = make(map[string][]byte)
+		}
+		stub.writtenState[key] = value
+		return nil
+	}
+	return stub.PutState(key, value)
+}
+
+func (stub *myMockStub) saveWrittenState(t *testing.T) {
+	if stub.writtenState == nil {
+		return
+	}
+	for k, v := range stub.writtenState {
+		err := stub.MockStub.PutState(k, v)
+		if err != nil {
+			t.Fatalf("unable to `PutState` in saveWrittenState %s", err)
+		}
+	}
+	stub.writtenState = nil
+	return
+}
+
+func TestCreateComputePlan(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := shim.NewMockStub("substra", scc)
+	myStub := myMockStub{MockStub: mockStub}
+	myStub.saveWhenWriting = true
+	registerItem(t, *mockStub, "algo")
+	myStub.MockTransactionStart("42")
+	myStub.saveWhenWriting = false
+
+	// Simply test method and return values
+	inCP := defaultComputePlan
+	outCP, err := createComputePlan(&myStub, assetToArgs(inCP))
+	assert.NoError(t, err)
+	assert.NotNil(t, outCP)
+	assert.EqualValues(t, outCP.FLTask, outCP.TraintupleKeys[0])
+
+	// Save all that was written in the mocked ledger
+	myStub.saveWrittenState(t)
+
+	// Check the traintuples
+	traintuples, err := queryTraintuples(&myStub, []string{})
+	assert.NoError(t, err)
+	assert.Len(t, traintuples, 2)
+	require.Contains(t, outCP.TraintupleKeys, traintuples[0].Key)
+	require.Contains(t, outCP.TraintupleKeys, traintuples[1].Key)
+	var first, second outputTraintuple
+	for _, el := range traintuples {
+		switch el.Key {
+		case outCP.TraintupleKeys[0]:
+			first = el
+		case outCP.TraintupleKeys[1]:
+			second = el
+		}
+	}
+	assert.NotZero(t, first)
+	assert.NotZero(t, second)
+	assert.EqualValues(t, first.Key, first.FLTask)
+	assert.EqualValues(t, first.FLTask, second.FLTask)
+	assert.Len(t, second.InModels, 1)
+	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
+	assert.Equal(t, first.Status, StatusTodo)
+	assert.Equal(t, second.Status, StatusWaiting)
+
+	// Check the testtuples
+	testtuples, err := queryTesttuples(&myStub, []string{})
+	assert.NoError(t, err)
+	require.Len(t, testtuples, 1)
+	testtuple := testtuples[0]
+	require.Contains(t, outCP.TesttupleKeys, testtuple.Key)
+	assert.EqualValues(t, second.Key, testtuple.Model.TraintupleKey)
+	assert.True(t, testtuple.Certified)
+}
 func TestSpecifiqArgSeq(t *testing.T) {
 	t.SkipNow()
 	// This test is a POC and a example of a test base on the output of the log
@@ -49,13 +134,14 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 	registerItem(t, *mockStub, "trainDataset")
 
 	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash, TestDataset: ":"}
-	args := inpObjective.createDefault()
-	resp := mockStub.MockInvoke("42", args)
+	inpObjective := inputObjective{DescriptionHash: objHash}
+	inpObjective.createDefault()
+	inpObjective.TestDataset = inputDataset{}
+	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
 	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
 
 	inpAlgo := inputAlgo{}
-	args = inpAlgo.createDefault()
+	args := inpAlgo.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
@@ -158,7 +244,7 @@ func TestTraintupleFLTaskCreation(t *testing.T) {
 	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 400, resp.Status, "should failed for missing rank")
-	require.Contains(t, resp.Message, "invalit inputs, a FLTask should have a rank", "invalid error message")
+	require.Contains(t, resp.Message, "invalid inputs, a FLTask should have a rank", "invalid error message")
 
 	inpTraintuple = inputTraintuple{Rank: "1"}
 	args = inpTraintuple.createDefault()
@@ -202,7 +288,7 @@ func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 	key := res["key"]
 	// Failed to add a traintuple with the same rank
 	inpTraintuple = inputTraintuple{
-		InModels: key,
+		InModels: []string{key},
 		Rank:     "0",
 		FLTask:   key}
 	args = inpTraintuple.createDefault()
@@ -211,7 +297,7 @@ func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 
 	// Failed to add a traintuple to an unexisting Fltask
 	inpTraintuple = inputTraintuple{
-		InModels: key,
+		InModels: []string{key},
 		Rank:     "1",
 		FLTask:   "notarealone"}
 	args = inpTraintuple.createDefault()
@@ -220,7 +306,7 @@ func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 
 	// Succesfully add a traintuple to the same FLTask
 	inpTraintuple = inputTraintuple{
-		InModels: key,
+		InModels: []string{key},
 		Rank:     "1",
 		FLTask:   key}
 	args = inpTraintuple.createDefault()
@@ -239,7 +325,7 @@ func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 
 	inpTraintuple = inputTraintuple{
 		AlgoKey:  newAlgoHash,
-		InModels: ttkey,
+		InModels: []string{ttkey},
 		Rank:     "2",
 		FLTask:   key}
 	args = inpTraintuple.createDefault()
@@ -286,7 +372,7 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 	// Add a testtuple that shoulb be certified since it's the same dataManager and
 	// dataSample than the objective but explicitly pass as arguments and in disorder
 	inpTesttuple := inputTesttuple{
-		DataSampleKeys: testDataSampleHash2 + "," + testDataSampleHash1,
+		DataSampleKeys: []string{testDataSampleHash2, testDataSampleHash1},
 		DataManagerKey: dataManagerOpenerHash}
 	args := inpTesttuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
@@ -315,7 +401,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status)
 
 	// Fail to add an incomplete uncertified testtuple
-	inpTesttuple2 := inputTesttuple{DataSampleKeys: trainDataSampleHash1}
+	inpTesttuple2 := inputTesttuple{DataSampleKeys: []string{trainDataSampleHash1}}
 	args = inpTesttuple2.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status)
@@ -323,7 +409,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 
 	// Add an uncertified testtuple successfully
 	inpTesttuple3 := inputTesttuple{
-		DataSampleKeys: trainDataSampleHash1 + "," + trainDataSampleHash2,
+		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 		DataManagerKey: dataManagerOpenerHash}
 	args = inpTesttuple3.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -331,7 +417,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 
 	// Fail to add the same testtuple with a different order for dataSampleKeys
 	inpTesttuple4 := inputTesttuple{
-		DataSampleKeys: trainDataSampleHash2 + "," + trainDataSampleHash1,
+		DataSampleKeys: []string{trainDataSampleHash2, trainDataSampleHash1},
 		DataManagerKey: dataManagerOpenerHash}
 	args = inpTesttuple4.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -413,7 +499,7 @@ func TestTraintuple(t *testing.T) {
 
 	// Add traintuple with inmodel from the above-submitted traintuple
 	inpWaitingTraintuple := inputTraintuple{
-		InModels: string(traintupleKey),
+		InModels: []string{string(traintupleKey)},
 	}
 	args = inpWaitingTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -496,7 +582,8 @@ func TestQueryTraintupleNotFound(t *testing.T) {
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryTraintuple: key does not exist
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSON("notfoundkey")}
+	notFoundKey := "eedbb7c31f62244c0f34461cc168804227115793d01c270021fe3f7935482eed"
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(notFoundKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 

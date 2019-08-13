@@ -76,6 +76,8 @@ can jump immediately to the chaincode calls.
 Terminal 2 - Build & start the chaincode
 ----------------------------------------
 
+.. warning::  This step is not necessary anymore since the chaincode container now launch the chaincode itself.
+
 .. code:: bash
 
   docker exec -it chaincode bash
@@ -117,14 +119,14 @@ We'll leverage the CLI container to drive these calls.
 
 .. code:: bash
 
-  peer chaincode install -p chaincodedev/chaincode/ -n mycc -v 0
+  peer chaincode install -p chaincode/ -n mycc -v 0
   peer chaincode instantiate -n mycc -v 0 -c '{"Args":["init"]}' -C myc
 
-Now issue an invoke to create a problem.
+Now issue an invoke to create a dataManager.
 
 .. code:: bash
 
-  peer chaincode invoke -n mycc -c '{"Args":["registerDataset","liver slides","5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379","https://toto/dataset/222/opener","images","fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482d8d","https://toto/dataset/222/description","","all"]}' -C myc
+  peer chaincode invoke -n mycc -c '{"Args":["registerDataManager","{\"name\":\"liver slide\",\"openerHash\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"openerStorageAddress\":\"https://toto/dataManager/42234/opener\",\"type\":\"images\",\"descriptionHash\":\"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee\",\"descriptionStorageAddress\":\"https://toto/dataManager/42234/description\",\"objectiveKey\":\"\",\"permissions\":\"all\"}"]}' -C myc
 
 Finally, query all datasets.  We should see the newly added dataset.
 

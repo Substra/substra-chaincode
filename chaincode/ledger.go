@@ -3,8 +3,11 @@ package main
 // ---------------------------------------------------------------------------------
 // Representation of elements stored in the ledger
 // ---------------------------------------------------------------------------------
+
+// AssetType is use to check the type of an asset
 type AssetType uint8
 
+// Const representing the types of asset findable in the ledger
 const (
 	ObjectiveType AssetType = iota
 	DataManagerType
@@ -75,17 +78,17 @@ type Traintuple struct {
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Testtuple struct {
-	AssetType   AssetType      `json:"assetType"`
-	Algo        *HashDressName `json:"algo"`
-	Certified   bool           `json:"certified"`
-	Creator     string         `json:"creator"`
-	Dataset     *TtDataset     `json:"dataset"`
-	Log         string         `json:"log"`
-	Model       *Model         `json:"model"`
-	Objective   *TtObjective   `json:"objective"`
-	Permissions string         `json:"permissions"`
-	Status      string         `json:"status"`
-	Tag         string         `json:"tag"`
+	AssetType    AssetType  `json:"assetType"`
+	AlgoKey      string     `json:"algo"`
+	Certified    bool       `json:"certified"`
+	Creator      string     `json:"creator"`
+	Dataset      *TtDataset `json:"dataset"`
+	Log          string     `json:"log"`
+	Model        *Model     `json:"model"`
+	ObjectiveKey string     `json:"objective"`
+	Permissions  string     `json:"permissions"`
+	Status       string     `json:"status"`
+	Tag          string     `json:"tag"`
 }
 
 // ---------------------------------------------------------------------------------

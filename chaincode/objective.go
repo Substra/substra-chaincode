@@ -3,27 +3,19 @@ package main
 import (
 	"chaincode/errors"
 	"fmt"
-	"strings"
 
 	"encoding/json"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 // Set is a method of the receiver Objective. It checks the validity of inputObjective and uses its fields to set the Objective.
 // Returns the objectiveKey and the dataManagerKey associated to test dataSample
 func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjective) (objectiveKey string, dataManagerKey string, err error) {
-	// checking validity of submitted fields
-	validate := validator.New()
-	if err = validate.Struct(inp); err != nil {
-		err = errors.BadRequest(err, "invalid objective inputs")
-		return
-	}
-	dataManagerKey = strings.Split(inp.TestDataset, ":")[0]
+	dataManagerKey = inp.TestDataset.DataManagerKey
 	if dataManagerKey != "" {
 		var testOnly bool
-		dataSampleKeys := strings.Split(strings.Replace(strings.Split(inp.TestDataset, ":")[1], " ", "", -1), ",")
+		dataSampleKeys := inp.TestDataset.DataSampleKeys
 		testOnly, _, err = checkSameDataManager(stub, dataManagerKey, dataSampleKeys)
 		if err != nil {
 			err = errors.BadRequest(err, "invalid test dataSample")
@@ -66,7 +58,7 @@ func (objective *Objective) Set(stub shim.ChaincodeStubInterface, inp inputObjec
 func registerObjective(stub shim.ChaincodeStubInterface, args []string) (resp map[string]string, err error) {
 	// convert input strings args to input struct inputObjective
 	inp := inputObjective{}
-	err = AssetFromJSON(args[0], &inp)
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
@@ -99,8 +91,8 @@ func registerObjective(stub shim.ChaincodeStubInterface, args []string) (resp ma
 
 // queryObjective returns a objective of the ledger given its key
 func queryObjective(stub shim.ChaincodeStubInterface, args []string) (out outputObjective, err error) {
-	inp := inputHashe{}
-	err = AssetFromJSON(args[0], &inp)
+	inp := inputHash{}
+	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
