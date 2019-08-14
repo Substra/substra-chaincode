@@ -25,7 +25,7 @@ func NewLedgerDB(stub shim.ChaincodeStubInterface) LedgerDB {
 // Low-level functions to handle asset structs
 // ----------------------------------------------
 
-// Get returns an asset stored in the chaincode db
+// Get retrieves an object stored in the chaincode db and set the input object value
 func (db *LedgerDB) Get(key string, object interface{}) error {
 	buff, err := db.cc.GetState(key)
 	if err != nil {
@@ -46,7 +46,7 @@ func (db *LedgerDB) KeyExists(key string) (bool, error) {
 	return buff != nil, err
 }
 
-// Put stores an asset in the chaincode db, if the asset already exists it is replaced
+// Put stores an object in the chaincode db, if the object already exists it is replaced
 func (db *LedgerDB) Put(key string, object interface{}) error {
 	buff, _ := json.Marshal(object)
 	if err := db.cc.PutState(key, buff); err != nil {
@@ -55,7 +55,7 @@ func (db *LedgerDB) Put(key string, object interface{}) error {
 	return nil
 }
 
-// Add stores an asset in the chaincode db, it fails if the asset already exists
+// Add stores an object in the chaincode db, it fails if the object already exists
 func (db *LedgerDB) Add(key string, object interface{}) error {
 	ok, err := db.KeyExists(key)
 	if err != nil {
