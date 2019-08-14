@@ -27,7 +27,7 @@ func NewLedgerDB(stub shim.ChaincodeStubInterface) LedgerDB {
 // Low-level functions to handle asset structs
 // ----------------------------------------------
 
-// getPendingState returns a copy of an asset that has been cached during the transmission
+// getPendingState returns a copy of an object that has been updated or created during the transaction
 func (db *LedgerDB) getPendingState(key string) ([]byte, bool) {
 	pendingState, ok := db.pendingState[key]
 	if !ok {
@@ -38,11 +38,9 @@ func (db *LedgerDB) getPendingState(key string) ([]byte, bool) {
 	return state, true
 }
 
-// putPendingState stores a copy of an asset during a transmission lifetime
+// putPendingState stores an object during a transaction lifetime
 func (db *LedgerDB) putPendingState(key string, state []byte) {
-	stateCopy := make([]byte, len(state))
-	copy(stateCopy, state)
-	db.pendingState[key] = stateCopy
+	db.pendingState[key] = state
 }
 
 // Get retrieves an object stored in the chaincode db and set the input object value
