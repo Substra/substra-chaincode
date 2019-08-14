@@ -9,7 +9,7 @@ import (
 
 // Set is a method of the receiver DataManager. It uses inputDataManager fields to set the DataManager
 // Returns the dataManagerKey and associated objectiveKeys
-func (dataManager *DataManager) Set(inp inputDataManager, owner string) (string, string, error) {
+func (dataManager *DataManager) Set(db LedgerDB, inp inputDataManager) (string, string, error) {
 	dataManagerKey := inp.OpenerHash
 	dataManager.ObjectiveKey = inp.ObjectiveKey
 	dataManager.AssetType = DataManagerType
@@ -19,6 +19,10 @@ func (dataManager *DataManager) Set(inp inputDataManager, owner string) (string,
 	dataManager.Description = &HashDress{
 		Hash:           inp.DescriptionHash,
 		StorageAddress: inp.DescriptionStorageAddress,
+	}
+	owner, err := GetTxCreator(db.cc)
+	if err != nil {
+		return "", "", err
 	}
 	dataManager.Owner = owner
 	dataManager.Permissions = inp.Permissions
@@ -92,10 +96,6 @@ func registerDataManager(db LedgerDB, args []string) (resp map[string]string, er
 	if err != nil {
 		return
 	}
-	owner, err := GetTxCreator(db.cc)
-	if err != nil {
-		return
-	}
 	// check validity of input args and convert it to a DataManager
 	if len(inp.ObjectiveKey) > 0 {
 		if _, err := db.GetObjective(inp.ObjectiveKey); err != nil {
@@ -104,7 +104,7 @@ func registerDataManager(db LedgerDB, args []string) (resp map[string]string, er
 		}
 	}
 	dataManager := DataManager{}
-	dataManagerKey, objectiveKey, err := dataManager.Set(inp, owner)
+	dataManagerKey, objectiveKey, err := dataManager.Set(db, inp)
 	if err != nil {
 		return
 	}

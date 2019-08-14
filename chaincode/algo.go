@@ -6,8 +6,13 @@ import (
 
 // Set is a method of the receiver Algo. It uses inputAlgo fields to set the Algo
 // Returns the algoKey
-func (algo *Algo) Set(inp inputAlgo, owner string) string {
-	algoKey := inp.Hash
+func (algo *Algo) Set(db LedgerDB, inp inputAlgo) (algoKey string, err error) {
+	algoKey = inp.Hash
+	// find associated owner
+	owner, err := GetTxCreator(db.cc)
+	if err != nil {
+		return
+	}
 	algo.AssetType = AlgoType
 	algo.Name = inp.Name
 	algo.StorageAddress = inp.StorageAddress
@@ -17,7 +22,7 @@ func (algo *Algo) Set(inp inputAlgo, owner string) string {
 	}
 	algo.Owner = owner
 	algo.Permissions = inp.Permissions
-	return algoKey
+	return
 }
 
 // -------------------------------------------------------------------------------------------
@@ -31,13 +36,12 @@ func registerAlgo(db LedgerDB, args []string) (resp map[string]string, err error
 	if err != nil {
 		return
 	}
-	owner, err := GetTxCreator(db.cc)
+	// check validity of input args and convert it to Algo
+	algo := Algo{}
+	algoKey, err := algo.Set(db, inp)
 	if err != nil {
 		return
 	}
-	// check validity of input args and convert it to Algo
-	algo := Algo{}
-	algoKey := algo.Set(inp, owner)
 	// submit to ledger
 	err = db.Add(algoKey, algo)
 	if err != nil {
