@@ -5,13 +5,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 func TestJsonInputsDataManager(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStub("substra", scc)
 
 	inpDataManager := inputDataManager{}
 	inpDataManager.createDefault()
@@ -23,7 +21,7 @@ func TestJsonInputsDataManager(t *testing.T) {
 }
 func TestDataManager(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStub("substra", scc)
 
 	// Add dataManager with invalid field
 	inpDataManager := inputDataManager{
@@ -59,7 +57,7 @@ func TestDataManager(t *testing.T) {
 	expectedDataManager := outputDataManager{
 		ObjectiveKey: inpDataManager.ObjectiveKey,
 		Key:          dataManagerKey,
-		Owner:        "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
+		Owner:        worker,
 		Name:         inpDataManager.Name,
 		Description: &HashDress{
 			StorageAddress: inpDataManager.DescriptionStorageAddress,
@@ -96,7 +94,7 @@ func TestDataManager(t *testing.T) {
 
 func TestGetTestDatasetKeys(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStub("substra", scc)
 
 	// Input DataManager
 	inpDataManager := inputDataManager{}
@@ -127,7 +125,7 @@ func TestGetTestDatasetKeys(t *testing.T) {
 }
 func TestDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStub("substra", scc)
 
 	// Add dataSample with invalid field
 	inpDataSample := inputDataSample{

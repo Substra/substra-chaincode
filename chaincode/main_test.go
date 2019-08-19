@@ -31,8 +31,8 @@ const algoStorageAddress = "https://toto/algo/222/algo"
 const algoName = "hog + svm"
 const modelHash = "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed"
 const modelAddress = "https://substrabac/model/toto"
-const worker = "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0"
-const traintupleKey = "8e29bacef1250f8c3bd6ccc72455f764b74ef7e66b9157fd6cd2b0cecef1c687"
+const worker = "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+const traintupleKey = "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
 
 var (
 	pipeline = flag.Bool("pipeline", false, "Print out the pipeline test output")
@@ -42,7 +42,7 @@ var (
 
 func TestInit(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStub("substra", scc)
 
 	// resp := mockStub.MockInit("42", [][]byte{[]byte("init")})
 	resp := mockStub.MockInit("42", [][]byte{[]byte("init")})
@@ -123,7 +123,7 @@ func printInputStuct(buf io.Writer, fnName string, inputType reflect.Type) {
 	fmt.Fprint(buf, "```\n")
 }
 
-func registerItem(t *testing.T, mockStub shim.MockStub, itemType string) (peer.Response, interface{}) {
+func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Response, interface{}) {
 	// 1. add dataManager
 	inpDataManager := inputDataManager{}
 	args := inpDataManager.createDefault()
@@ -194,7 +194,7 @@ func printResp(buf io.Writer, payload []byte) {
 
 func TestPipeline(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStub("substra", scc)
 	var out strings.Builder
 	callAssertAndPrint := func(peerCmd, smartContract string, inputAsset interface{}) peer.Response {
 		var args [][]byte
@@ -429,14 +429,14 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func initializeMockStateDB(t *testing.T, stub *shim.MockStub) {
+func initializeMockStateDB(t *testing.T, stub *MockStub) {
 	stub.MockTransactionStart("42")
 	stub.PutState("key", []byte("value"))
 }
 
 func TestQueryEmptyResponse(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStub("substra", scc)
 	initializeMockStateDB(t, mockStub)
 
 	smartContracts := []string{

@@ -10,6 +10,8 @@ require (
 	github.com/fsouza/go-dockerclient v1.4.0 // indirect
 	github.com/go-playground/locales v0.12.1 // indirect
 	github.com/go-playground/universal-translator v0.16.0 // indirect
+	github.com/gogo/protobuf v1.2.1
+	github.com/golang/protobuf v1.3.1
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0 // indirect
 	github.com/hashicorp/go-version v1.2.0 // indirect
@@ -22,8 +24,9 @@ require (
 	github.com/miekg/pkcs11 v1.0.2 // indirect
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
-	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7 // indirect
+	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/pelletier/go-toml v1.4.0 // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

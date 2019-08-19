@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAlgo(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStub("substra", scc)
 
 	// Add algo with invalid field
 	inpAlgo := inputAlgo{
@@ -49,7 +48,7 @@ func TestAlgo(t *testing.T) {
 			Hash:           inpAlgo.DescriptionHash,
 			StorageAddress: inpAlgo.DescriptionStorageAddress,
 		},
-		Owner:       "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
+		Owner:       worker,
 		Permissions: inpAlgo.Permissions,
 	}
 	assert.Exactly(t, expectedAlgo, algo)
