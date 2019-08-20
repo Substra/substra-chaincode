@@ -4,43 +4,55 @@ import (
 	"chaincode/errors"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+type State struct {
+	items map[string]([]byte)
+}
+
 // LedgerDB to access the chaincode database during the lifetime of a SmartContract
 type LedgerDB struct {
-	cc           shim.ChaincodeStubInterface
-	pendingState map[string]([]byte)
+	cc               shim.ChaincodeStubInterface
+	transactionState State
+	mutex            *sync.RWMutex
 }
 
 // NewLedgerDB create a new db to access the chaincode during a SmartContract
 func NewLedgerDB(stub shim.ChaincodeStubInterface) LedgerDB {
-	db := LedgerDB{
+	return LedgerDB{
 		cc: stub,
+		transactionState: State{
+			items: make(map[string]([]byte)),
+		},
+		mutex: &sync.RWMutex{},
 	}
-	db.pendingState = make(map[string]([]byte))
-	return db
 }
 
 // ----------------------------------------------
 // Low-level functions to handle asset structs
 // ----------------------------------------------
 
-// getPendingState returns a copy of an object that has been updated or created during the transaction
-func (db *LedgerDB) getPendingState(key string) ([]byte, bool) {
-	pendingState, ok := db.pendingState[key]
+// gettransactionState returns a copy of an object that has been updated or created during the transaction
+func (db *LedgerDB) getTransactionState(key string) ([]byte, bool) {
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+	transactionState, ok := db.transactionState.items[key]
 	if !ok {
 		return nil, false
 	}
-	state := make([]byte, len(pendingState))
-	copy(state, pendingState)
+	state := make([]byte, len(transactionState))
+	copy(state, transactionState)
 	return state, true
 }
 
-// putPendingState stores an object during a transaction lifetime
-func (db *LedgerDB) putPendingState(key string, state []byte) {
-	db.pendingState[key] = state
+// putTransactionState stores an object during a transaction lifetime
+func (db *LedgerDB) putTransactionState(key string, state []byte) {
+	db.mutex.Lock()
+	defer db.mutex.Unlock()
+	db.transactionState.items[key] = state
 }
 
 // Get retrieves an object stored in the chaincode db and set the input object value
@@ -48,17 +60,15 @@ func (db *LedgerDB) Get(key string, object interface{}) error {
 	var buff []byte
 	var err error
 
-	buff, ok := db.getPendingState(key)
+	buff, ok := db.getTransactionState(key)
 	if !ok {
 		buff, err = db.cc.GetState(key)
-		if err != nil {
+		if err != nil || buff == nil {
 			return errors.NotFound(err)
 		}
-		if buff == nil {
-			return errors.NotFound()
-		}
-		db.putPendingState(key, buff)
+		db.putTransactionState(key, buff)
 	}
+
 	if err = json.Unmarshal(buff, &object); err != nil {
 		return err
 	}
@@ -74,13 +84,15 @@ func (db *LedgerDB) KeyExists(key string) (bool, error) {
 // Put stores an object in the chaincode db, if the object already exists it is replaced
 func (db *LedgerDB) Put(key string, object interface{}) error {
 	buff, _ := json.Marshal(object)
+
 	if err := db.cc.PutState(key, buff); err != nil {
 		return err
 	}
-	// PendingState is updated to ensure that even if the data is not committed, a further
+	// TransactionState is updated to ensure that even if the data is not committed, a further
 	// call to get this struct will returned the updated one (and not the original one).
 	// This is currently required when setting the statuses of the traintuple children.
-	db.putPendingState(key, buff)
+	db.putTransactionState(key, buff)
+
 	return nil
 }
 
