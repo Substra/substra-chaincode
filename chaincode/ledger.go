@@ -60,20 +60,20 @@ type Algo struct {
 
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
-	AssetType    AssetType  `json:"assetType"`
-	AlgoKey      string     `json:"algoKey"`
-	Creator      string     `json:"creator"`
-	Dataset      *Dataset   `json:"dataset"`
-	FLTask       string     `json:"fltask"`
-	InModelKeys  []string   `json:"inModels"`
-	Log          string     `json:"log"`
-	ObjectiveKey string     `json:"objectiveKey"`
-	OutModel     *HashDress `json:"outModel"`
-	Perf         float32    `json:"perf"`
-	Permissions  string     `json:"permissions"`
-	Rank         int        `json:"rank"`
-	Status       string     `json:"status"`
-	Tag          string     `json:"tag"`
+	AssetType     AssetType  `json:"assetType"`
+	AlgoKey       string     `json:"algoKey"`
+	Creator       string     `json:"creator"`
+	Dataset       *Dataset   `json:"dataset"`
+	ComputePlanID string     `json:"computePlanID"`
+	InModelKeys   []string   `json:"inModels"`
+	Log           string     `json:"log"`
+	ObjectiveKey  string     `json:"objectiveKey"`
+	OutModel      *HashDress `json:"outModel"`
+	Perf          float32    `json:"perf"`
+	Permissions   string     `json:"permissions"`
+	Rank          int        `json:"rank"`
+	Status        string     `json:"status"`
+	Tag           string     `json:"tag"`
 }
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform

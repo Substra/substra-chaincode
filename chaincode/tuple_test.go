@@ -57,7 +57,7 @@ func TestCreateComputePlan(t *testing.T) {
 	outCP, err := createComputePlan(NewLedgerDB(&myStub), assetToArgs(inCP))
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	assert.EqualValues(t, outCP.FLTask, outCP.TraintupleKeys[0])
+	assert.EqualValues(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
 
 	// Save all that was written in the mocked ledger
 	myStub.saveWrittenState(t)
@@ -79,8 +79,8 @@ func TestCreateComputePlan(t *testing.T) {
 	}
 	assert.NotZero(t, first)
 	assert.NotZero(t, second)
-	assert.EqualValues(t, first.Key, first.FLTask)
-	assert.EqualValues(t, first.FLTask, second.FLTask)
+	assert.EqualValues(t, first.Key, first.ComputePlanID)
+	assert.EqualValues(t, first.ComputePlanID, second.ComputePlanID)
 	assert.Len(t, second.InModels, 1)
 	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
 	assert.Equal(t, first.Status, StatusTodo)
@@ -231,24 +231,24 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 		getOutputTraintuple(NewLedgerDB(mockStub), traintupleKey)
 	})
 }
-func TestTraintupleFLTaskCreation(t *testing.T) {
+func TestTraintupleComputePlanCreation(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStub("substra", scc)
 
 	// Add dataManager, dataSample and algo
 	registerItem(t, *mockStub, "algo")
 
-	inpTraintuple := inputTraintuple{FLTask: "someFLTask"}
+	inpTraintuple := inputTraintuple{ComputePlanID: "someComputePlanID"}
 	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 400, resp.Status, "should failed for missing rank")
-	require.Contains(t, resp.Message, "invalid inputs, a FLTask should have a rank", "invalid error message")
+	require.Contains(t, resp.Message, "invalid inputs, a ComputePlan should have a rank", "invalid error message")
 
 	inpTraintuple = inputTraintuple{Rank: "1"}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 400, resp.Status, "should failed for invalid rank")
-	require.Contains(t, resp.Message, "invalid inputs, a new FLTask should have a rank 0")
+	require.Contains(t, resp.Message, "invalid inputs, a new ComputePlan should have a rank 0")
 
 	inpTraintuple = inputTraintuple{Rank: "0"}
 	args = inpTraintuple.createDefault()
@@ -264,11 +264,11 @@ func TestTraintupleFLTaskCreation(t *testing.T) {
 	inpTraintuple = inputTraintuple{Rank: "0"}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	require.EqualValues(t, 409, resp.Status, "should failed for existing FLTask")
+	require.EqualValues(t, 409, resp.Status, "should failed for existing ComputePlanID")
 	require.Contains(t, resp.Message, "already exists")
 }
 
-func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
+func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStub("substra", scc)
 
@@ -286,35 +286,35 @@ func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 	key := res["key"]
 	// Failed to add a traintuple with the same rank
 	inpTraintuple = inputTraintuple{
-		InModels: []string{key},
-		Rank:     "0",
-		FLTask:   key}
+		InModels:      []string{key},
+		Rank:          "0",
+		ComputePlanID: key}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add a traintuple of the same rank")
 
-	// Failed to add a traintuple to an unexisting Fltask
+	// Failed to add a traintuple to an unexisting CommputePlan
 	inpTraintuple = inputTraintuple{
-		InModels: []string{key},
-		Rank:     "1",
-		FLTask:   "notarealone"}
+		InModels:      []string{key},
+		Rank:          "1",
+		ComputePlanID: "notarealone"}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting FLTask")
+	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting ComputePlanID")
 
-	// Succesfully add a traintuple to the same FLTask
+	// Succesfully add a traintuple to the same ComputePlanID
 	inpTraintuple = inputTraintuple{
-		InModels: []string{key},
-		Rank:     "1",
-		FLTask:   key}
+		InModels:      []string{key},
+		Rank:          "1",
+		ComputePlanID: key}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same FLTask")
+	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same ComputePlanID")
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
 	ttkey := res["key"]
-	// Add new algo to check all fltask algo consistency
+	// Add new algo to check all ComputePlan algo consistency
 	newAlgoHash := strings.Replace(algoHash, "a", "b", 1)
 	inpAlgo := inputAlgo{Hash: newAlgoHash}
 	args = inpAlgo.createDefault()
@@ -322,10 +322,10 @@ func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status)
 
 	inpTraintuple = inputTraintuple{
-		AlgoKey:  newAlgoHash,
-		InModels: []string{ttkey},
-		Rank:     "2",
-		FLTask:   key}
+		AlgoKey:       newAlgoHash,
+		InModels:      []string{ttkey},
+		Rank:          "2",
+		ComputePlanID: key}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status, resp.Message, "sould fail for it doesn't have the same algo key")

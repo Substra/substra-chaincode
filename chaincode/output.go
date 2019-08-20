@@ -97,19 +97,19 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 // outputTraintuple is the representation of one the element type stored in the
 // ledger. It describes a training task occuring on the platform
 type outputTraintuple struct {
-	Key         string         `json:"key"`
-	Algo        *HashDressName `json:"algo"`
-	Creator     string         `json:"creator"`
-	Dataset     *TtDataset     `json:"dataset"`
-	FLTask      string         `json:"fltask"`
-	InModels    []*Model       `json:"inModels"`
-	Log         string         `json:"log"`
-	Objective   *TtObjective   `json:"objective"`
-	OutModel    *HashDress     `json:"outModel"`
-	Permissions string         `json:"permissions"`
-	Rank        int            `json:"rank"`
-	Status      string         `json:"status"`
-	Tag         string         `json:"tag"`
+	Key           string         `json:"key"`
+	Algo          *HashDressName `json:"algo"`
+	Creator       string         `json:"creator"`
+	Dataset       *TtDataset     `json:"dataset"`
+	ComputePlanID string         `json:"computePlanID"`
+	InModels      []*Model       `json:"inModels"`
+	Log           string         `json:"log"`
+	Objective     *TtObjective   `json:"objective"`
+	OutModel      *HashDress     `json:"outModel"`
+	Permissions   string         `json:"permissions"`
+	Rank          int            `json:"rank"`
+	Status        string         `json:"status"`
+	Tag           string         `json:"tag"`
 }
 
 //Fill is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
@@ -121,7 +121,7 @@ func (outputTraintuple *outputTraintuple) Fill(db LedgerDB, traintuple Traintupl
 	outputTraintuple.Log = traintuple.Log
 	outputTraintuple.Status = traintuple.Status
 	outputTraintuple.Rank = traintuple.Rank
-	outputTraintuple.FLTask = traintuple.FLTask
+	outputTraintuple.ComputePlanID = traintuple.ComputePlanID
 	outputTraintuple.OutModel = traintuple.OutModel
 	outputTraintuple.Tag = traintuple.Tag
 	// fill algo
@@ -266,7 +266,7 @@ func (te *TuplesEvent) SetTraintuples(otuples ...outputTraintuple) {
 }
 
 type outputComputePlan struct {
-	FLTask         string   `json:"fltask"`
+	ComputePlanID  string   `json:"computePlanID"`
 	TraintupleKeys []string `json:"traintupleKeys"`
 	TesttupleKeys  []string `json:"testtupleKeys"`
 }
