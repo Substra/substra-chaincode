@@ -112,19 +112,17 @@ func (db *LedgerDB) GetIndexKeys(index string, attributes []string) ([]string, e
 	keys := make([]string, 0)
 	iterator, err := db.cc.GetStateByPartialCompositeKey(index, attributes)
 	if err != nil {
-		err = fmt.Errorf("get index %s failed: %s", index, err.Error())
-		return keys, err
+		return nil, fmt.Errorf("get index %s failed: %s", index, err.Error())
 	}
 	defer iterator.Close()
-	for i := 0; iterator.HasNext(); i++ {
+	for iterator.HasNext() {
 		compositeKey, err := iterator.Next()
 		if err != nil {
-			return keys, err
+			return nil, err
 		}
 		_, keyParts, err := db.cc.SplitCompositeKey(compositeKey.Key)
 		if err != nil {
-			err = fmt.Errorf("get index %s failed: cannot split key %s: %s", index, compositeKey.Key, err.Error())
-			return keys, err
+			return nil, fmt.Errorf("get index %s failed: cannot split key %s: %s", index, compositeKey.Key, err.Error())
 		}
 		keys = append(keys, keyParts[len(keyParts)-1])
 	}
