@@ -37,69 +37,71 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	// Extract the function and args from the transaction proposal
 	fn, args := stub.GetFunctionAndParameters()
 
+	db := NewLedgerDB(stub)
+
 	var result interface{}
 	var err error
 	switch fn {
 	case "createComputePlan":
-		result, err = createComputePlan(stub, args)
+		result, err = createComputePlan(db, args)
 	case "createTesttuple":
-		result, err = createTesttuple(stub, args)
+		result, err = createTesttuple(db, args)
 	case "createTraintuple":
-		result, err = createTraintuple(stub, args)
+		result, err = createTraintuple(db, args)
 	case "logFailTest":
-		result, err = logFailTest(stub, args)
+		result, err = logFailTest(db, args)
 	case "logFailTrain":
-		result, err = logFailTrain(stub, args)
+		result, err = logFailTrain(db, args)
 	case "logStartTest":
-		result, err = logStartTest(stub, args)
+		result, err = logStartTest(db, args)
 	case "logStartTrain":
-		result, err = logStartTrain(stub, args)
+		result, err = logStartTrain(db, args)
 	case "logSuccessTest":
-		result, err = logSuccessTest(stub, args)
+		result, err = logSuccessTest(db, args)
 	case "logSuccessTrain":
-		result, err = logSuccessTrain(stub, args)
+		result, err = logSuccessTrain(db, args)
 	case "queryAlgo":
-		result, err = queryAlgo(stub, args)
+		result, err = queryAlgo(db, args)
 	case "queryAlgos":
-		result, err = queryAlgos(stub, args)
+		result, err = queryAlgos(db, args)
 	case "queryDataManager":
-		result, err = queryDataManager(stub, args)
+		result, err = queryDataManager(db, args)
 	case "queryDataManagers":
-		result, err = queryDataManagers(stub, args)
+		result, err = queryDataManagers(db, args)
 	case "queryDataSamples":
-		result, err = queryDataSamples(stub, args)
+		result, err = queryDataSamples(db, args)
 	case "queryDataset":
-		result, err = queryDataset(stub, args)
+		result, err = queryDataset(db, args)
 	case "queryFilter":
-		result, err = queryFilter(stub, args)
+		result, err = queryFilter(db, args)
 	case "queryModelDetails":
-		result, err = queryModelDetails(stub, args)
+		result, err = queryModelDetails(db, args)
 	case "queryModels":
-		result, err = queryModels(stub, args)
+		result, err = queryModels(db, args)
 	case "queryObjective":
-		result, err = queryObjective(stub, args)
+		result, err = queryObjective(db, args)
 	case "queryObjectives":
-		result, err = queryObjectives(stub, args)
+		result, err = queryObjectives(db, args)
 	case "queryTesttuple":
-		result, err = queryTesttuple(stub, args)
+		result, err = queryTesttuple(db, args)
 	case "queryTesttuples":
-		result, err = queryTesttuples(stub, args)
+		result, err = queryTesttuples(db, args)
 	case "queryTraintuple":
-		result, err = queryTraintuple(stub, args)
+		result, err = queryTraintuple(db, args)
 	case "queryTraintuples":
-		result, err = queryTraintuples(stub, args)
+		result, err = queryTraintuples(db, args)
 	case "registerAlgo":
-		result, err = registerAlgo(stub, args)
+		result, err = registerAlgo(db, args)
 	case "registerDataManager":
-		result, err = registerDataManager(stub, args)
+		result, err = registerDataManager(db, args)
 	case "registerDataSample":
-		result, err = registerDataSample(stub, args)
+		result, err = registerDataSample(db, args)
 	case "registerObjective":
-		result, err = registerObjective(stub, args)
+		result, err = registerObjective(db, args)
 	case "updateDataManager":
-		result, err = updateDataManager(stub, args)
+		result, err = updateDataManager(db, args)
 	case "updateDataSample":
-		result, err = updateDataSample(stub, args)
+		result, err = updateDataSample(db, args)
 	default:
 		err = fmt.Errorf("function not implemented")
 	}

@@ -1,10 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-
-	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 // Struct use as output representation of ledger data
@@ -116,7 +113,7 @@ type outputTraintuple struct {
 }
 
 //Fill is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
-func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface, traintuple Traintuple, traintupleKey string) (err error) {
+func (outputTraintuple *outputTraintuple) Fill(db LedgerDB, traintuple Traintuple, traintupleKey string) (err error) {
 
 	outputTraintuple.Key = traintupleKey
 	outputTraintuple.Creator = traintuple.Creator
@@ -128,8 +125,8 @@ func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface,
 	outputTraintuple.OutModel = traintuple.OutModel
 	outputTraintuple.Tag = traintuple.Tag
 	// fill algo
-	algo := Algo{}
-	if err = getElementStruct(stub, traintuple.AlgoKey, &algo); err != nil {
+	algo, err := db.GetAlgo(traintuple.AlgoKey)
+	if err != nil {
 		err = fmt.Errorf("could not retrieve algo with key %s - %s", traintuple.AlgoKey, err.Error())
 		return
 	}
@@ -139,8 +136,8 @@ func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface,
 		StorageAddress: algo.StorageAddress}
 
 	// fill objective
-	objective := Objective{}
-	if err = getElementStruct(stub, traintuple.ObjectiveKey, &objective); err != nil {
+	objective, err := db.GetObjective(traintuple.ObjectiveKey)
+	if err != nil {
 		err = fmt.Errorf("could not retrieve associated objective with key %s- %s", traintuple.ObjectiveKey, err.Error())
 		return
 	}
@@ -162,10 +159,9 @@ func (outputTraintuple *outputTraintuple) Fill(stub shim.ChaincodeStubInterface,
 		if inModelKey == "" {
 			break
 		}
-		parentTraintuple := Traintuple{}
-		if err = getElementStruct(stub, inModelKey, &parentTraintuple); err != nil {
-			err = fmt.Errorf("could not retrieve parent traintuple with key %s - %s", inModelKey, err.Error())
-			return
+		parentTraintuple, err := db.GetTraintuple(inModelKey)
+		if err != nil {
+			return fmt.Errorf("could not retrieve parent traintuple with key %s - %s", inModelKey, err.Error())
 		}
 		inModel := &Model{
 			TraintupleKey: inModelKey,
@@ -202,7 +198,7 @@ type outputTesttuple struct {
 	Tag         string         `json:"tag"`
 }
 
-func (out *outputTesttuple) Fill(stub shim.ChaincodeStubInterface, key string, in Testtuple) error {
+func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 	out.Key = key
 	out.Certified = in.Certified
 	out.Creator = in.Creator
@@ -214,8 +210,7 @@ func (out *outputTesttuple) Fill(stub shim.ChaincodeStubInterface, key string, i
 	out.Tag = in.Tag
 
 	// fill algo
-	algo := Algo{}
-	err := getElementStruct(stub, in.AlgoKey, &algo)
+	algo, err := db.GetAlgo(in.AlgoKey)
 	if err != nil {
 		return fmt.Errorf("could not retrieve algo with key %s - %s", in.AlgoKey, err.Error())
 	}
@@ -225,8 +220,7 @@ func (out *outputTesttuple) Fill(stub shim.ChaincodeStubInterface, key string, i
 		StorageAddress: algo.StorageAddress}
 
 	// fill objective
-	objective := Objective{}
-	err = getElementStruct(stub, in.ObjectiveKey, &objective)
+	objective, err := db.GetObjective(in.ObjectiveKey)
 	if err != nil {
 		return fmt.Errorf("could not retrieve associated objective with key %s- %s", in.ObjectiveKey, err.Error())
 	}
@@ -269,19 +263,6 @@ func (te *TuplesEvent) SetTesttuples(otuples ...outputTesttuple) {
 // SetTraintuples add one or several traintuples to the event struct
 func (te *TuplesEvent) SetTraintuples(otuples ...outputTraintuple) {
 	te.Traintuples = otuples
-}
-
-// SetEvent wrap the steps for sending a struct as payload for a event
-func SetEvent(stub shim.ChaincodeStubInterface, eventName string, eventObject interface{}) error {
-	payload, err := json.Marshal(eventObject)
-	if err != nil {
-		return err
-	}
-	err = stub.SetEvent(eventName, payload)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 type outputComputePlan struct {

@@ -3,13 +3,11 @@ package main
 import (
 	"fmt"
 	"strings"
-
-	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 // queryFilter returns all elements of the ledger matching some filters
 // For now, ok for everything. Later returns if the requester has permission to see it
-func queryFilter(stub shim.ChaincodeStubInterface, args []string) (elements interface{}, err error) {
+func queryFilter(db LedgerDB, args []string) (elements interface{}, err error) {
 	inp := inputQueryFilter{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -29,17 +27,16 @@ func queryFilter(stub shim.ChaincodeStubInterface, args []string) (elements inte
 	attributes := strings.Split(strings.Replace(inp.Attributes, " ", "", -1), ",")
 	attributes = append([]string{strings.Split(indexName, "~")[0]}, attributes...)
 
-	filteredKeys, err := getKeysFromComposite(stub, indexName, attributes)
+	filteredKeys, err := db.GetIndexKeys(indexName, attributes)
 	if err != nil {
-		err = fmt.Errorf("issue getting keys from composite key %s - %s", indexName, err.Error())
 		return
 	}
 	// get elements with filtererd keys
 	switch indexName {
 	case "testtuple~worker~status~key", "testtuple~tag~key":
-		elements, err = getOutputTesttuples(stub, filteredKeys)
+		elements, err = getOutputTesttuples(db, filteredKeys)
 	case "traintuple~worker~status~key", "traintuple~tag~key":
-		elements, err = getOutputTraintuples(stub, filteredKeys)
+		elements, err = getOutputTraintuples(db, filteredKeys)
 	}
 	return
 }

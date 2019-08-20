@@ -56,7 +56,7 @@ func TestCreateComputePlan(t *testing.T) {
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlan(&myStub, assetToArgs(inCP))
+	outCP, err := createComputePlan(NewLedgerDB(&myStub), assetToArgs(inCP))
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 	assert.EqualValues(t, outCP.FLTask, outCP.TraintupleKeys[0])
@@ -65,7 +65,7 @@ func TestCreateComputePlan(t *testing.T) {
 	myStub.saveWrittenState(t)
 
 	// Check the traintuples
-	traintuples, err := queryTraintuples(&myStub, []string{})
+	traintuples, err := queryTraintuples(NewLedgerDB(&myStub), []string{})
 	assert.NoError(t, err)
 	assert.Len(t, traintuples, 2)
 	require.Contains(t, outCP.TraintupleKeys, traintuples[0].Key)
@@ -89,7 +89,7 @@ func TestCreateComputePlan(t *testing.T) {
 	assert.Equal(t, second.Status, StatusWaiting)
 
 	// Check the testtuples
-	testtuples, err := queryTesttuples(&myStub, []string{})
+	testtuples, err := queryTesttuples(NewLedgerDB(&myStub), []string{})
 	assert.NoError(t, err)
 	require.Len(t, testtuples, 1)
 	testtuple := testtuples[0]
@@ -220,8 +220,8 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 	defer mockStub.MockTransactionEnd("42")
 
 	// Retreive and alter existing objectif to pass Metrics at nil
-	objective := Objective{}
-	err := getElementStruct(mockStub, objectiveDescriptionHash, &objective)
+	db := NewLedgerDB(mockStub)
+	objective, err := db.GetObjective(objectiveDescriptionHash)
 	assert.NoError(t, err)
 	objective.Metrics = nil
 	objBytes, err := json.Marshal(objective)
@@ -230,7 +230,7 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 	assert.NoError(t, err)
 	// It should not panic
 	require.NotPanics(t, func() {
-		getOutputTraintuple(mockStub, traintupleKey)
+		getOutputTraintuple(NewLedgerDB(mockStub), traintupleKey)
 	})
 }
 func TestTraintupleFLTaskCreation(t *testing.T) {
@@ -267,7 +267,7 @@ func TestTraintupleFLTaskCreation(t *testing.T) {
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 409, resp.Status, "should failed for existing FLTask")
-	require.Contains(t, resp.Message, "this traintuple already exists")
+	require.Contains(t, resp.Message, "already exists")
 }
 
 func TestTraintupleMultipleFLTaskCreations(t *testing.T) {
@@ -422,7 +422,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	args = inpTesttuple4.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 409, resp.Status)
-	assert.Contains(t, resp.Message, "this testtuple already exists")
+	assert.Contains(t, resp.Message, "already exists")
 }
 
 func TestTraintuple(t *testing.T) {
