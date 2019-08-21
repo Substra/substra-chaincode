@@ -5,13 +5,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStub("substra", scc)
 
 	inpObjective := inputObjective{}
 	inpObjective.createDefault()
@@ -21,7 +19,7 @@ func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 }
 func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStub("substra", scc)
 
 	// Add a dataManager and some dataSample successfuly
 	inpDataManager := inputDataManager{}
@@ -54,7 +52,7 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 }
 func TestObjective(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStub("substra", scc)
 
 	// Add objective with invalid field
 	inpObjective := inputObjective{
@@ -96,7 +94,7 @@ func TestObjective(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried objective")
 	expectedObjective := outputObjective{
 		Key:   objectiveKey,
-		Owner: "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
+		Owner: worker,
 		TestDataset: &Dataset{
 			DataManagerKey: dataManagerOpenerHash,
 			DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},

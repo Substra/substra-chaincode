@@ -2,14 +2,18 @@ package main
 
 import (
 	"chaincode/errors"
+	"crypto/rsa"
 	"crypto/sha256"
+	"crypto/x509"
 	"encoding/hex"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"reflect"
-	"strings"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/hyperledger/fabric/protos/msp"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -91,22 +95,34 @@ func SendTuplesEvent(stub shim.ChaincodeStubInterface, event interface{}) error 
 
 // GetTxCreator returns the transaction creator
 func GetTxCreator(stub shim.ChaincodeStubInterface) (string, error) {
-	// get the agent submitting the transaction
-	bCreator, err := stub.GetCreator()
+	creator, err := stub.GetCreator()
+
 	if err != nil {
 		return "", err
 	}
-	// get pem certificate only. This might be slightly dirty, but this is to avoid installing external packages
-	// change it once github.com/hyperledger/fabric/core/chaincode/lib/cid is in fabric chaincode docker
-	certPrefix := "-----BEGIN CERTIFICATE-----"
-	certSuffix := "-----END CERTIFICATE-----\n"
-	var creator string
-	if sCreator := strings.Split(string(bCreator), certPrefix); len(sCreator) > 1 {
-		creator = strings.Split(sCreator[1], certSuffix)[0]
-	} else {
-		creator = "test"
+
+	sID := &msp.SerializedIdentity{}
+	err = proto.Unmarshal(creator, sID)
+	if err != nil {
+		return "", err
 	}
-	creator = certPrefix + creator + certSuffix
-	tt := sha256.Sum256([]byte(creator))
-	return hex.EncodeToString(tt[:]), nil
+
+	block, _ := pem.Decode(sID.IdBytes)
+	if block == nil {
+		return "", fmt.Errorf("unable to decode block %s", sID.IdBytes)
+	}
+
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return "", err
+	}
+
+	rsaPublicKey, ok := cert.PublicKey.(*rsa.PublicKey)
+	if !ok {
+		return "", fmt.Errorf("cert.PublicKey with value: %s doesn't match expected type rsa.PublicKey", cert.PublicKey)
+	}
+
+	hashedModulus := sha256.Sum256(rsaPublicKey.N.Bytes())
+
+	return hex.EncodeToString(hashedModulus[:]), nil
 }
