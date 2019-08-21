@@ -2,7 +2,6 @@ package main
 
 import (
 	"chaincode/errors"
-	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/hex"
@@ -117,12 +116,11 @@ func GetTxCreator(stub shim.ChaincodeStubInterface) (string, error) {
 		return "", err
 	}
 
-	rsaPublicKey, ok := cert.PublicKey.(*rsa.PublicKey)
-	if !ok {
-		return "", fmt.Errorf("cert.PublicKey with value: %s doesn't match expected type rsa.PublicKey", cert.PublicKey)
+	publicKey, err := x509.MarshalPKIXPublicKey(cert.PublicKey)
+	if err != nil {
+		return "", err
 	}
 
-	hashedModulus := sha256.Sum256(rsaPublicKey.N.Bytes())
-
-	return hex.EncodeToString(hashedModulus[:]), nil
+	hashedPublicKey := sha256.Sum256(publicKey)
+	return hex.EncodeToString(hashedPublicKey[:]), nil
 }
