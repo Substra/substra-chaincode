@@ -1022,7 +1022,7 @@ func (traintuple *Traintuple) updateTraintupleChildren(db LedgerDB, traintupleKe
 		}
 
 		// remove associated composite key
-		if err := childTraintuple.removeModelCompositeKey(db, traintupleKey); err != nil {
+		if err := db.DeleteIndex("traintuple~inModel~key", []string{"traintuple", traintupleKey, childTraintupleKey}); err != nil {
 			return otuples, err
 		}
 
@@ -1085,11 +1085,6 @@ func (traintuple *Traintuple) isReady(db LedgerDB, newDoneTraintupleKey string) 
 		}
 	}
 	return true, nil
-}
-
-// removeModelCompositeKey remove the Model key state of a traintuple
-func (traintuple *Traintuple) removeModelCompositeKey(db LedgerDB, modelKey string) error {
-	return db.DeleteIndex("traintuple~inModel~key", []string{"traintuple", modelKey, traintuple.FLTask})
 }
 
 // commitStatusUpdate update the traintuple status in the ledger
