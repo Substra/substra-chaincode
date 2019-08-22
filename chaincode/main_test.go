@@ -31,8 +31,8 @@ const algoStorageAddress = "https://toto/algo/222/algo"
 const algoName = "hog + svm"
 const modelHash = "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed"
 const modelAddress = "https://substrabac/model/toto"
-const worker = "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
-const traintupleKey = "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
+const worker = "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
+const traintupleKey = "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
 
 var (
 	pipeline = flag.Bool("pipeline", false, "Print out the pipeline test output")

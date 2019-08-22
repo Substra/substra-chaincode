@@ -102,7 +102,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryDataManager","{\"key\":\"da1bb7
   "hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "storageAddress": "https://toto/dataManager/42234/opener"
  },
- "owner": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+ "owner": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
  "permissions": "all",
  "type": "images"
 }
@@ -228,7 +228,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataManagers"]}' -C myc
    "hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "storageAddress": "https://toto/dataManager/42234/opener"
   },
-  "owner": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+  "owner": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
   "permissions": "all",
   "type": "images"
  }
@@ -247,28 +247,28 @@ peer chaincode query -n mycc -c '{"Args":["queryDataSamples"]}' -C myc
    "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
   ],
   "key": "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-  "owner": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+  "owner": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
  },
  {
   "dataManagerKeys": [
    "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
   ],
   "key": "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-  "owner": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+  "owner": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
  },
  {
   "dataManagerKeys": [
    "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
   ],
   "key": "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-  "owner": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+  "owner": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
  },
  {
   "dataManagerKeys": [
    "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
   ],
   "key": "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-  "owner": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+  "owner": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
  }
 ]
 ```
@@ -292,7 +292,7 @@ peer chaincode query -n mycc -c '{"Args":["queryObjectives"]}' -C myc
    "storageAddress": "https://toto/objective/222/metrics"
   },
   "name": "MSI classification",
-  "owner": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+  "owner": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
   "permissions": "all",
   "testDataset": {
    "dataManagerKey": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -328,7 +328,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd
 ##### Command output:
 ```json
 {
- "key": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
+ "key": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
 }
 ```
 #### ------------ Add Traintuple with inModel from previous traintuple ------------
@@ -349,18 +349,18 @@ Smart contract: `createTraintuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":[\"0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d\"],\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"flTask\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":[\"4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6\"],\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"flTask\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
- "key": "a4f668de15b8dbf22fb3ca2847740423b7ce3df0fd0831ea614e19e1cedea247"
+ "key": "05a8b7fa61a4f77f126f569b4ea108db20e35904f704dc233b88962375c46fc0"
 }
 ```
 ##### Command output:
 ```json
 {
- "key": "a4f668de15b8dbf22fb3ca2847740423b7ce3df0fd0831ea614e19e1cedea247"
+ "key": "05a8b7fa61a4f77f126f569b4ea108db20e35904f704dc233b88962375c46fc0"
 }
 ```
 #### ------------ Query Traintuples of worker with todo status ------------
@@ -375,7 +375,7 @@ Smart contract: `queryFilter`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"traintuple~worker~status\",\"attributes\":\"27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7, todo\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"traintuple~worker~status\",\"attributes\":\"ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776, todo\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -386,7 +386,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"train
    "name": "hog + svm",
    "storageAddress": "https://toto/algo/222/algo"
   },
-  "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+  "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
   "dataset": {
    "keys": [
     "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -394,11 +394,11 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"train
    ],
    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0,
-   "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+   "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
   },
   "fltask": "",
   "inModels": null,
-  "key": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d",
+  "key": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6",
   "log": "",
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -426,7 +426,7 @@ Smart contract: `logStartTrain`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -436,7 +436,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"0ac522569
   "name": "hog + svm",
   "storageAddress": "https://toto/algo/222/algo"
  },
- "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+ "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
  "dataset": {
   "keys": [
    "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -444,11 +444,11 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"0ac522569
   ],
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "perf": 0,
-  "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+  "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
  },
  "fltask": "",
  "inModels": null,
- "key": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d",
+ "key": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6",
  "log": "",
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -481,7 +481,7 @@ Smart contract: `logSuccessTrain`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d\",\"log\":\"no error, ah ah ah\",\"outModel\":{\"hash\":\"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed\",\"storageAddress\":\"https://substrabac/model/toto\"},\"perf\":0.9}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6\",\"log\":\"no error, ah ah ah\",\"outModel\":{\"hash\":\"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed\",\"storageAddress\":\"https://substrabac/model/toto\"},\"perf\":0.9}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -491,7 +491,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"0ac5225
   "name": "hog + svm",
   "storageAddress": "https://toto/algo/222/algo"
  },
- "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+ "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
  "dataset": {
   "keys": [
    "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -499,11 +499,11 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"0ac5225
   ],
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "perf": 0.9,
-  "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+  "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
  },
  "fltask": "",
  "inModels": null,
- "key": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d",
+ "key": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6",
  "log": "no error, ah ah ah",
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -533,7 +533,7 @@ Smart contract: `queryTraintuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -543,7 +543,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"0ac5225
   "name": "hog + svm",
   "storageAddress": "https://toto/algo/222/algo"
  },
- "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+ "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
  "dataset": {
   "keys": [
    "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -551,11 +551,11 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"0ac5225
   ],
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "perf": 0.9,
-  "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+  "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
  },
  "fltask": "",
  "inModels": null,
- "key": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d",
+ "key": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6",
  "log": "no error, ah ah ah",
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -588,12 +588,12 @@ Smart contract: `createTesttuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"traintupleKey\":\"0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d\",\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"tag\":\"\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"traintupleKey\":\"4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6\",\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"tag\":\"\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
- "key": "6d91b423308881fb0eb027c3621d882f3be5554875a1c1ba7a285b30b853fcc3"
+ "key": "e24b10100ae235aa0955ae42016d4dde3c48d1e955d0f9672e6e692d5f5e6c6e"
 }
 ```
 #### ------------ Add Certified Testtuple ------------
@@ -610,12 +610,12 @@ Smart contract: `createTesttuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"traintupleKey\":\"0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d\",\"dataManagerKey\":\"\",\"dataSampleKeys\":null,\"tag\":\"\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"traintupleKey\":\"4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6\",\"dataManagerKey\":\"\",\"dataSampleKeys\":null,\"tag\":\"\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
- "key": "cbf883362e2468ae84576c0c3cc87846be3742189c5247f3b31df1665e62c64a"
+ "key": "96d9d7922847ef768db438d5cbfe1b09832d935e72133d93628d52dc81298339"
 }
 ```
 #### ------------ Add Testtuple with not done traintuple ------------
@@ -632,12 +632,12 @@ Smart contract: `createTesttuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"traintupleKey\":\"a4f668de15b8dbf22fb3ca2847740423b7ce3df0fd0831ea614e19e1cedea247\",\"dataManagerKey\":\"\",\"dataSampleKeys\":null,\"tag\":\"\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"traintupleKey\":\"05a8b7fa61a4f77f126f569b4ea108db20e35904f704dc233b88962375c46fc0\",\"dataManagerKey\":\"\",\"dataSampleKeys\":null,\"tag\":\"\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
- "key": "77d3134db7ab4ae5557e4f76d8849b669d38036d6daa8336cf0bda3655135d6f"
+ "key": "412d55375a3f19c8b11a4345a95a32c915f1346a9b65294ddf87908857ddbeab"
 }
 ```
 #### ------------ Query Testtuples of worker with todo status ------------
@@ -652,7 +652,7 @@ Smart contract: `queryFilter`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testtuple~worker~status\",\"attributes\":\"27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7, todo\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testtuple~worker~status\",\"attributes\":\"ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776, todo\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -663,23 +663,23 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
    "name": "hog + svm",
    "storageAddress": "https://toto/algo/222/algo"
   },
-  "certified": false,
-  "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+  "certified": true,
+  "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
   "dataset": {
    "keys": [
-    "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+    "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
    ],
    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0,
-   "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+   "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
   },
-  "key": "6d91b423308881fb0eb027c3621d882f3be5554875a1c1ba7a285b30b853fcc3",
+  "key": "96d9d7922847ef768db438d5cbfe1b09832d935e72133d93628d52dc81298339",
   "log": "",
   "model": {
    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
    "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
+   "traintupleKey": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
   },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -698,23 +698,23 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
    "name": "hog + svm",
    "storageAddress": "https://toto/algo/222/algo"
   },
-  "certified": true,
-  "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+  "certified": false,
+  "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
   "dataset": {
    "keys": [
-    "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+    "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
    ],
    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0,
-   "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+   "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
   },
-  "key": "cbf883362e2468ae84576c0c3cc87846be3742189c5247f3b31df1665e62c64a",
+  "key": "e24b10100ae235aa0955ae42016d4dde3c48d1e955d0f9672e6e692d5f5e6c6e",
   "log": "",
   "model": {
    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
    "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
+   "traintupleKey": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
   },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -740,7 +740,7 @@ Smart contract: `logStartTest`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"cbf883362e2468ae84576c0c3cc87846be3742189c5247f3b31df1665e62c64a\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"96d9d7922847ef768db438d5cbfe1b09832d935e72133d93628d52dc81298339\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -751,7 +751,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"cbf883362e
   "storageAddress": "https://toto/algo/222/algo"
  },
  "certified": true,
- "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+ "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
  "dataset": {
   "keys": [
    "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -759,14 +759,14 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"cbf883362e
   ],
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "perf": 0,
-  "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+  "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
  },
- "key": "cbf883362e2468ae84576c0c3cc87846be3742189c5247f3b31df1665e62c64a",
+ "key": "96d9d7922847ef768db438d5cbfe1b09832d935e72133d93628d52dc81298339",
  "log": "",
  "model": {
   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
   "storageAddress": "https://substrabac/model/toto",
-  "traintupleKey": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
+  "traintupleKey": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
  },
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -793,7 +793,7 @@ Smart contract: `logSuccessTest`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"cbf883362e2468ae84576c0c3cc87846be3742189c5247f3b31df1665e62c64a\",\"log\":\"no error, ah ah ah\",\"perf\":0.9}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"96d9d7922847ef768db438d5cbfe1b09832d935e72133d93628d52dc81298339\",\"log\":\"no error, ah ah ah\",\"perf\":0.9}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -804,7 +804,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"cbf88336
   "storageAddress": "https://toto/algo/222/algo"
  },
  "certified": true,
- "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+ "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
  "dataset": {
   "keys": [
    "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -812,14 +812,14 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"cbf88336
   ],
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "perf": 0.9,
-  "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+  "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
  },
- "key": "cbf883362e2468ae84576c0c3cc87846be3742189c5247f3b31df1665e62c64a",
+ "key": "96d9d7922847ef768db438d5cbfe1b09832d935e72133d93628d52dc81298339",
  "log": "no error, ah ah ah",
  "model": {
   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
   "storageAddress": "https://substrabac/model/toto",
-  "traintupleKey": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
+  "traintupleKey": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
  },
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -844,7 +844,7 @@ Smart contract: `queryTesttuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"cbf883362e2468ae84576c0c3cc87846be3742189c5247f3b31df1665e62c64a\"}"]}' -C myc
+peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"96d9d7922847ef768db438d5cbfe1b09832d935e72133d93628d52dc81298339\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -855,7 +855,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"cbf883362
   "storageAddress": "https://toto/algo/222/algo"
  },
  "certified": true,
- "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+ "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
  "dataset": {
   "keys": [
    "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -863,14 +863,14 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"cbf883362
   ],
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "perf": 0.9,
-  "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+  "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
  },
- "key": "cbf883362e2468ae84576c0c3cc87846be3742189c5247f3b31df1665e62c64a",
+ "key": "96d9d7922847ef768db438d5cbfe1b09832d935e72133d93628d52dc81298339",
  "log": "no error, ah ah ah",
  "model": {
   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
   "storageAddress": "https://substrabac/model/toto",
-  "traintupleKey": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
+  "traintupleKey": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
  },
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -898,8 +898,43 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    "name": "hog + svm",
    "storageAddress": "https://toto/algo/222/algo"
   },
+  "certified": true,
+  "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
+  "dataset": {
+   "keys": [
+    "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+   ],
+   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "perf": 0,
+   "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
+  },
+  "key": "412d55375a3f19c8b11a4345a95a32c915f1346a9b65294ddf87908857ddbeab",
+  "log": "",
+  "model": {
+   "hash": "",
+   "storageAddress": "",
+   "traintupleKey": "05a8b7fa61a4f77f126f569b4ea108db20e35904f704dc233b88962375c46fc0"
+  },
+  "objective": {
+   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "metrics": {
+    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "storageAddress": "https://toto/objective/222/metrics"
+   }
+  },
+  "permissions": "all",
+  "status": "waiting",
+  "tag": ""
+ },
+ {
+  "algo": {
+   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "name": "hog + svm",
+   "storageAddress": "https://toto/algo/222/algo"
+  },
   "certified": false,
-  "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+  "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
   "dataset": {
    "keys": [
     "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -907,14 +942,14 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    ],
    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0,
-   "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+   "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
   },
-  "key": "6d91b423308881fb0eb027c3621d882f3be5554875a1c1ba7a285b30b853fcc3",
+  "key": "e24b10100ae235aa0955ae42016d4dde3c48d1e955d0f9672e6e692d5f5e6c6e",
   "log": "",
   "model": {
    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
    "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
+   "traintupleKey": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
   },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -934,7 +969,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    "storageAddress": "https://toto/algo/222/algo"
   },
   "certified": true,
-  "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+  "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
   "dataset": {
    "keys": [
     "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -942,14 +977,14 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    ],
    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0.9,
-   "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+   "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
   },
-  "key": "cbf883362e2468ae84576c0c3cc87846be3742189c5247f3b31df1665e62c64a",
+  "key": "96d9d7922847ef768db438d5cbfe1b09832d935e72133d93628d52dc81298339",
   "log": "no error, ah ah ah",
   "model": {
    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
    "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
+   "traintupleKey": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
   },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -960,41 +995,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   },
   "permissions": "all",
   "status": "done",
-  "tag": ""
- },
- {
-  "algo": {
-   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-   "name": "hog + svm",
-   "storageAddress": "https://toto/algo/222/algo"
-  },
-  "certified": true,
-  "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
-  "dataset": {
-   "keys": [
-    "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-   ],
-   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-   "perf": 0,
-   "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
-  },
-  "key": "77d3134db7ab4ae5557e4f76d8849b669d38036d6daa8336cf0bda3655135d6f",
-  "log": "",
-  "model": {
-   "hash": "",
-   "storageAddress": "",
-   "traintupleKey": "a4f668de15b8dbf22fb3ca2847740423b7ce3df0fd0831ea614e19e1cedea247"
-  },
-  "objective": {
-   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-   "metrics": {
-    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-    "storageAddress": "https://toto/objective/222/metrics"
-   }
-  },
-  "permissions": "all",
-  "status": "waiting",
   "tag": ""
  }
 ]
@@ -1010,7 +1010,7 @@ Smart contract: `queryModelDetails`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d\"}"]}' -C myc
+peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -1023,7 +1023,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"0ac522
     "storageAddress": "https://toto/algo/222/algo"
    },
    "certified": false,
-   "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+   "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
    "dataset": {
     "keys": [
      "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -1031,14 +1031,14 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"0ac522
     ],
     "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "perf": 0,
-    "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+    "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
    },
-   "key": "6d91b423308881fb0eb027c3621d882f3be5554875a1c1ba7a285b30b853fcc3",
+   "key": "e24b10100ae235aa0955ae42016d4dde3c48d1e955d0f9672e6e692d5f5e6c6e",
    "log": "",
    "model": {
     "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
     "storageAddress": "https://substrabac/model/toto",
-    "traintupleKey": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
+    "traintupleKey": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
    },
    "objective": {
     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1059,7 +1059,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"0ac522
    "storageAddress": "https://toto/algo/222/algo"
   },
   "certified": true,
-  "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+  "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
   "dataset": {
    "keys": [
     "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -1067,14 +1067,14 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"0ac522
    ],
    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0.9,
-   "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+   "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
   },
-  "key": "cbf883362e2468ae84576c0c3cc87846be3742189c5247f3b31df1665e62c64a",
+  "key": "96d9d7922847ef768db438d5cbfe1b09832d935e72133d93628d52dc81298339",
   "log": "no error, ah ah ah",
   "model": {
    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
    "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
+   "traintupleKey": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
   },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1093,7 +1093,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"0ac522
    "name": "hog + svm",
    "storageAddress": "https://toto/algo/222/algo"
   },
-  "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+  "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
   "dataset": {
    "keys": [
     "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -1101,11 +1101,11 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"0ac522
    ],
    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0.9,
-   "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+   "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
   },
   "fltask": "",
   "inModels": null,
-  "key": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d",
+  "key": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6",
   "log": "no error, ah ah ah",
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1141,80 +1141,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     "storageAddress": "https://toto/algo/222/algo"
    },
    "certified": true,
-   "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
-   "dataset": {
-    "keys": [
-     "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-     "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-    ],
-    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "perf": 0.9,
-    "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
-   },
-   "key": "cbf883362e2468ae84576c0c3cc87846be3742189c5247f3b31df1665e62c64a",
-   "log": "no error, ah ah ah",
-   "model": {
-    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-    "storageAddress": "https://substrabac/model/toto",
-    "traintupleKey": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
-   },
-   "objective": {
-    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-    "metrics": {
-     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-     "storageAddress": "https://toto/objective/222/metrics"
-    }
-   },
-   "permissions": "all",
-   "status": "done",
-   "tag": ""
-  },
-  "traintuple": {
-   "algo": {
-    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "name": "hog + svm",
-    "storageAddress": "https://toto/algo/222/algo"
-   },
-   "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
-   "dataset": {
-    "keys": [
-     "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-     "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-    ],
-    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "perf": 0.9,
-    "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
-   },
-   "fltask": "",
-   "inModels": null,
-   "key": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d",
-   "log": "no error, ah ah ah",
-   "objective": {
-    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-    "metrics": {
-     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-     "storageAddress": "https://toto/objective/222/metrics"
-    }
-   },
-   "outModel": {
-    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-    "storageAddress": "https://substrabac/model/toto"
-   },
-   "permissions": "all",
-   "rank": 0,
-   "status": "done",
-   "tag": ""
-  }
- },
- {
-  "testtuple": {
-   "algo": {
-    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "name": "hog + svm",
-    "storageAddress": "https://toto/algo/222/algo"
-   },
-   "certified": true,
-   "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+   "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
    "dataset": {
     "keys": [
      "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -1222,14 +1149,14 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     ],
     "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "perf": 0,
-    "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+    "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
    },
-   "key": "77d3134db7ab4ae5557e4f76d8849b669d38036d6daa8336cf0bda3655135d6f",
+   "key": "412d55375a3f19c8b11a4345a95a32c915f1346a9b65294ddf87908857ddbeab",
    "log": "",
    "model": {
     "hash": "",
     "storageAddress": "",
-    "traintupleKey": "a4f668de15b8dbf22fb3ca2847740423b7ce3df0fd0831ea614e19e1cedea247"
+    "traintupleKey": "05a8b7fa61a4f77f126f569b4ea108db20e35904f704dc233b88962375c46fc0"
    },
    "objective": {
     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1248,7 +1175,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     "name": "hog + svm",
     "storageAddress": "https://toto/algo/222/algo"
    },
-   "creator": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+   "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
    "dataset": {
     "keys": [
      "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -1256,17 +1183,17 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     ],
     "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "perf": 0,
-    "worker": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7"
+    "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
    },
    "fltask": "",
    "inModels": [
     {
      "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
      "storageAddress": "https://substrabac/model/toto",
-     "traintupleKey": "0ac52256948f90b245cc1aa05400b5b8ac0f88aa24796808e3ad692ce088ab7d"
+     "traintupleKey": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
     }
    ],
-   "key": "a4f668de15b8dbf22fb3ca2847740423b7ce3df0fd0831ea614e19e1cedea247",
+   "key": "05a8b7fa61a4f77f126f569b4ea108db20e35904f704dc233b88962375c46fc0",
    "log": "",
    "objective": {
     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1279,6 +1206,79 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    "permissions": "all",
    "rank": 0,
    "status": "todo",
+   "tag": ""
+  }
+ },
+ {
+  "testtuple": {
+   "algo": {
+    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "name": "hog + svm",
+    "storageAddress": "https://toto/algo/222/algo"
+   },
+   "certified": true,
+   "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
+   "dataset": {
+    "keys": [
+     "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+     "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+    ],
+    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "perf": 0.9,
+    "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
+   },
+   "key": "96d9d7922847ef768db438d5cbfe1b09832d935e72133d93628d52dc81298339",
+   "log": "no error, ah ah ah",
+   "model": {
+    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+    "storageAddress": "https://substrabac/model/toto",
+    "traintupleKey": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
+   },
+   "objective": {
+    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "metrics": {
+     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+     "storageAddress": "https://toto/objective/222/metrics"
+    }
+   },
+   "permissions": "all",
+   "status": "done",
+   "tag": ""
+  },
+  "traintuple": {
+   "algo": {
+    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "name": "hog + svm",
+    "storageAddress": "https://toto/algo/222/algo"
+   },
+   "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
+   "dataset": {
+    "keys": [
+     "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+     "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+    ],
+    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "perf": 0.9,
+    "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
+   },
+   "fltask": "",
+   "inModels": null,
+   "key": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6",
+   "log": "no error, ah ah ah",
+   "objective": {
+    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "metrics": {
+     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+     "storageAddress": "https://toto/objective/222/metrics"
+    }
+   },
+   "outModel": {
+    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+    "storageAddress": "https://substrabac/model/toto"
+   },
+   "permissions": "all",
+   "rank": 0,
+   "status": "done",
    "tag": ""
   }
  }
@@ -1311,7 +1311,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"da1bb7c31f6
   "hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "storageAddress": "https://toto/dataManager/42234/opener"
  },
- "owner": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+ "owner": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
  "permissions": "all",
  "testDataSampleKeys": [
   "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -1371,7 +1371,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"38a320b2a67
   "hash": "38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee",
   "storageAddress": "https://toto/dataManager/42234/opener"
  },
- "owner": "27f1a922afa3a31bca70b96231423c50bb6bb8ba13d4acb2aeed793bfc602de7",
+ "owner": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
  "permissions": "all",
  "testDataSampleKeys": [],
  "trainDataSampleKeys": [
@@ -1414,13 +1414,13 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"algoKey\":\"f
 ##### Command output:
 ```json
 {
- "fltask": "eaa352911a728032cfa207975d09bcdacf3b0c5fc6d761291eee1f7b99034fce",
+ "fltask": "60ad8fede3a6139b366008482ab9f29233b09f521d09ac3ad50cfcb55a8fadc9",
  "testtupleKeys": [
-  "1b1fd93ceb4f8e6dade3cb46067dfd213b2846286329108aecc0b744cc31f180"
+  "c5805fea88648f6abcddf5e6862133e4f8efbc67561b1380ece06eeec1623bd4"
  ],
  "traintupleKeys": [
-  "eaa352911a728032cfa207975d09bcdacf3b0c5fc6d761291eee1f7b99034fce",
-  "f1cb7bb3d8f66ba381ce4ff8f3626383a1f5621434077104edf28a2708917331"
+  "60ad8fede3a6139b366008482ab9f29233b09f521d09ac3ad50cfcb55a8fadc9",
+  "e95e6f91581c458e8c742535b86c872405f8c945da796ce91a311d6dd3e05d4c"
  ]
 }
 ```
