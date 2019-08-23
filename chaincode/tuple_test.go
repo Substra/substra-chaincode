@@ -480,8 +480,10 @@ func TestTraintuple(t *testing.T) {
 				StorageAddress: objectiveMetricsStorageAddress,
 			},
 		},
-		Permissions: NewPermissions(OpenPermissions),
-		Status:      StatusTodo,
+		Permissions: outputPermissions{
+			Process: Privilege{IsRestricted: false, AuthorizedNodes: []string{}},
+		},
+		Status: StatusTodo,
 	}
 	assert.Exactly(t, expected, out, "the traintuple queried from the ledger differ from expected")
 

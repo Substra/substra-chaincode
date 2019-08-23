@@ -48,8 +48,10 @@ func TestAlgo(t *testing.T) {
 			Hash:           inpAlgo.DescriptionHash,
 			StorageAddress: inpAlgo.DescriptionStorageAddress,
 		},
-		Owner:       worker,
-		Permissions: NewPermissions(inpAlgo.Permissions),
+		Owner: worker,
+		Permissions: outputPermissions{
+			Process: Privilege{IsRestricted: false, AuthorizedNodes: []string{}},
+		},
 	}
 	assert.Exactly(t, expectedAlgo, algo)
 

@@ -63,7 +63,9 @@ func TestDataManager(t *testing.T) {
 			StorageAddress: inpDataManager.DescriptionStorageAddress,
 			Hash:           inpDataManager.DescriptionHash,
 		},
-		Permissions: NewPermissions(inpDataManager.Permissions),
+		Permissions: outputPermissions{
+			Process: Privilege{IsRestricted: false, AuthorizedNodes: []string{}},
+		},
 		Opener: HashDress{
 			Hash:           dataManagerKey,
 			StorageAddress: inpDataManager.OpenerStorageAddress,

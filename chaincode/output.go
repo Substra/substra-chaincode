@@ -7,13 +7,13 @@ import (
 // Struct use as output representation of ledger data
 
 type outputObjective struct {
-	Key         string         `json:"key"`
-	Name        string         `json:"name"`
-	Description HashDress      `json:"description"`
-	Metrics     *HashDressName `json:"metrics"`
-	Owner       string         `json:"owner"`
-	TestDataset *Dataset       `json:"testDataset"`
-	Permissions Permissions    `json:"permissions"`
+	Key         string            `json:"key"`
+	Name        string            `json:"name"`
+	Description HashDress         `json:"description"`
+	Metrics     *HashDressName    `json:"metrics"`
+	Owner       string            `json:"owner"`
+	TestDataset *Dataset          `json:"testDataset"`
+	Permissions outputPermissions `json:"permissions"`
 }
 
 func (out *outputObjective) Fill(key string, in Objective) {
@@ -24,19 +24,19 @@ func (out *outputObjective) Fill(key string, in Objective) {
 	out.Metrics = in.Metrics
 	out.Owner = in.Owner
 	out.TestDataset = in.TestDataset
-	out.Permissions = in.Permissions
+	out.Permissions.Fill(in.Permissions)
 }
 
 // outputDataManager is the return representation of the DataManager type stored in the ledger
 type outputDataManager struct {
-	ObjectiveKey string      `json:"objectiveKey"`
-	Description  *HashDress  `json:"description"`
-	Key          string      `json:"key"`
-	Name         string      `json:"name"`
-	Opener       HashDress   `json:"opener"`
-	Owner        string      `json:"owner"`
-	Permissions  Permissions `json:"permissions"`
-	Type         string      `json:"type"`
+	ObjectiveKey string            `json:"objectiveKey"`
+	Description  *HashDress        `json:"description"`
+	Key          string            `json:"key"`
+	Name         string            `json:"name"`
+	Opener       HashDress         `json:"opener"`
+	Owner        string            `json:"owner"`
+	Permissions  outputPermissions `json:"permissions"`
+	Type         string            `json:"type"`
 }
 
 func (out *outputDataManager) Fill(key string, in DataManager) {
@@ -47,7 +47,7 @@ func (out *outputDataManager) Fill(key string, in DataManager) {
 	out.Opener.Hash = key
 	out.Opener.StorageAddress = in.OpenerStorageAddress
 	out.Owner = in.Owner
-	out.Permissions = in.Permissions
+	out.Permissions.Fill(in.Permissions)
 	out.Type = in.Type
 }
 
@@ -76,12 +76,12 @@ func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, t
 }
 
 type outputAlgo struct {
-	Key         string      `json:"key"`
-	Name        string      `json:"name"`
-	Content     HashDress   `json:"content"`
-	Description *HashDress  `json:"description"`
-	Owner       string      `json:"owner"`
-	Permissions Permissions `json:"permissions"`
+	Key         string            `json:"key"`
+	Name        string            `json:"name"`
+	Content     HashDress         `json:"content"`
+	Description *HashDress        `json:"description"`
+	Owner       string            `json:"owner"`
+	Permissions outputPermissions `json:"permissions"`
 }
 
 func (out *outputAlgo) Fill(key string, in Algo) {
@@ -91,25 +91,25 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 	out.Content.StorageAddress = in.StorageAddress
 	out.Description = in.Description
 	out.Owner = in.Owner
-	out.Permissions = in.Permissions
+	out.Permissions.Fill(in.Permissions)
 }
 
 // outputTraintuple is the representation of one the element type stored in the
 // ledger. It describes a training task occuring on the platform
 type outputTraintuple struct {
-	Key           string         `json:"key"`
-	Algo          *HashDressName `json:"algo"`
-	Creator       string         `json:"creator"`
-	Dataset       *TtDataset     `json:"dataset"`
-	ComputePlanID string         `json:"computePlanID"`
-	InModels      []*Model       `json:"inModels"`
-	Log           string         `json:"log"`
-	Objective     *TtObjective   `json:"objective"`
-	OutModel      *HashDress     `json:"outModel"`
-	Permissions   Permissions    `json:"permissions"`
-	Rank          int            `json:"rank"`
-	Status        string         `json:"status"`
-	Tag           string         `json:"tag"`
+	Key           string            `json:"key"`
+	Algo          *HashDressName    `json:"algo"`
+	Creator       string            `json:"creator"`
+	Dataset       *TtDataset        `json:"dataset"`
+	ComputePlanID string            `json:"computePlanID"`
+	InModels      []*Model          `json:"inModels"`
+	Log           string            `json:"log"`
+	Objective     *TtObjective      `json:"objective"`
+	OutModel      *HashDress        `json:"outModel"`
+	Permissions   outputPermissions `json:"permissions"`
+	Rank          int               `json:"rank"`
+	Status        string            `json:"status"`
+	Tag           string            `json:"tag"`
 }
 
 //Fill is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
@@ -117,7 +117,7 @@ func (outputTraintuple *outputTraintuple) Fill(db LedgerDB, traintuple Traintupl
 
 	outputTraintuple.Key = traintupleKey
 	outputTraintuple.Creator = traintuple.Creator
-	outputTraintuple.Permissions = traintuple.Permissions
+	outputTraintuple.Permissions.Fill(traintuple.Permissions)
 	outputTraintuple.Log = traintuple.Log
 	outputTraintuple.Status = traintuple.Status
 	outputTraintuple.Rank = traintuple.Rank
@@ -185,17 +185,17 @@ func (outputTraintuple *outputTraintuple) Fill(db LedgerDB, traintuple Traintupl
 }
 
 type outputTesttuple struct {
-	Key         string         `json:"key"`
-	Algo        *HashDressName `json:"algo"`
-	Certified   bool           `json:"certified"`
-	Creator     string         `json:"creator"`
-	Dataset     *TtDataset     `json:"dataset"`
-	Log         string         `json:"log"`
-	Model       *Model         `json:"model"`
-	Objective   *TtObjective   `json:"objective"`
-	Permissions string         `json:"permissions"`
-	Status      string         `json:"status"`
-	Tag         string         `json:"tag"`
+	Key         string            `json:"key"`
+	Algo        *HashDressName    `json:"algo"`
+	Certified   bool              `json:"certified"`
+	Creator     string            `json:"creator"`
+	Dataset     *TtDataset        `json:"dataset"`
+	Log         string            `json:"log"`
+	Model       *Model            `json:"model"`
+	Objective   *TtObjective      `json:"objective"`
+	Permissions outputPermissions `json:"permissions"`
+	Status      string            `json:"status"`
+	Tag         string            `json:"tag"`
 }
 
 func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
@@ -205,7 +205,7 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 	out.Dataset = in.Dataset
 	out.Log = in.Log
 	out.Model = in.Model
-	out.Permissions = in.Permissions
+	out.Permissions.Fill(in.Permissions)
 	out.Status = in.Status
 	out.Tag = in.Tag
 
@@ -317,4 +317,12 @@ func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string
 	out.Permissions = in.Permissions
 	out.Tag = in.Tag
 	return nil
+}
+
+type outputPermissions struct {
+	Process Privilege `validate:"required" json:"process"`
+}
+
+func (out *outputPermissions) Fill(in Permissions) {
+	out.Process = in.Process
 }
