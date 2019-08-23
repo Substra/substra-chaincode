@@ -49,7 +49,7 @@ func TestAlgo(t *testing.T) {
 			StorageAddress: inpAlgo.DescriptionStorageAddress,
 		},
 		Owner:       worker,
-		Permissions: inpAlgo.Permissions,
+		Permissions: NewPermissions(inpAlgo.Permissions),
 	}
 	assert.Exactly(t, expectedAlgo, algo)
 

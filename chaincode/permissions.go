@@ -1,9 +1,5 @@
 package main
 
-import (
-	"fmt"
-)
-
 // Action is the the type of an action
 type Action string
 
@@ -48,17 +44,14 @@ func (perms Permissions) CanProcess(owner, node string) bool {
 	return false
 }
 
-// Set the Permissions Privilege according to the arg received
-func (perms *Permissions) Set(in inputPermissions) error {
+// NewPermissions the Permissions Privilege according to the arg received
+func NewPermissions(in inputPermissions) Permissions {
+	perms := Permissions{}
 	process := newPrivilege(in.Process)
-	// Download privilege is not implemented in the node server, so it is set to the process privilege
-	download := process
-	if !process.include(download) {
-		return fmt.Errorf("process privilege is more restrictive than dowload ones")
-	}
-	perms.Download = download
 	perms.Process = process
-	return nil
+	// Download privilege is not implemented in the node server, so it is set to the process privilege
+	perms.Download = process
+	return perms
 }
 
 func newPrivilege(in inputPrivilege) Privilege {

@@ -13,7 +13,7 @@ type outputObjective struct {
 	Metrics     *HashDressName `json:"metrics"`
 	Owner       string         `json:"owner"`
 	TestDataset *Dataset       `json:"testDataset"`
-	Permissions string         `json:"permissions"`
+	Permissions Permissions    `json:"permissions"`
 }
 
 func (out *outputObjective) Fill(key string, in Objective) {
@@ -29,14 +29,14 @@ func (out *outputObjective) Fill(key string, in Objective) {
 
 // outputDataManager is the return representation of the DataManager type stored in the ledger
 type outputDataManager struct {
-	ObjectiveKey string     `json:"objectiveKey"`
-	Description  *HashDress `json:"description"`
-	Key          string     `json:"key"`
-	Name         string     `json:"name"`
-	Opener       HashDress  `json:"opener"`
-	Owner        string     `json:"owner"`
-	Permissions  string     `json:"permissions"`
-	Type         string     `json:"type"`
+	ObjectiveKey string      `json:"objectiveKey"`
+	Description  *HashDress  `json:"description"`
+	Key          string      `json:"key"`
+	Name         string      `json:"name"`
+	Opener       HashDress   `json:"opener"`
+	Owner        string      `json:"owner"`
+	Permissions  Permissions `json:"permissions"`
+	Type         string      `json:"type"`
 }
 
 func (out *outputDataManager) Fill(key string, in DataManager) {
@@ -76,12 +76,12 @@ func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, t
 }
 
 type outputAlgo struct {
-	Key         string     `json:"key"`
-	Name        string     `json:"name"`
-	Content     HashDress  `json:"content"`
-	Description *HashDress `json:"description"`
-	Owner       string     `json:"owner"`
-	Permissions string     `json:"permissions"`
+	Key         string      `json:"key"`
+	Name        string      `json:"name"`
+	Content     HashDress   `json:"content"`
+	Description *HashDress  `json:"description"`
+	Owner       string      `json:"owner"`
+	Permissions Permissions `json:"permissions"`
 }
 
 func (out *outputAlgo) Fill(key string, in Algo) {
@@ -106,7 +106,7 @@ type outputTraintuple struct {
 	Log           string         `json:"log"`
 	Objective     *TtObjective   `json:"objective"`
 	OutModel      *HashDress     `json:"outModel"`
-	Permissions   string         `json:"permissions"`
+	Permissions   Permissions    `json:"permissions"`
 	Rank          int            `json:"rank"`
 	Status        string         `json:"status"`
 	Tag           string         `json:"tag"`

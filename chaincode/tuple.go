@@ -43,17 +43,23 @@ func (traintuple *Traintuple) SetFromInput(db LedgerDB, inp inputTraintuple) err
 	}
 	traintuple.AssetType = TraintupleType
 	traintuple.Creator = creator
-	traintuple.Permissions = "all"
 	traintuple.Tag = inp.Tag
-	// check if algo exists
-	if _, err = db.GetAlgo(inp.AlgoKey); err != nil {
+	algo, err := db.GetAlgo(inp.AlgoKey)
+	if err != nil {
 		return errors.BadRequest(err, "could not retrieve algo with key %s", inp.AlgoKey)
+	}
+	if !algo.Permissions.CanProcess(algo.Owner, creator) {
+		return errors.Forbidden("not authorized to process this algo %s", inp.AlgoKey)
 	}
 	traintuple.AlgoKey = inp.AlgoKey
 
 	// check objective exists
-	if _, err = db.GetObjective(inp.ObjectiveKey); err != nil {
+	objective, err := db.GetObjective(inp.ObjectiveKey)
+	if err != nil {
 		return errors.BadRequest(err, "could not retrieve objective with key %s", inp.ObjectiveKey)
+	}
+	if !objective.Permissions.CanProcess(objective.Owner, creator) {
+		return errors.Forbidden("not authorized to process this objective %s", inp.ObjectiveKey)
 	}
 	traintuple.ObjectiveKey = inp.ObjectiveKey
 
@@ -65,9 +71,16 @@ func (traintuple *Traintuple) SetFromInput(db LedgerDB, inp inputTraintuple) err
 	if !trainOnly {
 		return errors.BadRequest("not possible to create a traintuple with test only data")
 	}
-	if _, err = db.GetDataManager(inp.DataManagerKey); err != nil {
+
+	dataManager, err := db.GetDataManager(inp.DataManagerKey)
+	if err != nil {
 		return errors.BadRequest(err, "could not retrieve dataManager with key %s", inp.DataManagerKey)
 	}
+	if !dataManager.Permissions.CanProcess(dataManager.Owner, creator) {
+		return errors.Forbidden("not authorized to process this dataManager %s", inp.DataManagerKey)
+	}
+
+	traintuple.Permissions = MergePermissions(dataManager.Permissions, algo.Permissions)
 
 	// fill traintuple.Dataset from dataManager and dataSample
 	traintuple.Dataset = &Dataset{

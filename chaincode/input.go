@@ -7,24 +7,14 @@ package main
 
 // inputObjective is the representation of input args to register a Objective
 type inputObjective struct {
-	Name                      string       `validate:"required,gte=1,lte=100" json:"name"`
-	DescriptionHash           string       `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
-	DescriptionStorageAddress string       `validate:"required,url" json:"descriptionStorageAddress"`
-	MetricsName               string       `validate:"required,gte=1,lte=100" json:"metricsName"`
-	MetricsHash               string       `validate:"required,len=64,hexadecimal" json:"metricsHash"`
-	MetricsStorageAddress     string       `validate:"required,url" json:"metricsStorageAddress"`
-	TestDataset               inputDataset `validate:"omitempty" json:"testDataset"`
-	Permissions               string       `validate:"required,oneof=all" json:"permissions"`
-	// Permissions               inputPermissions `validate:"required" json:"permissions"`
-}
-
-type inputPrivilege struct {
-	IsRestricted    bool     `validate:"required" json:"isRestricted"`
-	AuthorizedNodes []string `validate:"required,dive,len=64,hexadecimal" json:"authorizedNodes"`
-}
-
-type inputPermissions struct {
-	Process inputPrivilege `validate:"required" json:process`
+	Name                      string           `validate:"required,gte=1,lte=100" json:"name"`
+	DescriptionHash           string           `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
+	DescriptionStorageAddress string           `validate:"required,url" json:"descriptionStorageAddress"`
+	MetricsName               string           `validate:"required,gte=1,lte=100" json:"metricsName"`
+	MetricsHash               string           `validate:"required,len=64,hexadecimal" json:"metricsHash"`
+	MetricsStorageAddress     string           `validate:"required,url" json:"metricsStorageAddress"`
+	TestDataset               inputDataset     `validate:"omitempty" json:"testDataset"`
+	Permissions               inputPermissions `validate:"required" json:"permissions"`
 }
 
 // inputDataset is the representation in input args to register a dataset
@@ -35,24 +25,24 @@ type inputDataset struct {
 
 // inputAlgo is the representation of input args to register an Algo
 type inputAlgo struct {
-	Name                      string `validate:"required,gte=1,lte=100" json:"name"`
-	Hash                      string `validate:"required,len=64,hexadecimal" json:"hash"`
-	StorageAddress            string `validate:"required,url" json:"storageAddress"`
-	DescriptionHash           string `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
-	DescriptionStorageAddress string `validate:"required,url" json:"descriptionStorageAddress"`
-	Permissions               string `validate:"required,oneof=all" json:"permissions"`
+	Name                      string           `validate:"required,gte=1,lte=100" json:"name"`
+	Hash                      string           `validate:"required,len=64,hexadecimal" json:"hash"`
+	StorageAddress            string           `validate:"required,url" json:"storageAddress"`
+	DescriptionHash           string           `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
+	DescriptionStorageAddress string           `validate:"required,url" json:"descriptionStorageAddress"`
+	Permissions               inputPermissions `validate:"required" json:"permissions"`
 }
 
 // inputDataManager is the representation of input args to register a DataManager
 type inputDataManager struct {
-	Name                      string `validate:"required,gte=1,lte=100" json:"name"`
-	OpenerHash                string `validate:"required,len=64,hexadecimal" json:"openerHash"`
-	OpenerStorageAddress      string `validate:"required,url" json:"openerStorageAddress"`
-	Type                      string `validate:"required,gte=1,lte=30" json:"type"`
-	DescriptionHash           string `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
-	DescriptionStorageAddress string `validate:"required,url" json:"descriptionStorageAddress"`
-	ObjectiveKey              string `validate:"omitempty" json:"objectiveKey"` //`validate:"required"`
-	Permissions               string `validate:"required,oneof=all" json:"permissions"`
+	Name                      string           `validate:"required,gte=1,lte=100" json:"name"`
+	OpenerHash                string           `validate:"required,len=64,hexadecimal" json:"openerHash"`
+	OpenerStorageAddress      string           `validate:"required,url" json:"openerStorageAddress"`
+	Type                      string           `validate:"required,gte=1,lte=30" json:"type"`
+	DescriptionHash           string           `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
+	DescriptionStorageAddress string           `validate:"required,url" json:"descriptionStorageAddress"`
+	ObjectiveKey              string           `validate:"omitempty" json:"objectiveKey"` //`validate:"required"`
+	Permissions               inputPermissions `validate:"required" json:"permissions"`
 }
 
 // inputUpdateDataManager is the representation of input args to update a dataManager with a objective
@@ -157,6 +147,15 @@ type inputComputePlanTesttuple struct {
 }
 
 type inputLeaderboard struct {
-	ObjectiveKey  string `validate:"omitempty,len=64,hexadecimal" json:"objectiveKey"`
+	ObjectiveKey   string `validate:"omitempty,len=64,hexadecimal" json:"objectiveKey"`
 	AscendingOrder bool   `json:"ascendingOrder,required"`
+}
+
+type inputPermissions struct {
+	Process inputPrivilege `validate:"required" json:"process"`
+}
+
+type inputPrivilege struct {
+	IsRestricted    bool     `json:"isRestricted,required"`
+	AuthorizedNodes []string `validate:"required,dive,len=64,hexadecimal" json:"authorizedNodes"`
 }

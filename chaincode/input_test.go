@@ -28,6 +28,12 @@ var (
 			},
 		},
 	}
+	OpenPermissions = inputPermissions{
+		Process: inputPrivilege{
+			IsRestricted:    false,
+			AuthorizedNodes: []string{},
+		},
+	}
 )
 
 func (dataManager *inputDataManager) createDefault() [][]byte {
@@ -49,7 +55,7 @@ func (dataManager *inputDataManager) createDefault() [][]byte {
 	if dataManager.DescriptionStorageAddress == "" {
 		dataManager.DescriptionStorageAddress = "https://toto/dataManager/42234/description"
 	}
-	dataManager.Permissions = "all"
+	dataManager.Permissions = OpenPermissions
 	args := append([][]byte{[]byte("registerDataManager")}, assetToJSON(dataManager))
 
 	return args
@@ -93,7 +99,7 @@ func (objective *inputObjective) createDefault() [][]byte {
 	if objective.TestDataset.DataSampleKeys == nil || len(objective.TestDataset.DataSampleKeys) == 0 {
 		objective.TestDataset.DataSampleKeys = []string{testDataSampleHash1, testDataSampleHash2}
 	}
-	objective.Permissions = "all"
+	objective.Permissions = OpenPermissions
 	args := append([][]byte{[]byte("registerObjective")}, assetToJSON(objective))
 	return args
 }
@@ -114,7 +120,7 @@ func (algo *inputAlgo) createDefault() [][]byte {
 	if algo.DescriptionStorageAddress == "" {
 		algo.DescriptionStorageAddress = "https://toto/algo/222/description"
 	}
-	algo.Permissions = "all"
+	algo.Permissions = OpenPermissions
 	args := append([][]byte{[]byte("registerAlgo")}, assetToJSON(algo))
 	return args
 }

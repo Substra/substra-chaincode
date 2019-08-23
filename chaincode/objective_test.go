@@ -142,7 +142,7 @@ func TestObjective(t *testing.T) {
 			StorageAddress: inpObjective.DescriptionStorageAddress,
 			Hash:           objectiveKey,
 		},
-		Permissions: inpObjective.Permissions,
+		Permissions: NewPermissions(inpObjective.Permissions),
 		Metrics: &HashDressName{
 			Hash:           inpObjective.MetricsHash,
 			Name:           inpObjective.MetricsName,
