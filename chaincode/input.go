@@ -15,6 +15,16 @@ type inputObjective struct {
 	MetricsStorageAddress     string       `validate:"required,url" json:"metricsStorageAddress"`
 	TestDataset               inputDataset `validate:"omitempty" json:"testDataset"`
 	Permissions               string       `validate:"required,oneof=all" json:"permissions"`
+	// Permissions               inputPermissions `validate:"required" json:"permissions"`
+}
+
+type inputPrivilege struct {
+	IsRestricted    bool     `validate:"required" json:"isRestricted"`
+	AuthorizedNodes []string `validate:"required,dive,len=64,hexadecimal" json:"authorizedNodes"`
+}
+
+type inputPermissions struct {
+	Process inputPrivilege `validate:"required" json:process`
 }
 
 // inputDataset is the representation in input args to register a dataset
