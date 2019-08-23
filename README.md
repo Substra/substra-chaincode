@@ -64,7 +64,7 @@ Smart contract: `registerDataManager`
  "objectiveKey": string (omitempty),
  "permissions": (required){
     "process": (required){
-       "isRestricted,required": bool (),
+       "isRestricted": bool (required),
        "authorizedNodes": [string] (required,dive,len=64,hexadecimal),
       }
        }
@@ -159,7 +159,7 @@ Smart contract: `registerObjective`
    }
   "permissions": (required){
     "process": (required){
-       "isRestricted,required": bool (),
+       "isRestricted": bool (required),
        "authorizedNodes": [string] (required,dive,len=64,hexadecimal),
       }
        }
@@ -188,7 +188,7 @@ Smart contract: `registerAlgo`
  "descriptionStorageAddress": string (required,url),
  "permissions": (required){
     "process": (required){
-       "isRestricted,required": bool (),
+       "isRestricted": bool (required),
        "authorizedNodes": [string] (required,dive,len=64,hexadecimal),
       }
        }

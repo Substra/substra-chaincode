@@ -103,14 +103,20 @@ func prettyPrintStructElements(buf io.Writer, margin string, strucType reflect.T
 		}
 		fieldType := f.Type.Kind()
 		fieldStr := ""
-		if fieldType == reflect.Slice && f.Type.Elem().Kind() == reflect.Struct {
-			fmt.Fprintf(buf, "%s\"%s\": (%s) [\n%s", margin, f.Tag.Get("json"), f.Tag.Get("validate"), margin+"  ")
-			prettyPrintStruct(buf, margin+"  ", f.Type.Elem())
-			fmt.Fprintf(buf, "%s],\n", margin)
+		switch fieldType {
+		case reflect.Bool:
+			jsonTag := strings.Split(f.Tag.Get("json"), ",")
+			fmt.Fprintf(buf, "%s\"%s\": %s (%s),\n", margin, jsonTag[0], fieldType, jsonTag[1])
 			continue
-		} else if fieldType == reflect.Slice {
+		case reflect.Slice:
+			if f.Type.Elem().Kind() == reflect.Struct {
+				fmt.Fprintf(buf, "%s\"%s\": (%s) [\n%s", margin, f.Tag.Get("json"), f.Tag.Get("validate"), margin+"  ")
+				prettyPrintStruct(buf, margin+"  ", f.Type.Elem())
+				fmt.Fprintf(buf, "%s],\n", margin)
+				continue
+			}
 			fieldStr = fmt.Sprintf("[%s]", f.Type.Elem().Kind())
-		} else {
+		default:
 			fieldStr = fmt.Sprint(fieldType)
 		}
 		fmt.Fprintf(buf, "%s\"%s\": %s (%s),\n", margin, f.Tag.Get("json"), fieldStr, f.Tag.Get("validate"))
