@@ -86,33 +86,32 @@ func printArgs(buf io.Writer, args [][]byte, command string) {
 func prettyPrintStruct(buf io.Writer, margin string, strucType reflect.Type) {
 	fmt.Fprintln(buf, "{")
 	prettyPrintStructElements(buf, margin+" ", strucType)
-	fmt.Fprintf(buf, "%s}\n", margin)
+	fmt.Fprint(buf, "}")
 }
 func prettyPrintStructElements(buf io.Writer, margin string, strucType reflect.Type) {
 	for i := 0; i < strucType.NumField(); i++ {
 		f := strucType.Field(i)
-		if f.Type.Kind() == reflect.Struct {
+		fieldType := f.Type.Kind()
+		fieldStr := ""
+		switch fieldType {
+		case reflect.Struct:
 			if f.Anonymous {
 				prettyPrintStructElements(buf, margin, f.Type)
 			} else {
 				fmt.Fprintf(buf, "%s\"%s\": (%s)", margin, f.Tag.Get("json"), f.Tag.Get("validate"))
-				prettyPrintStruct(buf, margin+"  ", f.Type)
-				fmt.Fprint(buf, margin)
+				prettyPrintStruct(buf, margin+" ", f.Type)
+				fmt.Fprint(buf, ",\n")
 			}
 			continue
-		}
-		fieldType := f.Type.Kind()
-		fieldStr := ""
-		switch fieldType {
 		case reflect.Bool:
 			jsonTag := strings.Split(f.Tag.Get("json"), ",")
 			fmt.Fprintf(buf, "%s\"%s\": %s (%s),\n", margin, jsonTag[0], fieldType, jsonTag[1])
 			continue
 		case reflect.Slice:
 			if f.Type.Elem().Kind() == reflect.Struct {
-				fmt.Fprintf(buf, "%s\"%s\": (%s) [\n%s", margin, f.Tag.Get("json"), f.Tag.Get("validate"), margin+"  ")
-				prettyPrintStruct(buf, margin+"  ", f.Type.Elem())
-				fmt.Fprintf(buf, "%s],\n", margin)
+				fmt.Fprintf(buf, "%s\"%s\": (%s) [", margin, f.Tag.Get("json"), f.Tag.Get("validate"))
+				prettyPrintStruct(buf, margin+" ", f.Type.Elem())
+				fmt.Fprint(buf, "],\n")
 				continue
 			}
 			fieldStr = fmt.Sprintf("[%s]", f.Type.Elem().Kind())
@@ -121,12 +120,16 @@ func prettyPrintStructElements(buf io.Writer, margin string, strucType reflect.T
 		}
 		fmt.Fprintf(buf, "%s\"%s\": %s (%s),\n", margin, f.Tag.Get("json"), fieldStr, f.Tag.Get("validate"))
 	}
+	l := len(margin) - 2
+	if l > 0 {
+		fmt.Fprint(buf, margin[:l])
+	}
 }
 
 func printInputStuct(buf io.Writer, fnName string, inputType reflect.Type) {
 	fmt.Fprintf(buf, "Smart contract: `%s`\n\n##### JSON Inputs:\n```go\n", fnName) // ", fnName)
 	prettyPrintStruct(buf, "", inputType)
-	fmt.Fprint(buf, "```\n")
+	fmt.Fprint(buf, "\n```\n")
 }
 
 func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Response, interface{}) {

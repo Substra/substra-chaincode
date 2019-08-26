@@ -63,12 +63,12 @@ Smart contract: `registerDataManager`
  "descriptionStorageAddress": string (required,url),
  "objectiveKey": string (omitempty),
  "permissions": (required){
-    "process": (required){
-       "public": bool (required),
-       "authorizedIDs": [string] (required,dive,len=64,hexadecimal),
-      }
-       }
- }
+   "process": (required){
+     "public": bool (required),
+     "authorizedIDs": [string] (required,dive,len=64,hexadecimal),
+   },
+ },
+}
 ```
 ##### Command peer example:
 ```bash
@@ -154,16 +154,16 @@ Smart contract: `registerObjective`
  "metricsHash": string (required,len=64,hexadecimal),
  "metricsStorageAddress": string (required,url),
  "testDataset": (omitempty){
-    "dataManagerKey": string (omitempty,len=64,hexadecimal),
-    "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
-   }
-  "permissions": (required){
-    "process": (required){
-       "public": bool (required),
-       "authorizedIDs": [string] (required,dive,len=64,hexadecimal),
-      }
-       }
- }
+   "dataManagerKey": string (omitempty,len=64,hexadecimal),
+   "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
+ },
+ "permissions": (required){
+   "process": (required){
+     "public": bool (required),
+     "authorizedIDs": [string] (required,dive,len=64,hexadecimal),
+   },
+ },
+}
 ```
 ##### Command peer example:
 ```bash
@@ -187,12 +187,12 @@ Smart contract: `registerAlgo`
  "descriptionHash": string (required,len=64,hexadecimal),
  "descriptionStorageAddress": string (required,url),
  "permissions": (required){
-    "process": (required){
-       "public": bool (required),
-       "authorizedIDs": [string] (required,dive,len=64,hexadecimal),
-      }
-       }
- }
+   "process": (required){
+     "public": bool (required),
+     "authorizedIDs": [string] (required,dive,len=64,hexadecimal),
+   },
+ },
+}
 ```
 ##### Command peer example:
 ```bash
@@ -513,10 +513,10 @@ Smart contract: `logSuccessTrain`
  "key": string (required,len=64,hexadecimal),
  "log": string (required,lte=200),
  "outModel": (required){
-    "hash": string (required,len=64,hexadecimal),
-    "storageAddress": string (required),
-   }
-  "perf": float32 (omitempty),
+   "hash": string (required,len=64,hexadecimal),
+   "storageAddress": string (required),
+ },
+ "perf": float32 (omitempty),
 }
 ```
 ##### Command peer example:
@@ -1523,23 +1523,19 @@ Smart contract: `createComputePlan`
 {
  "algoKey": string (required,len=64,hexadecimal),
  "objectiveKey": string (required,len=64,hexadecimal),
- "traintuples": (required,gt=0) [
-   {
-    "dataManagerKey": string (required,len=64,hexadecimal),
-    "dataSampleKeys": [string] (required,dive,len=64,hexadecimal),
-    "id": string (required,lte=64),
-    "inModelsIDs": [string] (omitempty,dive,lte=64),
-    "tag": string (omitempty,lte=64),
-   }
- ],
- "testtuples": (omitempty) [
-   {
-    "dataManagerKey": string (omitempty,len=64,hexadecimal),
-    "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
-    "tag": string (omitempty,lte=64),
-    "traintupleID": string (required,lte=64),
-   }
- ],
+ "traintuples": (required,gt=0) [{
+   "dataManagerKey": string (required,len=64,hexadecimal),
+   "dataSampleKeys": [string] (required,dive,len=64,hexadecimal),
+   "id": string (required,lte=64),
+   "inModelsIDs": [string] (omitempty,dive,lte=64),
+   "tag": string (omitempty,lte=64),
+ }],
+ "testtuples": (omitempty) [{
+   "dataManagerKey": string (omitempty,len=64,hexadecimal),
+   "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
+   "tag": string (omitempty,lte=64),
+   "traintupleID": string (required,lte=64),
+ }],
 }
 ```
 ##### Command peer example:
