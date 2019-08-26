@@ -481,7 +481,7 @@ func TestTraintuple(t *testing.T) {
 			},
 		},
 		Permissions: outputPermissions{
-			Process: Privilege{IsRestricted: false, AuthorizedNodes: []string{}},
+			Process: Privilege{Public: true, AuthorizedIDs: []string{}},
 		},
 		Status: StatusTodo,
 	}

@@ -30,8 +30,8 @@ var (
 	}
 	OpenPermissions = inputPermissions{
 		Process: inputPrivilege{
-			IsRestricted:    false,
-			AuthorizedNodes: []string{},
+			Public:        true,
+			AuthorizedIDs: []string{},
 		},
 	}
 )

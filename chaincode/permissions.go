@@ -11,11 +11,11 @@ const (
 
 // Privilege represents one permission based on an action type
 type Privilege struct {
-	// IsRestricted is true if this permission is given to the asset's owner only and
-	// the nodes listed in AuthorizedNodes (open to all nodes if false)
-	IsRestricted bool `json:"isRestricted"`
-	// AuthorizedNodes list all authorised nodes other than the asset's owner
-	AuthorizedNodes []string `json:"authorizedNodes"`
+	// Public is true if this permission is given to the asset's owner only and
+	// the nodes listed in AuthorizedIDs (open to all nodes if false)
+	Public bool `json:"public"`
+	// AuthorizedIDs list all authorised nodes other than the asset's owner
+	AuthorizedIDs []string `json:"authorizedIDs"`
 }
 
 // Permissions represents all privileges associated with an asset
@@ -32,11 +32,11 @@ func (perms Permissions) CanProcess(owner, node string) bool {
 		return true
 	}
 
-	if !perms.Process.IsRestricted {
+	if perms.Process.Public {
 		return true
 	}
 
-	for _, authorizedNode := range perms.Process.AuthorizedNodes {
+	for _, authorizedNode := range perms.Process.AuthorizedIDs {
 		if node == authorizedNode {
 			return true
 		}
@@ -56,20 +56,20 @@ func NewPermissions(in inputPermissions) Permissions {
 
 func newPrivilege(in inputPrivilege) Privilege {
 	return Privilege{
-		IsRestricted:    in.IsRestricted,
-		AuthorizedNodes: in.AuthorizedNodes,
+		Public:        in.Public,
+		AuthorizedIDs: in.AuthorizedIDs,
 	}
 }
 
 func (priv Privilege) include(other Privilege) bool {
-	if !priv.IsRestricted {
+	if priv.Public {
 		return true
 	}
-	if !other.IsRestricted {
+	if other.Public {
 		return false
 	}
-	for _, node := range other.AuthorizedNodes {
-		if !stringInSlice(node, priv.AuthorizedNodes) {
+	for _, node := range other.AuthorizedIDs {
+		if !stringInSlice(node, priv.AuthorizedIDs) {
 			return false
 		}
 	}
@@ -86,22 +86,22 @@ func MergePermissions(x, y Permissions) Permissions {
 
 func mergePrivileges(x, y Privilege) Privilege {
 	priv := Privilege{}
-	priv.IsRestricted = x.IsRestricted || y.IsRestricted
+	priv.Public = x.Public && y.Public
 
-	if x.IsRestricted && !y.IsRestricted {
-		priv.AuthorizedNodes = x.AuthorizedNodes
-	} else if !x.IsRestricted && y.IsRestricted {
-		priv.AuthorizedNodes = y.AuthorizedNodes
+	if !x.Public && y.Public {
+		priv.AuthorizedIDs = x.AuthorizedIDs
+	} else if x.Public && !y.Public {
+		priv.AuthorizedIDs = y.AuthorizedIDs
 	} else {
-		priv.AuthorizedNodes = x.getNodesIntersection(y)
+		priv.AuthorizedIDs = x.getNodesIntersection(y)
 	}
 	return priv
 }
 
 func (priv Privilege) getNodesIntersection(p Privilege) []string {
 	nodes := []string{}
-	for _, i := range priv.AuthorizedNodes {
-		for _, j := range p.AuthorizedNodes {
+	for _, i := range priv.AuthorizedIDs {
+		for _, j := range p.AuthorizedIDs {
 			if i == j {
 				nodes = append(nodes, i)
 				break

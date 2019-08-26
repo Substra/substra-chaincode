@@ -156,6 +156,6 @@ type inputPermissions struct {
 }
 
 type inputPrivilege struct {
-	IsRestricted    bool     `json:"isRestricted,required"`
-	AuthorizedNodes []string `validate:"required,dive,len=64,hexadecimal" json:"authorizedNodes"`
+	Public        bool     `json:"public,required"`
+	AuthorizedIDs []string `validate:"required,dive,len=64,hexadecimal" json:"authorizedIDs"`
 }
