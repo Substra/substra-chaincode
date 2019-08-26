@@ -316,14 +316,14 @@ Smart contract: `createTraintuple`
  "inModels": [string] (omitempty,dive,len=64,hexadecimal),
  "dataManagerKey": string (required,len=64,hexadecimal),
  "dataSampleKeys": [string] (required,gt=1,dive,len=64,hexadecimal),
- "flTask": string (omitempty),
+ "computePlanID": string (omitempty),
  "rank": string (omitempty),
  "tag": string (omitempty,lte=64),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":[],\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"flTask\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":[],\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"computePlanID\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -342,14 +342,14 @@ Smart contract: `createTraintuple`
  "inModels": [string] (omitempty,dive,len=64,hexadecimal),
  "dataManagerKey": string (required,len=64,hexadecimal),
  "dataSampleKeys": [string] (required,gt=1,dive,len=64,hexadecimal),
- "flTask": string (omitempty),
+ "computePlanID": string (omitempty),
  "rank": string (omitempty),
  "tag": string (omitempty,lte=64),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":[\"4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6\"],\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"flTask\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":[\"4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6\"],\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"computePlanID\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -386,6 +386,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"train
    "name": "hog + svm",
    "storageAddress": "https://toto/algo/222/algo"
   },
+  "computePlanID": "",
   "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
   "dataset": {
    "keys": [
@@ -396,7 +397,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"train
    "perf": 0,
    "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
   },
-  "fltask": "",
   "inModels": null,
   "key": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6",
   "log": "",
@@ -436,6 +436,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"4ef2002b7
   "name": "hog + svm",
   "storageAddress": "https://toto/algo/222/algo"
  },
+ "computePlanID": "",
  "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
  "dataset": {
   "keys": [
@@ -446,7 +447,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"4ef2002b7
   "perf": 0,
   "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
  },
- "fltask": "",
  "inModels": null,
  "key": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6",
  "log": "",
@@ -491,6 +491,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"4ef2002
   "name": "hog + svm",
   "storageAddress": "https://toto/algo/222/algo"
  },
+ "computePlanID": "",
  "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
  "dataset": {
   "keys": [
@@ -501,7 +502,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"4ef2002
   "perf": 0.9,
   "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
  },
- "fltask": "",
  "inModels": null,
  "key": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6",
  "log": "no error, ah ah ah",
@@ -543,6 +543,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"4ef2002
   "name": "hog + svm",
   "storageAddress": "https://toto/algo/222/algo"
  },
+ "computePlanID": "",
  "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
  "dataset": {
   "keys": [
@@ -553,7 +554,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"4ef2002
   "perf": 0.9,
   "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
  },
- "fltask": "",
  "inModels": null,
  "key": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6",
  "log": "no error, ah ah ah",
@@ -1093,6 +1093,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"4ef200
    "name": "hog + svm",
    "storageAddress": "https://toto/algo/222/algo"
   },
+  "computePlanID": "",
   "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
   "dataset": {
    "keys": [
@@ -1103,7 +1104,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"4ef200
    "perf": 0.9,
    "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
   },
-  "fltask": "",
   "inModels": null,
   "key": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6",
   "log": "no error, ah ah ah",
@@ -1175,6 +1175,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     "name": "hog + svm",
     "storageAddress": "https://toto/algo/222/algo"
    },
+   "computePlanID": "",
    "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
    "dataset": {
     "keys": [
@@ -1185,7 +1186,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     "perf": 0,
     "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
    },
-   "fltask": "",
    "inModels": [
     {
      "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
@@ -1251,6 +1251,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     "name": "hog + svm",
     "storageAddress": "https://toto/algo/222/algo"
    },
+   "computePlanID": "",
    "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
    "dataset": {
     "keys": [
@@ -1261,7 +1262,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     "perf": 0.9,
     "worker": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776"
    },
-   "fltask": "",
    "inModels": null,
    "key": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6",
    "log": "no error, ah ah ah",
@@ -1414,7 +1414,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"algoKey\":\"f
 ##### Command output:
 ```json
 {
- "fltask": "60ad8fede3a6139b366008482ab9f29233b09f521d09ac3ad50cfcb55a8fadc9",
+ "computePlanID": "60ad8fede3a6139b366008482ab9f29233b09f521d09ac3ad50cfcb55a8fadc9",
  "testtupleKeys": [
   "c5805fea88648f6abcddf5e6862133e4f8efbc67561b1380ece06eeec1623bd4"
  ],

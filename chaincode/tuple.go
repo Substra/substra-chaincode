@@ -109,17 +109,17 @@ func (traintuple *Traintuple) GetKey() string {
 
 }
 
-// AddToFLTask set the traintuple's parameters that determines if it's part of on FLTask and how.
+// AddToComputePlan set the traintuple's parameters that determines if it's part of on ComputePlan and how.
 // It uses the inputTraintuple values as follow:
-//  - If neither FLTask nor rank is set it returns immediately
-//  - If rank is 0 and FLTask empty, it's start a new one using this traintuple key
-//  - If rank and FLTask are set, it checks if there are coherent with previous ones and set it.
-func (traintuple *Traintuple) AddToFLTask(db LedgerDB, inp inputTraintuple, traintupleKey string) error {
-	// check FLTask and Rank and set it when required
+//  - If neither ComputePlanID nor rank is set it returns immediately
+//  - If rank is 0 and ComputePlanID empty, it's start a new one using this traintuple key
+//  - If rank and ComputePlanID are set, it checks if there are coherent with previous ones and set it.
+func (traintuple *Traintuple) AddToComputePlan(db LedgerDB, inp inputTraintuple, traintupleKey string) error {
+	// check ComputePlanID and Rank and set it when required
 	var err error
 	if inp.Rank == "" {
-		if inp.FLTask != "" {
-			return errors.BadRequest("invalid inputs, a FLTask should have a rank")
+		if inp.ComputePlanID != "" {
+			return errors.BadRequest("invalid inputs, a ComputePlan should have a rank")
 		}
 		return nil
 	}
@@ -127,21 +127,21 @@ func (traintuple *Traintuple) AddToFLTask(db LedgerDB, inp inputTraintuple, trai
 	if err != nil {
 		return err
 	}
-	if inp.FLTask == "" {
+	if inp.ComputePlanID == "" {
 		if traintuple.Rank != 0 {
-			err = errors.BadRequest("invalid inputs, a new FLTask should have a rank 0")
+			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
 			return err
 		}
-		traintuple.FLTask = traintupleKey
+		traintuple.ComputePlanID = traintupleKey
 		return nil
 	}
 	var ttKeys []string
-	ttKeys, err = db.GetIndexKeys("traintuple~fltask~worker~rank~key", []string{"traintuple", inp.FLTask})
+	ttKeys, err = db.GetIndexKeys("traintuple~computeplanid~worker~rank~key", []string{"traintuple", inp.ComputePlanID})
 	if err != nil {
 		return err
 	}
 	if len(ttKeys) == 0 {
-		return errors.BadRequest("cannot find the FLTask %s", inp.FLTask)
+		return errors.BadRequest("cannot find the ComputePlanID %s", inp.ComputePlanID)
 	}
 	for _, ttKey := range ttKeys {
 		FLTraintuple, err := db.GetTraintuple(ttKey)
@@ -149,19 +149,19 @@ func (traintuple *Traintuple) AddToFLTask(db LedgerDB, inp inputTraintuple, trai
 			return err
 		}
 		if FLTraintuple.AlgoKey != inp.AlgoKey {
-			return errors.BadRequest("previous traintuple for FLTask %s does not have the same algo key %s", inp.FLTask, inp.AlgoKey)
+			return errors.BadRequest("previous traintuple for ComputePlanID %s does not have the same algo key %s", inp.ComputePlanID, inp.AlgoKey)
 		}
 	}
 
-	ttKeys, err = db.GetIndexKeys("traintuple~fltask~worker~rank~key", []string{"traintuple", inp.FLTask, traintuple.Dataset.Worker, inp.Rank})
+	ttKeys, err = db.GetIndexKeys("traintuple~computeplanid~worker~rank~key", []string{"traintuple", inp.ComputePlanID, traintuple.Dataset.Worker, inp.Rank})
 	if err != nil {
 		return err
 	} else if len(ttKeys) > 0 {
-		err = errors.BadRequest("FLTask %s with worker %s rank %d already exists", inp.FLTask, traintuple.Dataset.Worker, traintuple.Rank)
+		err = errors.BadRequest("ComputePlanID %s with worker %s rank %d already exists", inp.ComputePlanID, traintuple.Dataset.Worker, traintuple.Rank)
 		return err
 	}
 
-	traintuple.FLTask = inp.FLTask
+	traintuple.ComputePlanID = inp.ComputePlanID
 
 	return nil
 }
@@ -187,8 +187,8 @@ func (traintuple *Traintuple) Save(db LedgerDB, traintupleKey string) error {
 			return err
 		}
 	}
-	if traintuple.FLTask != "" {
-		if err := db.CreateIndex("traintuple~fltask~worker~rank~key", []string{"traintuple", traintuple.FLTask, traintuple.Dataset.Worker, strconv.Itoa(traintuple.Rank), traintupleKey}); err != nil {
+	if traintuple.ComputePlanID != "" {
+		if err := db.CreateIndex("traintuple~computeplanid~worker~rank~key", []string{"traintuple", traintuple.ComputePlanID, traintuple.Dataset.Worker, strconv.Itoa(traintuple.Rank), traintupleKey}); err != nil {
 			return err
 		}
 	}
@@ -394,12 +394,12 @@ func createComputePlan(db LedgerDB, args []string) (resp outputComputePlan, err 
 
 		traintupleKey := traintuple.GetKey()
 
-		// Set the Fltask
+		// Set the ComputePlanID
 		if i == 0 {
-			traintuple.FLTask = traintupleKey
-			resp.FLTask = traintuple.FLTask
+			traintuple.ComputePlanID = traintupleKey
+			resp.ComputePlanID = traintuple.ComputePlanID
 		} else {
-			traintuple.FLTask = resp.FLTask
+			traintuple.ComputePlanID = resp.ComputePlanID
 		}
 
 		// Set status: if it has parents it's waiting
@@ -480,7 +480,7 @@ func createTraintuple(db LedgerDB, args []string) (map[string]string, error) {
 		return nil, err
 	}
 	traintupleKey := traintuple.GetKey()
-	err = traintuple.AddToFLTask(db, inp, traintupleKey)
+	err = traintuple.AddToComputePlan(db, inp, traintupleKey)
 	if err != nil {
 		return nil, err
 	}
