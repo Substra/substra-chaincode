@@ -25,7 +25,7 @@ func (dataManager *DataManager) Set(db LedgerDB, inp inputDataManager) (string, 
 		return "", "", err
 	}
 	dataManager.Owner = owner
-	dataManager.Permissions = NewPermissions(inp.Permissions)
+	dataManager.Permissions = NewPermissions(inp.Permissions, owner)
 	return dataManagerKey, dataManager.ObjectiveKey, nil
 }
 

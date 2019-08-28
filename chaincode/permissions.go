@@ -45,16 +45,21 @@ func (perms Permissions) CanProcess(owner, node string) bool {
 }
 
 // NewPermissions the Permissions Privilege according to the arg received
-func NewPermissions(in inputPermissions) Permissions {
+func NewPermissions(in inputPermissions, owner string) Permissions {
 	perms := Permissions{}
-	process := newPrivilege(in.Process)
+	process := newPrivilege(in.Process, owner)
 	perms.Process = process
 	// Download privilege is not implemented in the node server, so it is set to the process privilege
 	perms.Download = process
 	return perms
 }
 
-func newPrivilege(in inputPrivilege) Privilege {
+func newPrivilege(in inputPrivilege, owner string) Privilege {
+	// Owner must always be defined in the list of authorizedIDs if the privilege is private,
+	// it will ease the merge of private privileges
+	if !in.Public && !stringInSlice(owner, in.AuthorizedIDs) {
+		in.AuthorizedIDs = append([]string{owner}, in.AuthorizedIDs...)
+	}
 	return Privilege{
 		Public:        in.Public,
 		AuthorizedIDs: in.AuthorizedIDs,
