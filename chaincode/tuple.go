@@ -334,6 +334,9 @@ func (testtuple *Testtuple) Save(db LedgerDB, testtupleKey string) error {
 	}
 
 	// create composite keys
+	if err = db.CreateIndex("testtuple~objective~certified~key", []string{"testtuple", testtuple.ObjectiveKey, strconv.FormatBool(testtuple.Certified), testtupleKey}); err != nil {
+		return err
+	}
 	if err = db.CreateIndex("testtuple~algo~key", []string{"testtuple", testtuple.AlgoKey, testtupleKey}); err != nil {
 		return err
 	}

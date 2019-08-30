@@ -145,3 +145,8 @@ type inputComputePlanTesttuple struct {
 	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
 	TraintupleID   string   `validate:"required,lte=64" json:"traintupleID"`
 }
+
+type inputLeaderboard struct {
+	ObjectiveKey  string `validate:"omitempty,len=64,hexadecimal" json:"objectiveKey"`
+	AscendingSort bool   `json:"ascendingSort,required"`
+}

@@ -116,6 +116,42 @@ func queryObjectives(db LedgerDB, args []string) (outObjectives []outputObjectiv
 	return
 }
 
+// getObjectiveLeaderboard return all testtuples for a objective order by perf
+// It can be an ascending sort or not depending on the ascendingSort value.
+func getObjectiveLeaderboard(db LedgerDB, args []string) (outputLeaderboard, error) {
+	inp := inputLeaderboard{}
+	err := AssetFromJSON(args, &inp)
+	if err != nil {
+		return outputLeaderboard{}, err
+	}
+
+	objective, err := db.GetObjective(inp.ObjectiveKey)
+	if err != nil {
+		return outputLeaderboard{}, err
+	}
+	outObjective := outputObjective{}
+	outObjective.Fill(inp.ObjectiveKey, objective)
+	out := outputLeaderboard{Objective: outObjective, Testtuples: []outputBoardTuple{}}
+
+	testtupleKeys, err := db.GetIndexKeys("testtuple~objective~certified~key", []string{"testtuple", inp.ObjectiveKey, "true"})
+	for _, testtupleKey := range testtupleKeys {
+		var boardTuple outputBoardTuple
+		testtuple, err := db.GetTesttuple(testtupleKey)
+		if err != nil {
+			return outputLeaderboard{}, err
+		}
+		if testtuple.Status != StatusDone {
+			continue
+		}
+		err = boardTuple.Fill(db, testtuple, testtupleKey)
+		if err != nil {
+			return outputLeaderboard{}, err
+		}
+		out.Testtuples = append(out.Testtuples, boardTuple)
+	}
+	return out, nil
+}
+
 // -------------------------------------------------------------------------------------------
 // Utils for objectivess
 // -------------------------------------------------------------------------------------------

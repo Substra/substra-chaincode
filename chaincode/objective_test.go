@@ -7,6 +7,41 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestLeaderBoard(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStub("substra", scc)
+	db := NewLedgerDB(mockStub)
+	registerItem(t, *mockStub, "")
+	mockStub.MockTransactionStart("42")
+
+	// Add a certified testtuple
+	inputTest := inputTesttuple{
+		TraintupleKey: traintupleKey,
+	}
+	keyMap, err := createTesttuple(db, assetToArgs(inputTest))
+	assert.NoError(t, err)
+
+	inpLeaderboard := inputLeaderboard{
+		ObjectiveKey:  objectiveDescriptionHash,
+		AscendingSort: true,
+	}
+	// leaderboard should be empty since there is no testtuple done
+	leaderboard, err := getObjectiveLeaderboard(db, assetToArgs(inpLeaderboard))
+	assert.NoError(t, err)
+	assert.Len(t, leaderboard.Testtuples, 0)
+
+	// Update testtuple status directly
+	testtuple, err := db.GetTesttuple(keyMap["key"])
+	assert.NoError(t, err)
+	testtuple.Status = StatusDone
+	testtuple.Dataset.Perf = 0.9
+	err = db.Put(keyMap["key"], testtuple)
+	assert.NoError(t, err)
+
+	leaderboard, err = getObjectiveLeaderboard(db, assetToArgs(inpLeaderboard))
+	assert.NoError(t, err)
+	assert.Len(t, leaderboard.Testtuples, 1)
+}
 func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStub("substra", scc)
