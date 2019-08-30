@@ -152,10 +152,10 @@ type inputLeaderboard struct {
 }
 
 type inputPermissions struct {
-	Process inputPrivilege `validate:"required" json:"process"`
+	Process inputPermission `validate:"required" json:"process"`
 }
 
-type inputPrivilege struct {
+type inputPermission struct {
 	Public        bool     `json:"public,required"`
 	AuthorizedIDs []string `validate:"required,dive,len=64,hexadecimal" json:"authorizedIDs"`
 }

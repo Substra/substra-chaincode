@@ -50,7 +50,7 @@ func TestAlgo(t *testing.T) {
 		},
 		Owner: worker,
 		Permissions: outputPermissions{
-			Process: Privilege{Public: true, AuthorizedIDs: []string{}},
+			Process: Permission{Public: true},
 		},
 	}
 	assert.Exactly(t, expectedAlgo, algo)

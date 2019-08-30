@@ -143,7 +143,7 @@ func TestObjective(t *testing.T) {
 			Hash:           objectiveKey,
 		},
 		Permissions: outputPermissions{
-			Process: Privilege{Public: true, AuthorizedIDs: []string{}},
+			Process: Permission{Public: true},
 		},
 		Metrics: &HashDressName{
 			Hash:           inpObjective.MetricsHash,

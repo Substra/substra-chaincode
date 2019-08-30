@@ -320,9 +320,12 @@ func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string
 }
 
 type outputPermissions struct {
-	Process Privilege `validate:"required" json:"process"`
+	Process Permission `validate:"required" json:"process"`
 }
 
 func (out *outputPermissions) Fill(in Permissions) {
-	out.Process = in.Process
+	out.Process.Public = in.Process.Public
+	if !in.Process.Public {
+		out.Process.AuthorizedIDs = []string{}
+	}
 }

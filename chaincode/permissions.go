@@ -9,8 +9,8 @@ const (
 	Download Action = "download"
 )
 
-// Privilege represents one permission based on an action type
-type Privilege struct {
+// Permission represents one permission based on an action type
+type Permission struct {
 	// Public is true if this permission is given to the asset's owner only and
 	// the nodes listed in AuthorizedIDs (open to all nodes if false)
 	Public bool `json:"public"`
@@ -18,12 +18,12 @@ type Privilege struct {
 	AuthorizedIDs []string `json:"authorizedIDs"`
 }
 
-// Permissions represents all privileges associated with an asset
+// Permissions represents all permissions associated with an asset
 type Permissions struct {
 	// Download define if a given node can allow its nodes to download the asset
-	Download Privilege `json:"download"`
+	Download Permission `json:"download"`
 	// Process define if a given node can process the sset
-	Process Privilege `json:"process"`
+	Process Permission `json:"process"`
 }
 
 // CanProcess checks if a node can process the asset with the current permissions
@@ -44,29 +44,29 @@ func (perms Permissions) CanProcess(owner, node string) bool {
 	return false
 }
 
-// NewPermissions the Permissions Privilege according to the arg received
+// NewPermissions create the Permissions according to the arg received
 func NewPermissions(in inputPermissions, owner string) Permissions {
 	perms := Permissions{}
-	process := newPrivilege(in.Process, owner)
+	process := newPermission(in.Process, owner)
 	perms.Process = process
-	// Download privilege is not implemented in the node server, so it is set to the process privilege
+	// Download permission is not implemented in the node server, so it is set to the process permission
 	perms.Download = process
 	return perms
 }
 
-func newPrivilege(in inputPrivilege, owner string) Privilege {
-	// Owner must always be defined in the list of authorizedIDs if the privilege is private,
-	// it will ease the merge of private privileges
-	if !in.Public && !stringInSlice(owner, in.AuthorizedIDs) {
+func newPermission(in inputPermission, owner string) Permission {
+	// Owner must always be defined in the list of authorizedIDs, if the permission is private,
+	// it will ease the merge of private permissions
+	if !stringInSlice(owner, in.AuthorizedIDs) {
 		in.AuthorizedIDs = append([]string{owner}, in.AuthorizedIDs...)
 	}
-	return Privilege{
+	return Permission{
 		Public:        in.Public,
 		AuthorizedIDs: in.AuthorizedIDs,
 	}
 }
 
-func (priv Privilege) include(other Privilege) bool {
+func (priv Permission) include(other Permission) bool {
 	if priv.Public {
 		return true
 	}
@@ -84,13 +84,13 @@ func (priv Privilege) include(other Privilege) bool {
 // MergePermissions returns the intersection of input permissions
 func MergePermissions(x, y Permissions) Permissions {
 	perm := Permissions{}
-	perm.Process = mergePrivileges(x.Process, y.Process)
-	perm.Download = mergePrivileges(x.Download, y.Download)
+	perm.Process = mergePermissions(x.Process, y.Process)
+	perm.Download = mergePermissions(x.Download, y.Download)
 	return perm
 }
 
-func mergePrivileges(x, y Privilege) Privilege {
-	priv := Privilege{}
+func mergePermissions(x, y Permission) Permission {
+	priv := Permission{}
 	priv.Public = x.Public && y.Public
 
 	if !x.Public && y.Public {
@@ -103,7 +103,7 @@ func mergePrivileges(x, y Privilege) Privilege {
 	return priv
 }
 
-func (priv Privilege) getNodesIntersection(p Privilege) []string {
+func (priv Permission) getNodesIntersection(p Permission) []string {
 	nodes := []string{}
 	for _, i := range priv.AuthorizedIDs {
 		for _, j := range p.AuthorizedIDs {

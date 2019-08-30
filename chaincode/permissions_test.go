@@ -7,12 +7,12 @@ import (
 )
 
 var (
-	defaultPrivilege = Privilege{
+	defaultPermission = Permission{
 		Public:        false,
 		AuthorizedIDs: []string{"foo"},
 	}
 	defaultPermissions = Permissions{
-		Process: defaultPrivilege,
+		Process: defaultPermission,
 	}
 	defaultOwner = "me"
 )
@@ -62,8 +62,8 @@ func TestPrivInclusion(t *testing.T) {
 	}
 	for _, test := range testTable {
 		t.Run(test.name, func(t *testing.T) {
-			privIncluded := Privilege{Public: test.includedOpenbar, AuthorizedIDs: test.includedNodes}
-			privIncluding := Privilege{Public: test.includingOpenbar, AuthorizedIDs: test.includingNodes}
+			privIncluded := Permission{Public: test.includedOpenbar, AuthorizedIDs: test.includedNodes}
+			privIncluding := Permission{Public: test.includingOpenbar, AuthorizedIDs: test.includingNodes}
 			assert.Equal(t, test.doesInclude, privIncluding.include(privIncluded))
 		})
 	}
@@ -85,21 +85,21 @@ func TestMergingMechanism(t *testing.T) {
 	}
 	for _, test := range testTable {
 		t.Run(test.name, func(t *testing.T) {
-			toMerge := Privilege{
+			toMerge := Permission{
 				Public:        test.toMergeINR,
 				AuthorizedIDs: test.toMergeRU,
 			}
-			mergedPriv := mergePrivileges(defaultPrivilege, toMerge)
+			mergedPriv := mergePermissions(defaultPermission, toMerge)
 			assert.Equal(t, test.expectedINR, mergedPriv.Public)
 			assert.ElementsMatch(t, test.expectedRU, mergedPriv.AuthorizedIDs)
-			privMerged := mergePrivileges(toMerge, defaultPrivilege)
+			privMerged := mergePermissions(toMerge, defaultPermission)
 			assert.Equal(t, mergedPriv.Public, privMerged.Public, "merging should be transitif")
 			assert.ElementsMatch(t, mergedPriv.AuthorizedIDs, privMerged.AuthorizedIDs, "merging should be transitif")
 
-			theSamePriv := mergePrivileges(Privilege{Public: true}, toMerge)
-			assert.Equal(t, toMerge.Public, theSamePriv.Public, "a non restrictive privilege should be neutral")
-			assert.ElementsMatch(t, toMerge.AuthorizedIDs, theSamePriv.AuthorizedIDs, "a non restrictive privilege should be neutral")
-			theSamePriv = mergePrivileges(toMerge, Privilege{Public: true})
+			theSamePriv := mergePermissions(Permission{Public: true}, toMerge)
+			assert.Equal(t, toMerge.Public, theSamePriv.Public, "a non restrictive permission should be neutral")
+			assert.ElementsMatch(t, toMerge.AuthorizedIDs, theSamePriv.AuthorizedIDs, "a non restrictive permission should be neutral")
+			theSamePriv = mergePermissions(toMerge, Permission{Public: true})
 			assert.Equal(t, toMerge.Public, theSamePriv.Public, "neutral element should be transitive")
 			assert.ElementsMatch(t, toMerge.AuthorizedIDs, theSamePriv.AuthorizedIDs, "neutral element should be transitive")
 		})

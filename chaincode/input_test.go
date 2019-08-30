@@ -29,7 +29,7 @@ var (
 		},
 	}
 	OpenPermissions = inputPermissions{
-		Process: inputPrivilege{
+		Process: inputPermission{
 			Public:        true,
 			AuthorizedIDs: []string{},
 		},
