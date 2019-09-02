@@ -48,6 +48,8 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = createTesttuple(db, args)
 	case "createTraintuple":
 		result, err = createTraintuple(db, args)
+	case "getObjectiveLeaderboard":
+		result, err = getObjectiveLeaderboard(db, args)
 	case "logFailTest":
 		result, err = logFailTest(db, args)
 	case "logFailTrain":
