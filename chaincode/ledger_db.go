@@ -103,8 +103,8 @@ func (db *LedgerDB) Add(key string, object interface{}) error {
 		return err
 	}
 	if ok {
-		data := map[string]interface{}{"key": key}
-		return errors.Conflict(data, "struct already exists (tkey: %s)", key)
+		// data := map[string]interface{}{"key": key}
+		return errors.Conflict("struct already exists (tkey: %s)", key).WithKey(key)
 	}
 	return db.Put(key, object)
 }

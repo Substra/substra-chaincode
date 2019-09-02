@@ -130,7 +130,7 @@ func formatErrorResponse(err error) peer.Response {
 		// access the status
 		"status": status,
 	}
-	for k, v := range e.Data {
+	for k, v := range e.GetContext() {
 		errStruct[k] = v
 	}
 

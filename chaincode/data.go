@@ -39,8 +39,7 @@ func setDataSample(db LedgerDB, inp inputDataSample) (dataSampleHashes []string,
 	}
 	// check dataSample is not already in the ledger
 	if existingKeys := checkDataSamplesExist(db, dataSampleHashes); existingKeys != nil {
-		data := map[string]interface{}{"keys": existingKeys}
-		err = errors.Conflict(data, "data samples with keys %s already exist", existingKeys)
+		err = errors.Conflict("data samples with keys %s already exist", existingKeys).WithKeys(existingKeys)
 		return
 	}
 
