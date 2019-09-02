@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sort"
 )
 
 // Struct use as output representation of ledger data
@@ -277,13 +276,16 @@ type outputLeaderboard struct {
 	Testtuples []outputBoardTuple
 }
 
-func (out *outputLeaderboard) Sort(ascendingSort bool) {
-	sort.SliceStable(out.Testtuples, func(i, j int) bool {
-		if ascendingSort {
-			return out.Testtuples[i].Perf < out.Testtuples[j].Perf
-		}
-		return out.Testtuples[i].Perf > out.Testtuples[j].Perf
-	})
+func (out outputLeaderboard) Len() int {
+	return len(out.Testtuples)
+}
+
+func (out outputLeaderboard) Swap(i, j int) {
+	out.Testtuples[i], out.Testtuples[j] = out.Testtuples[j], out.Testtuples[i]
+}
+
+func (out outputLeaderboard) Less(i, j int) bool {
+	return out.Testtuples[i].Perf < out.Testtuples[j].Perf
 }
 
 type outputBoardTuple struct {

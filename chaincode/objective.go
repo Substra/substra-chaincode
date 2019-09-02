@@ -3,6 +3,7 @@ package main
 import (
 	"chaincode/errors"
 	"fmt"
+	"sort"
 )
 
 // Set is a method of the receiver Objective. It checks the validity of inputObjective and uses its fields to set the Objective.
@@ -148,6 +149,12 @@ func getObjectiveLeaderboard(db LedgerDB, args []string) (outputLeaderboard, err
 			return outputLeaderboard{}, err
 		}
 		out.Testtuples = append(out.Testtuples, boardTuple)
+	}
+
+	if inp.AscendingSort {
+		sort.Sort(out)
+	} else {
+		sort.Sort(sort.Reverse(out))
 	}
 	return out, nil
 }

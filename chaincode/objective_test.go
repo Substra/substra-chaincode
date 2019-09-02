@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLeaderBoard(t *testing.T) {
@@ -40,7 +41,9 @@ func TestLeaderBoard(t *testing.T) {
 
 	leaderboard, err = getObjectiveLeaderboard(db, assetToArgs(inpLeaderboard))
 	assert.NoError(t, err)
-	assert.Len(t, leaderboard.Testtuples, 1)
+	assert.Equal(t, objectiveDescriptionHash, leaderboard.Objective.Key)
+	require.Len(t, leaderboard.Testtuples, 1)
+	assert.Equal(t, keyMap["key"], leaderboard.Testtuples[0].Key)
 }
 func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
