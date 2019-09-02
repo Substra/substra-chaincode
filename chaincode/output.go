@@ -272,8 +272,8 @@ type outputComputePlan struct {
 }
 
 type outputLeaderboard struct {
-	Objective  outputObjective
-	Testtuples []outputBoardTuple
+	Objective  outputObjective    `json:"objective"`
+	Testtuples []outputBoardTuple `json:"testtuples"`
 }
 
 func (out outputLeaderboard) Len() int {
