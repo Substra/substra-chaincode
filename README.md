@@ -1425,18 +1425,18 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"algoKey\":\"f
 }
 ```
 #### ------------ Querry an ObjectiveLeaderboard ------------
-Smart contract: `getObjectiveLeaderboard`
+Smart contract: `queryObjectiveLeaderboard`
 
 ##### JSON Inputs:
 ```go
 {
  "objectiveKey": string (omitempty,len=64,hexadecimal),
- "ascendingSort,required": bool (),
+ "ascendingOrder,required": bool (),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["getObjectiveLeaderboard","{\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"ascendingSort\":true}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"ascendingOrder\":true}"]}' -C myc
 ```
 ##### Command output:
 ```json

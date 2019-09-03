@@ -24,10 +24,10 @@ func TestLeaderBoard(t *testing.T) {
 
 	inpLeaderboard := inputLeaderboard{
 		ObjectiveKey:  objectiveDescriptionHash,
-		AscendingSort: true,
+		AscendingOrder: true,
 	}
 	// leaderboard should be empty since there is no testtuple done
-	leaderboard, err := getObjectiveLeaderboard(db, assetToArgs(inpLeaderboard))
+	leaderboard, err := queryObjectiveLeaderboard(db, assetToArgs(inpLeaderboard))
 	assert.NoError(t, err)
 	assert.Len(t, leaderboard.Testtuples, 0)
 
@@ -39,7 +39,7 @@ func TestLeaderBoard(t *testing.T) {
 	err = db.Put(keyMap["key"], testtuple)
 	assert.NoError(t, err)
 
-	leaderboard, err = getObjectiveLeaderboard(db, assetToArgs(inpLeaderboard))
+	leaderboard, err = queryObjectiveLeaderboard(db, assetToArgs(inpLeaderboard))
 	assert.NoError(t, err)
 	assert.Equal(t, objectiveDescriptionHash, leaderboard.Objective.Key)
 	require.Len(t, leaderboard.Testtuples, 1)

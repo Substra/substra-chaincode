@@ -148,5 +148,5 @@ type inputComputePlanTesttuple struct {
 
 type inputLeaderboard struct {
 	ObjectiveKey  string `validate:"omitempty,len=64,hexadecimal" json:"objectiveKey"`
-	AscendingSort bool   `json:"ascendingSort,required"`
+	AscendingOrder bool   `json:"ascendingOrder,required"`
 }

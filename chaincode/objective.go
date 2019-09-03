@@ -117,9 +117,9 @@ func queryObjectives(db LedgerDB, args []string) (outObjectives []outputObjectiv
 	return
 }
 
-// getObjectiveLeaderboard return all testtuples for a objective order by perf
-// It can be an ascending sort or not depending on the ascendingSort value.
-func getObjectiveLeaderboard(db LedgerDB, args []string) (outputLeaderboard, error) {
+// getObjectiveLeaderboard returns for an objective, all its certified testtuples with a done status, ordered by their perf
+// It can be an ascending sort or not depending on the ascendingOrder value.
+func queryObjectiveLeaderboard(db LedgerDB, args []string) (outputLeaderboard, error) {
 	inp := inputLeaderboard{}
 	err := AssetFromJSON(args, &inp)
 	if err != nil {
@@ -135,6 +135,10 @@ func getObjectiveLeaderboard(db LedgerDB, args []string) (outputLeaderboard, err
 	out := outputLeaderboard{Objective: outObjective, Testtuples: []outputBoardTuple{}}
 
 	testtupleKeys, err := db.GetIndexKeys("testtuple~objective~certified~key", []string{"testtuple", inp.ObjectiveKey, "true"})
+	if err != nil {
+		return outputLeaderboard{}, err
+	}
+
 	for _, testtupleKey := range testtupleKeys {
 		var boardTuple outputBoardTuple
 		testtuple, err := db.GetTesttuple(testtupleKey)
@@ -151,7 +155,7 @@ func getObjectiveLeaderboard(db LedgerDB, args []string) (outputLeaderboard, err
 		out.Testtuples = append(out.Testtuples, boardTuple)
 	}
 
-	if inp.AscendingSort {
+	if inp.AscendingOrder {
 		sort.Sort(out)
 	} else {
 		sort.Sort(sort.Reverse(out))

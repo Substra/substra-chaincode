@@ -403,9 +403,9 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintln(&out, "#### ------------ Querry an ObjectiveLeaderboard ------------")
 	inpLeaderboard := inputLeaderboard{
 		ObjectiveKey:  objectiveDescriptionHash,
-		AscendingSort: true,
+		AscendingOrder: true,
 	}
-	callAssertAndPrint("invoke", "getObjectiveLeaderboard", inpLeaderboard)
+	callAssertAndPrint("invoke", "queryObjectiveLeaderboard", inpLeaderboard)
 
 	// Use the output to check the README file and if asked update it
 	doc := out.String()
