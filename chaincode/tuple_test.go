@@ -174,8 +174,10 @@ func TestTagTuple(t *testing.T) {
 
 	args = [][]byte{[]byte("queryTraintuples")}
 	resp = mockStub.MockInvoke("42", args)
+
 	traintuples := []outputTraintuple{}
 	err := json.Unmarshal(resp.Payload, &traintuples)
+
 	assert.NoError(t, err, "should be unmarshaled")
 	assert.Len(t, traintuples, 1, "there should be one traintuple")
 	assert.EqualValues(t, tag, traintuples[0].Tag)

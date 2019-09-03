@@ -2,11 +2,7 @@ package main
 
 import (
 	"chaincode/errors"
-	"crypto/sha256"
-	"crypto/x509"
-	"encoding/hex"
 	"encoding/json"
-	"encoding/pem"
 	"fmt"
 	"reflect"
 
@@ -106,21 +102,5 @@ func GetTxCreator(stub shim.ChaincodeStubInterface) (string, error) {
 		return "", err
 	}
 
-	block, _ := pem.Decode(sID.IdBytes)
-	if block == nil {
-		return "", fmt.Errorf("unable to decode block %s", sID.IdBytes)
-	}
-
-	cert, err := x509.ParseCertificate(block.Bytes)
-	if err != nil {
-		return "", err
-	}
-
-	publicKey, err := x509.MarshalPKIXPublicKey(cert.PublicKey)
-	if err != nil {
-		return "", err
-	}
-
-	hashedPublicKey := sha256.Sum256(publicKey)
-	return hex.EncodeToString(hashedPublicKey[:]), nil
+	return sID.GetMspid(), nil
 }
