@@ -47,15 +47,19 @@ func E(args ...interface{}) Error {
 		switch arg := arg.(type) {
 		case Kind:
 			e.Kind = arg
-		case error:
-			if argError, ok := arg.(Error); ok {
-				e.context = argError.context
+		case Error:
+			e.context = arg.context
+			if e.Err == nil {
+				e.Err = arg.Err
+			} else {
+				e.Err = fmt.Errorf("%s %s", arg.Error(), e.Error())
 			}
+		case error:
 			if e.Err == nil {
 				e.Err = arg
-				continue
+			} else {
+				e.Err = fmt.Errorf("%s %s", arg.Error(), e.Error())
 			}
-			e.Err = fmt.Errorf("%s %s", arg.Error(), e.Error())
 		case string:
 			parameters := args[i+1:]
 			msg := fmt.Sprintf(arg, parameters...)
