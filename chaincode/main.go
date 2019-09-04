@@ -122,10 +122,9 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 func formatErrorResponse(err error) peer.Response {
 	e := errors.Wrap(err)
 	status := e.HTTPStatusCode()
-	message := e.Error()
 
 	errStruct := map[string]interface{}{
-		"error": message,
+		"error": e.Error(),
 		// Serialize status in the message until fabric-sdk-py allows subtrabac to
 		// access the status
 		"status": status,
@@ -136,7 +135,7 @@ func formatErrorResponse(err error) peer.Response {
 
 	payload, _ := json.Marshal(errStruct)
 	return peer.Response{
-		Message: string(message),
+		Message: string(payload),
 		Payload: payload,
 		Status:  int32(status),
 	}
