@@ -400,9 +400,9 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintln(&out, "#### ------------ Create a ComputePlan ------------")
 	callAssertAndPrint("invoke", "createComputePlan", defaultComputePlan)
 
-	fmt.Fprintln(&out, "#### ------------ Querry an ObjectiveLeaderboard ------------")
+	fmt.Fprintln(&out, "#### ------------ Query an ObjectiveLeaderboard ------------")
 	inpLeaderboard := inputLeaderboard{
-		ObjectiveKey:  objectiveDescriptionHash,
+		ObjectiveKey:   objectiveDescriptionHash,
 		AscendingOrder: true,
 	}
 	callAssertAndPrint("invoke", "queryObjectiveLeaderboard", inpLeaderboard)
