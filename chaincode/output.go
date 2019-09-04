@@ -272,20 +272,22 @@ type outputComputePlan struct {
 }
 
 type outputLeaderboard struct {
-	Objective  outputObjective    `json:"objective"`
-	Testtuples []outputBoardTuple `json:"testtuples"`
+	Objective  outputObjective   `json:"objective"`
+	Testtuples outputBoardTuples `json:"testtuples"`
 }
 
-func (out outputLeaderboard) Len() int {
-	return len(out.Testtuples)
+type outputBoardTuples []outputBoardTuple
+
+func (out outputBoardTuples) Len() int {
+	return len(out)
 }
 
-func (out outputLeaderboard) Swap(i, j int) {
-	out.Testtuples[i], out.Testtuples[j] = out.Testtuples[j], out.Testtuples[i]
+func (out outputBoardTuples) Swap(i, j int) {
+	out[i], out[j] = out[j], out[i]
 }
 
-func (out outputLeaderboard) Less(i, j int) bool {
-	return out.Testtuples[i].Perf < out.Testtuples[j].Perf
+func (out outputBoardTuples) Less(i, j int) bool {
+	return out[i].Perf < out[j].Perf
 }
 
 type outputBoardTuple struct {

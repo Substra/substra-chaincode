@@ -156,9 +156,9 @@ func queryObjectiveLeaderboard(db LedgerDB, args []string) (outputLeaderboard, e
 	}
 
 	if inp.AscendingOrder {
-		sort.Sort(out)
+		sort.Sort(out.Testtuples)
 	} else {
-		sort.Sort(sort.Reverse(out))
+		sort.Sort(sort.Reverse(out.Testtuples))
 	}
 	return out, nil
 }
