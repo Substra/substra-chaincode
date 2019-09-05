@@ -2,11 +2,18 @@ package main
 
 import (
 	"chaincode/errors"
+	"crypto/ecdsa"
+	"crypto/rsa"
+
+	"crypto/x509"
+
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/pem"
 	"fmt"
+	"github.com/golang/protobuf/proto"
+	"github.com/hyperledger/fabric/protos/msp"
 	"reflect"
-	"strings"
 
 	"encoding/json"
 
@@ -81,19 +88,40 @@ func getTxCreator(stub shim.ChaincodeStubInterface) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	// get pem certificate only. This might be slightly dirty, but this is to avoid installing external packages
-	// change it once github.com/hyperledger/fabric/core/chaincode/lib/cid is in fabric chaincode docker
-	cert_prefix := "-----BEGIN CERTIFICATE-----"
-	cert_suffix := "-----END CERTIFICATE-----\n"
-	var creator string
-	if sCreator := strings.Split(string(bCreator), cert_prefix); len(sCreator) > 1 {
-		creator = strings.Split(sCreator[1], cert_suffix)[0]
-	} else {
-		creator = "test"
+
+	// get pertain protobuf object
+	sID := &msp.SerializedIdentity{}
+	err = proto.Unmarshal(bCreator, sID)
+	if err != nil {
+		return "", err
 	}
-	creator = cert_prefix + creator + cert_suffix
-	tt := sha256.Sum256([]byte(creator))
-	return hex.EncodeToString(tt[:]), nil
+
+	// get the cert
+	block, _ := pem.Decode(sID.IdBytes)
+	if block == nil {
+		return "", fmt.Errorf("unable to decode block %s", sID.IdBytes)
+	}
+
+	// load it as a pem cert
+	var cert *x509.Certificate
+	cert, _ = x509.ParseCertificate(block.Bytes)
+
+	creator := "test"
+	switch pub := cert.PublicKey.(type) {
+	case *rsa.PublicKey:
+		rsaPublicKey := cert.PublicKey.(*rsa.PublicKey)
+		modulus := rsaPublicKey.N
+		hashedModulus := sha256.Sum256(modulus.Bytes())
+		creator = hex.EncodeToString(hashedModulus[:])
+	case *ecdsa.PublicKey:
+		point := fmt.Sprintf("%v:%v", pub.X, pub.Y)
+		hashedPoint := sha256.Sum256([]byte(point))
+		creator = hex.EncodeToString(hashedPoint[:])
+	default:
+		return "", fmt.Errorf("can't determine public key algorithm")
+	}
+
+	return creator, nil
 }
 
 // bytesToStruct converts bytes to one a the struct corresponding to elements stored in the ledger
