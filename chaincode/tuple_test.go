@@ -273,7 +273,8 @@ func TestTraintupleComputePlanCreation(t *testing.T) {
 	errorPayload := map[string]interface{}{}
 	err = json.Unmarshal(resp.Payload, &errorPayload)
 	assert.NoError(t, err, "should unmarshal without problem")
-	require.EqualValues(t, traintupleKey, errorPayload["key"], "key should be available in payload")
+	require.Contains(t, errorPayload, "key", "key should be available in payload")
+	assert.EqualValues(t, traintupleKey, errorPayload["key"], "key in error should be traintupleKey")
 }
 
 func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {

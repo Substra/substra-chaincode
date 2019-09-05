@@ -32,8 +32,6 @@ func (e Error) Error() string {
 // The possible arg type are:
 //	errors.Kind
 //		The class of error, such as a key conflict
-//  map[string]interface{}
-//      Additional data that will be added to the error payload
 //	error
 //		The underlying error
 //	string
