@@ -1424,7 +1424,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"algoKey\":\"f
  ]
 }
 ```
-#### ------------ Querry an ObjectiveLeaderboard ------------
+#### ------------ Query an ObjectiveLeaderboard ------------
 Smart contract: `queryObjectiveLeaderboard`
 
 ##### JSON Inputs:
@@ -1453,7 +1453,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
    "storageAddress": "https://toto/objective/222/metrics"
   },
   "name": "MSI classification",
-  "owner": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
+  "owner": "SampleOrg",
   "permissions": "all",
   "testDataset": {
    "dataManagerKey": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -1471,12 +1471,12 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
     "name": "hog + svm",
     "storageAddress": "https://toto/algo/222/algo"
    },
-   "creator": "ec722969cb64200ab6638f68ac538e40abab5b19a6485661042a1061c4612776",
-   "key": "96d9d7922847ef768db438d5cbfe1b09832d935e72133d93628d52dc81298339",
+   "creator": "SampleOrg",
+   "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
    "model": {
     "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
     "storageAddress": "https://substrabac/model/toto",
-    "traintupleKey": "4ef2002b70fdeb9d91679a98eb74a74edb7db852cd064209807f79d5dfd22cd6"
+    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
    },
    "perf": 0.9,
    "permissions": "all",
