@@ -3,6 +3,7 @@ package main
 import (
 	"chaincode/errors"
 	"fmt"
+	"sort"
 )
 
 // Set is a method of the receiver Objective. It checks the validity of inputObjective and uses its fields to set the Objective.
@@ -114,6 +115,52 @@ func queryObjectives(db LedgerDB, args []string) (outObjectives []outputObjectiv
 		outObjectives = append(outObjectives, out)
 	}
 	return
+}
+
+// getObjectiveLeaderboard returns for an objective, all its certified testtuples with a done status, ordered by their perf
+// It can be an ascending sort or not depending on the ascendingOrder value.
+func queryObjectiveLeaderboard(db LedgerDB, args []string) (outputLeaderboard, error) {
+	inp := inputLeaderboard{}
+	err := AssetFromJSON(args, &inp)
+	if err != nil {
+		return outputLeaderboard{}, err
+	}
+
+	objective, err := db.GetObjective(inp.ObjectiveKey)
+	if err != nil {
+		return outputLeaderboard{}, err
+	}
+	outObjective := outputObjective{}
+	outObjective.Fill(inp.ObjectiveKey, objective)
+	out := outputLeaderboard{Objective: outObjective, Testtuples: []outputBoardTuple{}}
+
+	testtupleKeys, err := db.GetIndexKeys("testtuple~objective~certified~key", []string{"testtuple", inp.ObjectiveKey, "true"})
+	if err != nil {
+		return outputLeaderboard{}, err
+	}
+
+	for _, testtupleKey := range testtupleKeys {
+		var boardTuple outputBoardTuple
+		testtuple, err := db.GetTesttuple(testtupleKey)
+		if err != nil {
+			return outputLeaderboard{}, err
+		}
+		if testtuple.Status != StatusDone {
+			continue
+		}
+		err = boardTuple.Fill(db, testtuple, testtupleKey)
+		if err != nil {
+			return outputLeaderboard{}, err
+		}
+		out.Testtuples = append(out.Testtuples, boardTuple)
+	}
+
+	if inp.AscendingOrder {
+		sort.Sort(out.Testtuples)
+	} else {
+		sort.Sort(sort.Reverse(out.Testtuples))
+	}
+	return out, nil
 }
 
 // -------------------------------------------------------------------------------------------

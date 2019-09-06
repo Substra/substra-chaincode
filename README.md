@@ -1424,3 +1424,64 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"algoKey\":\"f
  ]
 }
 ```
+#### ------------ Query an ObjectiveLeaderboard ------------
+Smart contract: `queryObjectiveLeaderboard`
+
+##### JSON Inputs:
+```go
+{
+ "objectiveKey": string (omitempty,len=64,hexadecimal),
+ "ascendingOrder,required": bool (),
+}
+```
+##### Command peer example:
+```bash
+peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"ascendingOrder\":true}"]}' -C myc
+```
+##### Command output:
+```json
+{
+ "objective": {
+  "description": {
+   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "storageAddress": "https://toto/objective/222/description"
+  },
+  "key": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+  "metrics": {
+   "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "name": "accuracy",
+   "storageAddress": "https://toto/objective/222/metrics"
+  },
+  "name": "MSI classification",
+  "owner": "SampleOrg",
+  "permissions": "all",
+  "testDataset": {
+   "dataManagerKey": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "dataSampleKeys": [
+    "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+   ],
+   "worker": ""
+  }
+ },
+ "testtuples": [
+  {
+   "algo": {
+    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "name": "hog + svm",
+    "storageAddress": "https://toto/algo/222/algo"
+   },
+   "creator": "SampleOrg",
+   "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
+   "model": {
+    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+    "storageAddress": "https://substrabac/model/toto",
+    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+   },
+   "perf": 0.9,
+   "permissions": "all",
+   "tag": ""
+  }
+ ]
+}
+```

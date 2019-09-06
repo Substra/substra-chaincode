@@ -270,3 +270,51 @@ type outputComputePlan struct {
 	TraintupleKeys []string `json:"traintupleKeys"`
 	TesttupleKeys  []string `json:"testtupleKeys"`
 }
+
+type outputLeaderboard struct {
+	Objective  outputObjective   `json:"objective"`
+	Testtuples outputBoardTuples `json:"testtuples"`
+}
+
+type outputBoardTuples []outputBoardTuple
+
+func (out outputBoardTuples) Len() int {
+	return len(out)
+}
+
+func (out outputBoardTuples) Swap(i, j int) {
+	out[i], out[j] = out[j], out[i]
+}
+
+func (out outputBoardTuples) Less(i, j int) bool {
+	return out[i].Perf < out[j].Perf
+}
+
+type outputBoardTuple struct {
+	Algo        *HashDressName `json:"algo"`
+	Creator     string         `json:"creator"`
+	Key         string         `json:"key"`
+	Model       *Model         `json:"model"`
+	Perf        float32        `json:"perf"`
+	Permissions string         `json:"permissions"`
+	Tag         string         `json:"tag"`
+}
+
+func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string) error {
+	out.Key = testtupleKey
+	out.Creator = in.Creator
+	algo, err := db.GetAlgo(in.AlgoKey)
+	if err != nil {
+		return err
+	}
+	out.Algo = &HashDressName{
+		Name:           algo.Name,
+		Hash:           in.AlgoKey,
+		StorageAddress: algo.StorageAddress,
+	}
+	out.Model = in.Model
+	out.Perf = in.Dataset.Perf
+	out.Permissions = in.Permissions
+	out.Tag = in.Tag
+	return nil
+}

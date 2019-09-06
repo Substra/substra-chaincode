@@ -80,6 +80,8 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = queryModels(db, args)
 	case "queryObjective":
 		result, err = queryObjective(db, args)
+	case "queryObjectiveLeaderboard":
+		result, err = queryObjectiveLeaderboard(db, args)
 	case "queryObjectives":
 		result, err = queryObjectives(db, args)
 	case "queryTesttuple":

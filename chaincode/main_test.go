@@ -400,6 +400,13 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintln(&out, "#### ------------ Create a ComputePlan ------------")
 	callAssertAndPrint("invoke", "createComputePlan", defaultComputePlan)
 
+	fmt.Fprintln(&out, "#### ------------ Query an ObjectiveLeaderboard ------------")
+	inpLeaderboard := inputLeaderboard{
+		ObjectiveKey:   objectiveDescriptionHash,
+		AscendingOrder: true,
+	}
+	callAssertAndPrint("invoke", "queryObjectiveLeaderboard", inpLeaderboard)
+
 	// Use the output to check the README file and if asked update it
 	doc := out.String()
 	fromFile, err := ioutil.ReadFile(*readme)

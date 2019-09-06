@@ -110,10 +110,10 @@ func TestGetTestDatasetKeys(t *testing.T) {
 	args = inpDataSample.createDefault()
 	mockStub.MockInvoke("42", args)
 
-	// Querry the DataManager
+	// Query the DataManager
 	args = [][]byte{[]byte("queryDataset"), keyToJSON(inpDataManager.OpenerHash)}
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status, "querrying the dataManager should return an ok status")
+	assert.EqualValues(t, 200, resp.Status, "querying the dataManager should return an ok status")
 	payload := map[string]interface{}{}
 	err := json.Unmarshal(resp.Payload, &payload)
 	assert.NoError(t, err)
