@@ -9,6 +9,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+// State is a in-memory representation of the db state
 type State struct {
 	items map[string]([]byte)
 }

@@ -25,19 +25,19 @@ type Objective struct {
 	Metrics                   *HashDressName `json:"metrics"`
 	Owner                     string         `json:"owner"`
 	TestDataset               *Dataset       `json:"testDataset"`
-	Permissions               string         `json:"permissions"`
+	Permissions               Permissions    `json:"permissions"`
 }
 
 // DataManager is the representation of one of the elements type stored in the ledger
 type DataManager struct {
-	Name                 string     `json:"name"`
-	AssetType            AssetType  `json:"assetType"`
-	OpenerStorageAddress string     `json:"openerStorageAddress"`
-	Type                 string     `json:"type"`
-	Description          *HashDress `json:"description"`
-	Owner                string     `json:"owner"`
-	ObjectiveKey         string     `json:"objectiveKey"`
-	Permissions          string     `json:"permissions"`
+	Name                 string      `json:"name"`
+	AssetType            AssetType   `json:"assetType"`
+	OpenerStorageAddress string      `json:"openerStorageAddress"`
+	Type                 string      `json:"type"`
+	Description          *HashDress  `json:"description"`
+	Owner                string      `json:"owner"`
+	ObjectiveKey         string      `json:"objectiveKey"`
+	Permissions          Permissions `json:"permissions"`
 }
 
 // DataSample is the representation of one of the element type stored in the ledger
@@ -50,45 +50,45 @@ type DataSample struct {
 
 // Algo is the representation of one of the element type stored in the ledger
 type Algo struct {
-	Name           string     `json:"name"`
-	AssetType      AssetType  `json:"assetType"`
-	StorageAddress string     `json:"storageAddress"`
-	Description    *HashDress `json:"description"`
-	Owner          string     `json:"owner"`
-	Permissions    string     `json:"permissions"`
+	Name           string      `json:"name"`
+	AssetType      AssetType   `json:"assetType"`
+	StorageAddress string      `json:"storageAddress"`
+	Description    *HashDress  `json:"description"`
+	Owner          string      `json:"owner"`
+	Permissions    Permissions `json:"permissions"`
 }
 
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
-	AssetType     AssetType  `json:"assetType"`
-	AlgoKey       string     `json:"algoKey"`
-	Creator       string     `json:"creator"`
-	Dataset       *Dataset   `json:"dataset"`
-	ComputePlanID string     `json:"computePlanID"`
-	InModelKeys   []string   `json:"inModels"`
-	Log           string     `json:"log"`
-	ObjectiveKey  string     `json:"objectiveKey"`
-	OutModel      *HashDress `json:"outModel"`
-	Perf          float32    `json:"perf"`
-	Permissions   string     `json:"permissions"`
-	Rank          int        `json:"rank"`
-	Status        string     `json:"status"`
-	Tag           string     `json:"tag"`
+	AssetType     AssetType   `json:"assetType"`
+	AlgoKey       string      `json:"algoKey"`
+	Creator       string      `json:"creator"`
+	Dataset       *Dataset    `json:"dataset"`
+	ComputePlanID string      `json:"computePlanID"`
+	InModelKeys   []string    `json:"inModels"`
+	Log           string      `json:"log"`
+	ObjectiveKey  string      `json:"objectiveKey"`
+	OutModel      *HashDress  `json:"outModel"`
+	Perf          float32     `json:"perf"`
+	Permissions   Permissions `json:"permissions"`
+	Rank          int         `json:"rank"`
+	Status        string      `json:"status"`
+	Tag           string      `json:"tag"`
 }
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Testtuple struct {
-	AssetType    AssetType  `json:"assetType"`
-	AlgoKey      string     `json:"algo"`
-	Certified    bool       `json:"certified"`
-	Creator      string     `json:"creator"`
-	Dataset      *TtDataset `json:"dataset"`
-	Log          string     `json:"log"`
-	Model        *Model     `json:"model"`
-	ObjectiveKey string     `json:"objective"`
-	Permissions  string     `json:"permissions"`
-	Status       string     `json:"status"`
-	Tag          string     `json:"tag"`
+	AssetType    AssetType   `json:"assetType"`
+	AlgoKey      string      `json:"algo"`
+	Certified    bool        `json:"certified"`
+	Creator      string      `json:"creator"`
+	Dataset      *TtDataset  `json:"dataset"`
+	Log          string      `json:"log"`
+	Model        *Model      `json:"model"`
+	ObjectiveKey string      `json:"objective"`
+	Permissions  Permissions `json:"permissions"`
+	Status       string      `json:"status"`
+	Tag          string      `json:"tag"`
 }
 
 // ---------------------------------------------------------------------------------

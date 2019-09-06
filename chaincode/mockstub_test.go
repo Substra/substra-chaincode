@@ -421,7 +421,7 @@ func (stub *MockStub) setTxTimestamp(time *timestamp.Timestamp) {
 
 func (stub *MockStub) GetTxTimestamp() (*timestamp.Timestamp, error) {
 	if stub.TxTimestamp == nil {
-		return nil, errors.New("TxTimestamp not set.")
+		return nil, errors.New("stub.TxTimestamp not set")
 	}
 	return stub.TxTimestamp, nil
 }
@@ -515,11 +515,9 @@ func (iter *MockStateRangeQueryIterator) HasNext() bool {
 			if comp2 < 0 {
 				mockLogger.Debug("HasNext() got next")
 				return true
-			} else {
-				mockLogger.Debug("HasNext() but no next")
-				return false
-
 			}
+			mockLogger.Debug("HasNext() but no next")
+			return false
 		}
 		current = current.Next()
 	}

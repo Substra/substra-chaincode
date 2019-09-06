@@ -43,17 +43,23 @@ func (traintuple *Traintuple) SetFromInput(db LedgerDB, inp inputTraintuple) err
 	}
 	traintuple.AssetType = TraintupleType
 	traintuple.Creator = creator
-	traintuple.Permissions = "all"
 	traintuple.Tag = inp.Tag
-	// check if algo exists
-	if _, err = db.GetAlgo(inp.AlgoKey); err != nil {
+	algo, err := db.GetAlgo(inp.AlgoKey)
+	if err != nil {
 		return errors.BadRequest(err, "could not retrieve algo with key %s", inp.AlgoKey)
+	}
+	if !algo.Permissions.CanProcess(algo.Owner, creator) {
+		return errors.Forbidden("not authorized to process algo %s", inp.AlgoKey)
 	}
 	traintuple.AlgoKey = inp.AlgoKey
 
 	// check objective exists
-	if _, err = db.GetObjective(inp.ObjectiveKey); err != nil {
+	objective, err := db.GetObjective(inp.ObjectiveKey)
+	if err != nil {
 		return errors.BadRequest(err, "could not retrieve objective with key %s", inp.ObjectiveKey)
+	}
+	if !objective.Permissions.CanProcess(objective.Owner, creator) {
+		return errors.Forbidden("not authorized to process objective %s", inp.ObjectiveKey)
 	}
 	traintuple.ObjectiveKey = inp.ObjectiveKey
 
@@ -65,9 +71,16 @@ func (traintuple *Traintuple) SetFromInput(db LedgerDB, inp inputTraintuple) err
 	if !trainOnly {
 		return errors.BadRequest("not possible to create a traintuple with test only data")
 	}
-	if _, err = db.GetDataManager(inp.DataManagerKey); err != nil {
+
+	dataManager, err := db.GetDataManager(inp.DataManagerKey)
+	if err != nil {
 		return errors.BadRequest(err, "could not retrieve dataManager with key %s", inp.DataManagerKey)
 	}
+	if !dataManager.Permissions.CanProcess(dataManager.Owner, creator) {
+		return errors.Forbidden("not authorized to process dataManager %s", inp.DataManagerKey)
+	}
+
+	traintuple.Permissions = MergePermissions(dataManager.Permissions, algo.Permissions)
 
 	// fill traintuple.Dataset from dataManager and dataSample
 	traintuple.Dataset = &Dataset{
@@ -209,21 +222,16 @@ func (traintuple *Traintuple) Save(db LedgerDB, traintupleKey string) error {
 // It uses the inputTesttuple to check and set the testtuple's parameters
 // which don't depend on previous testtuples values :
 //  - AssetType
-//  - Creator & permissions
+//  - Creator
 //  - Tag
-//  - AlgoKey & ObjectiveKey
 //  - Dataset
 //  - Certified
 func (testtuple *Testtuple) SetFromInput(db LedgerDB, inp inputTesttuple) error {
-
-	// TODO later: check permissions
-	// find associated creator and check permissions (TODO later)
 	creator, err := GetTxCreator(db.cc)
 	if err != nil {
 		return err
 	}
 	testtuple.Creator = creator
-	testtuple.Permissions = "all"
 	testtuple.Tag = inp.Tag
 	testtuple.AssetType = TesttupleType
 
@@ -289,6 +297,13 @@ func (testtuple *Testtuple) SetFromTraintuple(db LedgerDB, traintupleKey string)
 	traintuple, err := db.GetTraintuple(traintupleKey)
 	if err != nil {
 		return errors.BadRequest(err, "could not retrieve traintuple with key %s", traintupleKey)
+	}
+	creator, err := GetTxCreator(db.cc)
+	if err != nil {
+		return err
+	}
+	if !traintuple.Permissions.CanProcess(traintuple.Creator, creator) {
+		return errors.Forbidden("not authorized to process traintuple %s", traintupleKey)
 	}
 	testtuple.ObjectiveKey = traintuple.ObjectiveKey
 	testtuple.AlgoKey = traintuple.AlgoKey

@@ -62,12 +62,17 @@ Smart contract: `registerDataManager`
  "descriptionHash": string (required,len=64,hexadecimal),
  "descriptionStorageAddress": string (required,url),
  "objectiveKey": string (omitempty),
- "permissions": string (required,oneof=all),
+ "permissions": (required){
+   "process": (required){
+     "public": bool (required),
+     "authorizedIDs": [string] (required,dive,len=64,hexadecimal),
+   },
+ },
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerDataManager","{\"name\":\"liver slide\",\"openerHash\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"openerStorageAddress\":\"https://toto/dataManager/42234/opener\",\"type\":\"images\",\"descriptionHash\":\"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee\",\"descriptionStorageAddress\":\"https://toto/dataManager/42234/description\",\"objectiveKey\":\"\",\"permissions\":\"all\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerDataManager","{\"name\":\"liver slide\",\"openerHash\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"openerStorageAddress\":\"https://toto/dataManager/42234/opener\",\"type\":\"images\",\"descriptionHash\":\"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee\",\"descriptionStorageAddress\":\"https://toto/dataManager/42234/description\",\"objectiveKey\":\"\",\"permissions\":{\"process\":{\"public\":true,\"authorizedIDs\":[]}}}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -103,7 +108,12 @@ peer chaincode invoke -n mycc -c '{"Args":["queryDataManager","{\"key\":\"da1bb7
   "storageAddress": "https://toto/dataManager/42234/opener"
  },
  "owner": "SampleOrg",
- "permissions": "all",
+ "permissions": {
+  "process": {
+   "authorizedIDs": null,
+   "public": true
+  }
+ },
  "type": "images"
 }
 ```
@@ -144,15 +154,20 @@ Smart contract: `registerObjective`
  "metricsHash": string (required,len=64,hexadecimal),
  "metricsStorageAddress": string (required,url),
  "testDataset": (omitempty){
-    "dataManagerKey": string (omitempty,len=64,hexadecimal),
-    "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
-   }
-  "permissions": string (required,oneof=all),
+   "dataManagerKey": string (omitempty,len=64,hexadecimal),
+   "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
+ },
+ "permissions": (required){
+   "process": (required){
+     "public": bool (required),
+     "authorizedIDs": [string] (required,dive,len=64,hexadecimal),
+   },
+ },
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerObjective","{\"name\":\"MSI classification\",\"descriptionHash\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"descriptionStorageAddress\":\"https://toto/objective/222/description\",\"metricsName\":\"accuracy\",\"metricsHash\":\"4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"metricsStorageAddress\":\"https://toto/objective/222/metrics\",\"testDataset\":{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"]},\"permissions\":\"all\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerObjective","{\"name\":\"MSI classification\",\"descriptionHash\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"descriptionStorageAddress\":\"https://toto/objective/222/description\",\"metricsName\":\"accuracy\",\"metricsHash\":\"4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"metricsStorageAddress\":\"https://toto/objective/222/metrics\",\"testDataset\":{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"]},\"permissions\":{\"process\":{\"public\":true,\"authorizedIDs\":[]}}}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -171,12 +186,17 @@ Smart contract: `registerAlgo`
  "storageAddress": string (required,url),
  "descriptionHash": string (required,len=64,hexadecimal),
  "descriptionStorageAddress": string (required,url),
- "permissions": string (required,oneof=all),
+ "permissions": (required){
+   "process": (required){
+     "public": bool (required),
+     "authorizedIDs": [string] (required,dive,len=64,hexadecimal),
+   },
+ },
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerAlgo","{\"name\":\"hog + svm\",\"hash\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"storageAddress\":\"https://toto/algo/222/algo\",\"descriptionHash\":\"e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dca\",\"descriptionStorageAddress\":\"https://toto/algo/222/description\",\"permissions\":\"all\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerAlgo","{\"name\":\"hog + svm\",\"hash\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"storageAddress\":\"https://toto/algo/222/algo\",\"descriptionHash\":\"e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dca\",\"descriptionStorageAddress\":\"https://toto/algo/222/description\",\"permissions\":{\"process\":{\"public\":true,\"authorizedIDs\":[]}}}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -229,7 +249,12 @@ peer chaincode query -n mycc -c '{"Args":["queryDataManagers"]}' -C myc
    "storageAddress": "https://toto/dataManager/42234/opener"
   },
   "owner": "SampleOrg",
-  "permissions": "all",
+  "permissions": {
+   "process": {
+    "authorizedIDs": null,
+    "public": true
+   }
+  },
   "type": "images"
  }
 ]
@@ -293,7 +318,12 @@ peer chaincode query -n mycc -c '{"Args":["queryObjectives"]}' -C myc
   },
   "name": "MSI classification",
   "owner": "SampleOrg",
-  "permissions": "all",
+  "permissions": {
+   "process": {
+    "authorizedIDs": null,
+    "public": true
+   }
+  },
   "testDataset": {
    "dataManagerKey": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "dataSampleKeys": [
@@ -408,7 +438,12 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"train
    }
   },
   "outModel": null,
-  "permissions": "all",
+  "permissions": {
+   "process": {
+    "authorizedIDs": null,
+    "public": true
+   }
+  },
   "rank": 0,
   "status": "todo",
   "tag": ""
@@ -458,7 +493,12 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"9da043ddc
   }
  },
  "outModel": null,
- "permissions": "all",
+ "permissions": {
+  "process": {
+   "authorizedIDs": null,
+   "public": true
+  }
+ },
  "rank": 0,
  "status": "doing",
  "tag": ""
@@ -473,10 +513,10 @@ Smart contract: `logSuccessTrain`
  "key": string (required,len=64,hexadecimal),
  "log": string (required,lte=200),
  "outModel": (required){
-    "hash": string (required,len=64,hexadecimal),
-    "storageAddress": string (required),
-   }
-  "perf": float32 (omitempty),
+   "hash": string (required,len=64,hexadecimal),
+   "storageAddress": string (required),
+ },
+ "perf": float32 (omitempty),
 }
 ```
 ##### Command peer example:
@@ -516,7 +556,12 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"9da043d
   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
   "storageAddress": "https://substrabac/model/toto"
  },
- "permissions": "all",
+ "permissions": {
+  "process": {
+   "authorizedIDs": null,
+   "public": true
+  }
+ },
  "rank": 0,
  "status": "done",
  "tag": ""
@@ -568,7 +613,12 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"9da043d
   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
   "storageAddress": "https://substrabac/model/toto"
  },
- "permissions": "all",
+ "permissions": {
+  "process": {
+   "authorizedIDs": null,
+   "public": true
+  }
+ },
  "rank": 0,
  "status": "done",
  "tag": ""
@@ -688,7 +738,12 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
-  "permissions": "all",
+  "permissions": {
+   "process": {
+    "authorizedIDs": [],
+    "public": false
+   }
+  },
   "status": "todo",
   "tag": ""
  },
@@ -723,7 +778,12 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
-  "permissions": "all",
+  "permissions": {
+   "process": {
+    "authorizedIDs": [],
+    "public": false
+   }
+  },
   "status": "todo",
   "tag": ""
  }
@@ -775,7 +835,12 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"5ae68332a1
    "storageAddress": "https://toto/objective/222/metrics"
   }
  },
- "permissions": "all",
+ "permissions": {
+  "process": {
+   "authorizedIDs": [],
+   "public": false
+  }
+ },
  "status": "doing",
  "tag": ""
 }
@@ -828,7 +893,12 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"5ae68332
    "storageAddress": "https://toto/objective/222/metrics"
   }
  },
- "permissions": "all",
+ "permissions": {
+  "process": {
+   "authorizedIDs": [],
+   "public": false
+  }
+ },
  "status": "done",
  "tag": ""
 }
@@ -879,7 +949,12 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"5ae68332a
    "storageAddress": "https://toto/objective/222/metrics"
   }
  },
- "permissions": "all",
+ "permissions": {
+  "process": {
+   "authorizedIDs": [],
+   "public": false
+  }
+ },
  "status": "done",
  "tag": ""
 }
@@ -923,7 +998,12 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
-  "permissions": "all",
+  "permissions": {
+   "process": {
+    "authorizedIDs": [],
+    "public": false
+   }
+  },
   "status": "waiting",
   "tag": ""
  },
@@ -958,7 +1038,12 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
-  "permissions": "all",
+  "permissions": {
+   "process": {
+    "authorizedIDs": [],
+    "public": false
+   }
+  },
   "status": "todo",
   "tag": ""
  },
@@ -993,7 +1078,12 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
-  "permissions": "all",
+  "permissions": {
+   "process": {
+    "authorizedIDs": [],
+    "public": false
+   }
+  },
   "status": "done",
   "tag": ""
  }
@@ -1047,7 +1137,12 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
      "storageAddress": "https://toto/objective/222/metrics"
     }
    },
-   "permissions": "all",
+   "permissions": {
+    "process": {
+     "authorizedIDs": [],
+     "public": false
+    }
+   },
    "status": "todo",
    "tag": ""
   }
@@ -1083,7 +1178,12 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
-  "permissions": "all",
+  "permissions": {
+   "process": {
+    "authorizedIDs": [],
+    "public": false
+   }
+  },
   "status": "done",
   "tag": ""
  },
@@ -1118,7 +1218,12 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
    "storageAddress": "https://substrabac/model/toto"
   },
-  "permissions": "all",
+  "permissions": {
+   "process": {
+    "authorizedIDs": null,
+    "public": true
+   }
+  },
   "rank": 0,
   "status": "done",
   "tag": ""
@@ -1165,7 +1270,12 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
      "storageAddress": "https://toto/objective/222/metrics"
     }
    },
-   "permissions": "all",
+   "permissions": {
+    "process": {
+     "authorizedIDs": [],
+     "public": false
+    }
+   },
    "status": "waiting",
    "tag": ""
   },
@@ -1203,7 +1313,12 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     }
    },
    "outModel": null,
-   "permissions": "all",
+   "permissions": {
+    "process": {
+     "authorizedIDs": null,
+     "public": true
+    }
+   },
    "rank": 0,
    "status": "todo",
    "tag": ""
@@ -1241,7 +1356,12 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
      "storageAddress": "https://toto/objective/222/metrics"
     }
    },
-   "permissions": "all",
+   "permissions": {
+    "process": {
+     "authorizedIDs": [],
+     "public": false
+    }
+   },
    "status": "done",
    "tag": ""
   },
@@ -1276,7 +1396,12 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
     "storageAddress": "https://substrabac/model/toto"
    },
-   "permissions": "all",
+   "permissions": {
+    "process": {
+     "authorizedIDs": null,
+     "public": true
+    }
+   },
    "rank": 0,
    "status": "done",
    "tag": ""
@@ -1312,7 +1437,12 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"da1bb7c31f6
   "storageAddress": "https://toto/dataManager/42234/opener"
  },
  "owner": "SampleOrg",
- "permissions": "all",
+ "permissions": {
+  "process": {
+   "authorizedIDs": null,
+   "public": true
+  }
+ },
  "testDataSampleKeys": [
   "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
@@ -1372,7 +1502,12 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"38a320b2a67
   "storageAddress": "https://toto/dataManager/42234/opener"
  },
  "owner": "SampleOrg",
- "permissions": "all",
+ "permissions": {
+  "process": {
+   "authorizedIDs": null,
+   "public": true
+  }
+ },
  "testDataSampleKeys": [],
  "trainDataSampleKeys": [
   "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
@@ -1388,23 +1523,19 @@ Smart contract: `createComputePlan`
 {
  "algoKey": string (required,len=64,hexadecimal),
  "objectiveKey": string (required,len=64,hexadecimal),
- "traintuples": (required,gt=0) [
-   {
-    "dataManagerKey": string (required,len=64,hexadecimal),
-    "dataSampleKeys": [string] (required,dive,len=64,hexadecimal),
-    "id": string (required,lte=64),
-    "inModelsIDs": [string] (omitempty,dive,lte=64),
-    "tag": string (omitempty,lte=64),
-   }
- ],
- "testtuples": (omitempty) [
-   {
-    "dataManagerKey": string (omitempty,len=64,hexadecimal),
-    "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
-    "tag": string (omitempty,lte=64),
-    "traintupleID": string (required,lte=64),
-   }
- ],
+ "traintuples": (required,gt=0) [{
+   "dataManagerKey": string (required,len=64,hexadecimal),
+   "dataSampleKeys": [string] (required,dive,len=64,hexadecimal),
+   "id": string (required,lte=64),
+   "inModelsIDs": [string] (omitempty,dive,lte=64),
+   "tag": string (omitempty,lte=64),
+ }],
+ "testtuples": (omitempty) [{
+   "dataManagerKey": string (omitempty,len=64,hexadecimal),
+   "dataSampleKeys": [string] (omitempty,dive,len=64,hexadecimal),
+   "tag": string (omitempty,lte=64),
+   "traintupleID": string (required,lte=64),
+ }],
 }
 ```
 ##### Command peer example:
@@ -1431,7 +1562,7 @@ Smart contract: `queryObjectiveLeaderboard`
 ```go
 {
  "objectiveKey": string (omitempty,len=64,hexadecimal),
- "ascendingOrder,required": bool (),
+ "ascendingOrder": bool (required),
 }
 ```
 ##### Command peer example:
@@ -1454,7 +1585,12 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
   },
   "name": "MSI classification",
   "owner": "SampleOrg",
-  "permissions": "all",
+  "permissions": {
+   "process": {
+    "authorizedIDs": null,
+    "public": true
+   }
+  },
   "testDataset": {
    "dataManagerKey": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "dataSampleKeys": [
@@ -1479,7 +1615,12 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
     "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
    },
    "perf": 0.9,
-   "permissions": "all",
+   "permissions": {
+    "process": {
+     "authorizedIDs": [],
+     "public": false
+    }
+   },
    "tag": ""
   }
  ]
