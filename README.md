@@ -1562,7 +1562,7 @@ Smart contract: `queryObjectiveLeaderboard`
 ```go
 {
  "objectiveKey": string (omitempty,len=64,hexadecimal),
- "ascendingOrder,required": bool (),
+ "ascendingOrder": bool (required),
 }
 ```
 ##### Command peer example:
@@ -1586,13 +1586,9 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
   "name": "MSI classification",
   "owner": "SampleOrg",
   "permissions": {
-   "download": {
-    "authorizedNodes": [],
-    "isRestricted": false
-   },
    "process": {
-    "authorizedNodes": [],
-    "isRestricted": false
+    "authorizedIDs": null,
+    "public": true
    }
   },
   "testDataset": {
@@ -1619,7 +1615,12 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
     "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
    },
    "perf": 0.9,
-   "permissions": "all",
+   "permissions": {
+    "process": {
+     "authorizedIDs": [],
+     "public": false
+    }
+   },
    "tag": ""
   }
  ]

@@ -271,6 +271,17 @@ type outputComputePlan struct {
 	TesttupleKeys  []string `json:"testtupleKeys"`
 }
 
+type outputPermissions struct {
+	Process Permission `validate:"required" json:"process"`
+}
+
+func (out *outputPermissions) Fill(in Permissions) {
+	out.Process.Public = in.Process.Public
+	if !in.Process.Public {
+		out.Process.AuthorizedIDs = []string{}
+	}
+}
+
 type outputLeaderboard struct {
 	Objective  outputObjective   `json:"objective"`
 	Testtuples outputBoardTuples `json:"testtuples"`
@@ -291,13 +302,13 @@ func (out outputBoardTuples) Less(i, j int) bool {
 }
 
 type outputBoardTuple struct {
-	Algo        *HashDressName `json:"algo"`
-	Creator     string         `json:"creator"`
-	Key         string         `json:"key"`
-	Model       *Model         `json:"model"`
-	Perf        float32        `json:"perf"`
-	Permissions string         `json:"permissions"`
-	Tag         string         `json:"tag"`
+	Algo        *HashDressName    `json:"algo"`
+	Creator     string            `json:"creator"`
+	Key         string            `json:"key"`
+	Model       *Model            `json:"model"`
+	Perf        float32           `json:"perf"`
+	Permissions outputPermissions `json:"permissions"`
+	Tag         string            `json:"tag"`
 }
 
 func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string) error {
@@ -314,18 +325,7 @@ func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string
 	}
 	out.Model = in.Model
 	out.Perf = in.Dataset.Perf
-	out.Permissions = in.Permissions
+	out.Permissions.Fill(in.Permissions)
 	out.Tag = in.Tag
 	return nil
-}
-
-type outputPermissions struct {
-	Process Permission `validate:"required" json:"process"`
-}
-
-func (out *outputPermissions) Fill(in Permissions) {
-	out.Process.Public = in.Process.Public
-	if !in.Process.Public {
-		out.Process.AuthorizedIDs = []string{}
-	}
 }
