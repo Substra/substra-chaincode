@@ -157,5 +157,5 @@ type inputPermissions struct {
 
 type inputPermission struct {
 	Public        bool     `json:"public,required"`
-	AuthorizedIDs []string `validate:"required,dive,len=64,hexadecimal" json:"authorizedIDs"`
+	AuthorizedIDs []string `validate:"required" json:"authorizedIDs"`
 }
