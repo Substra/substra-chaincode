@@ -65,7 +65,7 @@ Smart contract: `registerDataManager`
  "permissions": (required){
    "process": (required){
      "public": bool (required),
-     "authorizedIDs": [string] (required,dive,len=64,hexadecimal),
+     "authorizedIDs": [string] (required),
    },
  },
 }
@@ -160,7 +160,7 @@ Smart contract: `registerObjective`
  "permissions": (required){
    "process": (required){
      "public": bool (required),
-     "authorizedIDs": [string] (required,dive,len=64,hexadecimal),
+     "authorizedIDs": [string] (required),
    },
  },
 }
@@ -189,7 +189,7 @@ Smart contract: `registerAlgo`
  "permissions": (required){
    "process": (required){
      "public": bool (required),
-     "authorizedIDs": [string] (required,dive,len=64,hexadecimal),
+     "authorizedIDs": [string] (required),
    },
  },
 }
