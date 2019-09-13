@@ -185,17 +185,16 @@ func (outputTraintuple *outputTraintuple) Fill(db LedgerDB, traintuple Traintupl
 }
 
 type outputTesttuple struct {
-	Key         string            `json:"key"`
-	Algo        *HashDressName    `json:"algo"`
-	Certified   bool              `json:"certified"`
-	Creator     string            `json:"creator"`
-	Dataset     *TtDataset        `json:"dataset"`
-	Log         string            `json:"log"`
-	Model       *Model            `json:"model"`
-	Objective   *TtObjective      `json:"objective"`
-	Permissions outputPermissions `json:"permissions"`
-	Status      string            `json:"status"`
-	Tag         string            `json:"tag"`
+	Key       string         `json:"key"`
+	Algo      *HashDressName `json:"algo"`
+	Certified bool           `json:"certified"`
+	Creator   string         `json:"creator"`
+	Dataset   *TtDataset     `json:"dataset"`
+	Log       string         `json:"log"`
+	Model     *Model         `json:"model"`
+	Objective *TtObjective   `json:"objective"`
+	Status    string         `json:"status"`
+	Tag       string         `json:"tag"`
 }
 
 func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
@@ -205,7 +204,6 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 	out.Dataset = in.Dataset
 	out.Log = in.Log
 	out.Model = in.Model
-	out.Permissions.Fill(in.Permissions)
 	out.Status = in.Status
 	out.Tag = in.Tag
 
@@ -277,8 +275,9 @@ type outputPermissions struct {
 
 func (out *outputPermissions) Fill(in Permissions) {
 	out.Process.Public = in.Process.Public
+	out.Process.AuthorizedIDs = []string{}
 	if !in.Process.Public {
-		out.Process.AuthorizedIDs = []string{}
+		out.Process.AuthorizedIDs = in.Process.AuthorizedIDs
 	}
 }
 
@@ -302,13 +301,12 @@ func (out outputBoardTuples) Less(i, j int) bool {
 }
 
 type outputBoardTuple struct {
-	Algo        *HashDressName    `json:"algo"`
-	Creator     string            `json:"creator"`
-	Key         string            `json:"key"`
-	Model       *Model            `json:"model"`
-	Perf        float32           `json:"perf"`
-	Permissions outputPermissions `json:"permissions"`
-	Tag         string            `json:"tag"`
+	Algo    *HashDressName `json:"algo"`
+	Creator string         `json:"creator"`
+	Key     string         `json:"key"`
+	Model   *Model         `json:"model"`
+	Perf    float32        `json:"perf"`
+	Tag     string         `json:"tag"`
 }
 
 func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string) error {
@@ -325,7 +323,6 @@ func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string
 	}
 	out.Model = in.Model
 	out.Perf = in.Dataset.Perf
-	out.Permissions.Fill(in.Permissions)
 	out.Tag = in.Tag
 	return nil
 }

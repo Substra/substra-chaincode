@@ -110,7 +110,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryDataManager","{\"key\":\"da1bb7
  "owner": "SampleOrg",
  "permissions": {
   "process": {
-   "authorizedIDs": null,
+   "authorizedIDs": [],
    "public": true
   }
  },
@@ -251,7 +251,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataManagers"]}' -C myc
   "owner": "SampleOrg",
   "permissions": {
    "process": {
-    "authorizedIDs": null,
+    "authorizedIDs": [],
     "public": true
    }
   },
@@ -320,7 +320,7 @@ peer chaincode query -n mycc -c '{"Args":["queryObjectives"]}' -C myc
   "owner": "SampleOrg",
   "permissions": {
    "process": {
-    "authorizedIDs": null,
+    "authorizedIDs": [],
     "public": true
    }
   },
@@ -440,7 +440,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"train
   "outModel": null,
   "permissions": {
    "process": {
-    "authorizedIDs": null,
+    "authorizedIDs": [],
     "public": true
    }
   },
@@ -495,7 +495,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"9da043ddc
  "outModel": null,
  "permissions": {
   "process": {
-   "authorizedIDs": null,
+   "authorizedIDs": [],
    "public": true
   }
  },
@@ -558,7 +558,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"9da043d
  },
  "permissions": {
   "process": {
-   "authorizedIDs": null,
+   "authorizedIDs": [],
    "public": true
   }
  },
@@ -615,7 +615,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"9da043d
  },
  "permissions": {
   "process": {
-   "authorizedIDs": null,
+   "authorizedIDs": [],
    "public": true
   }
  },
@@ -738,12 +738,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
-  "permissions": {
-   "process": {
-    "authorizedIDs": [],
-    "public": false
-   }
-  },
   "status": "todo",
   "tag": ""
  },
@@ -776,12 +770,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storageAddress": "https://toto/objective/222/metrics"
-   }
-  },
-  "permissions": {
-   "process": {
-    "authorizedIDs": [],
-    "public": false
    }
   },
   "status": "todo",
@@ -833,12 +821,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"5ae68332a1
   "metrics": {
    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storageAddress": "https://toto/objective/222/metrics"
-  }
- },
- "permissions": {
-  "process": {
-   "authorizedIDs": [],
-   "public": false
   }
  },
  "status": "doing",
@@ -893,12 +875,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"5ae68332
    "storageAddress": "https://toto/objective/222/metrics"
   }
  },
- "permissions": {
-  "process": {
-   "authorizedIDs": [],
-   "public": false
-  }
- },
  "status": "done",
  "tag": ""
 }
@@ -949,12 +925,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"5ae68332a
    "storageAddress": "https://toto/objective/222/metrics"
   }
  },
- "permissions": {
-  "process": {
-   "authorizedIDs": [],
-   "public": false
-  }
- },
  "status": "done",
  "tag": ""
 }
@@ -998,12 +968,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
-  "permissions": {
-   "process": {
-    "authorizedIDs": [],
-    "public": false
-   }
-  },
   "status": "waiting",
   "tag": ""
  },
@@ -1038,12 +1002,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
-  "permissions": {
-   "process": {
-    "authorizedIDs": [],
-    "public": false
-   }
-  },
   "status": "todo",
   "tag": ""
  },
@@ -1076,12 +1034,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storageAddress": "https://toto/objective/222/metrics"
-   }
-  },
-  "permissions": {
-   "process": {
-    "authorizedIDs": [],
-    "public": false
    }
   },
   "status": "done",
@@ -1137,12 +1089,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
      "storageAddress": "https://toto/objective/222/metrics"
     }
    },
-   "permissions": {
-    "process": {
-     "authorizedIDs": [],
-     "public": false
-    }
-   },
    "status": "todo",
    "tag": ""
   }
@@ -1176,12 +1122,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storageAddress": "https://toto/objective/222/metrics"
-   }
-  },
-  "permissions": {
-   "process": {
-    "authorizedIDs": [],
-    "public": false
    }
   },
   "status": "done",
@@ -1220,7 +1160,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
   },
   "permissions": {
    "process": {
-    "authorizedIDs": null,
+    "authorizedIDs": [],
     "public": true
    }
   },
@@ -1270,12 +1210,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
      "storageAddress": "https://toto/objective/222/metrics"
     }
    },
-   "permissions": {
-    "process": {
-     "authorizedIDs": [],
-     "public": false
-    }
-   },
    "status": "waiting",
    "tag": ""
   },
@@ -1315,7 +1249,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    "outModel": null,
    "permissions": {
     "process": {
-     "authorizedIDs": null,
+     "authorizedIDs": [],
      "public": true
     }
    },
@@ -1356,12 +1290,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
      "storageAddress": "https://toto/objective/222/metrics"
     }
    },
-   "permissions": {
-    "process": {
-     "authorizedIDs": [],
-     "public": false
-    }
-   },
    "status": "done",
    "tag": ""
   },
@@ -1398,7 +1326,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    },
    "permissions": {
     "process": {
-     "authorizedIDs": null,
+     "authorizedIDs": [],
      "public": true
     }
    },
@@ -1439,7 +1367,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"da1bb7c31f6
  "owner": "SampleOrg",
  "permissions": {
   "process": {
-   "authorizedIDs": null,
+   "authorizedIDs": [],
    "public": true
   }
  },
@@ -1504,7 +1432,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"38a320b2a67
  "owner": "SampleOrg",
  "permissions": {
   "process": {
-   "authorizedIDs": null,
+   "authorizedIDs": [],
    "public": true
   }
  },
@@ -1587,7 +1515,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
   "owner": "SampleOrg",
   "permissions": {
    "process": {
-    "authorizedIDs": null,
+    "authorizedIDs": [],
     "public": true
    }
   },
@@ -1615,12 +1543,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
     "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
    },
    "perf": 0.9,
-   "permissions": {
-    "process": {
-     "authorizedIDs": [],
-     "public": false
-    }
-   },
    "tag": ""
   }
  ]

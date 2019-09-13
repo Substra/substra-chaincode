@@ -64,7 +64,7 @@ func TestDataManager(t *testing.T) {
 			Hash:           inpDataManager.DescriptionHash,
 		},
 		Permissions: outputPermissions{
-			Process: Permission{Public: true},
+			Process: Permission{Public: true, AuthorizedIDs: []string{}},
 		},
 		Opener: HashDress{
 			Hash:           dataManagerKey,

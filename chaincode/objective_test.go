@@ -23,7 +23,7 @@ func TestLeaderBoard(t *testing.T) {
 	assert.NoError(t, err)
 
 	inpLeaderboard := inputLeaderboard{
-		ObjectiveKey:  objectiveDescriptionHash,
+		ObjectiveKey:   objectiveDescriptionHash,
 		AscendingOrder: true,
 	}
 	// leaderboard should be empty since there is no testtuple done
@@ -143,7 +143,7 @@ func TestObjective(t *testing.T) {
 			Hash:           objectiveKey,
 		},
 		Permissions: outputPermissions{
-			Process: Permission{Public: true},
+			Process: Permission{Public: true, AuthorizedIDs: []string{}},
 		},
 		Metrics: &HashDressName{
 			Hash:           inpObjective.MetricsHash,
