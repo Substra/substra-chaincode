@@ -165,8 +165,7 @@ func TestDataset(t *testing.T) {
 
 	// Add dataSample which already exist
 	resp = mockStub.MockInvoke("42", args)
-	// TODO should return q 409
-	assert.EqualValuesf(t, 400, resp.Status, "when adding dataSample which already exist, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 409, resp.Status, "when adding dataSample which already exist, status %d and message %s", resp.Status, resp.Message)
 
 	// Query dataSample and check it corresponds to what was input
 	args = [][]byte{[]byte("queryDataset"), keyToJSON(inpDataManager.OpenerHash)}

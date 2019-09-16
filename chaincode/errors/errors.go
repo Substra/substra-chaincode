@@ -12,6 +12,8 @@ type Error struct {
 	Kind Kind
 	// The underlying error if any
 	Err error
+	// Associated interface through errors methods
+	context map[string]interface{}
 }
 
 func (e Error) Error() string {
@@ -36,18 +38,26 @@ func (e Error) Error() string {
 //		The string to add to the existing error message. As mention above
 //		all the args following the first string will be handle as format
 //		parameters.
-func E(args ...interface{}) error {
+func E(args ...interface{}) Error {
 	e := Error{}
+	e.context = map[string]interface{}{}
 	for i, arg := range args {
 		switch arg := arg.(type) {
 		case Kind:
 			e.Kind = arg
+		case Error:
+			e.context = arg.context
+			if e.Err == nil {
+				e.Err = arg.Err
+			} else {
+				e.Err = fmt.Errorf("%s %s", arg.Error(), e.Error())
+			}
 		case error:
 			if e.Err == nil {
 				e.Err = arg
-				continue
+			} else {
+				e.Err = fmt.Errorf("%s %s", arg.Error(), e.Error())
 			}
-			e.Err = fmt.Errorf("%s %s", arg.Error(), e.Error())
 		case string:
 			parameters := args[i+1:]
 			msg := fmt.Sprintf(arg, parameters...)
@@ -72,33 +82,52 @@ func Wrap(err error) Error {
 }
 
 // Internal returns an Error of a this specific type
-func Internal(args ...interface{}) error {
+func Internal(args ...interface{}) Error {
 	args = append([]interface{}{internal}, args...)
 	return E(args...)
 }
 
 // NotFound returns an Error of a this specific type
-func NotFound(args ...interface{}) error {
+func NotFound(args ...interface{}) Error {
 	args = append([]interface{}{notFound}, args...)
 	return E(args...)
 }
 
 // Conflict returns an Error of a this specific type
-func Conflict(args ...interface{}) error {
+func Conflict(args ...interface{}) Error {
 	args = append([]interface{}{conflict}, args...)
 	return E(args...)
 }
 
 // BadRequest returns an Error of a this specific type
-func BadRequest(args ...interface{}) error {
+func BadRequest(args ...interface{}) Error {
 	args = append([]interface{}{badRequest}, args...)
 	return E(args...)
 }
 
 // Forbidden returns an Error of a this specific type
-func Forbidden(args ...interface{}) error {
+func Forbidden(args ...interface{}) Error {
 	args = append([]interface{}{forbidden}, args...)
 	return E(args...)
+}
+
+// WithKey associate the given key to the error context
+// It overwrites previous key if any.
+func (e Error) WithKey(key string) Error {
+	e.context["key"] = key
+	return e
+}
+
+// WithKeys associate the given keys to the error context
+// It overwrites previous keys' list if any.
+func (e Error) WithKeys(keys []string) Error {
+	e.context["keys"] = keys
+	return e
+}
+
+// GetContext return the associated key if there is any
+func (e Error) GetContext() map[string]interface{} {
+	return e.context
 }
 
 // HTTPStatusCode wrap the HTTPStatusCode methods of the Kind parameter

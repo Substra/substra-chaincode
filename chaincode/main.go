@@ -125,15 +125,19 @@ func formatErrorResponse(err error) peer.Response {
 	e := errors.Wrap(err)
 	status := e.HTTPStatusCode()
 
-	errStruct := map[string]interface{}{"error": e.Error()}
+	errStruct := map[string]interface{}{
+		"error": e.Error(),
+		// Serialize status in the message until fabric-sdk-py allows subtrabac to
+		// access the status
+		"status": status,
+	}
+	for k, v := range e.GetContext() {
+		errStruct[k] = v
+	}
+
 	payload, _ := json.Marshal(errStruct)
-	// For now we still return both payload and message.
-	// We also need to serialize the status into the message until fabrik-sdk-py
-	// allow substrabac to access the status
-	errStruct["status"] = status
-	message, _ := json.Marshal(errStruct)
 	return peer.Response{
-		Message: string(message),
+		Message: string(payload),
 		Payload: payload,
 		Status:  int32(status),
 	}

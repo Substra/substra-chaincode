@@ -16,7 +16,7 @@ func TestErrorCases(t *testing.T) {
 	strFinal := fmt.Sprintf(strFormat, param1, param2)
 	testCases := []struct {
 		desc           string
-		errorFunc      func(...interface{}) error
+		errorFunc      func(...interface{}) Error
 		args           []interface{}
 		expectedMsg    string
 		expectedStatus int
