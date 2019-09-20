@@ -82,6 +82,11 @@ func (traintuple *Traintuple) SetFromInput(db LedgerDB, inp inputTraintuple) err
 
 	traintuple.Permissions = MergePermissions(dataManager.Permissions, algo.Permissions)
 
+	// check data sample keys are not duplicated
+	if sliceHasDuplicatedItems(inp.DataSampleKeys) {
+		return errors.BadRequest("duplicated data sample keys")
+	}
+
 	// fill traintuple.Dataset from dataManager and dataSample
 	traintuple.Dataset = &Dataset{
 		DataManagerKey: inp.DataManagerKey,
