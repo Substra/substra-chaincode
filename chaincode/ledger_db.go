@@ -246,3 +246,15 @@ func (db *LedgerDB) GetTesttuple(key string) (Testtuple, error) {
 	}
 	return testtuple, nil
 }
+
+// GetNode fetches a Node from the ledger based on its unique key
+func (db *LedgerDB) GetNode(key string) (Node, error) {
+	node := Node{}
+
+	err := db.Get(key, &node)
+	if err != nil {
+		return node, err
+	}
+
+	return node, nil
+}

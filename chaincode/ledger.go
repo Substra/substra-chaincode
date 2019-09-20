@@ -139,3 +139,9 @@ type TtObjective struct {
 	Key     string     `json:"hash"`
 	Metrics *HashDress `json:"metrics"`
 }
+
+// Node stores informations about node registered into the network,
+// would be used to list authorized nodes for permissions
+type Node struct {
+	ID string `json:"id"`
+}

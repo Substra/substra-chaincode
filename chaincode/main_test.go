@@ -257,6 +257,9 @@ func TestPipeline(t *testing.T) {
 	inpDataSample.createDefault()
 	callAssertAndPrint("invoke", "registerDataSample", inpDataSample)
 
+	fmt.Fprintln(&out, "#### ------------ Add Node ------------")
+	callAssertAndPrint("invoke", "registerNode", nil)
+
 	fmt.Fprintln(&out, "#### ------------ Query DataManagers ------------")
 	callAssertAndPrint("query", "queryDataManagers", nil)
 
@@ -388,6 +391,9 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Query Dataset ------------")
 	callAssertAndPrint("query", "queryDataset", inputHash{dataManagerOpenerHash})
+
+	fmt.Fprintln(&out, "#### ------------ Query nodes ------------")
+	callAssertAndPrint("query", "queryNodes", nil)
 
 	// 3. add new data manager and dataSample
 	fmt.Fprintln(&out, "#### ------------ Update Data Sample with new data manager ------------")

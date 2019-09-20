@@ -1,0 +1,29 @@
+package main
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestNode(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStub("substra", scc)
+
+	args := append([][]byte{[]byte("registerNode")}, []byte{})
+
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValuesf(t, 200, resp.Status, "Node Created")
+	assert.EqualValuesf(t, "{\"id\":\"SampleOrg\"}", string(resp.Payload), "Node created")
+}
+
+func TestQueryNodes(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStub("substra", scc)
+
+	mockStub.MockInvoke("42", [][]byte{[]byte("registerNode")})
+	response := mockStub.MockInvoke("43", [][]byte{[]byte("queryNodes")})
+
+	assert.EqualValuesf(t, 200, response.Status, "Node Created")
+	assert.EqualValuesf(t, "{\"nodeIDs\":[\"SampleOrg\"]}", string(response.Payload), "Query nodes")
+}

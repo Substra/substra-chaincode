@@ -104,6 +104,10 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = updateDataManager(db, args)
 	case "updateDataSample":
 		result, err = updateDataSample(db, args)
+	case "registerNode":
+		result, err = registerNode(db, args)
+	case "queryNodes":
+		result, err = queryNodes(db, args)
 	default:
 		err = fmt.Errorf("function not implemented")
 	}

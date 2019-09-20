@@ -46,6 +46,8 @@ Note for internal use only: See the [technical specifications](https://github.co
 - `registerObjective`
 - `updateDataManager`
 - `updateDataSample`
+- `registerNode`
+- `queryNodes`
 
 ### Examples
 
@@ -226,6 +228,17 @@ peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":[\"
   "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
  ]
+}
+```
+#### ------------ Add Node ------------
+##### Command peer example:
+```bash
+peer chaincode invoke -n mycc -c '{"Args":["registerNode"]}' -C myc
+```
+##### Command output:
+```json
+{
+ "id": "SampleOrg"
 }
 ```
 #### ------------ Query DataManagers ------------
@@ -1380,6 +1393,19 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"da1bb7c31f6
   "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
  ],
  "type": "images"
+}
+```
+#### ------------ Query nodes ------------
+##### Command peer example:
+```bash
+peer chaincode query -n mycc -c '{"Args":["queryNodes"]}' -C myc
+```
+##### Command output:
+```json
+{
+ "nodeIDs": [
+  "SampleOrg"
+ ]
 }
 ```
 #### ------------ Update Data Sample with new data manager ------------
