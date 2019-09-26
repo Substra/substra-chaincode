@@ -524,7 +524,7 @@ Smart contract: `logSuccessTrain`
 ```go
 {
  "key": string (required,len=64,hexadecimal),
- "log": string (required,lte=200),
+ "log": string (lte=200),
  "outModel": (required){
    "hash": string (required,len=64,hexadecimal),
    "storageAddress": string (required),
@@ -847,7 +847,7 @@ Smart contract: `logSuccessTest`
 ```go
 {
  "key": string (required,len=64,hexadecimal),
- "log": string (required,lte=200),
+ "log": string (lte=200),
  "perf": float32 (omitempty),
 }
 ```
