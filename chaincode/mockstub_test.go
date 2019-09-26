@@ -477,6 +477,13 @@ func NewMockStub(name string, cc shim.Chaincode) *MockStub {
 	return s
 }
 
+func NewMockStubWithRegisterNode(name string, cc shim.Chaincode) *MockStub {
+	s := NewMockStub(name, cc)
+	s.MockInvoke("42", [][]byte{[]byte("registerNode")})
+
+	return s
+}
+
 /*****************************
  Range Query Iterator
 *****************************/

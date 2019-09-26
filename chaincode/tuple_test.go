@@ -45,7 +45,7 @@ func (stub *myMockStub) saveWrittenState(t *testing.T) {
 
 func TestCreateComputePlan(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	myStub := myMockStub{MockStub: mockStub}
 	myStub.saveWhenWriting = true
 	registerItem(t, *mockStub, "algo")
@@ -100,7 +100,7 @@ func TestSpecifiqArgSeq(t *testing.T) {
 	// This test is a POC and a example of a test base on the output of the log
 	// parameters directly copied in a test. It can be realy usesul for debugging
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	argSeq := [][]string{
 		// []string{"registerDataManager", "Titanic", "17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223", "http://owkin.substrabac:8000/data_manager/17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223/opener/", "csv", "48c89276972363250ea949c32809020e9d7fda786547a570bcaecedcc5092627", "http://owkin.substrabac:8000/data_manager/17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223/description/", "", "all"},
 		[]string{"registerDataManager", "\"{\\\"Name\\\":\\\"Titanic\\\",\\\"OpenerHash\\\":\\\"17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223\\\",\\\"OpenerStorageAddress\\\":\\\"http://owkin.substrabac:8000/data_manager/17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223/opener/\\\",\\\"Type\\\":\\\"csv\\\",\\\"DescriptionHash\\\":\\\"48c89276972363250ea949c32809020e9d7fda786547a570bcaecedcc5092627\\\",\\\"DescriptionStorageAddress\\\":\\\"http://owkin.substrabac:8000/data_manager/17dbc4ece248304cab7b1dd53ec7edf1ebf8a5e12ff77a26dc6e8da9db4da223/description/\\\",\\\"ObjectiveKey\\\":\\\"\\\",\\\"Permissions\\\":\\\"all\\\"}\""},
@@ -128,7 +128,7 @@ func TestSpecifiqArgSeq(t *testing.T) {
 
 func TestTraintupleWithNoTestDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
 	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
@@ -154,7 +154,7 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 }
 func TestTraintupleWithSingleDatasample(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
 	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
@@ -186,7 +186,7 @@ func TestTraintupleWithSingleDatasample(t *testing.T) {
 }
 func TestTagTuple(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	registerItem(t, *mockStub, "algo")
 
@@ -243,7 +243,7 @@ func TestTagTuple(t *testing.T) {
 }
 func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "traintuple")
 
@@ -267,7 +267,7 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 }
 func TestTraintupleComputePlanCreation(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add dataManager, dataSample and algo
 	registerItem(t, *mockStub, "algo")
@@ -311,7 +311,7 @@ func TestTraintupleComputePlanCreation(t *testing.T) {
 
 func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "algo")
@@ -375,7 +375,7 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 
 func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
 	resp, _ := registerItem(t, *mockStub, "traintuple")
@@ -403,7 +403,7 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 
 func TestCertifiedExplicitTesttuple(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "traintuple")
@@ -428,7 +428,7 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 }
 func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "traintuple")
@@ -466,7 +466,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 
 func TestTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add traintuple with invalid field
 	inpTraintuple := inputTraintuple{
@@ -614,7 +614,7 @@ func TestTraintuple(t *testing.T) {
 
 func TestQueryTraintupleNotFound(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "traintuple")
 
 	// queryTraintuple: normal case

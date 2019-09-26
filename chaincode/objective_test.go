@@ -10,7 +10,7 @@ import (
 
 func TestLeaderBoard(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	db := NewLedgerDB(mockStub)
 	registerItem(t, *mockStub, "")
 	mockStub.MockTransactionStart("42")
@@ -47,7 +47,7 @@ func TestLeaderBoard(t *testing.T) {
 }
 func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	inpObjective := inputObjective{}
 	inpObjective.createDefault()
@@ -57,7 +57,8 @@ func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 }
 func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockStub.MockInvoke("42", [][]byte{[]byte("registerNode")})
 
 	// Add a dataManager and some dataSample successfuly
 	inpDataManager := inputDataManager{}
@@ -90,7 +91,7 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 }
 func TestObjective(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add objective with invalid field
 	inpObjective := inputObjective{

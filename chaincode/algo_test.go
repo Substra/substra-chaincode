@@ -9,7 +9,7 @@ import (
 
 func TestAlgo(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add algo with invalid field
 	inpAlgo := inputAlgo{

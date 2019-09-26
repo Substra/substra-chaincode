@@ -51,6 +51,17 @@ Note for internal use only: See the [technical specifications](https://github.co
 
 ### Examples
 
+#### ------------ Add Node ------------
+##### Command peer example:
+```bash
+peer chaincode invoke -n mycc -c '{"Args":["registerNode"]}' -C myc
+```
+##### Command output:
+```json
+{
+ "id": "SampleOrg"
+}
+```
 #### ------------ Add DataManager ------------
 Smart contract: `registerDataManager`
 
@@ -228,17 +239,6 @@ peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":[\"
   "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
  ]
-}
-```
-#### ------------ Add Node ------------
-##### Command peer example:
-```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerNode"]}' -C myc
-```
-##### Command output:
-```json
-{
- "id": "SampleOrg"
 }
 ```
 #### ------------ Query DataManagers ------------
@@ -1402,11 +1402,11 @@ peer chaincode query -n mycc -c '{"Args":["queryNodes"]}' -C myc
 ```
 ##### Command output:
 ```json
-{
- "nodeIDs": [
-  "SampleOrg"
- ]
-}
+[
+ {
+  "id": "SampleOrg"
+ }
+]
 ```
 #### ------------ Update Data Sample with new data manager ------------
 Smart contract: `updateDataSample`

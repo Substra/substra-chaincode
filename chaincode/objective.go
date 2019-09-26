@@ -40,8 +40,12 @@ func (objective *Objective) Set(db LedgerDB, inp inputObjective) (objectiveKey s
 	if err != nil {
 		return
 	}
+	permissions, err := NewPermissions(db, inp.Permissions)
+	if err != nil {
+		return
+	}
 	objective.Owner = owner
-	objective.Permissions = NewPermissions(inp.Permissions, owner)
+	objective.Permissions = permissions
 	objectiveKey = inp.DescriptionHash
 	return
 }

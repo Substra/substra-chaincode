@@ -9,7 +9,7 @@ import (
 
 func TestJsonInputsDataManager(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	inpDataManager := inputDataManager{}
 	inpDataManager.createDefault()
@@ -21,7 +21,7 @@ func TestJsonInputsDataManager(t *testing.T) {
 }
 func TestDataManager(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add dataManager with invalid field
 	inpDataManager := inputDataManager{
@@ -96,7 +96,7 @@ func TestDataManager(t *testing.T) {
 
 func TestGetTestDatasetKeys(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Input DataManager
 	inpDataManager := inputDataManager{}
@@ -127,7 +127,7 @@ func TestGetTestDatasetKeys(t *testing.T) {
 }
 func TestDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add dataSample with invalid field
 	inpDataSample := inputDataSample{

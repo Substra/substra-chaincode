@@ -1,5 +1,9 @@
 package main
 
+import (
+	"fmt"
+)
+
 // Action is the the type of an action
 type Action string
 
@@ -45,13 +49,40 @@ func (perms Permissions) CanProcess(owner, node string) bool {
 }
 
 // NewPermissions create the Permissions according to the arg received
-func NewPermissions(in inputPermissions, owner string) Permissions {
-	perms := Permissions{}
+func NewPermissions(db LedgerDB, in inputPermissions) (Permissions, error) {
+	nodes, err := queryNodes(db, []string{})
+	if err != nil {
+		return Permissions{}, err
+	}
+
+	nodesIDs := []string{}
+	for _, node := range nodes {
+		nodesIDs = append(nodesIDs, node.ID)
+	}
+
+	// Validate Process inputPermissions
+	// @TODO Validate Download inputPermissions when implemented
+	for _, authorizedID := range in.Process.AuthorizedIDs {
+		if in.Process.Public {
+			continue
+		}
+
+		if !stringInSlice(authorizedID, nodesIDs) {
+			return Permissions{}, fmt.Errorf("Invalid permission input values")
+		}
+	}
+
+	owner, err := GetTxCreator(db.cc)
+	if err != nil {
+		return Permissions{}, err
+	}
+
+	permissions := Permissions{}
 	process := newPermission(in.Process, owner)
-	perms.Process = process
+	permissions.Process = process
 	// Download permission is not implemented in the node server, so it is set to the process permission
-	perms.Download = process
-	return perms
+	permissions.Download = process
+	return permissions, nil
 }
 
 func newPermission(in inputPermission, owner string) Permission {

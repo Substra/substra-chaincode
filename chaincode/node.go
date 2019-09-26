@@ -22,21 +22,21 @@ func registerNode(db LedgerDB, args []string) (Node, error) {
 	return node, nil
 }
 
-func queryNodes(db LedgerDB, args []string) (resp map[string][]string, err error) {
+func queryNodes(db LedgerDB, args []string) (resp []Node, err error) {
 	elementsKeys, err := db.GetIndexKeys("node~key", []string{"node"})
 	if err != nil {
 		return nil, err
 	}
 
-	nodes := []string{}
+	nodes := []Node{}
 	for _, key := range elementsKeys {
 		node, err := db.GetNode(key)
 		if err != nil {
 			return nil, err
 		}
 
-		nodes = append(nodes, node.ID)
+		nodes = append(nodes, node)
 	}
 
-	return map[string][]string{"nodeIDs": nodes}, nil
+	return nodes, nil
 }

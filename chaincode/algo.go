@@ -13,6 +13,12 @@ func (algo *Algo) Set(db LedgerDB, inp inputAlgo) (algoKey string, err error) {
 	if err != nil {
 		return
 	}
+
+	permissions, err := NewPermissions(db, inp.Permissions)
+	if err != nil {
+		return
+	}
+
 	algo.AssetType = AlgoType
 	algo.Name = inp.Name
 	algo.StorageAddress = inp.StorageAddress
@@ -21,7 +27,7 @@ func (algo *Algo) Set(db LedgerDB, inp inputAlgo) (algoKey string, err error) {
 		StorageAddress: inp.DescriptionStorageAddress,
 	}
 	algo.Owner = owner
-	algo.Permissions = NewPermissions(inp.Permissions, owner)
+	algo.Permissions = permissions
 	return
 }
 

@@ -42,7 +42,7 @@ var (
 
 func TestInit(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// resp := mockStub.MockInit("42", [][]byte{[]byte("init")})
 	resp := mockStub.MockInit("42", [][]byte{[]byte("init")})
@@ -220,6 +220,9 @@ func TestPipeline(t *testing.T) {
 		return resp
 	}
 
+	fmt.Fprintln(&out, "#### ------------ Add Node ------------")
+	callAssertAndPrint("invoke", "registerNode", nil)
+
 	fmt.Fprintln(&out, "#### ------------ Add DataManager ------------")
 	inpDataManager := inputDataManager{}
 	inpDataManager.createDefault()
@@ -256,9 +259,6 @@ func TestPipeline(t *testing.T) {
 	inpDataSample = inputDataSample{}
 	inpDataSample.createDefault()
 	callAssertAndPrint("invoke", "registerDataSample", inpDataSample)
-
-	fmt.Fprintln(&out, "#### ------------ Add Node ------------")
-	callAssertAndPrint("invoke", "registerNode", nil)
 
 	fmt.Fprintln(&out, "#### ------------ Query DataManagers ------------")
 	callAssertAndPrint("query", "queryDataManagers", nil)
@@ -458,7 +458,7 @@ func initializeMockStateDB(t *testing.T, stub *MockStub) {
 
 func TestQueryEmptyResponse(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	initializeMockStateDB(t, mockStub)
 
 	smartContracts := []string{
