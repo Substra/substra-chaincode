@@ -13,8 +13,12 @@ func TestNode(t *testing.T) {
 	args := append([][]byte{[]byte("registerNode")}, []byte{})
 
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 200, resp.Status, "Node Created")
+	assert.EqualValuesf(t, 200, resp.Status, "Node created")
 	assert.EqualValuesf(t, "{\"id\":\"SampleOrg\"}", string(resp.Payload), "Node created")
+
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValuesf(t, 200, resp.Status, "Node registered twice")
+	assert.EqualValuesf(t, "{\"id\":\"SampleOrg\"}", string(resp.Payload), "Node registered twice")
 }
 
 func TestQueryNodes(t *testing.T) {

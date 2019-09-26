@@ -9,7 +9,17 @@ func registerNode(db LedgerDB, args []string) (Node, error) {
 	node := Node{}
 	node.ID = txCreator
 
-	err = db.Add(node.ID, node)
+	// Not using db.Add because we need to handle conflict as silent event without errors
+	exists, err := db.KeyExists(node.ID)
+	if err != nil {
+		return Node{}, err
+	}
+
+	if exists {
+		return node, nil
+	}
+
+	err = db.Put(node.ID, node)
 	if err != nil {
 		return Node{}, err
 	}
