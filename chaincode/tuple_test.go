@@ -207,7 +207,7 @@ func TestTraintupleWithDuplicatedDatasamples(t *testing.T) {
 	}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 400, resp.Status, "when adding traintuple with a duplicated data samples it should not work: ", resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding traintuple with a duplicated data samples it should not work: %s", resp.Message)
 }
 func TestTagTuple(t *testing.T) {
 	scc := new(SubstraChaincode)

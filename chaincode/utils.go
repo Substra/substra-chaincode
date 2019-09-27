@@ -22,19 +22,6 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-// sliceHasDuplicatedItems checks if a list of strings has duplicated items
-func sliceHasDuplicatedItems(list []string) bool {
-	existing_items := make(map[string]bool)
-	for _, item := range list {
-		_, ok := existing_items[item]
-		if ok {
-			return true
-		}
-		existing_items[item] = true
-	}
-	return false
-}
-
 // inputStructToBytes converts fields of a struct (with string fields only, such as input struct defined in ledger.go) to a [][]byte
 func inputStructToBytes(v interface{}) (sb [][]byte, err error) {
 
