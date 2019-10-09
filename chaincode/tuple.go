@@ -498,6 +498,14 @@ func createTraintuple(db LedgerDB, args []string) (map[string]string, error) {
 		return nil, err
 	}
 	traintupleKey := traintuple.GetKey()
+	// Test if the key (ergo the traintuple) already exists
+	tupleExists, err := db.KeyExists(traintupleKey)
+	if err != nil {
+		return nil, err
+	}
+	if tupleExists {
+		return nil, errors.Conflict("traintuple already exists").WithKey(traintupleKey)
+	}
 	err = traintuple.AddToComputePlan(db, inp, traintupleKey)
 	if err != nil {
 		return nil, err
