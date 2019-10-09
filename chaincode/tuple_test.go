@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"net/http"
 	"strings"
 	"testing"
 
@@ -632,4 +633,30 @@ func TestQueryTraintupleNotFound(t *testing.T) {
 	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(algoHash)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
+}
+
+func TestInsertTraintupleTwice(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "algo")
+
+	// create a traintuple and start a ComplutePlan
+	inpTraintuple := inputTraintuple{
+		Rank: "0",
+	}
+	inpTraintuple.createDefault()
+	resp := mockStub.MockInvoke("42", methodAndAssetToByte("createTraintuple", inpTraintuple))
+	assert.EqualValues(t, http.StatusOK, resp.Status)
+
+	// create a second traintuple in the same ComputePlan
+	inpTraintuple.Rank = "1"
+	inpTraintuple.ComputePlanID = traintupleKey
+	inpTraintuple.InModels = []string{traintupleKey}
+	resp = mockStub.MockInvoke("42", methodAndAssetToByte("createTraintuple", inpTraintuple))
+	assert.EqualValues(t, http.StatusOK, resp.Status)
+
+	// re-insert the same traintuple and expect a conflict error
+	resp = mockStub.MockInvoke("42", methodAndAssetToByte("createTraintuple", inpTraintuple))
+	assert.EqualValues(t, http.StatusConflict, resp.Status)
+
 }
