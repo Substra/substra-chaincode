@@ -62,6 +62,7 @@ func (traintuple *Traintuple) SetFromInput(db LedgerDB, inp inputTraintuple) err
 		return errors.Forbidden("not authorized to process objective %s", inp.ObjectiveKey)
 	}
 	traintuple.ObjectiveKey = inp.ObjectiveKey
+	traintuple.Evaluate = inp.Evaluate
 
 	// check if DataSampleKeys are from the same dataManager and if they are not test only dataSample
 	_, trainOnly, err := checkSameDataManager(db, inp.DataManagerKey, inp.DataSampleKeys)

@@ -71,6 +71,7 @@ type Traintuple struct {
 	OutModel      *HashDress  `json:"outModel"`
 	Perf          float32     `json:"perf"`
 	Permissions   Permissions `json:"permissions"`
+	Evaluate      bool        `json:"evaluate"`
 	Rank          int         `json:"rank"`
 	Status        string      `json:"status"`
 	Tag           string      `json:"tag"`

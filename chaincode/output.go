@@ -110,6 +110,7 @@ type outputTraintuple struct {
 	Rank          int               `json:"rank"`
 	Status        string            `json:"status"`
 	Tag           string            `json:"tag"`
+	Evaluate      bool              `json:"evaluate"`
 }
 
 //Fill is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
@@ -123,6 +124,7 @@ func (outputTraintuple *outputTraintuple) Fill(db LedgerDB, traintuple Traintupl
 	outputTraintuple.Rank = traintuple.Rank
 	outputTraintuple.ComputePlanID = traintuple.ComputePlanID
 	outputTraintuple.OutModel = traintuple.OutModel
+	outputTraintuple.Evaluate = traintuple.Evaluate
 	outputTraintuple.Tag = traintuple.Tag
 	// fill algo
 	algo, err := db.GetAlgo(traintuple.AlgoKey)

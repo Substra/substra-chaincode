@@ -359,6 +359,7 @@ Smart contract: `createTraintuple`
  "inModels": [string] (omitempty,dive,len=64,hexadecimal),
  "dataManagerKey": string (required,len=64,hexadecimal),
  "dataSampleKeys": [string] (required,unique,gt=0,dive,len=64,hexadecimal),
+ "evaluate": bool (required),
  "computePlanID": string (omitempty),
  "rank": string (omitempty),
  "tag": string (omitempty,lte=64),
@@ -366,7 +367,7 @@ Smart contract: `createTraintuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":[],\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"computePlanID\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":[],\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"evaluate\":false,\"computePlanID\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -385,6 +386,7 @@ Smart contract: `createTraintuple`
  "inModels": [string] (omitempty,dive,len=64,hexadecimal),
  "dataManagerKey": string (required,len=64,hexadecimal),
  "dataSampleKeys": [string] (required,unique,gt=0,dive,len=64,hexadecimal),
+ "evaluate": bool (required),
  "computePlanID": string (omitempty),
  "rank": string (omitempty),
  "tag": string (omitempty,lte=64),
@@ -392,7 +394,7 @@ Smart contract: `createTraintuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":[\"9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3\"],\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"computePlanID\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"inModels\":[\"9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3\"],\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"evaluate\":false,\"computePlanID\":\"\",\"rank\":\"\",\"tag\":\"\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -440,6 +442,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"train
    "perf": 0,
    "worker": "SampleOrg"
   },
+  "evaluate": false,
   "inModels": null,
   "key": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
   "log": "",
@@ -495,6 +498,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"9da043ddc
   "perf": 0,
   "worker": "SampleOrg"
  },
+ "evaluate": false,
  "inModels": null,
  "key": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
  "log": "",
@@ -555,6 +559,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"9da043d
   "perf": 0.9,
   "worker": "SampleOrg"
  },
+ "evaluate": false,
  "inModels": null,
  "key": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
  "log": "no error, ah ah ah",
@@ -612,6 +617,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"9da043d
   "perf": 0.9,
   "worker": "SampleOrg"
  },
+ "evaluate": false,
  "inModels": null,
  "key": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
  "log": "no error, ah ah ah",
@@ -1157,6 +1163,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
    "perf": 0.9,
    "worker": "SampleOrg"
   },
+  "evaluate": false,
   "inModels": null,
   "key": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
   "log": "no error, ah ah ah",
@@ -1243,6 +1250,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     "perf": 0,
     "worker": "SampleOrg"
    },
+   "evaluate": false,
    "inModels": [
     {
      "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
@@ -1323,6 +1331,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     "perf": 0.9,
     "worker": "SampleOrg"
    },
+   "evaluate": false,
    "inModels": null,
    "key": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
    "log": "no error, ah ah ah",
