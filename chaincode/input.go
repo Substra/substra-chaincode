@@ -71,7 +71,7 @@ type inputTraintuple struct {
 	InModels       []string `validate:"omitempty,dive,len=64,hexadecimal" json:"inModels"`
 	DataManagerKey string   `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
 	DataSampleKeys []string `validate:"required,unique,gt=0,dive,len=64,hexadecimal" json:"dataSampleKeys"`
-	Evaluate       bool     `json:"evaluate,required"`
+	Evaluate       bool     `json:"evaluate"`
 	ComputePlanID  string   `validate:"omitempty" json:"computePlanID"`
 	Rank           string   `validate:"omitempty" json:"rank"`
 	Tag            string   `validate:"omitempty,lte=64" json:"tag"`

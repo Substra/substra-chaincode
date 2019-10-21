@@ -104,8 +104,12 @@ func prettyPrintStructElements(buf io.Writer, margin string, strucType reflect.T
 			}
 			continue
 		case reflect.Bool:
-			jsonTag := strings.Split(f.Tag.Get("json"), ",")
-			fmt.Fprintf(buf, "%s\"%s\": %s (%s),\n", margin, jsonTag[0], fieldType, jsonTag[1])
+			jsonTags := strings.Split(f.Tag.Get("json"), ",")
+			extraJSONTag := ""
+			if len(jsonTags) > 1 {
+				extraJSONTag = fmt.Sprintf(" (%s)", jsonTags[1])
+			}
+			fmt.Fprintf(buf, "%s\"%s\": %s%s,\n", margin, jsonTags[0], fieldType, extraJSONTag)
 			continue
 		case reflect.Slice:
 			if f.Type.Elem().Kind() == reflect.Struct {
