@@ -11,6 +11,43 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestRecursiveLogFailed(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStub("substra", scc)
+	mockStub.MockTransactionStart("42")
+	registerItem(t, *mockStub, "traintuple")
+	db := NewLedgerDB(mockStub)
+
+	childtraintuple := inputTraintuple{}
+	childtraintuple.createDefault()
+	childtraintuple.InModels = []string{traintupleKey}
+	childResp, err := createTraintuple(db, assetToArgs(childtraintuple))
+	assert.NoError(t, err)
+
+	grandChildtraintuple := inputTraintuple{}
+	grandChildtraintuple.createDefault()
+	grandChildtraintuple.InModels = []string{childResp["key"]}
+	grandChildresp, err := createTraintuple(db, assetToArgs(grandChildtraintuple))
+	assert.NoError(t, err)
+
+	grandChildtesttuple := inputTesttuple{TraintupleKey: traintupleKey}
+	testResp, err := createTesttuple(db, assetToArgs(grandChildtesttuple))
+	assert.NoError(t, err)
+
+	_, err = logStartTrain(db, assetToArgs(inputHash{Key: traintupleKey}))
+	assert.NoError(t, err)
+	_, err = logFailTrain(db, assetToArgs(inputHash{Key: traintupleKey}))
+	assert.NoError(t, err)
+
+	train2, err := db.GetTraintuple(grandChildresp["key"])
+	assert.NoError(t, err)
+	assert.Equal(t, StatusFailed, train2.Status)
+
+	test, err := db.GetTesttuple(testResp["key"])
+	assert.NoError(t, err)
+	assert.Equal(t, StatusFailed, test.Status)
+}
+
 // myMockStub is here to simulate the fact that in real condition you cannot read
 // what you just write. It should be improved and more generally used.
 type myMockStub struct {

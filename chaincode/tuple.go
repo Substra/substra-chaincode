@@ -1082,6 +1082,17 @@ func (traintuple *Traintuple) updateTraintupleChildren(db LedgerDB, traintupleKe
 			}
 			event.AddTraintuple(out)
 		}
+
+		// Recursively call for an update on this child's children
+		err = childTraintuple.updateTesttupleChildren(db, childTraintupleKey, event)
+		if err != nil {
+			return err
+		}
+
+		err = childTraintuple.updateTraintupleChildren(db, childTraintupleKey, event)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
