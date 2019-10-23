@@ -263,6 +263,16 @@ func (te *TuplesEvent) SetTraintuples(otuples ...outputTraintuple) {
 	te.Traintuples = otuples
 }
 
+// AddTraintuple add one traintuple to the event struct
+func (te *TuplesEvent) AddTraintuple(out outputTraintuple) {
+	te.Traintuples = append(te.Traintuples, out)
+}
+
+// AddTesttuple add one testtuple to the event struct
+func (te *TuplesEvent) AddTesttuple(out outputTesttuple) {
+	te.Testtuples = append(te.Testtuples, out)
+}
+
 type outputComputePlan struct {
 	ComputePlanID  string   `json:"computePlanID"`
 	TraintupleKeys []string `json:"traintupleKeys"`
