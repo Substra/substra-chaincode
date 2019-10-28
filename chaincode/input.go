@@ -90,6 +90,24 @@ type inputTraintuple struct {
 	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
 }
 
+// inputCompositeTraintuple is the representation of input args to register a Traintuple
+type inputCompositeTraintuple struct {
+	AlgoKey        string              `validate:"required,len=64,hexadecimal" json:"algoKey"`
+	ObjectiveKey   string              `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
+	InModelHead    inputCompositeModel `validate:"omitempty" json:"inModelHead"`
+	InModelTrunk   inputCompositeModel `validate:"omitempty" json:"inModelTrunk"`
+	DataManagerKey string              `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys []string            `validate:"required,unique,gt=0,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	ComputePlanID  string              `validate:"omitempty" json:"computePlanID"`
+	Rank           string              `validate:"omitempty" json:"rank"`
+	Tag            string              `validate:"omitempty,lte=64" json:"tag"`
+}
+
+type inputCompositeModel struct {
+	Key            string           `validate:"required,len=64,hexadecimal" json:"key"`
+	OutPermissions inputPermissions `validate:"required" json:"outPermissions"`
+}
+
 // inputTestuple is the representation of input args to register a Testtuple
 type inputTesttuple struct {
 	TraintupleKey  string   `validate:"required,len=64,hexadecimal" json:"traintupleKey"`
