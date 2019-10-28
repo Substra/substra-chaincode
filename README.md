@@ -1574,4 +1574,3 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
  ]
 }
 ```
- 
