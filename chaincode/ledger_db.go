@@ -249,6 +249,18 @@ func (db *LedgerDB) GetTraintuple(key string) (Traintuple, error) {
 	return traintuple, nil
 }
 
+// GetTraintupleComposite fetches a TraintupleComposite from the ledger using its unique key
+func (db *LedgerDB) GetTraintupleComposite(key string) (TraintupleComposite, error) {
+	traintuple := TraintupleComposite{}
+	if err := db.Get(key, &traintuple); err != nil {
+		return traintuple, err
+	}
+	if traintuple.AssetType != TraintupleCompositeType {
+		return traintuple, errors.NotFound("traintuple %s not found", key)
+	}
+	return traintuple, nil
+}
+
 // GetTesttuple fetches a Testtuple from the ledger using its unique key
 func (db *LedgerDB) GetTesttuple(key string) (Testtuple, error) {
 	testtuple := Testtuple{}

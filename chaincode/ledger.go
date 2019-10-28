@@ -29,6 +29,7 @@ const (
 	AlgoType
 	TraintupleType
 	TesttupleType
+	TraintupleCompositeType
 )
 
 // Objective is the representation of one of the element type stored in the ledger
@@ -88,6 +89,32 @@ type Traintuple struct {
 	Rank          int         `json:"rank"`
 	Status        string      `json:"status"`
 	Tag           string      `json:"tag"`
+}
+
+// TraintupleComposite is like a traintuple, but for composite model composition
+type TraintupleComposite struct {
+	AlgoKey       string                      `json:"algoKey"`
+	AssetType     AssetType                   `json:"assetType"`
+	ComputePlanID string                      `json:"computePlanID"`
+	Creator       string                      `json:"creator"`
+	Dataset       *Dataset                    `json:"dataset"`
+	InModelHead   string                      `json:"inModelHead"`
+	InModelTrunk  string                      `json:"inModelTrunk"`
+	Log           string                      `json:"log"`
+	ObjectiveKey  string                      `json:"objectiveKey"`
+	OutModelHead  TraintupleCompositeOutModel `json:"outModelHead"`
+	OutModelTrunk TraintupleCompositeOutModel `json:"outModelTrunk"`
+	Perf          float32                     `json:"perf"`
+	Permissions   Permissions                 `json:"permissions"`
+	Rank          int                         `json:"rank"`
+	Status        string                      `json:"status"`
+	Tag           string                      `json:"tag"`
+}
+
+// TraintupleCompositeOutModel is the out-model of a TraintupleComposite
+type TraintupleCompositeOutModel struct {
+	OutModel    *HashDress  `json:"outModel"`
+	Permissions Permissions `json:"permissions"`
 }
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform

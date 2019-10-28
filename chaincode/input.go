@@ -90,6 +90,24 @@ type inputTraintuple struct {
 	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
 }
 
+// inputTraintupleComposite is the representation of input args to register a Traintuple
+type inputTraintupleComposite struct {
+	AlgoKey        string              `validate:"required,len=64,hexadecimal" json:"algoKey"`
+	ObjectiveKey   string              `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
+	InModelHead    inputModelComposite `validate:"omitempty" json:"inModelHead"`
+	InModelTrunk   inputModelComposite `validate:"omitempty" json:"inModelTrunk"`
+	DataManagerKey string              `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys []string            `validate:"required,unique,gt=0,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	ComputePlanID  string              `validate:"omitempty" json:"computePlanID"`
+	Rank           string              `validate:"omitempty" json:"rank"`
+	Tag            string              `validate:"omitempty,lte=64" json:"tag"`
+}
+
+type inputModelComposite struct {
+	Key            string           `validate:"required,len=64,hexadecimal" json:"key"`
+	OutPermissions inputPermissions `validate:"required" json:"outPermissions"`
+}
+
 // inputTestuple is the representation of input args to register a Testtuple
 type inputTesttuple struct {
 	TraintupleKey  string   `validate:"required,len=64,hexadecimal" json:"traintupleKey"`
@@ -106,6 +124,12 @@ type inputLogSuccessTrain struct {
 	inputLog
 	OutModel inputHashDress `validate:"required" json:"outModel"`
 	Perf     float32        `validate:"omitempty" json:"perf"`
+}
+type inputLogSuccessTrainComposite struct {
+	inputLog
+	OutModelHead  inputHashDress `validate:"required" json:"outModelHead"`
+	OutModelTrunk inputHashDress `validate:"required" json:"outModelTrunk"`
+	Perf          float32        `validate:"omitempty" json:"perf"`
 }
 type inputLogSuccessTest struct {
 	inputLog

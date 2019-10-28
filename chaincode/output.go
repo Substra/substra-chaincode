@@ -263,8 +263,14 @@ type outputModel struct {
 
 // TuplesEvent is the collection of tuples sent in an event
 type TuplesEvent struct {
-	Testtuples  []outputTesttuple  `json:"testtuple"`
-	Traintuples []outputTraintuple `json:"traintuple"`
+	Testtuples           []outputTesttuple           `json:"testtuple"`
+	Traintuples          []outputTraintuple          `json:"traintuple"`
+	TraintuplesComposite []outputTraintupleComposite `json:"traintuplesComposite"`
+}
+
+// SetTraintuplesComposite add one or several testtuples to the event struct
+func (te *TuplesEvent) SetTraintuplesComposite(otuples ...outputTraintupleComposite) {
+	te.TraintuplesComposite = otuples
 }
 
 // SetTesttuples add one or several testtuples to the event struct
