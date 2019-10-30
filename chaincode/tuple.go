@@ -1053,11 +1053,6 @@ func (traintuple *Traintuple) updateTraintupleChildren(db LedgerDB, traintupleKe
 			return err
 		}
 
-		// remove associated composite key
-		if err := db.DeleteIndex("traintuple~inModel~key", []string{"traintuple", traintupleKey, childTraintupleKey}); err != nil {
-			return err
-		}
-
 		// traintuple is already failed, don't update it
 		if childTraintuple.Status == StatusFailed {
 			continue
