@@ -16,9 +16,18 @@ package main
 
 import (
 	"chaincode/errors"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"reflect"
+
+	"crypto/ecdsa"
+	"crypto/rsa"
+
+	"crypto/x509"
+
+	"encoding/pem"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -104,17 +113,43 @@ func SendTuplesEvent(stub shim.ChaincodeStubInterface, event interface{}) error 
 
 // GetTxCreator returns the transaction creator
 func GetTxCreator(stub shim.ChaincodeStubInterface) (string, error) {
-	creator, err := stub.GetCreator()
+	bCreator, err := stub.GetCreator()
 
 	if err != nil {
 		return "", err
 	}
 
+	// get pertain protobuf object
 	sID := &msp.SerializedIdentity{}
-	err = proto.Unmarshal(creator, sID)
+	err = proto.Unmarshal(bCreator, sID)
 	if err != nil {
 		return "", err
 	}
 
-	return sID.GetMspid(), nil
+	// get the cert
+	block, _ := pem.Decode(sID.IdBytes)
+	if block == nil {
+		return "", fmt.Errorf("unable to decode block %s", sID.IdBytes)
+	}
+
+	// load it as a pem cert
+	var cert *x509.Certificate
+	cert, _ = x509.ParseCertificate(block.Bytes)
+
+	creator := "test"
+	switch pub := cert.PublicKey.(type) {
+	case *rsa.PublicKey:
+		rsaPublicKey := cert.PublicKey.(*rsa.PublicKey)
+		modulus := rsaPublicKey.N
+		hashedModulus := sha256.Sum256(modulus.Bytes())
+		creator = hex.EncodeToString(hashedModulus[:])
+	case *ecdsa.PublicKey:
+		point := fmt.Sprintf("%v:%v", pub.X, pub.Y)
+		hashedPoint := sha256.Sum256([]byte(point))
+		creator = hex.EncodeToString(hashedPoint[:])
+	default:
+		return "", fmt.Errorf("can't determine public key algorithm")
+	}
+
+	return creator, nil
 }
