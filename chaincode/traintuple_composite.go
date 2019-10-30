@@ -362,6 +362,8 @@ func logSuccessTrainComposite(db LedgerDB, args []string) (outputTraintuple outp
 	outputTraintuple.Fill(db, traintuple, inp.Key)
 
 	event := TuplesEvent{}
+	// TODO: What type of children can composite traintuples have?
+	// Only composite traintuple? Only regular tuples? Both?
 	event.SetTraintuples(traintuplesEvent...)
 	event.SetTesttuples(testtuplesEvent...)
 	err = SendTuplesEvent(db.cc, event)
@@ -564,7 +566,7 @@ func (traintuple *TraintupleComposite) updateTraintupleChildren(db LedgerDB, tra
 // isReady checks if inModels of a traintuple have been trained, except the newDoneTraintupleKey (since the transaction is not commited)
 // and updates the traintuple status if necessary
 func (traintuple *TraintupleComposite) isReady(db LedgerDB, newDoneTraintupleKey string) (ready bool, err error) {
-	for _, key := range traintuple.InModelKeys {
+	for _, key := range [2]string{traintuple.InModelTrunk, traintuple.InModelHead} {
 		// don't check newly done traintuple
 		if key == newDoneTraintupleKey {
 			continue
@@ -638,6 +640,7 @@ func (traintuple *TraintupleComposite) updateTesttupleChildren(db LedgerDB, trai
 		}
 
 		if newStatus == StatusTodo {
+			// TODO: the testtuples of composite traintuples have 2 models instead of 1!?
 			testtuple.Model.Hash = traintuple.OutModel.Hash
 			testtuple.Model.StorageAddress = traintuple.OutModel.StorageAddress
 		}

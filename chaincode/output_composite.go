@@ -45,12 +45,16 @@ func (outputTraintupleComposite *outputTraintupleComposite) Fill(db LedgerDB, tr
 
 	outputTraintupleComposite.Key = traintupleKey
 	outputTraintupleComposite.Creator = traintuple.Creator
-	outputTraintupleComposite.Permissions.Fill(traintuple.Permissions)
 	outputTraintupleComposite.Log = traintuple.Log
 	outputTraintupleComposite.Status = traintuple.Status
 	outputTraintupleComposite.Rank = traintuple.Rank
 	outputTraintupleComposite.ComputePlanID = traintuple.ComputePlanID
-	outputTraintupleComposite.OutModel = traintuple.OutModel
+	outputTraintupleComposite.OutModelHead = outModelComposite{
+		OutModel:    traintuple.OutModelHead.OutModel,
+		Permissions: getOutPermissions(traintuple.OutModelHead.Permissions)}
+	outputTraintupleComposite.OutModelTrunk = outModelComposite{
+		OutModel:    traintuple.OutModelTrunk.OutModel,
+		Permissions: getOutPermissions(traintuple.OutModelTrunk.Permissions)}
 	outputTraintupleComposite.Tag = traintuple.Tag
 	// fill algo
 	algo, err := db.GetAlgo(traintuple.AlgoKey)
@@ -82,23 +86,30 @@ func (outputTraintupleComposite *outputTraintupleComposite) Fill(db LedgerDB, tr
 		Metrics: &metrics,
 	}
 
-	// fill inModels
-	for _, inModelKey := range traintuple.InModelKeys {
-		if inModelKey == "" {
-			break
-		}
-		parentTraintuple, err := db.GetTraintuple(inModelKey)
-		if err != nil {
-			return fmt.Errorf("could not retrieve parent traintuple with key %s - %s", inModelKey, err.Error())
-		}
-		inModel := &Model{
-			TraintupleKey: inModelKey,
-		}
-		if parentTraintuple.OutModel != nil {
-			inModel.Hash = parentTraintuple.OutModel.Hash
-			inModel.StorageAddress = parentTraintuple.OutModel.StorageAddress
-		}
-		outputTraintupleComposite.InModels = append(outputTraintupleComposite.InModels, inModel)
+	// fill inModel (trunk)
+	trunk, err := db.GetTraintuple(traintuple.InModelTrunk)
+	if err != nil {
+		return fmt.Errorf("could not retrieve parent traintuple (trunk) with key %s - %s", traintuple.InModelTrunk, err.Error())
+	}
+	outputTraintupleComposite.InModelTrunk = &Model{
+		TraintupleKey: traintuple.InModelTrunk,
+	}
+	if trunk.OutModel != nil {
+		outputTraintupleComposite.InModelTrunk.Hash = trunk.OutModel.Hash
+		outputTraintupleComposite.InModelTrunk.StorageAddress = trunk.OutModel.StorageAddress
+	}
+
+	// fill inModel (head)
+	head, err := db.GetTraintuple(traintuple.InModelHead)
+	if err != nil {
+		return fmt.Errorf("could not retrieve parent traintuple (head) with key %s - %s", traintuple.InModelHead, err.Error())
+	}
+	outputTraintupleComposite.InModelHead = &Model{
+		TraintupleKey: traintuple.InModelHead,
+	}
+	if head.OutModel != nil {
+		outputTraintupleComposite.InModelHead.Hash = head.OutModel.Hash
+		outputTraintupleComposite.InModelHead.StorageAddress = head.OutModel.StorageAddress
 	}
 
 	// fill dataset
@@ -110,4 +121,10 @@ func (outputTraintupleComposite *outputTraintupleComposite) Fill(db LedgerDB, tr
 	}
 
 	return
+}
+
+func getOutPermissions(in Permissions) (out outputPermissions) {
+	out = outputPermissions{}
+	out.Fill(in)
+	return out
 }
