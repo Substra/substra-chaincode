@@ -283,6 +283,11 @@ func (te *TuplesEvent) SetTraintuples(otuples ...outputTraintuple) {
 	te.Traintuples = otuples
 }
 
+// AddCompositeTraintuple add one traintuple to the event struct
+func (te *TuplesEvent) AddCompositeTraintuple(out outputCompositeTraintuple) {
+	te.TraintuplesComposite = append(te.TraintuplesComposite, out)
+}
+
 // AddTraintuple add one traintuple to the event struct
 func (te *TuplesEvent) AddTraintuple(out outputTraintuple) {
 	te.Traintuples = append(te.Traintuples, out)
