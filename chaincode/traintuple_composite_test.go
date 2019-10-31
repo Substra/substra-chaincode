@@ -43,7 +43,7 @@ func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding traintuple without test dataset it should work: ", resp.Message)
 
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
+	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
 }

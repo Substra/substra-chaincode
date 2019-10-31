@@ -173,7 +173,7 @@ func (traintuple *inputCompositeTraintuple) createDefault() [][]byte {
 		traintuple.DataSampleKeys = []string{trainDataSampleHash1, trainDataSampleHash2}
 	}
 	traintuple.InTrunkModelPermission = OpenPermissions
-	args := append([][]byte{[]byte("createTraintuple")}, assetToJSON(traintuple))
+	args := append([][]byte{[]byte("createCompositeTraintuple")}, assetToJSON(traintuple))
 	return args
 }
 
