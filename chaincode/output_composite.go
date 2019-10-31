@@ -87,29 +87,33 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db LedgerDB, tr
 	}
 
 	// fill inModel (trunk)
-	trunk, err := db.GetTraintuple(traintuple.InModelTrunk)
-	if err != nil {
-		return fmt.Errorf("could not retrieve parent traintuple (trunk) with key %s - %s", traintuple.InModelTrunk, err.Error())
-	}
-	outputCompositeTraintuple.InModelTrunk = &Model{
-		TraintupleKey: traintuple.InModelTrunk,
-	}
-	if trunk.OutModel != nil {
-		outputCompositeTraintuple.InModelTrunk.Hash = trunk.OutModel.Hash
-		outputCompositeTraintuple.InModelTrunk.StorageAddress = trunk.OutModel.StorageAddress
+	if traintuple.InModelTrunk != "" {
+		trunk, err := db.GetTraintuple(traintuple.InModelTrunk)
+		if err != nil {
+			return fmt.Errorf("could not retrieve parent traintuple (trunk) with key \"%s\" - %s", traintuple.InModelTrunk, err.Error())
+		}
+		outputCompositeTraintuple.InModelTrunk = &Model{
+			TraintupleKey: traintuple.InModelTrunk,
+		}
+		if trunk.OutModel != nil {
+			outputCompositeTraintuple.InModelTrunk.Hash = trunk.OutModel.Hash
+			outputCompositeTraintuple.InModelTrunk.StorageAddress = trunk.OutModel.StorageAddress
+		}
 	}
 
 	// fill inModel (head)
-	head, err := db.GetTraintuple(traintuple.InModelHead)
-	if err != nil {
-		return fmt.Errorf("could not retrieve parent traintuple (head) with key %s - %s", traintuple.InModelHead, err.Error())
-	}
-	outputCompositeTraintuple.InModelHead = &Model{
-		TraintupleKey: traintuple.InModelHead,
-	}
-	if head.OutModel != nil {
-		outputCompositeTraintuple.InModelHead.Hash = head.OutModel.Hash
-		outputCompositeTraintuple.InModelHead.StorageAddress = head.OutModel.StorageAddress
+	if traintuple.InModelHead != "" {
+		head, err := db.GetTraintuple(traintuple.InModelHead)
+		if err != nil {
+			return fmt.Errorf("could not retrieve parent traintuple (head) with key \"%s\" - %s", traintuple.InModelHead, err.Error())
+		}
+		outputCompositeTraintuple.InModelHead = &Model{
+			TraintupleKey: traintuple.InModelHead,
+		}
+		if head.OutModel != nil {
+			outputCompositeTraintuple.InModelHead.Hash = head.OutModel.Hash
+			outputCompositeTraintuple.InModelHead.StorageAddress = head.OutModel.StorageAddress
+		}
 	}
 
 	// fill dataset

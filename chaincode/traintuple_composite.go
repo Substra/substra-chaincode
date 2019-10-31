@@ -40,7 +40,7 @@ func (traintuple *CompositeTraintuple) SetFromInput(db LedgerDB, inp inputCompos
 	if err != nil {
 		return err
 	}
-	traintuple.AssetType = TraintupleType
+	traintuple.AssetType = CompositeTraintupleType
 	traintuple.Creator = creator
 	traintuple.Tag = inp.Tag
 	algo, err := db.GetAlgo(inp.AlgoKey)
@@ -98,34 +98,30 @@ func (traintuple *CompositeTraintuple) SetFromParents(db LedgerDB, inp inputComp
 	status := StatusTodo
 
 	// head
-	headTraintuple, err := db.GetCompositeTraintuple(inp.InHeadModelKey)
-	if err != nil {
-		err = errors.BadRequest(err, "could not retrieve parent traintuple (head) with key %s", inp.InHeadModelKey)
-		return err
+	if inp.InHeadModelKey != "" {
+		headTraintuple, err := db.GetCompositeTraintuple(inp.InHeadModelKey)
+		if err != nil {
+			err = errors.BadRequest(err, "could not retrieve parent traintuple (head) with key \"%s\"", inp.InHeadModelKey)
+			return err
+		}
+		if headTraintuple.OutHeadModel.OutModel == nil {
+			status = StatusWaiting
+		}
+		traintuple.InModelHead = inp.InHeadModelKey
 	}
-	if headTraintuple.OutHeadModel.OutModel == nil {
-		status = StatusWaiting
-	}
-	traintuple.InModelHead = inp.InHeadModelKey
-	permissions := Permissions{Process: Permission{AuthorizedIDs: []string{traintuple.Creator}}}
-
-	traintuple.OutHeadModel.Permissions = permissions
 
 	// trunk
-	trunkTraintuple, err := db.GetCompositeTraintuple(inp.InTrunkModelKey)
-	if err != nil {
-		err = errors.BadRequest(err, "could not retrieve parent traintuple (trunk) with key %s", inp.InTrunkModelKey)
-		return err
+	if inp.InTrunkModelKey != "" {
+		trunkTraintuple, err := db.GetCompositeTraintuple(inp.InTrunkModelKey)
+		if err != nil {
+			err = errors.BadRequest(err, "could not retrieve parent traintuple (trunk) with key \"%s\"", inp.InTrunkModelKey)
+			return err
+		}
+		if trunkTraintuple.OutTrunkModel.OutModel == nil {
+			status = StatusWaiting
+		}
+		traintuple.InModelTrunk = inp.InTrunkModelKey
 	}
-	if trunkTraintuple.OutTrunkModel.OutModel == nil {
-		status = StatusWaiting
-	}
-	traintuple.InModelTrunk = inp.InTrunkModelKey
-	permissions, err = NewPermissions(db, inp.InTrunkModelPermission)
-	if err != nil {
-		return err
-	}
-	traintuple.OutTrunkModel.Permissions = permissions
 
 	traintuple.Status = status
 	return nil
@@ -260,6 +256,9 @@ func createCompositeTraintuple(db LedgerDB, args []string) (map[string]string, e
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO: permissions
+
 	traintupleKey := traintuple.GetKey()
 	// Test if the key (ergo the traintuple) already exists
 	tupleExists, err := db.KeyExists(traintupleKey)
@@ -425,7 +424,7 @@ func queryCompositeTraintuple(db LedgerDB, args []string) (outputTraintuple outp
 	if err != nil {
 		return
 	}
-	if traintuple.AssetType != TraintupleType {
+	if traintuple.AssetType != CompositeTraintupleType {
 		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}

@@ -47,6 +47,7 @@ const modelHash = "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482
 const modelAddress = "https://substrabac/model/toto"
 const worker = "SampleOrg"
 const traintupleKey = "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+const compositeTraintupleKey = "43849d898536c772bd385f431893d05f0f05a3ffd73852e332a5be22b30fc8f2"
 
 var (
 	pipeline = flag.Bool("pipeline", false, "Print out the pipeline test output")
