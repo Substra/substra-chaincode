@@ -29,7 +29,7 @@ const (
 	AlgoType
 	TraintupleType
 	TesttupleType
-	TraintupleCompositeType
+	CompositeTraintupleType
 )
 
 // Objective is the representation of one of the element type stored in the ledger
@@ -91,8 +91,8 @@ type Traintuple struct {
 	Tag           string      `json:"tag"`
 }
 
-// TraintupleComposite is like a traintuple, but for composite model composition
-type TraintupleComposite struct {
+// CompositeTraintuple is like a traintuple, but for composite model composition
+type CompositeTraintuple struct {
 	AlgoKey       string                      `json:"algoKey"`
 	AssetType     AssetType                   `json:"assetType"`
 	ComputePlanID string                      `json:"computePlanID"`
@@ -102,8 +102,8 @@ type TraintupleComposite struct {
 	InModelTrunk  string                      `json:"inModelTrunk"`
 	Log           string                      `json:"log"`
 	ObjectiveKey  string                      `json:"objectiveKey"`
-	OutModelHead  TraintupleCompositeOutModel `json:"outModelHead"`
-	OutModelTrunk TraintupleCompositeOutModel `json:"outModelTrunk"`
+	OutHeadModel  CompositeTraintupleOutModel `json:"outHeadModel"`
+	OutTrunkModel CompositeTraintupleOutModel `json:"outTrunkModel"`
 	Perf          float32                     `json:"perf"`
 	Permissions   Permissions                 `json:"permissions"`
 	Rank          int                         `json:"rank"`
@@ -111,8 +111,8 @@ type TraintupleComposite struct {
 	Tag           string                      `json:"tag"`
 }
 
-// TraintupleCompositeOutModel is the out-model of a TraintupleComposite
-type TraintupleCompositeOutModel struct {
+// CompositeTraintupleOutModel is the out-model of a CompositeTraintuple
+type CompositeTraintupleOutModel struct {
 	OutModel    *HashDress  `json:"outModel"`
 	Permissions Permissions `json:"permissions"`
 }
