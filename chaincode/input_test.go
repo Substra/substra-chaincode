@@ -159,6 +159,24 @@ func (traintuple *inputTraintuple) createDefault() [][]byte {
 	return args
 }
 
+func (traintuple *inputCompositeTraintuple) createDefault() [][]byte {
+	if traintuple.AlgoKey == "" {
+		traintuple.AlgoKey = algoHash
+	}
+	if traintuple.ObjectiveKey == "" {
+		traintuple.ObjectiveKey = objectiveDescriptionHash
+	}
+	if traintuple.DataManagerKey == "" {
+		traintuple.DataManagerKey = dataManagerOpenerHash
+	}
+	if traintuple.DataSampleKeys == nil || len(traintuple.DataSampleKeys) == 0 {
+		traintuple.DataSampleKeys = []string{trainDataSampleHash1, trainDataSampleHash2}
+	}
+	traintuple.InTrunkModelPermission = OpenPermissions
+	args := append([][]byte{[]byte("createTraintuple")}, assetToJSON(traintuple))
+	return args
+}
+
 func (success *inputLogSuccessTrain) createDefault() [][]byte {
 	if success.Key == "" {
 		success.Key = traintupleKey
