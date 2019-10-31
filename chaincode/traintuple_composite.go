@@ -294,7 +294,7 @@ func createCompositeTraintuple(db LedgerDB, args []string) (map[string]string, e
 }
 
 // logStartTrain modifies a traintuple by changing its status from todo to doing
-func logStartTrainComposite(db LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
+func logStartCompositeTrain(db LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -318,7 +318,7 @@ func logStartTrainComposite(db LedgerDB, args []string) (outputTraintuple output
 
 // logSuccessTrainComposite modifies a traintuple by changing its status from doing to done
 // reports logs and associated performances
-func logSuccessTrainComposite(db LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
+func logSuccessCompositeTrain(db LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
 	inp := inputLogSuccessTrainComposite{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -371,7 +371,7 @@ func logSuccessTrainComposite(db LedgerDB, args []string) (outputTraintuple outp
 }
 
 // logFailTrain modifies a traintuple by changing its status to fail and reports associated logs
-func logFailTrainComposite(db LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
+func logFailCompositeTrain(db LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
 	inp := inputLogFailTrain{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -434,7 +434,7 @@ func queryCompositeTraintuple(db LedgerDB, args []string) (outputTraintuple outp
 }
 
 // queryTraintuples returns all traintuples
-func queryTraintuplesComposite(db LedgerDB, args []string) ([]outputCompositeTraintuple, error) {
+func queryCompositeTraintuples(db LedgerDB, args []string) ([]outputCompositeTraintuple, error) {
 	outTraintuples := []outputCompositeTraintuple{}
 
 	if len(args) != 0 {
