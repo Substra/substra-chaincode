@@ -562,7 +562,7 @@ func (traintuple *CompositeTraintuple) updateTraintupleChildren(db LedgerDB, tra
 // isReady checks if inModels of a traintuple have been trained, except the newDoneTraintupleKey (since the transaction is not commited)
 // and updates the traintuple status if necessary
 func (traintuple *CompositeTraintuple) isReady(db LedgerDB, newDoneTraintupleKey string) (ready bool, err error) {
-	for _, key := range [2]string{traintuple.InModelTrunk, traintuple.InModelHead} {
+	for _, key := range [2]string{traintuple.InModelHead, traintuple.InModelTrunk} {
 		// don't check newly done traintuple
 		if key == newDoneTraintupleKey {
 			continue

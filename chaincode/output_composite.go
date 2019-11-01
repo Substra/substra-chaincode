@@ -24,12 +24,12 @@ type outputCompositeTraintuple struct {
 	Creator       string            `json:"creator"`
 	Dataset       *TtDataset        `json:"dataset"`
 	ComputePlanID string            `json:"computePlanID"`
-	InModelTrunk  *Model            `json:"inModelTrunk"`
 	InModelHead   *Model            `json:"inModelHead"`
+	InModelTrunk  *Model            `json:"inModelTrunk"`
 	Log           string            `json:"log"`
 	Objective     *TtObjective      `json:"objective"`
-	OutTrunkModel outModelComposite `json:"outTrunkModel"`
 	OutHeadModel  outModelComposite `json:"outHeadModel"`
+	OutTrunkModel outModelComposite `json:"outTrunkModel"`
 	Rank          int               `json:"rank"`
 	Status        string            `json:"status"`
 	Tag           string            `json:"tag"`
@@ -86,21 +86,6 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db LedgerDB, tr
 		Metrics: &metrics,
 	}
 
-	// fill inModel (trunk)
-	if traintuple.InModelTrunk != "" {
-		trunk, err := db.GetTraintuple(traintuple.InModelTrunk)
-		if err != nil {
-			return fmt.Errorf("could not retrieve parent traintuple (trunk) with key \"%s\" - %s", traintuple.InModelTrunk, err.Error())
-		}
-		outputCompositeTraintuple.InModelTrunk = &Model{
-			TraintupleKey: traintuple.InModelTrunk,
-		}
-		if trunk.OutModel != nil {
-			outputCompositeTraintuple.InModelTrunk.Hash = trunk.OutModel.Hash
-			outputCompositeTraintuple.InModelTrunk.StorageAddress = trunk.OutModel.StorageAddress
-		}
-	}
-
 	// fill inModel (head)
 	if traintuple.InModelHead != "" {
 		head, err := db.GetTraintuple(traintuple.InModelHead)
@@ -113,6 +98,21 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db LedgerDB, tr
 		if head.OutModel != nil {
 			outputCompositeTraintuple.InModelHead.Hash = head.OutModel.Hash
 			outputCompositeTraintuple.InModelHead.StorageAddress = head.OutModel.StorageAddress
+		}
+	}
+
+	// fill inModel (trunk)
+	if traintuple.InModelTrunk != "" {
+		trunk, err := db.GetTraintuple(traintuple.InModelTrunk)
+		if err != nil {
+			return fmt.Errorf("could not retrieve parent traintuple (trunk) with key \"%s\" - %s", traintuple.InModelTrunk, err.Error())
+		}
+		outputCompositeTraintuple.InModelTrunk = &Model{
+			TraintupleKey: traintuple.InModelTrunk,
+		}
+		if trunk.OutModel != nil {
+			outputCompositeTraintuple.InModelTrunk.Hash = trunk.OutModel.Hash
+			outputCompositeTraintuple.InModelTrunk.StorageAddress = trunk.OutModel.StorageAddress
 		}
 	}
 
