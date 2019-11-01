@@ -110,6 +110,45 @@ func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 	}
 }
 
+func TestTraintuplePermissions(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "trainDataset")
+
+	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	inpObjective := inputObjective{DescriptionHash: objHash}
+	inpObjective.createDefault()
+	inpObjective.TestDataset = inputDataset{}
+	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
+
+	inpAlgo := inputAlgo{}
+	args := inpAlgo.createDefault()
+	resp = mockStub.MockInvoke("42", args)
+
+	inpTraintuple := inputCompositeTraintuple{ObjectiveKey: objHash}
+	inpTraintuple.fillDefaults()
+	// Grant trunk model permissions to no-one
+	inpTraintuple.InTrunkModelPermission = inputPermissions{Process: inputPermission{Public: false, AuthorizedIDs: []string{}}}
+	args = inpTraintuple.getArgs()
+	resp = mockStub.MockInvoke("42", args)
+
+	traintuple := outputCompositeTraintuple{}
+	json.Unmarshal(resp.Payload, &traintuple)
+	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(traintuple.Key)}
+	resp = mockStub.MockInvoke("42", args)
+	traintuple = outputCompositeTraintuple{}
+	json.Unmarshal(resp.Payload, &traintuple)
+
+	assert.EqualValues(t, false, traintuple.OutHeadModel.Permissions.Process.Public,
+		"the head model should not be public")
+	assert.EqualValues(t, []string{worker}, traintuple.OutHeadModel.Permissions.Process.AuthorizedIDs,
+		"the head model should only be processable by creator")
+	assert.EqualValues(t, false, traintuple.OutTrunkModel.Permissions.Process.Public,
+		"the trunk model should not be public")
+	assert.EqualValues(t, []string{worker}, traintuple.OutHeadModel.Permissions.Process.AuthorizedIDs,
+		"if input trunk model permissions are set to 'nobody', this should effectively grant permission to the creator only")
+}
+
 func TestTraintupleWithSingleDatasampleComposite(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)

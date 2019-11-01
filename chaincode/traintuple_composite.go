@@ -34,8 +34,6 @@ import (
 //  - Dataset
 func (traintuple *CompositeTraintuple) SetFromInput(db LedgerDB, inp inputCompositeTraintuple) error {
 
-	// TODO later: check permissions
-	// find associated creator and check permissions (TODO later)
 	creator, err := GetTxCreator(db.cc)
 	if err != nil {
 		return err
@@ -87,6 +85,20 @@ func (traintuple *CompositeTraintuple) SetFromInput(db LedgerDB, inp inputCompos
 		DataSampleKeys: inp.DataSampleKeys,
 	}
 	traintuple.Dataset.Worker, err = getDataManagerOwner(db, traintuple.Dataset.DataManagerKey)
+
+	// permissions (head): creator only
+	creatorOnly := Permission{
+		Public:        false,
+		AuthorizedIDs: []string{traintuple.Creator}}
+	traintuple.OutHeadModel.Permissions = Permissions{Process: creatorOnly, Download: creatorOnly}
+
+	// permissions (trunk): dictated by input
+	permissions, err := NewPermissions(db, inp.InTrunkModelPermission)
+	if err != nil {
+		return err
+	}
+	traintuple.OutTrunkModel.Permissions = permissions
+
 	return err
 }
 
@@ -256,8 +268,6 @@ func createCompositeTraintuple(db LedgerDB, args []string) (map[string]string, e
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO: permissions
 
 	traintupleKey := traintuple.GetKey()
 	// Test if the key (ergo the traintuple) already exists
