@@ -16,6 +16,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -112,6 +113,100 @@ func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 			assert.EqualValues(t, 400, resp.Status, tt.message)
 		}
 	}
+}
+
+func registerTraintuple(mockStub *MockStub, assetType AssetType, dataSampleKeys []string) (key string, err error) {
+	switch assetType {
+	case CompositeTraintupleType:
+		inpTraintuple := inputCompositeTraintuple{}
+		inpTraintuple.DataSampleKeys = dataSampleKeys
+		inpTraintuple.fillDefaults()
+		args := inpTraintuple.getArgs()
+		resp := mockStub.MockInvoke("42", args)
+		if resp.Status != 200 {
+			err = fmt.Errorf("Failed to register traintuple: %s", resp.Message)
+			return
+		}
+		var _key struct{ Key string }
+		json.Unmarshal(resp.Payload, &_key)
+		return _key.Key, nil
+	case TraintupleType:
+		inpTraintuple := inputTraintuple{}
+		inpTraintuple.DataSampleKeys = dataSampleKeys
+		args := inpTraintuple.createDefault()
+		resp := mockStub.MockInvoke("42", args)
+		if resp.Status != 200 {
+			err = fmt.Errorf("Failed to register traintuple: %s", resp.Message)
+			return
+		}
+		var _key struct{ Key string }
+		json.Unmarshal(resp.Payload, &_key)
+		return _key.Key, nil
+	default:
+		err = fmt.Errorf("Invalid asset type: %v", assetType)
+		return
+	}
+}
+
+// TODO: add more tests:
+// head:
+// - regular head
+// - composite head
+// trunk:
+// - regular trunk
+// - composite trunk
+// - aggregate trunk
+func TestTraintupleRegularHead(t *testing.T) {
+	message := "It should be possible to registering a traintuple with a regular traintuple as a head"
+
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "trainDataset")
+
+	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	inpObjective := inputObjective{DescriptionHash: objHash}
+	inpObjective.createDefault()
+	inpObjective.TestDataset = inputDataset{}
+	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
+
+	inpAlgo := inputAlgo{}
+	args := inpAlgo.createDefault()
+	resp = mockStub.MockInvoke("42", args)
+
+	inpTraintuple := inputCompositeTraintuple{ObjectiveKey: objHash}
+
+	head, err := registerTraintuple(mockStub, TraintupleType, []string{trainDataSampleHash1})
+	assert.NoError(t, err)
+	inpTraintuple.InHeadModelKey = head
+
+	trunk, err := registerTraintuple(mockStub, TraintupleType, []string{trainDataSampleHash2})
+	assert.NoError(t, err)
+	inpTraintuple.InTrunkModelKey = trunk
+
+	// create composite traintuple
+	inpTraintuple.fillDefaults()
+	args = inpTraintuple.getArgs()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, message+": ", resp.Message)
+	var keyOnly struct{ Key string }
+	json.Unmarshal(resp.Payload, &keyOnly)
+
+	// fetch it back
+	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(keyOnly.Key)}
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error: %s", resp.Message)
+	traintuple := outputCompositeTraintuple{}
+	json.Unmarshal(resp.Payload, &traintuple)
+
+	assert.EqualValues(t, inpTraintuple.InHeadModelKey, traintuple.InModelHead.TraintupleKey)
+	// TODO: test that fields are populated once parent traintuple is "done"
+	// assert.NotEqual(t, "", traintuple.InModelHead.Hash)
+	// assert.NotEqual(t, "", traintuple.InModelHead.StorageAddress)
+
+	assert.EqualValues(t, inpTraintuple.InTrunkModelKey, traintuple.InModelTrunk.TraintupleKey)
+	// TODO: test that fields are populated once parent traintuple is "done"
+	// assert.NotEqual(t, "", traintuple.InModelTrunk.Hash)
+	// assert.NotEqual(t, "", traintuple.InModelTrunk.StorageAddress)
 }
 
 func TestTraintuplePermissions(t *testing.T) {

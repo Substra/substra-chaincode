@@ -86,37 +86,35 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db LedgerDB, tr
 		Metrics: &metrics,
 	}
 
-	// fill inModel (head)
+	// fill in-model (head)
 	if traintuple.InModelHead != "" {
-		head, err := db.GetTraintuple(traintuple.InModelHead)
-		if err == nil {
-			outputCompositeTraintuple.InModelHead = &Model{
-				TraintupleKey: traintuple.InModelHead,
-			}
-			if head.OutModel != nil {
-				outputCompositeTraintuple.InModelHead.Hash = head.OutModel.Hash
-				outputCompositeTraintuple.InModelHead.StorageAddress = head.OutModel.StorageAddress
-			}
-		} else {
-			// TODO: handle parent in-models that are themselves composite
-			//return fmt.Errorf("could not retrieve parent traintuple (head) with key \"%s\" - %s", traintuple.InModelHead, err.Error())
+		hashDress, _err := db.GetOutModelHashDress(traintuple.InModelHead, HeadType, []AssetType{TraintupleType, CompositeTraintupleType})
+		if _err != nil {
+			err = fmt.Errorf("could not fill (head) in-model with key \"%s\": %s", traintuple.InModelHead, _err.Error())
+			return
+		}
+		outputCompositeTraintuple.InModelHead = &Model{
+			TraintupleKey: traintuple.InModelHead}
+
+		if hashDress != nil {
+			outputCompositeTraintuple.InModelHead.Hash = hashDress.Hash
+			outputCompositeTraintuple.InModelHead.StorageAddress = hashDress.StorageAddress
 		}
 	}
 
-	// fill inModel (trunk)
+	// fill in-model (trunk)
 	if traintuple.InModelTrunk != "" {
-		trunk, err := db.GetTraintuple(traintuple.InModelTrunk)
-		if err == nil {
-			outputCompositeTraintuple.InModelTrunk = &Model{
-				TraintupleKey: traintuple.InModelTrunk,
-			}
-			if trunk.OutModel != nil {
-				outputCompositeTraintuple.InModelTrunk.Hash = trunk.OutModel.Hash
-				outputCompositeTraintuple.InModelTrunk.StorageAddress = trunk.OutModel.StorageAddress
-			}
-		} else {
-			// TODO: handle parent in-models that are themselves composite
-			//return fmt.Errorf("could not retrieve parent traintuple (trunk) with key \"%s\" - %s", traintuple.InModelTrunk, err.Error())
+		hashDress, _err := db.GetOutModelHashDress(traintuple.InModelTrunk, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType /* TODO: add AggregateTraintupleTYpe */})
+		if _err != nil {
+			err = fmt.Errorf("could not fill (trunk) in-model with key \"%s\": %s", traintuple.InModelTrunk, _err.Error())
+			return
+		}
+		outputCompositeTraintuple.InModelTrunk = &Model{
+			TraintupleKey: traintuple.InModelTrunk}
+
+		if hashDress != nil {
+			outputCompositeTraintuple.InModelTrunk.Hash = hashDress.Hash
+			outputCompositeTraintuple.InModelTrunk.StorageAddress = hashDress.StorageAddress
 		}
 	}
 

@@ -111,12 +111,11 @@ func (traintuple *CompositeTraintuple) SetFromParents(db LedgerDB, inp inputComp
 
 	// head
 	if inp.InHeadModelKey != "" {
-		headTraintuple, err := db.GetCompositeTraintuple(inp.InHeadModelKey)
+		hashDress, err := db.GetOutModelHashDress(inp.InHeadModelKey, HeadType, []AssetType{TraintupleType, CompositeTraintupleType})
 		if err != nil {
-			err = errors.BadRequest(err, "could not retrieve parent traintuple (head) with key \"%s\"", inp.InHeadModelKey)
 			return err
 		}
-		if headTraintuple.OutHeadModel.OutModel == nil {
+		if hashDress == nil {
 			status = StatusWaiting
 		}
 		traintuple.InModelHead = inp.InHeadModelKey
@@ -124,12 +123,11 @@ func (traintuple *CompositeTraintuple) SetFromParents(db LedgerDB, inp inputComp
 
 	// trunk
 	if inp.InTrunkModelKey != "" {
-		trunkTraintuple, err := db.GetCompositeTraintuple(inp.InTrunkModelKey)
+		hashDress, err := db.GetOutModelHashDress(inp.InTrunkModelKey, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType /* TODO: add AggregateTraintupleTYpe */})
 		if err != nil {
-			err = errors.BadRequest(err, "could not retrieve parent traintuple (trunk) with key \"%s\"", inp.InTrunkModelKey)
 			return err
 		}
-		if trunkTraintuple.OutTrunkModel.OutModel == nil {
+		if hashDress == nil {
 			status = StatusWaiting
 		}
 		traintuple.InModelTrunk = inp.InTrunkModelKey
