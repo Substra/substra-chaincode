@@ -283,7 +283,7 @@ func createCompositeTraintuple(db LedgerDB, args []string) (map[string]string, e
 	}
 
 	event := TuplesEvent{}
-	event.SetTraintuplesComposite(out)
+	event.SetCompositeTraintuples(out)
 	err = SendTuplesEvent(db.cc, event)
 	if err != nil {
 		return nil, err

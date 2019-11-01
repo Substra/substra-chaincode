@@ -268,8 +268,8 @@ type TuplesEvent struct {
 	TraintuplesComposite []outputCompositeTraintuple `json:"traintuplesComposite"`
 }
 
-// SetTraintuplesComposite add one or several testtuples to the event struct
-func (te *TuplesEvent) SetTraintuplesComposite(otuples ...outputCompositeTraintuple) {
+// SetCompositeTraintuples add one or several testtuples to the event struct
+func (te *TuplesEvent) SetCompositeTraintuples(otuples ...outputCompositeTraintuple) {
 	te.TraintuplesComposite = otuples
 }
 
