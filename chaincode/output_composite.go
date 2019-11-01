@@ -89,30 +89,34 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db LedgerDB, tr
 	// fill inModel (head)
 	if traintuple.InModelHead != "" {
 		head, err := db.GetTraintuple(traintuple.InModelHead)
-		if err != nil {
-			return fmt.Errorf("could not retrieve parent traintuple (head) with key \"%s\" - %s", traintuple.InModelHead, err.Error())
-		}
-		outputCompositeTraintuple.InModelHead = &Model{
-			TraintupleKey: traintuple.InModelHead,
-		}
-		if head.OutModel != nil {
-			outputCompositeTraintuple.InModelHead.Hash = head.OutModel.Hash
-			outputCompositeTraintuple.InModelHead.StorageAddress = head.OutModel.StorageAddress
+		if err == nil {
+			outputCompositeTraintuple.InModelHead = &Model{
+				TraintupleKey: traintuple.InModelHead,
+			}
+			if head.OutModel != nil {
+				outputCompositeTraintuple.InModelHead.Hash = head.OutModel.Hash
+				outputCompositeTraintuple.InModelHead.StorageAddress = head.OutModel.StorageAddress
+			}
+		} else {
+			// TODO: handle parent in-models that are themselves composite
+			//return fmt.Errorf("could not retrieve parent traintuple (head) with key \"%s\" - %s", traintuple.InModelHead, err.Error())
 		}
 	}
 
 	// fill inModel (trunk)
 	if traintuple.InModelTrunk != "" {
 		trunk, err := db.GetTraintuple(traintuple.InModelTrunk)
-		if err != nil {
-			return fmt.Errorf("could not retrieve parent traintuple (trunk) with key \"%s\" - %s", traintuple.InModelTrunk, err.Error())
-		}
-		outputCompositeTraintuple.InModelTrunk = &Model{
-			TraintupleKey: traintuple.InModelTrunk,
-		}
-		if trunk.OutModel != nil {
-			outputCompositeTraintuple.InModelTrunk.Hash = trunk.OutModel.Hash
-			outputCompositeTraintuple.InModelTrunk.StorageAddress = trunk.OutModel.StorageAddress
+		if err == nil {
+			outputCompositeTraintuple.InModelTrunk = &Model{
+				TraintupleKey: traintuple.InModelTrunk,
+			}
+			if trunk.OutModel != nil {
+				outputCompositeTraintuple.InModelTrunk.Hash = trunk.OutModel.Hash
+				outputCompositeTraintuple.InModelTrunk.StorageAddress = trunk.OutModel.StorageAddress
+			}
+		} else {
+			// TODO: handle parent in-models that are themselves composite
+			//return fmt.Errorf("could not retrieve parent traintuple (trunk) with key \"%s\" - %s", traintuple.InModelTrunk, err.Error())
 		}
 	}
 

@@ -44,8 +44,8 @@ var createInModelTests = []struct {
 		shouldSucceed:    false,
 		message:          "One should NOT be able to create a composite traintuple with a trunk inModel unless a head inModel is also supplied"},
 	{
-		withInModelHead:  false,
-		withInModelTrunk: false,
+		withInModelHead:  true,
+		withInModelTrunk: true,
 		shouldSucceed:    true,
 		message:          "One should be able to create a composite traintuple with both a head and a trunk inModels"}}
 
@@ -73,6 +73,8 @@ func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 		if tt.withInModelHead {
 			// create head traintuple
 			inpHeadTraintuple := inputCompositeTraintuple{ObjectiveKey: objHash}
+			// make the traintuple unique so that it has a unique hash
+			inpHeadTraintuple.DataSampleKeys = []string{trainDataSampleHash1}
 			args = inpHeadTraintuple.createDefault()
 			resp = mockStub.MockInvoke("42", args)
 			headTraintuple := outputCompositeTraintuple{}
@@ -85,6 +87,8 @@ func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 		if tt.withInModelTrunk {
 			// create trunk traintuple
 			inpTrunkTraintuple := inputCompositeTraintuple{ObjectiveKey: objHash}
+			// make the traintuple unique so that it has a unique hash
+			inpTrunkTraintuple.DataSampleKeys = []string{trainDataSampleHash2}
 			args = inpTrunkTraintuple.createDefault()
 			resp = mockStub.MockInvoke("42", args)
 			trunkTraintuple := outputCompositeTraintuple{}
