@@ -27,12 +27,14 @@ var createInModelTests = []struct {
 	withInModelHead  bool
 	withInModelTrunk bool
 	shouldSucceed    bool
+	expectedStatus   string
 	message          string
 }{
 	{
 		withInModelHead:  false,
 		withInModelTrunk: false,
 		shouldSucceed:    true,
+		expectedStatus:   "todo", // no in-models, so we're ready to train
 		message:          "One should be able to create a composite traintuple without head or trunk inModels"},
 	{
 		withInModelHead:  true,
@@ -48,6 +50,7 @@ var createInModelTests = []struct {
 		withInModelHead:  true,
 		withInModelTrunk: true,
 		shouldSucceed:    true,
+		expectedStatus:   "waiting", // waiting for in models to be done before we can start training
 		message:          "One should be able to create a composite traintuple with both a head and a trunk inModels"}}
 
 // TODO: give this function a more accurate name
@@ -109,6 +112,9 @@ func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 			args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(traintuple.Key)}
 			resp = mockStub.MockInvoke("42", args)
 			assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
+			traintuple = outputCompositeTraintuple{}
+			json.Unmarshal(resp.Payload, &traintuple)
+			assert.EqualValues(t, tt.expectedStatus, traintuple.Status, "The traintuple status should be correct")
 		} else {
 			assert.EqualValues(t, 400, resp.Status, tt.message)
 		}
