@@ -15,37 +15,99 @@
 package main
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+var createInModelTests = []struct {
+	withInModelHead  bool
+	withInModelTrunk bool
+	shouldSucceed    bool
+	message          string
+}{
+	{
+		withInModelHead:  false,
+		withInModelTrunk: false,
+		shouldSucceed:    true,
+		message:          "One should be able to create a composite traintuple without head or trunk inModels"},
+	{
+		withInModelHead:  true,
+		withInModelTrunk: false,
+		shouldSucceed:    false,
+		message:          "One should not be able to create a composite traintuple with a head inModel unless a trunk inModel is also supplied"},
+	{
+		withInModelHead:  false,
+		withInModelTrunk: true,
+		shouldSucceed:    false,
+		message:          "One should not be able to create a composite traintuple with a trunk inModel unless a head inModel is also supplied"},
+	{
+		withInModelHead:  false,
+		withInModelTrunk: false,
+		shouldSucceed:    true,
+		message:          "One should be able to create a composite traintuple with both a head and a trunk inModels"}}
+
+// TODO: give this test function a more accurate name
 func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
-	scc := new(SubstraChaincode)
-	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	registerItem(t, *mockStub, "trainDataset")
+	for _, tt := range createInModelTests {
+		scc := new(SubstraChaincode)
+		mockStub := NewMockStubWithRegisterNode("substra", scc)
+		registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash}
-	inpObjective.createDefault()
-	inpObjective.TestDataset = inputDataset{}
-	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
-	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
+		objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+		inpObjective := inputObjective{DescriptionHash: objHash}
+		inpObjective.createDefault()
+		inpObjective.TestDataset = inputDataset{}
+		resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
+		assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
 
-	inpAlgo := inputAlgo{}
-	args := inpAlgo.createDefault()
-	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
+		inpAlgo := inputAlgo{}
+		args := inpAlgo.createDefault()
+		resp = mockStub.MockInvoke("42", args)
+		assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
-	inpTraintuple := inputCompositeTraintuple{ObjectiveKey: objHash}
-	args = inpTraintuple.createDefault()
-	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status, "when adding traintuple without test dataset it should work: ", resp.Message)
+		inpTraintuple := inputCompositeTraintuple{ObjectiveKey: objHash}
 
-	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(compositeTraintupleKey)}
-	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
+		if tt.withInModelHead {
+			// create head traintuple
+			inpHeadTraintuple := inputCompositeTraintuple{ObjectiveKey: objHash}
+			args = inpHeadTraintuple.createDefault()
+			resp = mockStub.MockInvoke("42", args)
+			headTraintuple := outputCompositeTraintuple{}
+			json.Unmarshal(resp.Payload, &headTraintuple)
+
+			// make it the head inmodel of inpTraintuple
+			inpTraintuple.InHeadModelKey = headTraintuple.Key
+		}
+
+		if tt.withInModelTrunk {
+			// create trunk traintuple
+			inpTrunkTraintuple := inputCompositeTraintuple{ObjectiveKey: objHash}
+			args = inpTrunkTraintuple.createDefault()
+			resp = mockStub.MockInvoke("42", args)
+			trunkTraintuple := outputCompositeTraintuple{}
+			json.Unmarshal(resp.Payload, &trunkTraintuple)
+
+			// make it the trunk inmodel of inpTraintuple
+			inpTraintuple.InTrunkModelKey = trunkTraintuple.Key
+		}
+
+		args = inpTraintuple.createDefault()
+		resp = mockStub.MockInvoke("42", args)
+
+		if tt.shouldSucceed {
+			assert.EqualValues(t, 200, resp.Status, tt.message+": "+resp.Message)
+			traintuple := outputCompositeTraintuple{}
+			json.Unmarshal(resp.Payload, &traintuple)
+			args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(traintuple.Key)}
+			resp = mockStub.MockInvoke("42", args)
+			assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
+		} else {
+			assert.EqualValues(t, 400, resp.Status, tt.message)
+		}
+	}
 }
 
 // func TestTraintupleWithSingleDatasampleComposite(t *testing.T) {
