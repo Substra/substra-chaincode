@@ -15,7 +15,11 @@
 package main
 
 import (
+	"fmt"
+	"github.com/hyperledger/fabric/protos/msp"
 	"testing"
+
+	"github.com/golang/protobuf/proto"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -25,14 +29,101 @@ var (
 		Public:        false,
 		AuthorizedIDs: []string{"foo"},
 	}
-	defaultPermissions = Permissions{
-		Process: defaultPermission,
-	}
 	defaultOwner = "me"
 )
 
+func TestNewPermissions(t *testing.T) {
+
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	bcreator, _ := mockStub.GetCreator()
+	sID := &msp.SerializedIdentity{}
+	_ = proto.Unmarshal(bcreator, sID)
+	mspId := sID.GetMspid()
+	db := NewLedgerDB(mockStub)
+
+	// public
+	inputPublicPermissions := inputPermissions{
+		Process: inputPermission{
+			Public:        true,
+			AuthorizedIDs: []string{},
+		},
+	}
+	var nilAuthorizedIDs []string
+	expectedPublicPermissions := Permissions{
+		Process: Permission{
+			Public:        true,
+			AuthorizedIDs: []string{},
+		},
+		Download: Permission{
+			Public:        true,
+			AuthorizedIDs: nilAuthorizedIDs,
+		},
+	}
+
+	// private
+	inputPrivatePermissions := inputPermissions{
+		Process: inputPermission{
+			Public:        false,
+			AuthorizedIDs: []string{},
+		},
+	}
+	expectedPrivatePermissions := Permissions{
+		Process: Permission{
+			Public:        false,
+			AuthorizedIDs: []string{mspId},
+		},
+		Download: Permission{
+			Public:        false,
+			AuthorizedIDs: []string{mspId},
+		},
+	}
+
+	testTable := []struct {
+		name string
+		inputPermissions inputPermissions
+		expectedPermissions Permissions
+	}{
+		{"Public Permissions", inputPublicPermissions, expectedPublicPermissions},
+		{"Private Permissions", inputPrivatePermissions, expectedPrivatePermissions},
+	}
+
+	for _, test := range testTable {
+		t.Run(test.name, func(t *testing.T) {
+			permissions, _ := NewPermissions(db, test.inputPermissions)
+			assert.Equal(t, test.expectedPermissions, permissions)
+		})
+	}
+}
+
+func TestBadPermissions(t *testing.T) {
+
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	db := NewLedgerDB(mockStub)
+
+	// should raise an error, can't be public and have AuthorizedIDs set
+	inputBadPermissions := inputPermissions{
+		Process: inputPermission{
+			Public:        true,
+			AuthorizedIDs: []string{"foo"},
+		},
+	}
+
+	t.Run("Bad Permission", func(t *testing.T) {
+		queryNodesMock := func (db LedgerDB, args []string) (resp []Node, err error) {
+			nodes := []Node{{ID: "foo"}} // make foo exist among nodes
+			return nodes, nil
+		}
+		// this mocks out the function that Bootstrap() calls
+		queryNodeList = queryNodesMock
+		_, err := NewPermissions(db, inputBadPermissions)
+		assert.Equal(t, fmt.Errorf("invalid permission input values"), err)
+	})
+}
+
 func TestPermissionsCanProcess(t *testing.T) {
-	perms := defaultPermissions
+	perms := Permissions{}
 
 	testTable := []struct {
 		name           string
@@ -107,8 +198,8 @@ func TestMergingMechanism(t *testing.T) {
 			assert.Equal(t, test.expectedINR, mergedPriv.Public)
 			assert.ElementsMatch(t, test.expectedRU, mergedPriv.AuthorizedIDs)
 			privMerged := mergePermissions(toMerge, defaultPermission)
-			assert.Equal(t, mergedPriv.Public, privMerged.Public, "merging should be transitif")
-			assert.ElementsMatch(t, mergedPriv.AuthorizedIDs, privMerged.AuthorizedIDs, "merging should be transitif")
+			assert.Equal(t, mergedPriv.Public, privMerged.Public, "merging should be transitive")
+			assert.ElementsMatch(t, mergedPriv.AuthorizedIDs, privMerged.AuthorizedIDs, "merging should be transitive")
 
 			theSamePriv := mergePermissions(Permission{Public: true}, toMerge)
 			assert.Equal(t, toMerge.Public, theSamePriv.Public, "a non restrictive permission should be neutral")

@@ -176,7 +176,7 @@ func validateTupleOwner(db *LedgerDB, worker string) error {
 }
 
 // check validity of traintuple update: consistent status and agent submitting the transaction
-func checkUpdateTuple(db *LedgerDB, worker string, oldStatus string, newStatus string) error {
+func checkUpdateTuple(oldStatus string, newStatus string) error {
 	statusPossibilities := map[string]string{
 		StatusWaiting: StatusTodo,
 		StatusTodo:    StatusDoing,

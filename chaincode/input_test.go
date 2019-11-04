@@ -17,7 +17,6 @@ package main
 var (
 	traintupleID1 = "firstTraintupleID"
 	traintupleID2 = "secondTraintupleID"
-	testtupleID   = "testtupleID"
 )
 
 func (dataManager *inputDataManager) createDefault() [][]byte {

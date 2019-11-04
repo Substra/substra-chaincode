@@ -24,7 +24,7 @@ type Permission struct {
 	// the nodes listed in AuthorizedIDs (open to all nodes if false)
 	Public bool `json:"public"`
 	// AuthorizedIDs list all authorised nodes other than the asset's owner
-	AuthorizedIDs []string `json:"authorizedIDs", omitempty`
+	AuthorizedIDs []string `json:"authorizedIDs, omitempty"`
 }
 
 // Permissions represents all permissions associated with an asset
@@ -53,9 +53,12 @@ func (perms Permissions) CanProcess(owner, node string) bool {
 	return false
 }
 
+// allow mocking
+var queryNodeList = queryNodes
+
 // NewPermissions create the Permissions according to the arg received
 func NewPermissions(db *LedgerDB, in inputPermissions) (Permissions, error) {
-	nodes, err := queryNodes(db, []string{})
+	nodes, err := queryNodeList(db, []string{})
 	if err != nil {
 		return Permissions{}, err
 	}

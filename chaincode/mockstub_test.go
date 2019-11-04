@@ -622,26 +622,6 @@ func NewMockStateRangeQueryIterator(stub *MockStub, startKey string, endKey stri
 	return iter
 }
 
-func getBytes(function string, args []string) [][]byte {
-	bytes := make([][]byte, 0, len(args)+1)
-	bytes = append(bytes, []byte(function))
-	for _, s := range args {
-		bytes = append(bytes, []byte(s))
-	}
-	return bytes
-}
-
-func getFuncArgs(bytes [][]byte) (string, []string) {
-	mockLogger.Debugf("getFuncArgs(%x)", bytes)
-	function := string(bytes[0])
-	args := make([]string, len(bytes)-1)
-	for i := 1; i < len(bytes); i++ {
-		mockLogger.Debugf("getFuncArgs - i:%x, len(bytes):%x", i, len(bytes))
-		args[i-1] = string(bytes[i])
-	}
-	return function, args
-}
-
 func newCompositeKey(objectType string, attributes []string) (string, error) {
 	if err := validateCompositeKeyAttribute(objectType); err != nil {
 		return "", err

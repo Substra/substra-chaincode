@@ -27,13 +27,12 @@ import (
 	"testing"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	peer "github.com/hyperledger/fabric/protos/peer"
+	"github.com/hyperledger/fabric/protos/peer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 const objectiveDescriptionHash = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
-const objectiveDescriptionStorageAddress = "https://toto/objective/222/description"
 const objectiveMetricsHash = "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 const objectiveMetricsStorageAddress = "https://toto/objective/222/metrics"
 const dataManagerOpenerHash = "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
@@ -82,10 +81,6 @@ func methodToByte(methodName string) [][]byte {
 
 func methodAndAssetToByte(methodName string, asset interface{}) [][]byte {
 	return [][]byte{[]byte(methodName), assetToJSON(asset)}
-}
-
-func methodAndKeyToByte(key string, asset interface{}) [][]byte {
-	return [][]byte{[]byte("queryAlgo"), keyToJSON(key)}
 }
 
 func assetToArgs(asset interface{}) []string {
