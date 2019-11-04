@@ -27,6 +27,7 @@ const (
 	DataManagerType
 	DataSampleType
 	AlgoType
+	CompositeAlgoType
 	TraintupleType
 	TesttupleType
 	CompositeTraintupleType
@@ -71,6 +72,10 @@ type Algo struct {
 	Description    *HashDress  `json:"description"`
 	Owner          string      `json:"owner"`
 	Permissions    Permissions `json:"permissions"`
+}
+
+type CompositeAlgo struct {
+	Algo
 }
 
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform

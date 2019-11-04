@@ -139,6 +139,27 @@ func (algo *inputAlgo) createDefault() [][]byte {
 	return args
 }
 
+func (algo *inputCompositeAlgo) createDefault() [][]byte {
+	if algo.Name == "" {
+		algo.Name = compositeAlgoName
+	}
+	if algo.Hash == "" {
+		algo.Hash = compositeAlgoHash
+	}
+	if algo.StorageAddress == "" {
+		algo.StorageAddress = compositeAlgoStorageAddress
+	}
+	if algo.DescriptionHash == "" {
+		algo.DescriptionHash = "e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcb"
+	}
+	if algo.DescriptionStorageAddress == "" {
+		algo.DescriptionStorageAddress = "https://toto/compositealgo/222/description"
+	}
+	algo.Permissions = OpenPermissions
+	args := append([][]byte{[]byte("registerCompositeAlgo")}, assetToJSON(algo))
+	return args
+}
+
 func (traintuple *inputTraintuple) createDefault() [][]byte {
 	if traintuple.AlgoKey == "" {
 		traintuple.AlgoKey = algoHash

@@ -43,6 +43,9 @@ const testDataSampleHash2 = "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021f
 const algoHash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const algoStorageAddress = "https://toto/algo/222/algo"
 const algoName = "hog + svm"
+const compositeAlgoHash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcd"
+const compositeAlgoStorageAddress = "https://toto/compositealgo/222/algo"
+const compositeAlgoName = "hog + svm composite"
 const modelHash = "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed"
 const modelAddress = "https://substrabac/model/toto"
 const worker = "SampleOrg"
@@ -192,7 +195,15 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	if itemType == "algo" {
 		return resp, inpAlgo
 	}
-	// 6. Add traintuple
+	// 6. Add composite algo
+	inpCompositeAlgo := inputCompositeAlgo{}
+	args = inpCompositeAlgo.createDefault()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding algo with status %d and message %s", resp.Status, resp.Message)
+	if itemType == "compositealgo" {
+		return resp, inpCompositeAlgo
+	}
+	// 7. Add traintuple
 	inpTraintuple := inputTraintuple{}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)

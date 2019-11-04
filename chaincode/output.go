@@ -108,6 +108,14 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 	out.Permissions.Fill(in.Permissions)
 }
 
+type outputCompositeAlgo struct {
+	outputAlgo
+}
+
+func (out *outputCompositeAlgo) Fill(key string, in CompositeAlgo) {
+	out.outputAlgo.Fill(key, in.Algo)
+}
+
 // outputTraintuple is the representation of one the element type stored in the
 // ledger. It describes a training task occuring on the platform
 type outputTraintuple struct {

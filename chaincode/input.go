@@ -47,6 +47,10 @@ type inputAlgo struct {
 	Permissions               inputPermissions `validate:"required" json:"permissions"`
 }
 
+type inputCompositeAlgo struct {
+	inputAlgo
+}
+
 // inputDataManager is the representation of input args to register a DataManager
 type inputDataManager struct {
 	Name                      string           `validate:"required,gte=1,lte=100" json:"name"`

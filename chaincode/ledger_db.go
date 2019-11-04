@@ -201,6 +201,18 @@ func (db *LedgerDB) GetAlgo(key string) (Algo, error) {
 	return algo, nil
 }
 
+// GetCompositeAlgo fetches a CompositeAlgo from the ledger using its unique key
+func (db *LedgerDB) GetCompositeAlgo(key string) (CompositeAlgo, error) {
+	algo := CompositeAlgo{}
+	if err := db.Get(key, &algo); err != nil {
+		return algo, err
+	}
+	if algo.AssetType != CompositeAlgoType {
+		return algo, errors.NotFound("algo %s not found", key)
+	}
+	return algo, nil
+}
+
 // GetObjective fetches an Objective from the ledger using its unique key
 func (db *LedgerDB) GetObjective(key string) (Objective, error) {
 	objective := Objective{}

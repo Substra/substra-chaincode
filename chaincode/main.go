@@ -86,6 +86,10 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = queryAlgo(db, args)
 	case "queryAlgos":
 		result, err = queryAlgos(db, args)
+	case "queryCompositeAlgo":
+		result, err = queryCompositeAlgo(db, args)
+	case "queryCompositeAlgos":
+		result, err = queryCompositeAlgos(db, args)
 	case "queryDataManager":
 		result, err = queryDataManager(db, args)
 	case "queryDataManagers":
@@ -120,6 +124,8 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = queryCompositeTraintuples(db, args)
 	case "registerAlgo":
 		result, err = registerAlgo(db, args)
+	case "registerCompositeAlgo":
+		result, err = registerCompositeAlgo(db, args)
 	case "registerDataManager":
 		result, err = registerDataManager(db, args)
 	case "registerDataSample":
