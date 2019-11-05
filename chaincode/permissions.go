@@ -138,11 +138,12 @@ func mergePermissions(x, y Permission) Permission {
 	priv := Permission{}
 	priv.Public = x.Public && y.Public
 
-	if !x.Public && y.Public {
+	switch {
+	case !x.Public && y.Public:
 		priv.AuthorizedIDs = x.AuthorizedIDs
-	} else if x.Public && !y.Public {
+	case x.Public && !y.Public:
 		priv.AuthorizedIDs = y.AuthorizedIDs
-	} else {
+	default:
 		priv.AuthorizedIDs = x.getNodesIntersection(y)
 	}
 	return priv

@@ -60,7 +60,8 @@ func (testtuple *Testtuple) SetFromInput(db LedgerDB, inp inputTesttuple) error 
 
 	var dataManagerKey string
 	var dataSampleKeys []string
-	if len(inp.DataManagerKey) > 0 && len(inp.DataSampleKeys) > 0 {
+	switch {
+	case len(inp.DataManagerKey) > 0 && len(inp.DataSampleKeys) > 0:
 		// non-certified testtuple
 		// test dataset are specified by the user
 		dataSampleKeys = inp.DataSampleKeys
@@ -71,13 +72,13 @@ func (testtuple *Testtuple) SetFromInput(db LedgerDB, inp inputTesttuple) error 
 		dataManagerKey = inp.DataManagerKey
 		sort.Strings(dataSampleKeys)
 		testtuple.Certified = objectiveDataManagerKey == dataManagerKey && reflect.DeepEqual(objectiveDataSampleKeys, dataSampleKeys)
-	} else if len(inp.DataManagerKey) > 0 || len(inp.DataSampleKeys) > 0 {
+	case len(inp.DataManagerKey) > 0 || len(inp.DataSampleKeys) > 0:
 		return errors.BadRequest("invalid input: dataManagerKey and dataSampleKey should be provided together")
-	} else if objective.TestDataset != nil {
+	case objective.TestDataset != nil:
 		dataSampleKeys = objectiveDataSampleKeys
 		dataManagerKey = objectiveDataManagerKey
 		testtuple.Certified = true
-	} else {
+	default:
 		return errors.BadRequest("can not create a certified testtuple, no data associated with objective %s", testtuple.ObjectiveKey)
 	}
 	// retrieve dataManager owner
