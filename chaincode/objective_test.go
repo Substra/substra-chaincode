@@ -1,3 +1,17 @@
+// Copyright 2018 Owkin, inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
 import (
@@ -5,66 +19,107 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/stretchr/testify/require"
 )
 
+func TestLeaderBoard(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	db := NewLedgerDB(mockStub)
+	registerItem(t, *mockStub, "")
+	mockStub.MockTransactionStart("42")
+
+	// Add a certified testtuple
+	inputTest := inputTesttuple{
+		TraintupleKey: traintupleKey,
+	}
+	keyMap, err := createTesttuple(db, assetToArgs(inputTest))
+	assert.NoError(t, err)
+
+	inpLeaderboard := inputLeaderboard{
+		ObjectiveKey:   objectiveDescriptionHash,
+		AscendingOrder: true,
+	}
+	// leaderboard should be empty since there is no testtuple done
+	leaderboard, err := queryObjectiveLeaderboard(db, assetToArgs(inpLeaderboard))
+	assert.NoError(t, err)
+	assert.Len(t, leaderboard.Testtuples, 0)
+
+	// Update testtuple status directly
+	testtuple, err := db.GetTesttuple(keyMap["key"])
+	assert.NoError(t, err)
+	testtuple.Status = StatusDone
+	testtuple.Dataset.Perf = 0.9
+	err = db.Put(keyMap["key"], testtuple)
+	assert.NoError(t, err)
+
+	leaderboard, err = queryObjectiveLeaderboard(db, assetToArgs(inpLeaderboard))
+	assert.NoError(t, err)
+	assert.Equal(t, objectiveDescriptionHash, leaderboard.Objective.Key)
+	require.Len(t, leaderboard.Testtuples, 1)
+	assert.Equal(t, keyMap["key"], leaderboard.Testtuples[0].Key)
+}
 func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
-	inpObjective := inputObjective{TestDataset: ":"}
-	args := inpObjective.createSample()
-	resp := mockStub.MockInvoke("42", args)
+	inpObjective := inputObjective{}
+	inpObjective.createDefault()
+	inpObjective.TestDataset = inputDataset{}
+	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
 	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
 }
 func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockStub.MockInvoke("42", [][]byte{[]byte("registerNode")})
 
 	// Add a dataManager and some dataSample successfuly
 	inpDataManager := inputDataManager{}
-	args := inpDataManager.createSample()
+	args := inpDataManager.createDefault()
 	mockStub.MockInvoke("42", args)
 	inpDataSample := inputDataSample{
-		Hashes:          testDataSampleHash1,
-		DataManagerKeys: dataManagerOpenerHash,
+		Hashes:          []string{testDataSampleHash1},
+		DataManagerKeys: []string{dataManagerOpenerHash},
 		TestOnly:        "true",
 	}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	mockStub.MockInvoke("42", args)
 	inpDataSample = inputDataSample{
-		Hashes:          testDataSampleHash2,
-		DataManagerKeys: dataManagerOpenerHash,
+		Hashes:          []string{testDataSampleHash2},
+		DataManagerKeys: []string{dataManagerOpenerHash},
 		TestOnly:        "true",
 	}
-	args = inpDataSample.createSample()
+	args = inpDataSample.createDefault()
 	r := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, r.Status)
 
 	// Fail to insert the objective
-	inpObjective := inputObjective{TestDataset: testDataSampleHash1 + ":" + testDataSampleHash2}
-	args = inpObjective.createSample()
+	inpObjective := inputObjective{
+		TestDataset: inputDataset{
+			DataManagerKey: testDataSampleHash1,
+			DataSampleKeys: []string{testDataSampleHash2}}}
+	args = inpObjective.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 500, resp.Status, "status should indicate an error since the dataManager key is a dataSample key")
+	assert.EqualValues(t, 400, resp.Status, "status should indicate an error since the dataManager key is a dataSample key")
 }
 func TestObjective(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add objective with invalid field
 	inpObjective := inputObjective{
 		DescriptionHash: "aaa",
 	}
-	args := inpObjective.createSample()
+	args := inpObjective.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Add objective with unexisting test dataSample
 	inpObjective = inputObjective{}
-	args = inpObjective.createSample()
+	args = inpObjective.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding objective with unexisting test dataSample, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with unexisting test dataSample, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add objective
 	resp, tt := registerItem(t, *mockStub, "objective")
@@ -84,7 +139,7 @@ func TestObjective(t *testing.T) {
 		inpObjective.DescriptionHash)
 
 	// Query objective from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryObjective"), []byte(objectiveKey)}
+	args = [][]byte{[]byte("queryObjective"), keyToJSON(objectiveKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying a dataManager with status %d and message %s", resp.Status, resp.Message)
 	objective := outputObjective{}
@@ -92,7 +147,7 @@ func TestObjective(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried objective")
 	expectedObjective := outputObjective{
 		Key:   objectiveKey,
-		Owner: "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
+		Owner: worker,
 		TestDataset: &Dataset{
 			DataManagerKey: dataManagerOpenerHash,
 			DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
@@ -102,7 +157,9 @@ func TestObjective(t *testing.T) {
 			StorageAddress: inpObjective.DescriptionStorageAddress,
 			Hash:           objectiveKey,
 		},
-		Permissions: inpObjective.Permissions,
+		Permissions: outputPermissions{
+			Process: Permission{Public: true, AuthorizedIDs: []string{}},
+		},
 		Metrics: &HashDressName{
 			Hash:           inpObjective.MetricsHash,
 			Name:           inpObjective.MetricsName,

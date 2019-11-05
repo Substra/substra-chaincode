@@ -1,0 +1,16 @@
+language: go
+
+go:
+  - "1.12.x"
+
+env:
+  - GO111MODULE=on
+
+branches:
+  only:
+    - master
+    - dev
+
+install: skip
+
+script: cd chaincode && go test -v ./...

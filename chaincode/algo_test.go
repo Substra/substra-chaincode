@@ -1,24 +1,37 @@
+// Copyright 2018 Owkin, inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
 import (
 	"encoding/json"
 	"testing"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAlgo(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := shim.NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add algo with invalid field
 	inpAlgo := inputAlgo{
 		DescriptionHash: "aaa",
 	}
-	args := inpAlgo.createSample()
+	args := inpAlgo.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 500, resp.Status, "when adding algo with invalid hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding algo with invalid hash, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add algo
 	resp, tt := registerItem(t, *mockStub, "algo")
@@ -32,7 +45,7 @@ func TestAlgo(t *testing.T) {
 	assert.Equalf(t, inpAlgo.Hash, algoKey, "when adding algo, key does not corresponds to its hash - key: %s and hash %s", algoKey, inpAlgo.Hash)
 
 	// Query algo from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryAlgo"), []byte(algoKey)}
+	args = [][]byte{[]byte("queryAlgo"), keyToJSON(algoKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying an algo with status %d and message %s", resp.Status, resp.Message)
 	algo := outputAlgo{}
@@ -49,8 +62,10 @@ func TestAlgo(t *testing.T) {
 			Hash:           inpAlgo.DescriptionHash,
 			StorageAddress: inpAlgo.DescriptionStorageAddress,
 		},
-		Owner:       "bbd157aa8e85eb985aeedb79361cd45739c92494dce44d351fd2dbd6190e27f0",
-		Permissions: inpAlgo.Permissions,
+		Owner: worker,
+		Permissions: outputPermissions{
+			Process: Permission{Public: true, AuthorizedIDs: []string{}},
+		},
 	}
 	assert.Exactly(t, expectedAlgo, algo)
 
