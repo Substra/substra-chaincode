@@ -110,7 +110,7 @@ func createComputePlan(db LedgerDB, args []string) (resp outputComputePlan, err 
 			return resp, errors.BadRequest("testtuple index %s: traintuple ID %s not found", index, computeTesttuple.TraintupleID)
 		}
 		testtuple := Testtuple{}
-		testtuple.Model = &Model{TraintupleKey: traintupleKey}
+		testtuple.TraintupleKey = traintupleKey
 		testtuple.ObjectiveKey = inp.ObjectiveKey
 		testtuple.AlgoKey = inp.AlgoKey
 
