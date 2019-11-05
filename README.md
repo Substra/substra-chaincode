@@ -6,6 +6,20 @@ Chaincode for the Substra platform
 ## License
 
 This project is developed under the Apache License, Version 2.0 (Apache-2.0), located in the [LICENSE](./LICENSE) file.
+
+## Local development
+
+### Prerequisites
+
+go version 1.11.x
+
+### Run the tests
+
+```
+cd chaincode/
+go test
+```
+
 ## Devmode
 
 See [chaincode-docker-devmode](./chaincode-docker-devmode/README.rst)
