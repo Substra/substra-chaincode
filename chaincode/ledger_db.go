@@ -84,10 +84,7 @@ func (db *LedgerDB) Get(key string, object interface{}) error {
 		db.putTransactionState(key, buff)
 	}
 
-	if err = json.Unmarshal(buff, &object); err != nil {
-		return err
-	}
-	return nil
+	return json.Unmarshal(buff, &object)
 }
 
 // KeyExists checks if a key is stored in the chaincode db
@@ -146,10 +143,7 @@ func (db *LedgerDB) DeleteIndex(index string, attributes []string) error {
 	if err != nil {
 		return err
 	}
-	if err = db.cc.DelState(compositeKey); err != nil {
-		return err
-	}
-	return nil
+	return db.cc.DelState(compositeKey)
 }
 
 // UpdateIndex updates an existing composite key in the chaincode db
@@ -157,10 +151,7 @@ func (db *LedgerDB) UpdateIndex(index string, oldAttributes []string, newAttribu
 	if err := db.DeleteIndex(index, oldAttributes); err != nil {
 		return err
 	}
-	if err := db.CreateIndex(index, newAttribues); err != nil {
-		return err
-	}
-	return nil
+	return db.CreateIndex(index, newAttribues)
 }
 
 // GetIndexKeys returns keys matching composite key values from the chaincode db

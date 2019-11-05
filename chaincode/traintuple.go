@@ -455,10 +455,7 @@ func getOutputTraintuples(db LedgerDB, traintupleKeys []string) (outTraintuples 
 // validateNewStatus verifies that the new status is consistent with the tuple current status
 func (traintuple *Traintuple) validateNewStatus(db LedgerDB, status string) error {
 	// check validity of worker and change of status
-	if err := checkUpdateTuple(db, traintuple.Dataset.Worker, traintuple.Status, status); err != nil {
-		return err
-	}
-	return nil
+	return checkUpdateTuple(db, traintuple.Dataset.Worker, traintuple.Status, status)
 }
 
 // updateTraintupleChildren updates the status of waiting trainuples  InModels of traintuples once they have been trained (succesfully or failed)
