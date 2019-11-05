@@ -1,7 +1,7 @@
 # substra-chaincode
 Chaincode for the Substra platform
 
-> :warning: This project is under active development. Please, wait some times before using it...
+> :warning: This project is under active development. Please wait a while before using it...
 
 ## License
 
