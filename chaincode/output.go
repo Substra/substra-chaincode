@@ -206,6 +206,7 @@ type outputTesttuple struct {
 	Dataset       *TtDataset     `json:"dataset"`
 	Log           string         `json:"log"`
 	TraintupleKey string         `json:"traintupleKey"`
+	Model         *Model         `json:"model"`
 	Objective     *TtObjective   `json:"objective"`
 	Status        string         `json:"status"`
 	Tag           string         `json:"tag"`
@@ -220,6 +221,16 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 	out.TraintupleKey = in.TraintupleKey
 	out.Status = in.Status
 	out.Tag = in.Tag
+
+	traintuple, err := db.GetTraintuple(in.TraintupleKey)
+	if err != nil {
+		return fmt.Errorf("could not retrieve traintuple with key %s - %s", in.TraintupleKey, err.Error())
+	}
+	out.Model = &Model{TraintupleKey: in.TraintupleKey}
+	if traintuple.OutModel != nil {
+		out.Model.Hash = traintuple.OutModel.Hash
+		out.Model.StorageAddress = traintuple.OutModel.StorageAddress
+	}
 
 	// fill algo
 	algo, err := db.GetAlgo(in.AlgoKey)
@@ -329,6 +340,7 @@ type outputBoardTuple struct {
 	Creator       string         `json:"creator"`
 	Key           string         `json:"key"`
 	TraintupleKey string         `json:"traintupleKey"`
+	Model         *Model         `json:"model"`
 	Perf          float32        `json:"perf"`
 	Tag           string         `json:"tag"`
 }
@@ -346,6 +358,18 @@ func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string
 		StorageAddress: algo.StorageAddress,
 	}
 	out.TraintupleKey = in.TraintupleKey
+	traintuple, err := db.GetTraintuple(in.TraintupleKey)
+
+	if err != nil {
+		return fmt.Errorf("could not retrieve traintuple with key %s - %s", in.TraintupleKey, err.Error())
+	}
+
+	out.Model = &Model{TraintupleKey: in.TraintupleKey}
+	if traintuple.OutModel != nil {
+		out.Model.Hash = traintuple.OutModel.Hash
+		out.Model.StorageAddress = traintuple.OutModel.StorageAddress
+	}
+
 	out.Perf = in.Dataset.Perf
 	out.Tag = in.Tag
 	return nil
