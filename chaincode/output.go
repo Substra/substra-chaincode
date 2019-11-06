@@ -206,7 +206,7 @@ type outputTesttuple struct {
 	Dataset       *TtDataset     `json:"dataset"`
 	Log           string         `json:"log"`
 	TraintupleKey string         `json:"traintupleKey"`
-	Model         *Model         `json:"model"`
+	Model         *Model         `json:"model"` // Obsolete field. TODO: delete it
 	Objective     *TtObjective   `json:"objective"`
 	Status        string         `json:"status"`
 	Tag           string         `json:"tag"`
@@ -222,6 +222,9 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 	out.Status = in.Status
 	out.Tag = in.Tag
 
+	// Populate the `out.model` for backwards compatibility.
+	//   The `out.model` field is obsolete and will disappear soon.
+	//   Callers should use `out.traintupleKey` instead.
 	traintuple, err := db.GetTraintuple(in.TraintupleKey)
 	if err != nil {
 		return fmt.Errorf("could not retrieve traintuple with key %s - %s", in.TraintupleKey, err.Error())
@@ -340,7 +343,7 @@ type outputBoardTuple struct {
 	Creator       string         `json:"creator"`
 	Key           string         `json:"key"`
 	TraintupleKey string         `json:"traintupleKey"`
-	Model         *Model         `json:"model"`
+	Model         *Model         `json:"model"` // Obsolete field. TODO: delete it
 	Perf          float32        `json:"perf"`
 	Tag           string         `json:"tag"`
 }
@@ -358,19 +361,21 @@ func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string
 		StorageAddress: algo.StorageAddress,
 	}
 	out.TraintupleKey = in.TraintupleKey
-	traintuple, err := db.GetTraintuple(in.TraintupleKey)
+	out.Perf = in.Dataset.Perf
+	out.Tag = in.Tag
 
+	// Populate the `out.model` for backwards compatibility.
+	//   The `out.model` field is obsolete and will disappear soon.
+	//   Callers should use `out.traintupleKey` instead.
+	traintuple, err := db.GetTraintuple(in.TraintupleKey)
 	if err != nil {
 		return fmt.Errorf("could not retrieve traintuple with key %s - %s", in.TraintupleKey, err.Error())
 	}
-
 	out.Model = &Model{TraintupleKey: in.TraintupleKey}
 	if traintuple.OutModel != nil {
 		out.Model.Hash = traintuple.OutModel.Hash
 		out.Model.StorageAddress = traintuple.OutModel.StorageAddress
 	}
 
-	out.Perf = in.Dataset.Perf
-	out.Tag = in.Tag
 	return nil
 }
