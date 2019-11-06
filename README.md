@@ -1588,3 +1588,273 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
  ]
 }
 ```
+Smart contract: `queryComputePlan`
+
+##### JSON Inputs:
+```go
+{
+ "key": string (required,len=64,hexadecimal),
+}
+```
+##### Command peer example:
+```bash
+peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369\"}"]}' -C myc
+```
+##### Command output:
+```json
+{
+ "algoKey": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+ "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+ "objectiveKey": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+ "outputTesttuples": [
+  {
+   "algo": {
+    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "name": "hog + svm",
+    "storageAddress": "https://toto/algo/222/algo"
+   },
+   "certified": true,
+   "creator": "SampleOrg",
+   "dataset": {
+    "keys": [
+     "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+     "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+    ],
+    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "perf": 0,
+    "worker": "SampleOrg"
+   },
+   "key": "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96",
+   "log": "",
+   "model": {
+    "hash": "",
+    "storageAddress": "",
+    "traintupleKey": "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
+   },
+   "objective": {
+    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "metrics": {
+     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+     "storageAddress": "https://toto/objective/222/metrics"
+    }
+   },
+   "status": "waiting",
+   "tag": ""
+  }
+ ],
+ "outputTraintuples": [
+  {
+   "algo": {
+    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "name": "hog + svm",
+    "storageAddress": "https://toto/algo/222/algo"
+   },
+   "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+   "creator": "SampleOrg",
+   "dataset": {
+    "keys": [
+     "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+    ],
+    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "perf": 0,
+    "worker": "SampleOrg"
+   },
+   "inModels": null,
+   "key": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+   "log": "",
+   "objective": {
+    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "metrics": {
+     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+     "storageAddress": "https://toto/objective/222/metrics"
+    }
+   },
+   "outModel": null,
+   "permissions": {
+    "process": {
+     "authorizedIDs": [],
+     "public": true
+    }
+   },
+   "rank": 0,
+   "status": "todo",
+   "tag": ""
+  },
+  {
+   "algo": {
+    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "name": "hog + svm",
+    "storageAddress": "https://toto/algo/222/algo"
+   },
+   "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+   "creator": "SampleOrg",
+   "dataset": {
+    "keys": [
+     "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+    ],
+    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "perf": 0,
+    "worker": "SampleOrg"
+   },
+   "inModels": [
+    {
+     "hash": "",
+     "storageAddress": "",
+     "traintupleKey": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369"
+    }
+   ],
+   "key": "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299",
+   "log": "",
+   "objective": {
+    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "metrics": {
+     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+     "storageAddress": "https://toto/objective/222/metrics"
+    }
+   },
+   "outModel": null,
+   "permissions": {
+    "process": {
+     "authorizedIDs": [],
+     "public": true
+    }
+   },
+   "rank": 0,
+   "status": "waiting",
+   "tag": ""
+  }
+ ]
+}
+```
+##### Command peer example:
+```bash
+peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
+```
+##### Command output:
+```json
+[
+ {
+  "algoKey": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+  "objectiveKey": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+  "outputTesttuples": [
+   {
+    "algo": {
+     "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+     "name": "hog + svm",
+     "storageAddress": "https://toto/algo/222/algo"
+    },
+    "certified": true,
+    "creator": "SampleOrg",
+    "dataset": {
+     "keys": [
+      "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+      "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+     ],
+     "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+     "perf": 0,
+     "worker": "SampleOrg"
+    },
+    "key": "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96",
+    "log": "",
+    "model": {
+     "hash": "",
+     "storageAddress": "",
+     "traintupleKey": "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
+    },
+    "objective": {
+     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+     "metrics": {
+      "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+      "storageAddress": "https://toto/objective/222/metrics"
+     }
+    },
+    "status": "waiting",
+    "tag": ""
+   }
+  ],
+  "outputTraintuples": [
+   {
+    "algo": {
+     "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+     "name": "hog + svm",
+     "storageAddress": "https://toto/algo/222/algo"
+    },
+    "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+    "creator": "SampleOrg",
+    "dataset": {
+     "keys": [
+      "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+     ],
+     "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+     "perf": 0,
+     "worker": "SampleOrg"
+    },
+    "inModels": null,
+    "key": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+    "log": "",
+    "objective": {
+     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+     "metrics": {
+      "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+      "storageAddress": "https://toto/objective/222/metrics"
+     }
+    },
+    "outModel": null,
+    "permissions": {
+     "process": {
+      "authorizedIDs": [],
+      "public": true
+     }
+    },
+    "rank": 0,
+    "status": "todo",
+    "tag": ""
+   },
+   {
+    "algo": {
+     "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+     "name": "hog + svm",
+     "storageAddress": "https://toto/algo/222/algo"
+    },
+    "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+    "creator": "SampleOrg",
+    "dataset": {
+     "keys": [
+      "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+     ],
+     "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+     "perf": 0,
+     "worker": "SampleOrg"
+    },
+    "inModels": [
+     {
+      "hash": "",
+      "storageAddress": "",
+      "traintupleKey": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369"
+     }
+    ],
+    "key": "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299",
+    "log": "",
+    "objective": {
+     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+     "metrics": {
+      "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+      "storageAddress": "https://toto/objective/222/metrics"
+     }
+    },
+    "outModel": null,
+    "permissions": {
+     "process": {
+      "authorizedIDs": [],
+      "public": true
+     }
+    },
+    "rank": 0,
+    "status": "waiting",
+    "tag": ""
+   }
+  ]
+ }
+]
+```
