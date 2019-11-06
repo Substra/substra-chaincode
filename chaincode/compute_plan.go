@@ -16,6 +16,7 @@ package main
 
 import (
 	"chaincode/errors"
+	"sort"
 	"strconv"
 )
 
@@ -124,3 +125,127 @@ func createComputePlan(db LedgerDB, args []string) (resp outputComputePlan, err 
 	return resp, err
 }
 
+func queryComputePlan(db LedgerDB, args []string) (resp outputComputePlanDetails, err error) {
+	inp := inputHash{}
+	err = AssetFromJSON(args, &inp)
+	if err != nil {
+		return
+	}
+	return getComputePlan(db, inp.Key)
+}
+
+func queryComputePlans(db LedgerDB, args []string) (resp []outputComputePlanDetails, err error) {
+	computePlanKeys, err := db.GetIndexKeys("traintuple~computeplanid", []string{"computeplan"})
+	if err != nil {
+		return
+	}
+	for _, key := range computePlanKeys {
+		var computePlan outputComputePlanDetails
+		computePlan, err = getComputePlan(db, key)
+		if err != nil {
+			return
+		}
+		resp = append(resp, computePlan)
+	}
+	return resp, err
+}
+
+func getComputePlan(db LedgerDB, key string) (resp outputComputePlanDetails, err error) {
+	// get traintuples
+	traintuples, err := getTraintuplesForComputePlan(db, key)
+	if err != nil {
+		return
+	}
+	if len(traintuples) == 0 {
+		err = errors.E("No traintuple found for compute plan %s", key)
+		return
+	}
+	var firstTt *Traintuple
+	ttKeys := []string{}
+	outTts := []outputTraintuple{}
+	for _, traintupleAndKey := range traintuples {
+		ttKey := traintupleAndKey.Key
+		tt := traintupleAndKey.Traintuple
+
+		if firstTt == nil {
+			firstTt = &tt
+		}
+		ttKeys = append(ttKeys, ttKey)
+
+		outTt := outputTraintuple{}
+		outTt.Fill(db, tt, ttKey)
+		outTts = append(outTts, outTt)
+	}
+
+	// get testtuples
+	testtuples, err := getTesttuplesForTraintuples(db, ttKeys)
+	if err != nil {
+		return
+	}
+	outTsts := []outputTesttuple{}
+	for tstKey, testtuple := range testtuples {
+		outTst := outputTesttuple{}
+		outTst.Fill(db, tstKey, testtuple)
+		outTsts = append(outTsts, outTst)
+	}
+
+	// return output
+	resp = outputComputePlanDetails{
+		ComputePlanID: key,
+		AlgoKey:       (*firstTt).AlgoKey,
+		ObjectiveKey:  (*firstTt).ObjectiveKey,
+		Traintuples:   outTts,
+		Testtuples:    outTsts,
+	}
+	return
+}
+
+type traintupleAndKey struct {
+	Key        string
+	Traintuple Traintuple
+}
+
+// results are ordered by rank
+func getTraintuplesForComputePlan(db LedgerDB, computePlanKey string) (resp []traintupleAndKey, err error) {
+	trainKeys, err := db.GetIndexKeys("traintuple~computeplanid~worker~rank~key", []string{"traintuple", computePlanKey})
+	if err != nil {
+		return
+	}
+	for _, trainKey := range trainKeys {
+		var traintuple Traintuple
+		traintuple, err = db.GetTraintuple(trainKey)
+		if err != nil {
+			return
+		}
+		resp = append(resp, traintupleAndKey{
+			Key:        trainKey,
+			Traintuple: traintuple})
+	}
+
+	// sort by rank
+	sort.SliceStable(resp, func(i, j int) bool {
+		return resp[i].Traintuple.Rank < resp[j].Traintuple.Rank
+	})
+
+	return resp, nil
+}
+
+func getTesttuplesForTraintuples(db LedgerDB, traintupleKeys []string) (resp map[string]Testtuple, err error) {
+	for _, traintupleKey := range traintupleKeys {
+		var testKeys []string
+		testKeys, err = db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey})
+		if err != nil {
+			return
+		}
+		resp = map[string]Testtuple{}
+		for _, testKey := range testKeys {
+			var testtuple Testtuple
+			testtuple, err = db.GetTesttuple(testKey)
+			if err != nil {
+				return
+			}
+			resp[testKey] = testtuple
+		}
+	}
+	return resp, nil
+}

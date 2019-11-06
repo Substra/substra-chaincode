@@ -106,6 +106,10 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = queryTraintuple(db, args)
 	case "queryTraintuples":
 		result, err = queryTraintuples(db, args)
+	case "queryComputePlan":
+		result, err = queryComputePlan(db, args)
+	case "queryComputePlans":
+		result, err = queryComputePlans(db, args)
 	case "registerAlgo":
 		result, err = registerAlgo(db, args)
 	case "registerDataManager":
