@@ -135,7 +135,7 @@ func queryComputePlan(db LedgerDB, args []string) (resp outputComputePlanDetails
 }
 
 func queryComputePlans(db LedgerDB, args []string) (resp []outputComputePlanDetails, err error) {
-	computePlanKeys, err := db.GetIndexKeys("traintuple~computeplanid", []string{"computeplan"})
+	computePlanKeys, err := db.GetIndexKeys("computeplan~id", []string{"computeplan"})
 	if err != nil {
 		return
 	}
