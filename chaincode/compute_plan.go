@@ -135,11 +135,11 @@ func queryComputePlan(db LedgerDB, args []string) (resp outputComputePlanDetails
 }
 
 func queryComputePlans(db LedgerDB, args []string) (resp []outputComputePlanDetails, err error) {
-	computePlanKeys, err := db.GetIndexKeys("computeplan~id", []string{"computeplan"})
+	computePlanIDs, err := db.GetIndexKeys("computeplan~id", []string{"computeplan"})
 	if err != nil {
 		return
 	}
-	for _, key := range computePlanKeys {
+	for _, key := range computePlanIDs {
 		var computePlan outputComputePlanDetails
 		computePlan, err = getComputePlan(db, key)
 		if err != nil {
@@ -206,8 +206,8 @@ type traintupleAndKey struct {
 }
 
 // results are ordered by rank
-func getTraintuplesForComputePlan(db LedgerDB, computePlanKey string) (resp []traintupleAndKey, err error) {
-	trainKeys, err := db.GetIndexKeys("traintuple~computeplanid~worker~rank~key", []string{"traintuple", computePlanKey})
+func getTraintuplesForComputePlan(db LedgerDB, computePlanID string) (resp []traintupleAndKey, err error) {
+	trainKeys, err := db.GetIndexKeys("traintuple~computeplanid~worker~rank~key", []string{"traintuple", computePlanID})
 	if err != nil {
 		return
 	}
