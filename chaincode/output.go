@@ -355,6 +355,6 @@ type outputComputePlanDetails struct {
 	ComputePlanID string             `json:"computePlanID"`
 	AlgoKey       string             `json:"algoKey"`
 	ObjectiveKey  string             `json:"objectiveKey"`
-	Traintuples   []outputTraintuple `json:"outputTraintuples"`
-	Testtuples    []outputTesttuple  `json:"outputTesttuples"`
+	Traintuples   []outputTraintuple `json:"traintuples"`
+	Testtuples    []outputTesttuple  `json:"testtuples"`
 }
