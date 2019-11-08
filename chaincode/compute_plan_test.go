@@ -126,82 +126,15 @@ func TestQueryComputePlans(t *testing.T) {
 
 func validateComputePlan(t *testing.T, cp outputComputePlanDetails, in inputComputePlan) {
 	assert.Len(t, cp.Traintuples, 2)
-	cpID := cp.Traintuples[0].Key
+	cpID := cp.Traintuples[0]
 
-	// validate top-level fields
 	assert.Equal(t, cpID, cp.ComputePlanID)
 	assert.Equal(t, in.AlgoKey, cp.AlgoKey)
 	assert.Equal(t, in.ObjectiveKey, cp.ObjectiveKey)
 
-	// validate first traintuple
-	first := cp.Traintuples[0]
-	validateDefaultPropertiesTrain(t, first)
-	assert.Equal(t, cpID, first.Key)
-	assert.Equal(t, in.Traintuples[0].DataManagerKey, first.Dataset.OpenerHash)
-	assert.Equal(t, in.Traintuples[0].DataSampleKeys, first.Dataset.DataSampleKeys)
-	assert.Equal(t, cpID, first.ComputePlanID)
-	assert.Len(t, first.InModels, 0)
-	assert.Equal(t, 0, first.Rank)
-	assert.Equal(t, StatusTodo, first.Status)
+	assert.NotEmpty(t, cp.Traintuples[0])
+	assert.NotEmpty(t, cp.Traintuples[1])
 
-	// validate second traintuple
-	second := cp.Traintuples[1]
-	validateDefaultPropertiesTrain(t, second)
-	assert.Equal(t, cpID, second.ComputePlanID)
-	assert.Equal(t, in.Traintuples[1].DataManagerKey, second.Dataset.OpenerHash)
-	assert.Equal(t, in.Traintuples[1].DataSampleKeys, second.Dataset.DataSampleKeys)
-	assert.Equal(t, StatusWaiting, second.Status)
-	assert.Len(t, second.InModels, 1)
-	assert.Equal(t, first.Key, second.InModels[0].TraintupleKey)
-	assert.Equal(t, "", second.InModels[0].Hash)
-	assert.Equal(t, "", second.InModels[0].StorageAddress)
-	assert.Equal(t, 0, second.Rank) // TODO: is that expected!?
-
-	// validate test tuples
 	require.Len(t, cp.Testtuples, 1)
-	testtuple := cp.Testtuples[0]
-	validateDefaultPropertiesTest(t, testtuple)
-	assert.Equal(t, second.Key, testtuple.Model.TraintupleKey)
-	assert.Equal(t, in.Testtuples[0].DataSampleKeys, testtuple.Dataset.DataSampleKeys)
-	assert.Equal(t, in.Testtuples[0].DataManagerKey, testtuple.Dataset.OpenerHash)
-	assert.Equal(t, algoName, testtuple.Algo.Name)
-	assert.Equal(t, algoHash, testtuple.Algo.Hash)
-	assert.Equal(t, algoStorageAddress, testtuple.Algo.StorageAddress)
-	assert.True(t, cp.Testtuples[0].Certified)
-}
-
-func validateDefaultPropertiesTrain(t *testing.T, traintuple outputTraintuple) {
-	assert.NotZero(t, traintuple)
-	assert.NotNil(t, traintuple.Key)
-	assert.Equal(t, worker, traintuple.Creator)
-	assert.Equal(t, worker, traintuple.Dataset.Worker)
-	assert.Equal(t, algoName, traintuple.Algo.Name)
-	assert.Equal(t, algoHash, traintuple.Algo.Hash)
-	assert.Equal(t, algoStorageAddress, traintuple.Algo.StorageAddress)
-	assert.Equal(t, objectiveDescriptionHash, traintuple.Objective.Key)
-	assert.Equal(t, objectiveMetricsHash, traintuple.Objective.Metrics.Hash)
-	assert.Equal(t, objectiveMetricsStorageAddress, traintuple.Objective.Metrics.StorageAddress)
-	assert.Equal(t, OpenPermissions.Process.Public, traintuple.Permissions.Process.Public)
-	assert.Equal(t, OpenPermissions.Process.AuthorizedIDs, traintuple.Permissions.Process.AuthorizedIDs)
-	assert.Equal(t, "", traintuple.Log)
-	assert.Equal(t, "", traintuple.Tag)
-	assert.Nil(t, traintuple.OutModel)
-	assert.EqualValues(t, 0, traintuple.Dataset.Perf)
-}
-
-func validateDefaultPropertiesTest(t *testing.T, testtuple outputTesttuple) {
-	assert.NotZero(t, testtuple)
-	assert.NotNil(t, testtuple.Key)
-	assert.Equal(t, worker, testtuple.Creator)
-	assert.Equal(t, worker, testtuple.Dataset.Worker)
-	assert.Equal(t, algoName, testtuple.Algo.Name)
-	assert.Equal(t, algoHash, testtuple.Algo.Hash)
-	assert.Equal(t, algoStorageAddress, testtuple.Algo.StorageAddress)
-	assert.Equal(t, StatusWaiting, testtuple.Status)
-	assert.Equal(t, objectiveDescriptionHash, testtuple.Objective.Key)
-	assert.Equal(t, objectiveMetricsHash, testtuple.Objective.Metrics.Hash)
-	assert.Equal(t, objectiveMetricsStorageAddress, testtuple.Objective.Metrics.StorageAddress)
-	assert.Equal(t, "", testtuple.Log)
-	assert.Equal(t, "", testtuple.Tag)
-	assert.EqualValues(t, 0, testtuple.Dataset.Perf)
+	assert.NotEmpty(t, cp.Testtuples[0])
 }

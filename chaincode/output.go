@@ -352,9 +352,9 @@ func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string
 }
 
 type outputComputePlanDetails struct {
-	ComputePlanID string             `json:"computePlanID"`
-	AlgoKey       string             `json:"algoKey"`
-	ObjectiveKey  string             `json:"objectiveKey"`
-	Traintuples   []outputTraintuple `json:"traintuples"`
-	Testtuples    []outputTesttuple  `json:"testtuples"`
+	ComputePlanID string   `json:"computePlanID"`
+	AlgoKey       string   `json:"algoKey"`
+	ObjectiveKey  string   `json:"objectiveKey"`
+	Traintuples   []string `json:"traintuples"`
+	Testtuples    []string `json:"testtuples"`
 }

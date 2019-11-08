@@ -150,102 +150,53 @@ func queryComputePlans(db LedgerDB, args []string) (resp []outputComputePlanDeta
 	return resp, err
 }
 
+// getComputePlan returns details for a compute plan id.
+// Traintuples are ordered by ascending rank.
 func getComputePlan(db LedgerDB, key string) (resp outputComputePlanDetails, err error) {
-	// get traintuples
-	traintuples, err := getTraintuplesForComputePlan(db, key)
+	// 1. Get Traintuples and sort them by ascending rank
+	var firstTt *Traintuple
+	ttKeys, err := db.GetIndexKeys("traintuple~computeplanid~worker~rank~key", []string{"traintuple", key})
 	if err != nil {
 		return
 	}
-	if len(traintuples) == 0 {
+	if len(ttKeys) == 0 {
 		err = errors.E("No traintuple found for compute plan %s", key)
 		return
 	}
-	var firstTt *Traintuple
-	ttKeys := []string{}
-	outTts := []outputTraintuple{}
-	for _, traintupleAndKey := range traintuples {
-		ttKey := traintupleAndKey.Key
-		tt := traintupleAndKey.Traintuple
-
+	tts := map[string]Traintuple{}
+	for _, ttKey := range ttKeys {
+		var tt Traintuple
+		tt, err = db.GetTraintuple(ttKey)
+		if err != nil {
+			return
+		}
 		if firstTt == nil {
 			firstTt = &tt
 		}
-		ttKeys = append(ttKeys, ttKey)
+		tts[ttKey] = tt
+	}
+	sort.SliceStable(ttKeys, func(i, j int) bool {
+		return tts[ttKeys[i]].Rank < tts[ttKeys[j]].Rank
+	})
 
-		outTt := outputTraintuple{}
-		outTt.Fill(db, tt, ttKey)
-		outTts = append(outTts, outTt)
+	// 2. Get Testtuples associated with each Traintuple
+	var tstKeys []string
+	for _, traintupleKey := range ttKeys {
+		var toAdd []string
+		toAdd, err = db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey})
+		if err != nil {
+			return
+		}
+		tstKeys = append(tstKeys, toAdd...)
 	}
 
-	// get testtuples
-	testtuples, err := getTesttuplesForTraintuples(db, ttKeys)
-	if err != nil {
-		return
-	}
-	outTsts := []outputTesttuple{}
-	for tstKey, testtuple := range testtuples {
-		outTst := outputTesttuple{}
-		outTst.Fill(db, tstKey, testtuple)
-		outTsts = append(outTsts, outTst)
-	}
-
-	// return output
+	// 3. Create response
 	resp = outputComputePlanDetails{
 		ComputePlanID: key,
 		AlgoKey:       (*firstTt).AlgoKey,
 		ObjectiveKey:  (*firstTt).ObjectiveKey,
-		Traintuples:   outTts,
-		Testtuples:    outTsts,
+		Traintuples:   ttKeys,
+		Testtuples:    tstKeys,
 	}
 	return
-}
-
-type traintupleAndKey struct {
-	Key        string
-	Traintuple Traintuple
-}
-
-// results are ordered by rank
-func getTraintuplesForComputePlan(db LedgerDB, computePlanID string) (resp []traintupleAndKey, err error) {
-	trainKeys, err := db.GetIndexKeys("traintuple~computeplanid~worker~rank~key", []string{"traintuple", computePlanID})
-	if err != nil {
-		return
-	}
-	for _, trainKey := range trainKeys {
-		var traintuple Traintuple
-		traintuple, err = db.GetTraintuple(trainKey)
-		if err != nil {
-			return
-		}
-		resp = append(resp, traintupleAndKey{
-			Key:        trainKey,
-			Traintuple: traintuple})
-	}
-
-	// sort by rank
-	sort.SliceStable(resp, func(i, j int) bool {
-		return resp[i].Traintuple.Rank < resp[j].Traintuple.Rank
-	})
-
-	return resp, nil
-}
-
-func getTesttuplesForTraintuples(db LedgerDB, traintupleKeys []string) (resp map[string]Testtuple, err error) {
-	for _, traintupleKey := range traintupleKeys {
-		var testKeys []string
-		testKeys, err = db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey})
-		if err != nil {
-			return
-		}
-		resp = map[string]Testtuple{}
-		for _, testKey := range testKeys {
-			var testtuple Testtuple
-			testtuple, err = db.GetTesttuple(testKey)
-			if err != nil {
-				return
-			}
-			resp[testKey] = testtuple
-		}
-	}
-	return resp, nil
 }
