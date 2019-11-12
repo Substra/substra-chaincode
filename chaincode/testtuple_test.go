@@ -16,6 +16,7 @@ package main
 
 import (
 	"encoding/json"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -157,4 +158,49 @@ func TestQueryTesttuple(t *testing.T) {
 	assert.Equal(t, algoHash, testtuple.Algo.Hash)
 	assert.Equal(t, algoStorageAddress, testtuple.Algo.StorageAddress)
 	assert.False(t, testtuple.Certified)
+}
+
+func TestTesttupleOnCompositeTraintuple(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+
+	registerItem(t, *mockStub, "compositeTraintuple")
+
+	inp := inputTesttuple{
+		TraintupleKey: compositeTraintupleKey,
+	}
+	// Create a testtuple before training
+	args := inp.createDefault()
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
+	values := map[string]string{}
+	bytesToStruct(resp.Payload, &values)
+	testTupleKey := values["key"]
+
+	// Start and succeed training
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+	_, err := logStartCompositeTrain(db, assetToArgs(inputHash{Key: compositeTraintupleKey}))
+	assert.NoError(t, err)
+	inLog := inputLogSuccessCompositeTrain{}
+	inLog.createDefault()
+	_, err = logSuccessCompositeTrain(db, assetToArgs(inLog))
+	assert.NoError(t, err)
+
+	testTuple, err := queryTesttuple(db, assetToArgs(inputHash{Key: testTupleKey}))
+	assert.Equal(t, StatusTodo, testTuple.Status)
+	assert.Equal(t, compositeTraintupleKey, testTuple.TraintupleKey)
+
+	// Create a testtuple after a successful training
+	inp.DataManagerKey = dataManagerOpenerHash
+	inp.DataSampleKeys = []string{trainDataSampleHash1}
+	args = inp.createDefault()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
+	values = map[string]string{}
+	bytesToStruct(resp.Payload, &values)
+	testTupleKey = values["key"]
+
+	testTuple, err = queryTesttuple(db, assetToArgs(inputHash{Key: testTupleKey}))
+	assert.Equal(t, StatusTodo, testTuple.Status)
 }

@@ -43,10 +43,18 @@ const testDataSampleHash2 = "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021f
 const algoHash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const algoStorageAddress = "https://toto/algo/222/algo"
 const algoName = "hog + svm"
+const compositeAlgoHash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcd"
+const compositeAlgoStorageAddress = "https://toto/compositeAlgo/222/algo"
+const compositeAlgoName = "hog + svm composite"
 const modelHash = "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed"
 const modelAddress = "https://substrabac/model/toto"
+const headModelHash = modelHash
+const headModelAddress = modelAddress
+const trunkModelHash = "ccdbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482ecc"
+const trunkModelAddress = "https://substrabac/model/titi"
 const worker = "SampleOrg"
 const traintupleKey = "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+const compositeTraintupleKey = "57104c72d50215d8cfa288059fdf47bcc5f808f6685a5f08fa08f792cd782c68"
 
 var (
 	pipeline = flag.Bool("pipeline", false, "Print out the pipeline test output")
@@ -191,12 +199,65 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	if itemType == "algo" {
 		return resp, inpAlgo
 	}
-	// 6. Add traintuple
+	// 6. Add composite algo
+	inpCompositeAlgo := inputCompositeAlgo{}
+	args = inpCompositeAlgo.createDefault()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding algo with status %d and message %s", resp.Status, resp.Message)
+	if itemType == "compositeAlgo" {
+		return resp, inpCompositeAlgo
+	}
+	// 7. Add traintuple
 	inpTraintuple := inputTraintuple{}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
-	return resp, inpTraintuple
+	if itemType == "traintuple" {
+		return resp, inpTraintuple
+	}
+	// 8. Add composite traintuple
+	inpCompositeTraintuple := inputCompositeTraintuple{}
+	args = inpCompositeTraintuple.createDefault()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding composite traintuple with status %d and message %s", resp.Status, resp.Message)
+	if itemType == "compositeTraintuple" {
+		return resp, inpCompositeTraintuple
+	}
+
+	return resp, inpCompositeTraintuple
+}
+
+func registerTraintuple(mockStub *MockStub, assetType AssetType, dataSampleKeys []string) (key string, err error) {
+	switch assetType {
+	case CompositeTraintupleType:
+		inpTraintuple := inputCompositeTraintuple{AlgoKey: compositeAlgoHash}
+		inpTraintuple.DataSampleKeys = dataSampleKeys
+		inpTraintuple.fillDefaults()
+		args := inpTraintuple.getArgs()
+		resp := mockStub.MockInvoke("42", args)
+		if resp.Status != 200 {
+			err = fmt.Errorf("Failed to register traintuple: %s", resp.Message)
+			return
+		}
+		var _key struct{ Key string }
+		json.Unmarshal(resp.Payload, &_key)
+		return _key.Key, nil
+	case TraintupleType:
+		inpTraintuple := inputTraintuple{}
+		inpTraintuple.DataSampleKeys = dataSampleKeys
+		args := inpTraintuple.createDefault()
+		resp := mockStub.MockInvoke("42", args)
+		if resp.Status != 200 {
+			err = fmt.Errorf("Failed to register traintuple: %s", resp.Message)
+			return
+		}
+		var _key struct{ Key string }
+		json.Unmarshal(resp.Payload, &_key)
+		return _key.Key, nil
+	default:
+		err = fmt.Errorf("Invalid asset type: %v", assetType)
+		return
+	}
 }
 
 func printResp(buf io.Writer, payload []byte) {

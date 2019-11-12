@@ -62,22 +62,34 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = createTesttuple(db, args)
 	case "createTraintuple":
 		result, err = createTraintuple(db, args)
+	case "createCompositeTraintuple":
+		result, err = createCompositeTraintuple(db, args)
 	case "logFailTest":
 		result, err = logFailTest(db, args)
 	case "logFailTrain":
 		result, err = logFailTrain(db, args)
+	case "logFailCompositeTrain":
+		result, err = logFailCompositeTrain(db, args)
 	case "logStartTest":
 		result, err = logStartTest(db, args)
 	case "logStartTrain":
 		result, err = logStartTrain(db, args)
+	case "logStartCompositeTrain":
+		result, err = logStartCompositeTrain(db, args)
 	case "logSuccessTest":
 		result, err = logSuccessTest(db, args)
 	case "logSuccessTrain":
 		result, err = logSuccessTrain(db, args)
+	case "logSuccessCompositeTrain":
+		result, err = logSuccessCompositeTrain(db, args)
 	case "queryAlgo":
 		result, err = queryAlgo(db, args)
 	case "queryAlgos":
 		result, err = queryAlgos(db, args)
+	case "queryCompositeAlgo":
+		result, err = queryCompositeAlgo(db, args)
+	case "queryCompositeAlgos":
+		result, err = queryCompositeAlgos(db, args)
 	case "queryDataManager":
 		result, err = queryDataManager(db, args)
 	case "queryDataManagers":
@@ -104,14 +116,20 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = queryTesttuples(db, args)
 	case "queryTraintuple":
 		result, err = queryTraintuple(db, args)
+	case "queryCompositeTraintuple":
+		result, err = queryCompositeTraintuple(db, args)
 	case "queryTraintuples":
 		result, err = queryTraintuples(db, args)
+	case "queryCompositeTraintuples":
+		result, err = queryCompositeTraintuples(db, args)
 	case "queryComputePlan":
 		result, err = queryComputePlan(db, args)
 	case "queryComputePlans":
 		result, err = queryComputePlans(db, args)
 	case "registerAlgo":
 		result, err = registerAlgo(db, args)
+	case "registerCompositeAlgo":
+		result, err = registerCompositeAlgo(db, args)
 	case "registerDataManager":
 		result, err = registerDataManager(db, args)
 	case "registerDataSample":

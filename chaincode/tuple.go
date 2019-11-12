@@ -43,10 +43,27 @@ func queryModelDetails(db LedgerDB, args []string) (outModelDetails outputModelD
 		return
 	}
 
-	// get associated traintuple
-	outModelDetails.Traintuple, err = getOutputTraintuple(db, inp.Key)
+	// get traintuple type
+	traintupleType, err := db.GetAssetType(inp.Key)
 	if err != nil {
 		return
+	}
+	switch traintupleType {
+	case TraintupleType:
+		var out outputTraintuple
+		out, err = getOutputTraintuple(db, inp.Key)
+		if err != nil {
+			return
+		}
+		outModelDetails.Traintuple = &out
+	case CompositeTraintupleType:
+		var out outputCompositeTraintuple
+		out, err = getOutputCompositeTraintuple(db, inp.Key)
+		if err != nil {
+			return
+		}
+		outModelDetails.CompositeTraintuple = &out
+		// TODO (aggregate): AggregateTraintupleType
 	}
 
 	// get certified and non-certified testtuples related to traintuple
@@ -80,35 +97,42 @@ func queryModels(db LedgerDB, args []string) (outModels []outputModel, err error
 		return
 	}
 
+	// populate from regular traintuples
 	traintupleKeys, err := db.GetIndexKeys("traintuple~algo~key", []string{"traintuple"})
 	if err != nil {
 		return
 	}
 	for _, traintupleKey := range traintupleKeys {
 		var outputModel outputModel
+		var out outputTraintuple
 
-		// get traintuple
-		outputModel.Traintuple, err = getOutputTraintuple(db, traintupleKey)
+		out, err = getOutputTraintuple(db, traintupleKey)
 		if err != nil {
 			return
 		}
-
-		// get associated testtuple
-		var testtupleKeys []string
-		testtupleKeys, err = db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey, "true"})
-		if err != nil {
-			return
-		}
-		if len(testtupleKeys) == 1 {
-			// get testtuple and serialize it
-			testtupleKey := testtupleKeys[0]
-			outputModel.Testtuple, err = getOutputTesttuple(db, testtupleKey)
-			if err != nil {
-				return
-			}
-		}
+		outputModel.Traintuple = &out
+		outputModel.Testtuple, err = getCertifiedOutputTesttuple(db, traintupleKey)
 		outModels = append(outModels, outputModel)
 	}
+
+	// populate from composite traintuples
+	compositeTraintupleKeys, err := db.GetIndexKeys("compositeTraintuple~algo~key", []string{"compositeTraintuple"})
+	if err != nil {
+		return
+	}
+	for _, compositeTraintupleKey := range compositeTraintupleKeys {
+		var outputModel outputModel
+		var out outputCompositeTraintuple
+
+		out, err = getOutputCompositeTraintuple(db, compositeTraintupleKey)
+		if err != nil {
+			return
+		}
+		outputModel.CompositeTraintuple = &out
+		outputModel.Testtuple, err = getCertifiedOutputTesttuple(db, compositeTraintupleKey)
+		outModels = append(outModels, outputModel)
+	}
+
 	return
 }
 
@@ -157,4 +181,25 @@ func HashForKey(objectType string, hashElements ...string) string {
 	}
 	sum := sha256.Sum256([]byte(toHash))
 	return hex.EncodeToString(sum[:])
+}
+
+func getCertifiedOutputTesttuple(db LedgerDB, traintupleKey string) (outputTesttuple, error) {
+	var out outputTesttuple
+	// get associated testtuple
+	var testtupleKeys []string
+	testtupleKeys, err := db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey, "true"})
+	if err != nil {
+		return out, err
+	}
+	if len(testtupleKeys) == 0 {
+		return out, nil
+	}
+	// get testtuple and serialize it
+	testtupleKey := testtupleKeys[0]
+	out, err = getOutputTesttuple(db, testtupleKey)
+	if err != nil {
+		return out, err
+	}
+
+	return out, nil
 }

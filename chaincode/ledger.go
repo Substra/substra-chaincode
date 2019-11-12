@@ -27,8 +27,12 @@ const (
 	DataManagerType
 	DataSampleType
 	AlgoType
+	CompositeAlgoType
 	TraintupleType
 	TesttupleType
+	CompositeTraintupleType
+	// when adding a new type here, don't forget to update
+	// the String() function in utils.go
 )
 
 // Objective is the representation of one of the element type stored in the ledger
@@ -72,6 +76,11 @@ type Algo struct {
 	Permissions    Permissions `json:"permissions"`
 }
 
+// CompositeAlgo is the representation of one of the element type stored in the ledger
+type CompositeAlgo struct {
+	Algo
+}
+
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
 	AssetType     AssetType   `json:"assetType"`
@@ -88,6 +97,32 @@ type Traintuple struct {
 	Rank          int         `json:"rank"`
 	Status        string      `json:"status"`
 	Tag           string      `json:"tag"`
+}
+
+// CompositeTraintuple is like a traintuple, but for composite model composition
+type CompositeTraintuple struct {
+	AlgoKey       string                      `json:"algoKey"`
+	AssetType     AssetType                   `json:"assetType"`
+	ComputePlanID string                      `json:"computePlanID"`
+	Creator       string                      `json:"creator"`
+	Dataset       *Dataset                    `json:"dataset"`
+	InHeadModel   string                      `json:"inHeadModel"`
+	InTrunkModel  string                      `json:"inTrunkModel"`
+	Log           string                      `json:"log"`
+	ObjectiveKey  string                      `json:"objectiveKey"`
+	OutHeadModel  CompositeTraintupleOutModel `json:"outHeadModel"`
+	OutTrunkModel CompositeTraintupleOutModel `json:"outTrunkModel"`
+	Perf          float32                     `json:"perf"`
+	Permissions   Permissions                 `json:"permissions"`
+	Rank          int                         `json:"rank"`
+	Status        string                      `json:"status"`
+	Tag           string                      `json:"tag"`
+}
+
+// CompositeTraintupleOutModel is the out-model of a CompositeTraintuple
+type CompositeTraintupleOutModel struct {
+	OutModel    *HashDress  `json:"outModel"`
+	Permissions Permissions `json:"permissions"`
 }
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform

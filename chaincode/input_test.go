@@ -139,6 +139,27 @@ func (algo *inputAlgo) createDefault() [][]byte {
 	return args
 }
 
+func (algo *inputCompositeAlgo) createDefault() [][]byte {
+	if algo.Name == "" {
+		algo.Name = compositeAlgoName
+	}
+	if algo.Hash == "" {
+		algo.Hash = compositeAlgoHash
+	}
+	if algo.StorageAddress == "" {
+		algo.StorageAddress = compositeAlgoStorageAddress
+	}
+	if algo.DescriptionHash == "" {
+		algo.DescriptionHash = "e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcb"
+	}
+	if algo.DescriptionStorageAddress == "" {
+		algo.DescriptionStorageAddress = "https://toto/compositeAlgo/222/description"
+	}
+	algo.Permissions = OpenPermissions
+	args := append([][]byte{[]byte("registerCompositeAlgo")}, assetToJSON(algo))
+	return args
+}
+
 func (traintuple *inputTraintuple) createDefault() [][]byte {
 	if traintuple.AlgoKey == "" {
 		traintuple.AlgoKey = algoHash
@@ -156,6 +177,32 @@ func (traintuple *inputTraintuple) createDefault() [][]byte {
 		traintuple.DataSampleKeys = []string{trainDataSampleHash1, trainDataSampleHash2}
 	}
 	args := append([][]byte{[]byte("createTraintuple")}, assetToJSON(traintuple))
+	return args
+}
+
+func (traintuple *inputCompositeTraintuple) createDefault() [][]byte {
+	traintuple.fillDefaults()
+	return traintuple.getArgs()
+}
+
+func (traintuple *inputCompositeTraintuple) fillDefaults() {
+	if traintuple.AlgoKey == "" {
+		traintuple.AlgoKey = compositeAlgoHash
+	}
+	if traintuple.ObjectiveKey == "" {
+		traintuple.ObjectiveKey = objectiveDescriptionHash
+	}
+	if traintuple.DataManagerKey == "" {
+		traintuple.DataManagerKey = dataManagerOpenerHash
+	}
+	if traintuple.DataSampleKeys == nil || len(traintuple.DataSampleKeys) == 0 {
+		traintuple.DataSampleKeys = []string{trainDataSampleHash1, trainDataSampleHash2}
+	}
+	traintuple.OutTrunkModelPermissions = OpenPermissions
+}
+
+func (traintuple *inputCompositeTraintuple) getArgs() [][]byte {
+	args := append([][]byte{[]byte("createCompositeTraintuple")}, assetToJSON(traintuple))
 	return args
 }
 
@@ -179,6 +226,34 @@ func (success *inputLogSuccessTrain) createDefault() [][]byte {
 	args := append([][]byte{[]byte("logSuccessTrain")}, assetToJSON(success))
 	return args
 }
+
+func (success *inputLogSuccessCompositeTrain) createDefault() [][]byte {
+	if success.Key == "" {
+		success.Key = compositeTraintupleKey
+	}
+	if success.Log == "" {
+		success.Log = "no error, ah ah ah"
+	}
+	if success.Perf == 0 {
+		success.Perf = 0.9
+	}
+	if success.OutHeadModel.Hash == "" {
+		success.OutHeadModel.Hash = headModelHash
+	}
+	if success.OutHeadModel.StorageAddress == "" {
+		success.OutHeadModel.StorageAddress = headModelAddress
+	}
+	if success.OutTrunkModel.Hash == "" {
+		success.OutTrunkModel.Hash = trunkModelHash
+	}
+	if success.OutTrunkModel.StorageAddress == "" {
+		success.OutTrunkModel.StorageAddress = trunkModelAddress
+	}
+
+	args := append([][]byte{[]byte("logSuccessCompositeTrain")}, assetToJSON(success))
+	return args
+}
+
 func (success *inputLogSuccessTest) createDefault() [][]byte {
 	if success.Key == "" {
 		success.Key = traintupleKey
@@ -193,17 +268,29 @@ func (success *inputLogSuccessTest) createDefault() [][]byte {
 	args := append([][]byte{[]byte("logSuccessTest")}, assetToJSON(success))
 	return args
 }
+
 func (fail *inputLogFailTrain) createDefault() [][]byte {
+	fail.fillDefaults()
+	return fail.getArgs()
+}
+
+func (fail *inputLogFailTrain) fillDefaults() {
 	if fail.Key == "" {
 		fail.Key = traintupleKey
 	}
 	if fail.Log == "" {
 		fail.Log = "man, did it failed!"
 	}
-
-	args := append([][]byte{[]byte("logFailTrain")}, assetToJSON(fail))
-	return args
 }
+
+func (fail *inputLogFailTrain) getArgs() [][]byte {
+	return append([][]byte{[]byte("logFailTrain")}, assetToJSON(fail))
+}
+
+func (fail *inputLogFailTrain) getArgsComposite() [][]byte {
+	return append([][]byte{[]byte("logFailCompositeTrain")}, assetToJSON(fail))
+}
+
 func (fail *inputLogFailTest) createDefault() [][]byte {
 	if fail.Key == "" {
 		fail.Key = traintupleKey

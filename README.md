@@ -756,7 +756,8 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   "model": {
    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
    "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+   "traintupleType": "traintuple"
   },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -791,7 +792,8 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   "model": {
    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
    "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+   "traintupleType": "traintuple"
   },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -843,7 +845,8 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"5ae68332a1
  "model": {
   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
   "storageAddress": "https://substrabac/model/toto",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+  "traintupleType": "traintuple"
  },
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -896,7 +899,8 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"5ae68332
  "model": {
   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
   "storageAddress": "https://substrabac/model/toto",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+  "traintupleType": "traintuple"
  },
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -947,7 +951,8 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"5ae68332a
  "model": {
   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
   "storageAddress": "https://substrabac/model/toto",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+  "traintupleType": "traintuple"
  },
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -991,7 +996,8 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "model": {
    "hash": "",
    "storageAddress": "",
-   "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
+   "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab",
+   "traintupleType": "traintuple"
   },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1026,7 +1032,8 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "model": {
    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
    "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+   "traintupleType": "traintuple"
   },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1061,7 +1068,8 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "model": {
    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
    "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+   "traintupleType": "traintuple"
   },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1115,7 +1123,8 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
    "model": {
     "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
     "storageAddress": "https://substrabac/model/toto",
-    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+    "traintupleType": "traintuple"
    },
    "objective": {
     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1151,7 +1160,8 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
   "model": {
    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
    "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+   "traintupleType": "traintuple"
   },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1238,7 +1248,8 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    "model": {
     "hash": "",
     "storageAddress": "",
-    "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
+    "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab",
+    "traintupleType": "traintuple"
    },
    "objective": {
     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1319,7 +1330,8 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    "model": {
     "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
     "storageAddress": "https://substrabac/model/toto",
-    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+    "traintupleType": "traintuple"
    },
    "objective": {
     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",

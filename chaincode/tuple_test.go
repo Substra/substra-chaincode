@@ -23,7 +23,7 @@ import (
 
 func TestRecursiveLogFailed(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	mockStub.MockTransactionStart("42")
 	registerItem(t, *mockStub, "traintuple")
 	db := NewLedgerDB(mockStub)
