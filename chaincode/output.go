@@ -221,6 +221,19 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 	out.Status = in.Status
 	out.Tag = in.Tag
 
+	// Populate the `out.model` for backwards compatibility.
+	//   The `out.model` field is obsolete and will disappear soon.
+	//   Callers should use `out.traintupleKey` instead.
+	traintuple, err := db.GetTraintuple(in.TraintupleKey)
+	if err != nil {
+		return fmt.Errorf("could not retrieve traintuple with key %s - %s", in.TraintupleKey, err.Error())
+	}
+	out.Model = &Model{TraintupleKey: in.TraintupleKey}
+	if traintuple.OutModel != nil {
+		out.Model.Hash = traintuple.OutModel.Hash
+		out.Model.StorageAddress = traintuple.OutModel.StorageAddress
+	}
+
 	// fill algo
 	algo, err := db.GetAlgo(in.AlgoKey)
 	if err != nil {
