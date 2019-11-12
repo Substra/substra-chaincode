@@ -70,7 +70,7 @@ func TestCreateComputePlan(t *testing.T) {
 	require.Len(t, testtuples, 1)
 	testtuple := testtuples[0]
 	require.Contains(t, outCP.TesttupleKeys, testtuple.Key)
-	assert.EqualValues(t, second.Key, testtuple.Model.TraintupleKey)
+	assert.EqualValues(t, second.Key, testtuple.TraintupleKey)
 	assert.True(t, testtuple.Certified)
 }
 
