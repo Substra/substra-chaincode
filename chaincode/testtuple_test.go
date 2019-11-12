@@ -112,3 +112,49 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	assert.EqualValues(t, 409, resp.Status)
 	assert.Contains(t, resp.Message, "already exists")
 }
+
+func TestQueryTesttuple(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "traintuple")
+
+	// create testtuple
+	dataSampleKeys := []string{trainDataSampleHash1, trainDataSampleHash2}
+	inpTesttuple := inputTesttuple{
+		DataManagerKey: dataManagerOpenerHash,
+		DataSampleKeys: dataSampleKeys,
+	}
+	args := inpTesttuple.createDefault()
+	resp := mockStub.MockInvoke("42", args)
+	res := map[string]string{}
+	json.Unmarshal(resp.Payload, &res)
+	testtupleKey := res["key"]
+
+	// query testtuple
+	args = [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
+	resp = mockStub.MockInvoke("42", args)
+	respTesttuple := resp.Payload
+	testtuple := outputTesttuple{}
+	bytesToStruct(respTesttuple, &testtuple)
+
+	// assert
+	assert.Equal(t, worker, testtuple.Creator)
+	assert.Equal(t, worker, testtuple.Dataset.Worker)
+	assert.Equal(t, algoName, testtuple.Algo.Name)
+	assert.Equal(t, algoHash, testtuple.Algo.Hash)
+	assert.Equal(t, algoStorageAddress, testtuple.Algo.StorageAddress)
+	assert.Equal(t, StatusWaiting, testtuple.Status)
+	assert.Equal(t, objectiveDescriptionHash, testtuple.Objective.Key)
+	assert.Equal(t, objectiveMetricsHash, testtuple.Objective.Metrics.Hash)
+	assert.Equal(t, objectiveMetricsStorageAddress, testtuple.Objective.Metrics.StorageAddress)
+	assert.Equal(t, "", testtuple.Log)
+	assert.Equal(t, "", testtuple.Tag)
+	assert.EqualValues(t, 0, testtuple.Dataset.Perf)
+	assert.Equal(t, inpTesttuple.TraintupleKey, testtuple.TraintupleKey)
+	assert.Equal(t, dataSampleKeys, testtuple.Dataset.DataSampleKeys)
+	assert.Equal(t, dataManagerOpenerHash, testtuple.Dataset.OpenerHash)
+	assert.Equal(t, algoName, testtuple.Algo.Name)
+	assert.Equal(t, algoHash, testtuple.Algo.Hash)
+	assert.Equal(t, algoStorageAddress, testtuple.Algo.StorageAddress)
+	assert.False(t, testtuple.Certified)
+}

@@ -115,13 +115,7 @@ func (testtuple *Testtuple) SetFromTraintuple(db LedgerDB, traintupleKey string)
 	}
 	testtuple.ObjectiveKey = traintuple.ObjectiveKey
 	testtuple.AlgoKey = traintuple.AlgoKey
-	testtuple.Model = &Model{
-		TraintupleKey: traintupleKey,
-	}
-	if traintuple.OutModel != nil {
-		testtuple.Model.Hash = traintuple.OutModel.Hash
-		testtuple.Model.StorageAddress = traintuple.OutModel.StorageAddress
-	}
+	testtuple.TraintupleKey = traintupleKey
 
 	switch status := traintuple.Status; status {
 	case StatusDone:
@@ -140,7 +134,7 @@ func (testtuple *Testtuple) SetFromTraintuple(db LedgerDB, traintupleKey string)
 func (testtuple *Testtuple) GetKey() string {
 	// create testtuple key and check if it already exists
 	hashKeys := []string{
-		testtuple.Model.TraintupleKey,
+		testtuple.TraintupleKey,
 		testtuple.Dataset.OpenerHash,
 		testtuple.Creator,
 	}
@@ -166,7 +160,7 @@ func (testtuple *Testtuple) Save(db LedgerDB, testtupleKey string) error {
 	if err = db.CreateIndex("testtuple~worker~status~key", []string{"testtuple", testtuple.Dataset.Worker, testtuple.Status, testtupleKey}); err != nil {
 		return err
 	}
-	if err = db.CreateIndex("testtuple~traintuple~certified~key", []string{"testtuple", testtuple.Model.TraintupleKey, strconv.FormatBool(testtuple.Certified), testtupleKey}); err != nil {
+	if err = db.CreateIndex("testtuple~traintuple~certified~key", []string{"testtuple", testtuple.TraintupleKey, strconv.FormatBool(testtuple.Certified), testtupleKey}); err != nil {
 		return err
 	}
 	if testtuple.Tag != "" {
