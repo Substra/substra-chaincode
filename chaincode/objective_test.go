@@ -58,6 +58,7 @@ func TestLeaderBoard(t *testing.T) {
 	assert.Equal(t, objectiveDescriptionHash, leaderboard.Objective.Key)
 	require.Len(t, leaderboard.Testtuples, 1)
 	assert.Equal(t, keyMap["key"], leaderboard.Testtuples[0].Key)
+	assert.Equal(t, traintupleKey, leaderboard.Testtuples[0].TraintupleKey)
 }
 func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 	scc := new(SubstraChaincode)

@@ -598,14 +598,7 @@ func (traintuple *Traintuple) updateTesttupleChildren(db LedgerDB, traintupleKey
 		if err != nil {
 			return err
 		}
-		testtuple.Model = &Model{
-			TraintupleKey: traintupleKey,
-		}
-
-		if newStatus == StatusTodo {
-			testtuple.Model.Hash = traintuple.OutModel.Hash
-			testtuple.Model.StorageAddress = traintuple.OutModel.StorageAddress
-		}
+		testtuple.TraintupleKey = traintupleKey
 
 		if err := testtuple.commitStatusUpdate(db, testtupleKey, newStatus); err != nil {
 			return err
