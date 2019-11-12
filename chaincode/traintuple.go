@@ -203,6 +203,9 @@ func (traintuple *Traintuple) Save(db LedgerDB, traintupleKey string) error {
 		if err := db.CreateIndex("traintuple~computeplanid~worker~rank~key", []string{"traintuple", traintuple.ComputePlanID, traintuple.Dataset.Worker, strconv.Itoa(traintuple.Rank), traintupleKey}); err != nil {
 			return err
 		}
+		if err := db.CreateIndex("computeplan~id", []string{"computeplan", traintuple.ComputePlanID}); err != nil {
+			return err
+		}
 	}
 	if traintuple.Tag != "" {
 		err := db.CreateIndex("traintuple~tag~key", []string{"traintuple", traintuple.Tag, traintupleKey})

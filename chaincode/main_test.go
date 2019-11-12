@@ -427,7 +427,9 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("query", "queryDataset", inputHash{newDataManagerKey})
 
 	fmt.Fprintln(&out, "#### ------------ Create a ComputePlan ------------")
-	callAssertAndPrint("invoke", "createComputePlan", defaultComputePlan)
+	resp = callAssertAndPrint("invoke", "createComputePlan", defaultComputePlan)
+	outCp := outputComputePlan{}
+	err = json.Unmarshal(resp.Payload, &outCp)
 
 	fmt.Fprintln(&out, "#### ------------ Query an ObjectiveLeaderboard ------------")
 	inpLeaderboard := inputLeaderboard{
@@ -435,6 +437,9 @@ func TestPipeline(t *testing.T) {
 		AscendingOrder: true,
 	}
 	callAssertAndPrint("invoke", "queryObjectiveLeaderboard", inpLeaderboard)
+
+	callAssertAndPrint("invoke", "queryComputePlan", inputHash{outCp.ComputePlanID})
+	callAssertAndPrint("invoke", "queryComputePlans", nil)
 
 	// Use the output to check the README file and if asked update it
 	doc := out.String()

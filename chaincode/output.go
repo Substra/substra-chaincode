@@ -379,3 +379,11 @@ func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string
 
 	return nil
 }
+
+type outputComputePlanDetails struct {
+	ComputePlanID string   `json:"computePlanID"`
+	AlgoKey       string   `json:"algoKey"`
+	ObjectiveKey  string   `json:"objectiveKey"`
+	Traintuples   []string `json:"traintuples"`
+	Testtuples    []string `json:"testtuples"`
+}
