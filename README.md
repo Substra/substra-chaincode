@@ -762,7 +762,8 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   },
   "status": "todo",
   "tag": "",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+  "traintupleType": "traintuple"
  },
  {
   "algo": {
@@ -792,7 +793,8 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   },
   "status": "todo",
   "tag": "",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+  "traintupleType": "traintuple"
  }
 ]
 ```
@@ -839,7 +841,8 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"5ae68332a1
  },
  "status": "doing",
  "tag": "",
- "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+ "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+ "traintupleType": "traintuple"
 }
 ```
 #### ------------ Log Success Testing ------------
@@ -887,7 +890,8 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"5ae68332
  },
  "status": "done",
  "tag": "",
- "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+ "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+ "traintupleType": "traintuple"
 }
 ```
 #### ------------ Query Testtuple from its key ------------
@@ -933,7 +937,8 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"5ae68332a
  },
  "status": "done",
  "tag": "",
- "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+ "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+ "traintupleType": "traintuple"
 }
 ```
 #### ------------ Query all Testtuples ------------
@@ -972,7 +977,8 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   },
   "status": "waiting",
   "tag": "",
-  "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
+  "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab",
+  "traintupleType": "traintuple"
  },
  {
   "algo": {
@@ -1002,7 +1008,8 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   },
   "status": "todo",
   "tag": "",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+  "traintupleType": "traintuple"
  },
  {
   "algo": {
@@ -1032,7 +1039,8 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   },
   "status": "done",
   "tag": "",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+  "traintupleType": "traintuple"
  }
 ]
 ```
@@ -1081,7 +1089,8 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
    },
    "status": "todo",
    "tag": "",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+   "traintupleType": "traintuple"
   }
  ],
  "testtuple": {
@@ -1112,7 +1121,8 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
   },
   "status": "done",
   "tag": "",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+  "traintupleType": "traintuple"
  },
  "traintuple": {
   "algo": {
@@ -1194,7 +1204,8 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    },
    "status": "waiting",
    "tag": "",
-   "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
+   "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab",
+   "traintupleType": "traintuple"
   },
   "traintuple": {
    "algo": {
@@ -1270,7 +1281,8 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    },
    "status": "done",
    "tag": "",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+   "traintupleType": "traintuple"
   },
   "traintuple": {
    "algo": {

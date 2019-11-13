@@ -199,16 +199,17 @@ func (outputTraintuple *outputTraintuple) Fill(db LedgerDB, traintuple Traintupl
 }
 
 type outputTesttuple struct {
-	Key           string         `json:"key"`
-	Algo          *HashDressName `json:"algo"`
-	Certified     bool           `json:"certified"`
-	Creator       string         `json:"creator"`
-	Dataset       *TtDataset     `json:"dataset"`
-	Log           string         `json:"log"`
-	TraintupleKey string         `json:"traintupleKey"`
-	Objective     *TtObjective   `json:"objective"`
-	Status        string         `json:"status"`
-	Tag           string         `json:"tag"`
+	Key            string         `json:"key"`
+	Algo           *HashDressName `json:"algo"`
+	Certified      bool           `json:"certified"`
+	Creator        string         `json:"creator"`
+	Dataset        *TtDataset     `json:"dataset"`
+	Log            string         `json:"log"`
+	TraintupleType string         `json:"traintupleType"`
+	TraintupleKey  string         `json:"traintupleKey"`
+	Objective      *TtObjective   `json:"objective"`
+	Status         string         `json:"status"`
+	Tag            string         `json:"tag"`
 }
 
 func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
@@ -226,6 +227,7 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 	if err != nil {
 		return fmt.Errorf("could not retrieve traintuple type with key %s - %s", in.TraintupleKey, err.Error())
 	}
+	out.TraintupleType = LowerFirst(traintupleType.String())
 
 	// fill algo
 	var algo Algo
@@ -377,9 +379,4 @@ type outputComputePlanDetails struct {
 	ObjectiveKey  string   `json:"objectiveKey"`
 	Traintuples   []string `json:"traintuples"`
 	Testtuples    []string `json:"testtuples"`
-}
-
-type outputTesttupleModel struct {
-	Model
-	TraintupleType string `json:"traintupleType"`
 }

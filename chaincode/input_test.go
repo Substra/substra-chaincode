@@ -302,11 +302,18 @@ func (fail *inputLogFailTest) createDefault() [][]byte {
 	args := append([][]byte{[]byte("logFailTest")}, assetToJSON(fail))
 	return args
 }
+
 func (testtuple *inputTesttuple) createDefault() [][]byte {
+	testtuple.fillDefaults()
+	return testtuple.getArgs()
+}
+
+func (testtuple *inputTesttuple) fillDefaults() {
 	if testtuple.TraintupleKey == "" {
 		testtuple.TraintupleKey = traintupleKey
 	}
-	args, _ := inputStructToBytes(testtuple)
-	args = append([][]byte{[]byte("createTesttuple")}, assetToJSON(testtuple))
-	return args
+}
+
+func (testtuple *inputTesttuple) getArgs() [][]byte {
+	return append([][]byte{[]byte("createTesttuple")}, assetToJSON(testtuple))
 }
