@@ -289,7 +289,7 @@ func logStartTrain(db LedgerDB, args []string) (outputTraintuple outputTraintupl
 	if err = traintuple.commitStatusUpdate(db, inp.Key, StatusDoing); err != nil {
 		return
 	}
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	err = outputTraintuple.Fill(db, traintuple, inp.Key)
 	return
 }
 
@@ -333,7 +333,10 @@ func logSuccessTrain(db LedgerDB, args []string) (outputTraintuple outputTraintu
 		return
 	}
 
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	err = outputTraintuple.Fill(db, traintuple, inp.Key)
+	if err != nil {
+		return
+	}
 
 	err = SendTuplesEvent(db.cc, event)
 	if err != nil {
@@ -365,7 +368,9 @@ func logFailTrain(db LedgerDB, args []string) (outputTraintuple outputTraintuple
 		return
 	}
 
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	if err = outputTraintuple.Fill(db, traintuple, inp.Key); err != nil {
+		return
+	}
 
 	// update depending tuples
 	event := TuplesEvent{}
@@ -402,7 +407,7 @@ func queryTraintuple(db LedgerDB, args []string) (outputTraintuple outputTraintu
 		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	err = outputTraintuple.Fill(db, traintuple, inp.Key)
 	return
 }
 
@@ -438,7 +443,7 @@ func getOutputTraintuple(db LedgerDB, traintupleKey string) (outTraintuple outpu
 	if err != nil {
 		return
 	}
-	outTraintuple.Fill(db, traintuple, traintupleKey)
+	err = outTraintuple.Fill(db, traintuple, traintupleKey)
 	return
 }
 
@@ -458,10 +463,7 @@ func getOutputTraintuples(db LedgerDB, traintupleKeys []string) (outTraintuples 
 // validateNewStatus verifies that the new status is consistent with the tuple current status
 func (traintuple *Traintuple) validateNewStatus(db LedgerDB, status string) error {
 	// check validity of worker and change of status
-	if err := checkUpdateTuple(db, traintuple.Dataset.Worker, traintuple.Status, status); err != nil {
-		return err
-	}
-	return nil
+	return checkUpdateTuple(db, traintuple.Dataset.Worker, traintuple.Status, status)
 }
 
 // updateTraintupleChildren updates the status of waiting trainuples  InModels of traintuples once they have been trained (succesfully or failed)
@@ -581,11 +583,12 @@ func (traintuple *Traintuple) commitStatusUpdate(db LedgerDB, traintupleKey stri
 // updateTesttupleChildren update testtuples status associated with a done or failed traintuple
 func (traintuple *Traintuple) updateTesttupleChildren(db LedgerDB, traintupleKey string, event *TuplesEvent) error {
 	var newStatus string
-	if traintuple.Status == StatusFailed {
+	switch {
+	case traintuple.Status == StatusFailed:
 		newStatus = StatusFailed
-	} else if traintuple.Status == StatusDone {
+	case traintuple.Status == StatusDone:
 		newStatus = StatusTodo
-	} else {
+	default:
 		return nil
 	}
 

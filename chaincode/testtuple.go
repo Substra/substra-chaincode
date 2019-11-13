@@ -60,7 +60,8 @@ func (testtuple *Testtuple) SetFromInput(db LedgerDB, inp inputTesttuple) error 
 
 	var dataManagerKey string
 	var dataSampleKeys []string
-	if len(inp.DataManagerKey) > 0 && len(inp.DataSampleKeys) > 0 {
+	switch {
+	case len(inp.DataManagerKey) > 0 && len(inp.DataSampleKeys) > 0:
 		// non-certified testtuple
 		// test dataset are specified by the user
 		dataSampleKeys = inp.DataSampleKeys
@@ -71,13 +72,13 @@ func (testtuple *Testtuple) SetFromInput(db LedgerDB, inp inputTesttuple) error 
 		dataManagerKey = inp.DataManagerKey
 		sort.Strings(dataSampleKeys)
 		testtuple.Certified = objectiveDataManagerKey == dataManagerKey && reflect.DeepEqual(objectiveDataSampleKeys, dataSampleKeys)
-	} else if len(inp.DataManagerKey) > 0 || len(inp.DataSampleKeys) > 0 {
+	case len(inp.DataManagerKey) > 0 || len(inp.DataSampleKeys) > 0:
 		return errors.BadRequest("invalid input: dataManagerKey and dataSampleKey should be provided together")
-	} else if objective.TestDataset != nil {
+	case objective.TestDataset != nil:
 		dataSampleKeys = objectiveDataSampleKeys
 		dataManagerKey = objectiveDataManagerKey
 		testtuple.Certified = true
-	} else {
+	default:
 		return errors.BadRequest("can not create a certified testtuple, no data associated with objective %s", testtuple.ObjectiveKey)
 	}
 	// retrieve dataManager owner
@@ -390,10 +391,7 @@ func getOutputTesttuples(db LedgerDB, testtupleKeys []string) (outTesttuples []o
 // validateNewStatus verifies that the new status is consistent with the tuple current status
 func (testtuple *Testtuple) validateNewStatus(db LedgerDB, status string) error {
 	// check validity of worker and change of status
-	if err := checkUpdateTuple(db, testtuple.Dataset.Worker, testtuple.Status, status); err != nil {
-		return err
-	}
-	return nil
+	return checkUpdateTuple(db, testtuple.Dataset.Worker, testtuple.Status, status)
 }
 
 // commitStatusUpdate update the testtuple status in the ledger
