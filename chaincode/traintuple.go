@@ -583,11 +583,12 @@ func (traintuple *Traintuple) commitStatusUpdate(db LedgerDB, traintupleKey stri
 // updateTesttupleChildren update testtuples status associated with a done or failed traintuple
 func (traintuple *Traintuple) updateTesttupleChildren(db LedgerDB, traintupleKey string, event *TuplesEvent) error {
 	var newStatus string
-	if traintuple.Status == StatusFailed {
+	switch {
+	case traintuple.Status == StatusFailed:
 		newStatus = StatusFailed
-	} else if traintuple.Status == StatusDone {
+	case traintuple.Status == StatusDone:
 		newStatus = StatusTodo
-	} else {
+	default:
 		return nil
 	}
 
