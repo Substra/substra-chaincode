@@ -155,16 +155,6 @@ func (traintuple *Traintuple) AddToComputePlan(db LedgerDB, inp inputTraintuple,
 	if len(ttKeys) == 0 {
 		return errors.BadRequest("cannot find the ComputePlanID %s", inp.ComputePlanID)
 	}
-	for _, ttKey := range ttKeys {
-		FLTraintuple, err := db.GetTraintuple(ttKey)
-		if err != nil {
-			return err
-		}
-		if FLTraintuple.AlgoKey != inp.AlgoKey {
-			return errors.BadRequest("previous traintuple for ComputePlanID %s does not have the same algo key %s", inp.ComputePlanID, inp.AlgoKey)
-		}
-	}
-
 	ttKeys, err = db.GetIndexKeys("traintuple~computeplanid~worker~rank~key", []string{"traintuple", inp.ComputePlanID, traintuple.Dataset.Worker, inp.Rank})
 	if err != nil {
 		return err
