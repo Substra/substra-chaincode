@@ -18,6 +18,7 @@ import (
 	"fmt"
 )
 
+/* Unused
 // Action is the the type of an action
 type Action string
 
@@ -26,6 +27,7 @@ const (
 	Process  Action = "process"
 	Download Action = "download"
 )
+*/
 
 // Permission represents one permission based on an action type
 type Permission struct {
@@ -82,7 +84,7 @@ func NewPermissions(db LedgerDB, in inputPermissions) (Permissions, error) {
 		}
 
 		if !stringInSlice(authorizedID, nodesIDs) {
-			return Permissions{}, fmt.Errorf("Invalid permission input values")
+			return Permissions{}, fmt.Errorf("invalid permission input values")
 		}
 	}
 
@@ -105,10 +107,7 @@ func newPermission(in inputPermission, owner string) Permission {
 	if !stringInSlice(owner, in.AuthorizedIDs) {
 		in.AuthorizedIDs = append([]string{owner}, in.AuthorizedIDs...)
 	}
-	return Permission{
-		Public:        in.Public,
-		AuthorizedIDs: in.AuthorizedIDs,
-	}
+	return Permission(in)
 }
 
 func (priv Permission) include(other Permission) bool {

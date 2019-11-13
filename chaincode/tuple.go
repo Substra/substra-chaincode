@@ -116,6 +116,7 @@ func queryModels(db LedgerDB, args []string) (outModels []outputModel, err error
 // Utils for smartcontracts related to  multiple tuple types
 // ----------------------------------------------------------
 
+/* Unused
 // checkLog checks the validity of logs
 func checkLog(log string) (err error) {
 	maxLength := 200
@@ -124,6 +125,7 @@ func checkLog(log string) (err error) {
 	}
 	return
 }
+*/
 
 func validateTupleOwner(db LedgerDB, worker string) error {
 	txCreator, err := GetTxCreator(db.cc)
