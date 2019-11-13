@@ -19,6 +19,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -119,23 +121,32 @@ func GetTxCreator(stub shim.ChaincodeStubInterface) (string, error) {
 	return sID.GetMspid(), nil
 }
 
+// LowerFirst returns the input string with the first letter lowercased
+func LowerFirst(s string) string {
+	if s == "" {
+		return ""
+	}
+	r, n := utf8.DecodeRuneInString(s)
+	return string(unicode.ToLower(r)) + s[n:]
+}
+
 // String returns a string representation for an asset type
 func (assetType AssetType) String() string {
 	switch assetType {
 	case ObjectiveType:
-		return "objective"
+		return "Objective"
 	case DataManagerType:
-		return "dataManager"
+		return "DataManager"
 	case DataSampleType:
-		return "dataSample"
+		return "DataSample"
 	case AlgoType:
-		return "algo"
+		return "Algo"
 	case TraintupleType:
-		return "traintuple"
+		return "Traintuple"
 	case TesttupleType:
-		return "testtuple"
+		return "Testtuple"
 	case CompositeTraintupleType:
-		return "compositeTraintuple"
+		return "CompositeTraintuple"
 	default:
 		return fmt.Sprintf("(unknown asset type: %d)", assetType)
 	}

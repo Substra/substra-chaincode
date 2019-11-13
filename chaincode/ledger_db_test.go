@@ -51,13 +51,13 @@ func TestGetOutModelHashDress(t *testing.T) {
 	assert.Error(t, err, "the key should not be found")
 	assert.EqualError(t,
 		err,
-		"GetOutModelHashDress: Could not find traintuple Head with key \"abc\". Allowed types: {compositeTraintuple}.",
+		"GetOutModelHashDress: Could not find traintuple Head with key \"abc\". Allowed types: {CompositeTraintuple}.",
 		"the error message should be valid")
 
 	_, err = db.GetOutModelHashDress("abc", HeadType, []AssetType{TraintupleType, CompositeTraintupleType})
 	assert.Error(t, err, "the key should not be found")
 	assert.EqualError(t,
 		err,
-		"GetOutModelHashDress: Could not find traintuple Head with key \"abc\". Allowed types: {traintuple, compositeTraintuple}.",
+		"GetOutModelHashDress: Could not find traintuple Head with key \"abc\". Allowed types: {Traintuple, CompositeTraintuple}.",
 		"the error message should be valid")
 }
