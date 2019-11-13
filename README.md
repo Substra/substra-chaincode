@@ -753,11 +753,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   },
   "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
   "log": "",
-  "model": {
-   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-   "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-  },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "metrics": {
@@ -788,11 +783,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   },
   "key": "c5f71e7a53c8a88af3e9b0311eaec68abd30718a388e8f8b45b0547ef2289dcd",
   "log": "",
-  "model": {
-   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-   "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-  },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "metrics": {
@@ -840,11 +830,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"5ae68332a1
  },
  "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
  "log": "",
- "model": {
-  "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-  "storageAddress": "https://substrabac/model/toto",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
- },
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
   "metrics": {
@@ -893,11 +878,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"5ae68332
  },
  "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
  "log": "no error, ah ah ah",
- "model": {
-  "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-  "storageAddress": "https://substrabac/model/toto",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
- },
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
   "metrics": {
@@ -944,11 +924,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"5ae68332a
  },
  "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
  "log": "no error, ah ah ah",
- "model": {
-  "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-  "storageAddress": "https://substrabac/model/toto",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
- },
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
   "metrics": {
@@ -988,11 +963,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   },
   "key": "d009acea2d213bc7149ee15b0eb23217e7f06154b79c7046a73eb13a50c3f9dc",
   "log": "",
-  "model": {
-   "hash": "",
-   "storageAddress": "",
-   "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
-  },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "metrics": {
@@ -1023,11 +993,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   },
   "key": "c5f71e7a53c8a88af3e9b0311eaec68abd30718a388e8f8b45b0547ef2289dcd",
   "log": "",
-  "model": {
-   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-   "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-  },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "metrics": {
@@ -1058,11 +1023,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   },
   "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
   "log": "no error, ah ah ah",
-  "model": {
-   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-   "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-  },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "metrics": {
@@ -1112,11 +1072,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
    },
    "key": "c5f71e7a53c8a88af3e9b0311eaec68abd30718a388e8f8b45b0547ef2289dcd",
    "log": "",
-   "model": {
-    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-    "storageAddress": "https://substrabac/model/toto",
-    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-   },
    "objective": {
     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "metrics": {
@@ -1148,11 +1103,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
   },
   "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
   "log": "no error, ah ah ah",
-  "model": {
-   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-   "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-  },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "metrics": {
@@ -1235,11 +1185,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    },
    "key": "d009acea2d213bc7149ee15b0eb23217e7f06154b79c7046a73eb13a50c3f9dc",
    "log": "",
-   "model": {
-    "hash": "",
-    "storageAddress": "",
-    "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
-   },
    "objective": {
     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "metrics": {
@@ -1316,11 +1261,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    },
    "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
    "log": "no error, ah ah ah",
-   "model": {
-    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-    "storageAddress": "https://substrabac/model/toto",
-    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-   },
    "objective": {
     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "metrics": {
@@ -1589,11 +1529,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
    },
    "creator": "SampleOrg",
    "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
-   "model": {
-    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-    "storageAddress": "https://substrabac/model/toto",
-    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-   },
    "perf": 0.9,
    "tag": "",
    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
