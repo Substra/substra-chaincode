@@ -289,7 +289,7 @@ func logStartTrain(db LedgerDB, args []string) (outputTraintuple outputTraintupl
 	if err = traintuple.commitStatusUpdate(db, inp.Key, StatusDoing); err != nil {
 		return
 	}
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	err = outputTraintuple.Fill(db, traintuple, inp.Key)
 	return
 }
 
@@ -333,7 +333,10 @@ func logSuccessTrain(db LedgerDB, args []string) (outputTraintuple outputTraintu
 		return
 	}
 
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	err = outputTraintuple.Fill(db, traintuple, inp.Key)
+	if err != nil {
+		return
+	}
 
 	err = SendTuplesEvent(db.cc, event)
 	if err != nil {
@@ -365,7 +368,9 @@ func logFailTrain(db LedgerDB, args []string) (outputTraintuple outputTraintuple
 		return
 	}
 
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	if err = outputTraintuple.Fill(db, traintuple, inp.Key); err != nil {
+		return
+	}
 
 	// update depending tuples
 	event := TuplesEvent{}
@@ -402,7 +407,7 @@ func queryTraintuple(db LedgerDB, args []string) (outputTraintuple outputTraintu
 		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	err = outputTraintuple.Fill(db, traintuple, inp.Key)
 	return
 }
 
@@ -438,7 +443,7 @@ func getOutputTraintuple(db LedgerDB, traintupleKey string) (outTraintuple outpu
 	if err != nil {
 		return
 	}
-	outTraintuple.Fill(db, traintuple, traintupleKey)
+	err = outTraintuple.Fill(db, traintuple, traintupleKey)
 	return
 }
 
