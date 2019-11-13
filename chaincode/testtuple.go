@@ -365,10 +365,7 @@ func getOutputTesttuples(db LedgerDB, testtupleKeys []string) (outTesttuples []o
 // validateNewStatus verifies that the new status is consistent with the tuple current status
 func (testtuple *Testtuple) validateNewStatus(db LedgerDB, status string) error {
 	// check validity of worker and change of status
-	if err := checkUpdateTuple(db, testtuple.Dataset.Worker, testtuple.Status, status); err != nil {
-		return err
-	}
-	return nil
+	return checkUpdateTuple(db, testtuple.Dataset.Worker, testtuple.Status, status)
 }
 
 // commitStatusUpdate update the testtuple status in the ledger
