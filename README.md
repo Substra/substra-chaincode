@@ -31,37 +31,50 @@ Note for internal use only: See the [technical specifications](https://github.co
 
 ### Implemented smart contracts
 
+- `createCompositeTraintuple`
 - `createComputePlan`
 - `createTesttuple`
 - `createTraintuple`
+- `logFailCompositeTrain`
 - `logFailTest`
 - `logFailTrain`
+- `logStartCompositeTrain`
 - `logStartTest`
 - `logStartTrain`
+- `logSuccessCompositeTrain`
 - `logSuccessTest`
 - `logSuccessTrain`
 - `queryAlgo`
 - `queryAlgos`
+- `queryCompositeAlgo`
+- `queryCompositeAlgos`
+- `queryCompositeTraintuple`
+- `queryCompositeTraintuples`
+- `queryComputePlan`
+- `queryComputePlans`
 - `queryDataManager`
 - `queryDataManagers`
+- `queryDataSamples`
 - `queryDataset`
 - `queryFilter`
 - `queryModelDetails`
 - `queryModels`
+- `queryNodes`
 - `queryObjective`
+- `queryObjectiveLeaderboard`
 - `queryObjectives`
 - `queryTesttuple`
 - `queryTesttuples`
 - `queryTraintuple`
 - `queryTraintuples`
 - `registerAlgo`
+- `registerCompositeAlgo`
 - `registerDataManager`
 - `registerDataSample`
+- `registerNode`
 - `registerObjective`
 - `updateDataManager`
 - `updateDataSample`
-- `registerNode`
-- `queryNodes`
 
 ### Examples
 
