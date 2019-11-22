@@ -207,6 +207,11 @@ func (traintuple *inputCompositeTraintuple) getArgs() [][]byte {
 }
 
 func (success *inputLogSuccessTrain) createDefault() [][]byte {
+	success.fillDefaults()
+	return success.getArgs()
+}
+
+func (success *inputLogSuccessTrain) fillDefaults() {
 	if success.Key == "" {
 		success.Key = traintupleKey
 	}
@@ -222,12 +227,18 @@ func (success *inputLogSuccessTrain) createDefault() [][]byte {
 	if success.OutModel.StorageAddress == "" {
 		success.OutModel.StorageAddress = modelAddress
 	}
+}
 
-	args := append([][]byte{[]byte("logSuccessTrain")}, assetToJSON(success))
-	return args
+func (success *inputLogSuccessTrain) getArgs() [][]byte {
+	return append([][]byte{[]byte("logSuccessTrain")}, assetToJSON(success))
 }
 
 func (success *inputLogSuccessCompositeTrain) createDefault() [][]byte {
+	success.fillDefaults()
+	return success.getArgs()
+}
+
+func (success *inputLogSuccessCompositeTrain) fillDefaults() {
 	if success.Key == "" {
 		success.Key = compositeTraintupleKey
 	}
@@ -249,9 +260,10 @@ func (success *inputLogSuccessCompositeTrain) createDefault() [][]byte {
 	if success.OutTrunkModel.StorageAddress == "" {
 		success.OutTrunkModel.StorageAddress = trunkModelAddress
 	}
+}
 
-	args := append([][]byte{[]byte("logSuccessCompositeTrain")}, assetToJSON(success))
-	return args
+func (success *inputLogSuccessCompositeTrain) getArgs() [][]byte {
+	return append([][]byte{[]byte("logSuccessCompositeTrain")}, assetToJSON(success))
 }
 
 func (success *inputLogSuccessTest) createDefault() [][]byte {

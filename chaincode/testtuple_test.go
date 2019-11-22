@@ -16,6 +16,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -188,46 +189,77 @@ func TestQueryTesttuple(t *testing.T) {
 }
 
 func TestTesttupleOnCompositeTraintuple(t *testing.T) {
-	scc := new(SubstraChaincode)
-	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	for _, status := range []string{StatusDone, StatusFailed} {
+		testName := fmt.Sprintf("TestTesttupleOnCompositeTraintuple_%s", status)
+		t.Run(testName, func(t *testing.T) {
+			scc := new(SubstraChaincode)
+			mockStub := NewMockStubWithRegisterNode("substra", scc)
 
-	registerItem(t, *mockStub, "compositeTraintuple")
+			registerItem(t, *mockStub, "compositeTraintuple")
 
-	inp := inputTesttuple{
-		TraintupleKey: compositeTraintupleKey,
+			inp := inputTesttuple{
+				TraintupleKey: compositeTraintupleKey,
+			}
+			// Create a testtuple before training
+			args := inp.createDefault()
+			resp := mockStub.MockInvoke("42", args)
+			assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
+			values := map[string]string{}
+			bytesToStruct(resp.Payload, &values)
+			testTupleKey := values["key"]
+
+			// Start training
+			mockStub.MockTransactionStart("42")
+			db := NewLedgerDB(mockStub)
+			_, err := logStartCompositeTrain(db, assetToArgs(inputHash{Key: compositeTraintupleKey}))
+			assert.NoError(t, err)
+
+			// Succeed/fail training
+			expectedTesttupleStatus := ""
+			switch status {
+			case StatusDone:
+				inLog := inputLogSuccessCompositeTrain{}
+				inLog.fillDefaults()
+				_, err = logSuccessCompositeTrain(db, assetToArgs(inLog))
+				assert.NoError(t, err)
+				expectedTesttupleStatus = StatusTodo
+			case StatusFailed:
+				inLog := inputLogFailTrain{}
+				inLog.Key = compositeTraintupleKey
+				inLog.fillDefaults()
+				_, err = logFailCompositeTrain(db, assetToArgs(inLog))
+				assert.NoError(t, err)
+				expectedTesttupleStatus = StatusFailed
+			default:
+				assert.NoError(t, fmt.Errorf("Unknown status %s", status))
+			}
+
+			testTuple, err := queryTesttuple(db, assetToArgs(inputHash{Key: testTupleKey}))
+			assert.NoError(t, err)
+			assert.Equal(t, expectedTesttupleStatus, testTuple.Status)
+			assert.Equal(t, compositeTraintupleKey, testTuple.TraintupleKey)
+
+			// Create a new testtuple *after* the traintuple has been set to failed/succeeded
+			inp.DataManagerKey = dataManagerOpenerHash
+			inp.DataSampleKeys = []string{trainDataSampleHash1}
+			args = inp.createDefault()
+			resp = mockStub.MockInvoke("42", args)
+
+			switch status {
+			case StatusDone:
+				assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
+				values = map[string]string{}
+				bytesToStruct(resp.Payload, &values)
+				testTupleKey = values["key"]
+				testTuple, err := queryTesttuple(db, assetToArgs(inputHash{Key: testTupleKey}))
+				assert.NoError(t, err)
+				assert.Equal(t, StatusTodo, testTuple.Status)
+			case StatusFailed:
+				assert.EqualValues(t, 400, resp.Status, "status should show an error since the traintuple is failed")
+				assert.Contains(t, resp.Message, "could not register this testtuple")
+			default:
+				assert.NoError(t, fmt.Errorf("Unknown status %s", status))
+			}
+		})
 	}
-	// Create a testtuple before training
-	args := inp.createDefault()
-	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
-	values := map[string]string{}
-	bytesToStruct(resp.Payload, &values)
-	testTupleKey := values["key"]
-
-	// Start and succeed training
-	mockStub.MockTransactionStart("42")
-	db := NewLedgerDB(mockStub)
-	_, err := logStartCompositeTrain(db, assetToArgs(inputHash{Key: compositeTraintupleKey}))
-	assert.NoError(t, err)
-	inLog := inputLogSuccessCompositeTrain{}
-	inLog.createDefault()
-	_, err = logSuccessCompositeTrain(db, assetToArgs(inLog))
-	assert.NoError(t, err)
-
-	testTuple, err := queryTesttuple(db, assetToArgs(inputHash{Key: testTupleKey}))
-	assert.Equal(t, StatusTodo, testTuple.Status)
-	assert.Equal(t, compositeTraintupleKey, testTuple.TraintupleKey)
-
-	// Create a testtuple after a successful training
-	inp.DataManagerKey = dataManagerOpenerHash
-	inp.DataSampleKeys = []string{trainDataSampleHash1}
-	args = inp.createDefault()
-	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
-	values = map[string]string{}
-	bytesToStruct(resp.Payload, &values)
-	testTupleKey = values["key"]
-
-	testTuple, err = queryTesttuple(db, assetToArgs(inputHash{Key: testTupleKey}))
-	assert.Equal(t, StatusTodo, testTuple.Status)
 }

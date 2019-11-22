@@ -192,6 +192,19 @@ func (db *LedgerDB) GetAssetType(key string) (AssetType, error) {
 	return asset.AssetType, nil
 }
 
+// GetGenericTraintuple fetches a regular/composite/aggregate traintuple in the chaincode db and returns
+// its common properties.
+func (db *LedgerDB) GetGenericTraintuple(key string) (assetType AssetType, status string, err error) {
+	asset := struct {
+		Status    string    `json:"status"`
+		AssetType AssetType `json:"assetType"`
+	}{}
+	if err := db.Get(key, &asset); err != nil {
+		return asset.AssetType, asset.Status, err
+	}
+	return asset.AssetType, asset.Status, nil
+}
+
 // GetAlgo fetches an Algo from the ledger using its unique key
 func (db *LedgerDB) GetAlgo(key string) (Algo, error) {
 	algo := Algo{}
