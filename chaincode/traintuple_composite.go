@@ -468,7 +468,7 @@ func queryCompositeTraintuples(db LedgerDB, args []string) ([]outputCompositeTra
 // ----------------------------------------------------------
 
 // UpdateCompositeTraintupleChild updates the status of a waiting trainuple, given the new parent traintuple status
-func UpdateCompositeTraintupleChild(db LedgerDB, childTraintupleKey string, traintupleStatus string, event *TuplesEvent) (childStatus string, err error) {
+func UpdateCompositeTraintupleChild(db LedgerDB, parentTraintupleKey string, childTraintupleKey string, traintupleStatus string, event *TuplesEvent) (childStatus string, err error) {
 	// get and update traintuple
 	childTraintuple, err := db.GetCompositeTraintuple(childTraintupleKey)
 	if err != nil {
@@ -482,7 +482,7 @@ func UpdateCompositeTraintupleChild(db LedgerDB, childTraintupleKey string, trai
 	if traintupleStatus == StatusFailed {
 		newStatus = StatusFailed
 	} else if traintupleStatus == StatusDone {
-		ready, _err := childTraintuple.isReady(db, traintupleKey)
+		ready, _err := childTraintuple.isReady(db, parentTraintupleKey)
 		if _err != nil {
 			err = _err
 			return
