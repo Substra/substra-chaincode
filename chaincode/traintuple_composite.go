@@ -227,7 +227,7 @@ func (traintuple *CompositeTraintuple) Save(db LedgerDB, traintupleKey string) e
 	if err := db.CreateIndex("compositeTraintuple~worker~status~key", []string{"compositeTraintuple", traintuple.Dataset.Worker, traintuple.Status, traintupleKey}); err != nil {
 		return err
 	}
-	// TODO (ask Camille?): Do we create an index for head/trunk inModel or do we concider that
+	// TODO: Do we create an index for head/trunk inModel or do we concider that
 	// they are classic inModels ?
 	if err := db.CreateIndex("compositeTraintuple~inModel~key", []string{"compositeTraintuple", traintuple.InHeadModel, traintupleKey}); err != nil {
 		return err
