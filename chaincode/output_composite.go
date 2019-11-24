@@ -112,8 +112,8 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db LedgerDB, tr
 		// Trunk can be either:
 		// - a traintuple's out model
 		// - a composite traintuple's head out model
-		// - an aggregate traintuple's out model
-		hashDress, _err := db.GetOutModelHashDress(traintuple.InTrunkModel, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType /* TODO (aggregate): add AggregateTraintupleTYpe */})
+		// - an aggregate tuple's out model
+		hashDress, _err := db.GetOutModelHashDress(traintuple.InTrunkModel, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType, AggregateTupleType})
 		if _err != nil {
 			err = fmt.Errorf("could not fill (trunk) in-model with key \"%s\": %s", traintuple.InTrunkModel, _err.Error())
 			return
@@ -148,7 +148,7 @@ func (out *outputCompositeAlgo) Fill(key string, in CompositeAlgo) {
 	out.outputAlgo.Fill(key, in.Algo)
 }
 
-// SetCompositeTraintuples add one or several testtuples to the event struct
+// SetCompositeTraintuples adds one or several tuples to the event struct
 func (te *TuplesEvent) SetCompositeTraintuples(otuples ...outputCompositeTraintuple) {
 	te.CompositeTraintuples = otuples
 }

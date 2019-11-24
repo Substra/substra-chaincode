@@ -160,6 +160,34 @@ func (algo *inputCompositeAlgo) createDefault() [][]byte {
 	return args
 }
 
+func (algo *inputAggregateAlgo) createDefault() [][]byte {
+	algo.fillDefaults()
+	return algo.getArgs()
+}
+
+func (algo *inputAggregateAlgo) fillDefaults() {
+	if algo.Name == "" {
+		algo.Name = aggregateAlgoName
+	}
+	if algo.Hash == "" {
+		algo.Hash = aggregateAlgoHash
+	}
+	if algo.StorageAddress == "" {
+		algo.StorageAddress = aggregateAlgoStorageAddress
+	}
+	if algo.DescriptionHash == "" {
+		algo.DescriptionHash = "e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcb"
+	}
+	if algo.DescriptionStorageAddress == "" {
+		algo.DescriptionStorageAddress = "https://toto/aggregateAlgo/222/description"
+	}
+	algo.Permissions = OpenPermissions
+}
+
+func (algo *inputAggregateAlgo) getArgs() [][]byte {
+	return append([][]byte{[]byte("registerAggregateAlgo")}, assetToJSON(algo))
+}
+
 func (traintuple *inputTraintuple) createDefault() [][]byte {
 	if traintuple.AlgoKey == "" {
 		traintuple.AlgoKey = algoHash
@@ -203,6 +231,28 @@ func (traintuple *inputCompositeTraintuple) fillDefaults() {
 
 func (traintuple *inputCompositeTraintuple) getArgs() [][]byte {
 	args := append([][]byte{[]byte("createCompositeTraintuple")}, assetToJSON(traintuple))
+	return args
+}
+
+func (traintuple *inputAggregateTuple) createDefault() [][]byte {
+	traintuple.fillDefaults()
+	return traintuple.getArgs()
+}
+
+func (traintuple *inputAggregateTuple) fillDefaults() {
+	if traintuple.AlgoKey == "" {
+		traintuple.AlgoKey = aggregateAlgoHash
+	}
+	if traintuple.ObjectiveKey == "" {
+		traintuple.ObjectiveKey = objectiveDescriptionHash
+	}
+	if traintuple.Worker == "" {
+		traintuple.Worker = worker
+	}
+}
+
+func (traintuple *inputAggregateTuple) getArgs() [][]byte {
+	args := append([][]byte{[]byte("createAggregateTuple")}, assetToJSON(traintuple))
 	return args
 }
 
