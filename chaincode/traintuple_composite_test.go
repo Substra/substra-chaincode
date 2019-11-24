@@ -635,11 +635,11 @@ func testCompositeTraintupleInModelTypes(t *testing.T, headType AssetType, trunk
 
 	inpTraintuple := inputCompositeTraintuple{}
 
-	head, err := registerTraintuple(mockStub, headType, []string{trainDataSampleHash1})
+	head, err := registerTraintuple(mockStub, headType)
 	assert.NoError(t, err)
 	inpTraintuple.InHeadModelKey = head
 
-	trunk, err := registerTraintuple(mockStub, trunkType, []string{trainDataSampleHash2})
+	trunk, err := registerTraintuple(mockStub, trunkType)
 	assert.NoError(t, err)
 	inpTraintuple.InTrunkModelKey = trunk
 
@@ -767,11 +767,11 @@ func TestRecursiveLogCompositeSuccessFail(t *testing.T) {
 				registerItem(t, *mockStub, "compositeAlgo")
 
 				// register head
-				headKey, err := registerTraintuple(mockStub, tt.head, []string{trainDataSampleHash1})
+				headKey, err := registerTraintuple(mockStub, tt.head)
 				assert.NoError(t, err)
 
 				// register trunk
-				trunkKey, err := registerTraintuple(mockStub, tt.trunk, []string{trainDataSampleHash2})
+				trunkKey, err := registerTraintuple(mockStub, tt.trunk)
 				assert.NoError(t, err)
 
 				mockStub.MockTransactionStart("42")

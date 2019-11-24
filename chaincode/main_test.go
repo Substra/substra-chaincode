@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"reflect"
 	"strings"
@@ -227,14 +228,26 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	return resp, inpCompositeTraintuple
 }
 
-func registerTraintuple(mockStub *MockStub, assetType AssetType, dataSampleKeys []string) (key string, err error) {
+func registerTraintuple(mockStub *MockStub, assetType AssetType) (key string, err error) {
+
+	randAlgoKey := GetRandomHash()
+
+	// 1. Generate and register random algo
+	// 2. Generate and register traintuple using that algo
+
 	switch assetType {
 	case CompositeTraintupleType:
-		inpTraintuple := inputCompositeTraintuple{AlgoKey: compositeAlgoHash}
-		inpTraintuple.DataSampleKeys = dataSampleKeys
-		inpTraintuple.fillDefaults()
-		args := inpTraintuple.getArgs()
+		inpAlgo := inputCompositeAlgo{inputAlgo{Hash: randAlgoKey}}
+		args := inpAlgo.createDefault()
 		resp := mockStub.MockInvoke("42", args)
+		if resp.Status != 200 {
+			err = fmt.Errorf("Failed to register random algo: %s", resp.Message)
+			return
+		}
+		inpTraintuple := inputCompositeTraintuple{AlgoKey: randAlgoKey}
+		inpTraintuple.fillDefaults()
+		args = inpTraintuple.getArgs()
+		resp = mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
 			err = fmt.Errorf("Failed to register traintuple: %s", resp.Message)
 			return
@@ -243,10 +256,16 @@ func registerTraintuple(mockStub *MockStub, assetType AssetType, dataSampleKeys 
 		json.Unmarshal(resp.Payload, &_key)
 		return _key.Key, nil
 	case TraintupleType:
-		inpTraintuple := inputTraintuple{}
-		inpTraintuple.DataSampleKeys = dataSampleKeys
-		args := inpTraintuple.createDefault()
+		inpAlgo := inputAlgo{Hash: randAlgoKey}
+		args := inpAlgo.createDefault()
 		resp := mockStub.MockInvoke("42", args)
+		if resp.Status != 200 {
+			err = fmt.Errorf("Failed to register random algo: %s", resp.Message)
+			return
+		}
+		inpTraintuple := inputTraintuple{AlgoKey: randAlgoKey}
+		args = inpTraintuple.createDefault()
+		resp = mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
 			err = fmt.Errorf("Failed to register traintuple: %s", resp.Message)
 			return
@@ -560,4 +579,14 @@ func TestQueryEmptyResponse(t *testing.T) {
 			assert.Equal(t, expectedPayload, resp.Payload, "payload is not an empty list")
 		})
 	}
+}
+
+var characterRunes = []rune("abcdef0123456789")
+
+func GetRandomHash() string {
+	b := make([]rune, 64)
+	for i := range b {
+		b[i] = characterRunes[rand.Intn(len(characterRunes))]
+	}
+	return string(b)
 }
