@@ -793,3 +793,25 @@ func TestCorrectParent(t *testing.T) {
 	child2, _ := queryCompositeTraintuple(db, assetToArgs(inputHash{Key: child2Key}))
 	assert.Equal(t, headModelHash, child2.InHeadModel.Hash)
 }
+
+func TestCreateTesttuplePermissions(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+
+	registerItem(t, *mockStub, "compositeTraintuple")
+
+	inpTesttuple := inputTesttuple{}
+	inpTesttuple.TraintupleKey = compositeTraintupleKey
+	inpTesttuple.fillDefaults()
+
+	// impersonate bad guy
+	initialCreator := mockStub.Creator
+	mockStub.Creator = "bad guy"
+	resp := mockStub.MockInvoke("42", inpTesttuple.getArgs())
+	assert.EqualValues(t, 403, resp.Status, "When the creator is NOT an authorized worker, the testtuple creation should fail: %s", resp.Message)
+
+	// impersonate good guy
+	mockStub.Creator = initialCreator
+	resp = mockStub.MockInvoke("42", inpTesttuple.getArgs())
+	assert.EqualValues(t, 200, resp.Status, "When the creator is an authorized worker, the testtuple should be created without error: %s", resp.Message)
+}
