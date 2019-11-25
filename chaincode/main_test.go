@@ -248,71 +248,81 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	return resp, inpAggregatetuple
 }
 
-func registerTraintuple(mockStub *MockStub, assetType AssetType) (key string, err error) {
+func registerRandomCompositeAlgo(mockStub *MockStub) (key string, err error) {
+	key = GetRandomHash()
+	inpAlgo := inputCompositeAlgo{inputAlgo{Hash: key}}
+	args := inpAlgo.createDefault()
+	resp := mockStub.MockInvoke("42", args)
+	if resp.Status != 200 {
+		err = fmt.Errorf("failed to register random algo: %s", resp.Message)
+		return
+	}
+	return
+}
 
-	randAlgoKey := GetRandomHash()
+func registerTraintuple(mockStub *MockStub, assetType AssetType) (key string, err error) {
 
 	// 1. Generate and register random algo
 	// 2. Generate and register traintuple using that algo
 
 	switch assetType {
 	case CompositeTraintupleType:
-		inpAlgo := inputCompositeAlgo{inputAlgo{Hash: randAlgoKey}}
-		args := inpAlgo.createDefault()
-		resp := mockStub.MockInvoke("42", args)
-		if resp.Status != 200 {
-			err = fmt.Errorf("Failed to register random algo: %s", resp.Message)
+		randAlgoKey, _err := registerRandomCompositeAlgo(mockStub)
+		if _err != nil {
+			err = _err
 			return
 		}
 		inpTraintuple := inputCompositeTraintuple{AlgoKey: randAlgoKey}
 		inpTraintuple.fillDefaults()
-		args = inpTraintuple.getArgs()
-		resp = mockStub.MockInvoke("42", args)
+		args := inpTraintuple.getArgs()
+		resp := mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
-			err = fmt.Errorf("Failed to register traintuple: %s", resp.Message)
+			err = fmt.Errorf("failed to register traintuple: %s", resp.Message)
 			return
 		}
 		var _key struct{ Key string }
 		json.Unmarshal(resp.Payload, &_key)
 		return _key.Key, nil
 	case TraintupleType:
+		randAlgoKey := GetRandomHash()
 		inpAlgo := inputAlgo{Hash: randAlgoKey}
 		args := inpAlgo.createDefault()
 		resp := mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
-			err = fmt.Errorf("Failed to register random algo: %s", resp.Message)
+			err = fmt.Errorf("failed to register random algo: %s", resp.Message)
 			return
 		}
 		inpTraintuple := inputTraintuple{AlgoKey: randAlgoKey}
 		args = inpTraintuple.createDefault()
 		resp = mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
-			err = fmt.Errorf("Failed to register traintuple: %s", resp.Message)
+			err = fmt.Errorf("failed to register traintuple: %s", resp.Message)
 			return
 		}
 		var _key struct{ Key string }
 		json.Unmarshal(resp.Payload, &_key)
 		return _key.Key, nil
 	case AggregatetupleType:
+		randAlgoKey := GetRandomHash()
 		inpAlgo := inputAggregateAlgo{inputAlgo{Hash: randAlgoKey}}
 		args := inpAlgo.createDefault()
 		resp := mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
-			err = fmt.Errorf("Failed to register random algo: %s", resp.Message)
+			err = fmt.Errorf("failed to register random algo: %s", resp.Message)
 			return
 		}
 		inpTraintuple := inputAggregatetuple{AlgoKey: randAlgoKey}
 		args = inpTraintuple.createDefault()
 		resp = mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
-			err = fmt.Errorf("Failed to register traintuple: %s", resp.Message)
+			err = fmt.Errorf("failed to register traintuple: %s", resp.Message)
 			return
 		}
 		var _key struct{ Key string }
 		json.Unmarshal(resp.Payload, &_key)
 		return _key.Key, nil
 	default:
-		err = fmt.Errorf("Invalid asset type: %v", assetType)
+		err = fmt.Errorf("invalid asset type: %v", assetType)
 		return
 	}
 }

@@ -56,12 +56,10 @@ func (tuple *Aggregatetuple) SetFromInput(db LedgerDB, inp inputAggregatetuple) 
 	if !objective.Permissions.CanProcess(objective.Owner, creator) {
 		return errors.Forbidden("not authorized to process objective %s", inp.ObjectiveKey)
 	}
+
 	tuple.ObjectiveKey = inp.ObjectiveKey
-
-	// TODO (aggregate): uncomment + add test
-	// tuple.Permissions = MergePermissions(dataManager.Permissions, algo.Permissions)
-
 	tuple.Worker = inp.Worker
+
 	return nil
 }
 
@@ -70,20 +68,62 @@ func (tuple *Aggregatetuple) SetFromInput(db LedgerDB, inp inputAggregatetuple) 
 // Also it's InModelKeys are set.
 func (tuple *Aggregatetuple) SetFromParents(db LedgerDB, inModels []string) error {
 	status := StatusTodo
-
-	for _, parentTraintupleKey := range inModels {
-		hashDress, err := db.GetOutModelHashDress(parentTraintupleKey, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
-		if err != nil {
-			return err
-		}
-		if hashDress == nil {
-			status = StatusWaiting
-		}
-
-		tuple.InModelKeys = append(tuple.InModelKeys, parentTraintupleKey)
+	inModelKeys := tuple.InModelKeys
+	permissions, err := NewPermissions(db, OpenPermissions)
+	if err != nil {
+		return errors.BadRequest(err, "could not generate open permissions")
 	}
 
+	for _, parentKey := range inModels {
+		parentType, err := db.GetAssetType(parentKey)
+		if err != nil {
+			return fmt.Errorf("could not retrieve traintuple type with key %s - %s", parentKey, err.Error())
+		}
+
+		var parentOutModel *HashDress
+		parentPermissions := Permissions{}
+
+		// get out-model and permissions from parent
+		switch parentType {
+		case CompositeTraintupleType:
+			tuple, err := db.GetCompositeTraintuple(parentKey)
+			if err == nil {
+				// if parent is aggregate, always take the "trunk" out-model
+				parentOutModel = tuple.OutTrunkModel.OutModel
+				parentPermissions = tuple.OutTrunkModel.Permissions
+			}
+		case TraintupleType:
+			tuple, err := db.GetTraintuple(parentKey)
+			if err == nil {
+				parentOutModel = tuple.OutModel
+				parentPermissions = tuple.Permissions
+			}
+		case AggregatetupleType:
+			tuple, err := db.GetAggregatetuple(parentKey)
+			if err == nil {
+				parentOutModel = tuple.OutModel
+				parentPermissions = tuple.Permissions
+			}
+		default:
+			return fmt.Errorf("Aggregate.SetFromParents: Unsupported parent type %s", parentType)
+		}
+
+		if err != nil {
+			return fmt.Errorf("could not retrieve traintuple type with key %s - %s", parentKey, err.Error())
+		}
+
+		// update child properties based on parent
+		if parentOutModel == nil {
+			status = StatusWaiting
+		}
+		inModelKeys = append(inModelKeys, parentKey)
+		permissions = MergePermissions(permissions, parentPermissions)
+	}
+
+	tuple.InModelKeys = inModelKeys
+	tuple.Permissions = permissions
 	tuple.Status = status
+
 	return nil
 }
 
