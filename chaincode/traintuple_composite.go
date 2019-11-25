@@ -148,7 +148,6 @@ func (traintuple *CompositeTraintuple) GetKey() string {
 		traintuple.InTrunkModel}
 	hashKeys = append(hashKeys, traintuple.Dataset.DataSampleKeys...)
 	return HashForKey("compositeTraintuple", hashKeys...)
-
 }
 
 // AddToComputePlan set the traintuple's parameters that determines if it's part of on ComputePlan and how.

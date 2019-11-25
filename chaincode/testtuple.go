@@ -130,7 +130,7 @@ func (testtuple *Testtuple) SetFromTraintuple(db LedgerDB, traintupleKey string)
 		if err != nil {
 			return errors.BadRequest(err, "could not retrieve composite traintuple with key %s", traintupleKey)
 		}
-		permissions = MergePermissions(compositeTraintuple.OutHeadModel.Permissions, compositeTraintuple.OutTrunkModel.Permissions)
+		permissions = compositeTraintuple.OutHeadModel.Permissions
 		tupleCreator = compositeTraintuple.Creator
 		status = compositeTraintuple.Status
 		testtuple.ObjectiveKey = compositeTraintuple.ObjectiveKey
