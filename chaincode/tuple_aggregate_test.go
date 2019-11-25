@@ -285,7 +285,6 @@ func TestTraintupleAggregate(t *testing.T) {
 			},
 		},
 	}
-	expected.Permissions.Process.Public = true
 	assert.Exactly(t, expected, out, "the aggregate tuple queried from the ledger differ from expected")
 
 	// Query all traintuples and check consistency
