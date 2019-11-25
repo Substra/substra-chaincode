@@ -486,43 +486,43 @@ func TestInsertTraintupleTwiceComposite(t *testing.T) {
 //
 /////////////////////////////////////////////
 
-var createInModelTests = []struct {
-	testName         string
-	withInHeadModel  bool
-	withInTrunkModel bool
-	shouldSucceed    bool
-	expectedStatus   string
-	message          string
-}{
-	{
-		testName:         "NoHeadAndNoTrunk",
-		withInHeadModel:  false,
-		withInTrunkModel: false,
-		shouldSucceed:    true,
-		expectedStatus:   "todo", // no in-models, so we're ready to train
-		message:          "One should be able to create a composite traintuple without head or trunk inModels"},
-	{
-		testName:         "NoHeadAndTrunk",
-		withInHeadModel:  true,
-		withInTrunkModel: false,
-		shouldSucceed:    false,
-		message:          "One should NOT be able to create a composite traintuple with a head inModel unless a trunk inModel is also supplied"},
-	{
-		testName:         "HeadAndNoTrunk",
-		withInHeadModel:  false,
-		withInTrunkModel: true,
-		shouldSucceed:    false,
-		message:          "One should NOT be able to create a composite traintuple with a trunk inModel unless a head inModel is also supplied"},
-	{
-		testName:         "HeadAndTrunk",
-		withInHeadModel:  true,
-		withInTrunkModel: true,
-		shouldSucceed:    true,
-		expectedStatus:   "waiting", // waiting for in models to be done before we can start training
-		message:          "One should be able to create a composite traintuple with both a head and a trunk inModels"}}
-
 func TestCreateCompositeTraintupleInModels(t *testing.T) {
-	for _, tt := range createInModelTests {
+	testTable := []struct {
+		testName         string
+		withInHeadModel  bool
+		withInTrunkModel bool
+		shouldSucceed    bool
+		expectedStatus   string
+		message          string
+	}{
+		{
+			testName:         "NoHeadAndNoTrunk",
+			withInHeadModel:  false,
+			withInTrunkModel: false,
+			shouldSucceed:    true,
+			expectedStatus:   "todo", // no in-models, so we're ready to train
+			message:          "One should be able to create a composite traintuple without head or trunk inModels"},
+		{
+			testName:         "NoHeadAndTrunk",
+			withInHeadModel:  true,
+			withInTrunkModel: false,
+			shouldSucceed:    false,
+			message:          "One should NOT be able to create a composite traintuple with a head inModel unless a trunk inModel is also supplied"},
+		{
+			testName:         "HeadAndNoTrunk",
+			withInHeadModel:  false,
+			withInTrunkModel: true,
+			shouldSucceed:    false,
+			message:          "One should NOT be able to create a composite traintuple with a trunk inModel unless a head inModel is also supplied"},
+		{
+			testName:         "HeadAndTrunk",
+			withInHeadModel:  true,
+			withInTrunkModel: true,
+			shouldSucceed:    true,
+			expectedStatus:   "waiting", // waiting for in models to be done before we can start training
+			message:          "One should be able to create a composite traintuple with both a head and a trunk inModels"},
+	}
+	for _, tt := range testTable {
 		t.Run(tt.testName, func(t *testing.T) {
 			scc := new(SubstraChaincode)
 			mockStub := NewMockStubWithRegisterNode("substra", scc)

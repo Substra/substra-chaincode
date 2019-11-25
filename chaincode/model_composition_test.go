@@ -21,23 +21,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var modelCompositionTests = []struct {
-	parent1 AssetType // head for composite
-	parent2 AssetType // trunk for composite
-	child   AssetType
-}{
-	{parent1: CompositeTraintupleType, parent2: TraintupleType, child: CompositeTraintupleType},
-	{parent1: CompositeTraintupleType, parent2: CompositeTraintupleType, child: CompositeTraintupleType},
-	{parent1: CompositeTraintupleType, parent2: AggregateTupleType, child: CompositeTraintupleType},
-	{parent1: CompositeTraintupleType, parent2: CompositeTraintupleType, child: AggregateTupleType},
-	{parent1: TraintupleType, parent2: AggregateTupleType, child: AggregateTupleType},
-}
-
 // This test makes sures that a child traintuple's state is successfully updated when a parent's state is updated
 // See assertions at the bottom of the test for more details.
 // The test ensures the behavior is correct with various combinations of parent traintuple types (composite, regular).
 func TestModelComposition(t *testing.T) {
-	for _, tt := range modelCompositionTests {
+	testTable := []struct {
+		parent1 AssetType // head for composite
+		parent2 AssetType // trunk for composite
+		child   AssetType
+	}{
+		{parent1: CompositeTraintupleType, parent2: TraintupleType, child: CompositeTraintupleType},
+		{parent1: CompositeTraintupleType, parent2: CompositeTraintupleType, child: CompositeTraintupleType},
+		{parent1: CompositeTraintupleType, parent2: AggregateTupleType, child: CompositeTraintupleType},
+		{parent1: CompositeTraintupleType, parent2: CompositeTraintupleType, child: AggregateTupleType},
+		{parent1: TraintupleType, parent2: AggregateTupleType, child: AggregateTupleType},
+	}
+	for _, tt := range testTable {
 		for _, status := range []string{
 			"successParent1",
 			"successParent2",

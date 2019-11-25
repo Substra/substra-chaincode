@@ -115,38 +115,37 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	assert.Contains(t, resp.Message, "already exists")
 }
 
-var queryTesttupleTests = []struct {
-	traintupleKey              string
-	expectedTypeString         string
-	expectedAlgoName           string
-	expectedAlgoHash           string
-	expectedAlgoStorageAddress string
-}{
-	{
-		traintupleKey:              traintupleKey,
-		expectedTypeString:         "traintuple",
-		expectedAlgoName:           algoName,
-		expectedAlgoHash:           algoHash,
-		expectedAlgoStorageAddress: algoStorageAddress,
-	},
-	{
-		traintupleKey:              compositeTraintupleKey,
-		expectedTypeString:         "compositeTraintuple",
-		expectedAlgoName:           compositeAlgoName,
-		expectedAlgoHash:           compositeAlgoHash,
-		expectedAlgoStorageAddress: compositeAlgoStorageAddress,
-	},
-	{
-		traintupleKey:              aggregateTupleKey,
-		expectedTypeString:         "aggregateTuple",
-		expectedAlgoName:           aggregateAlgoName,
-		expectedAlgoHash:           aggregateAlgoHash,
-		expectedAlgoStorageAddress: aggregateAlgoStorageAddress,
-	},
-}
-
 func TestQueryTesttuple(t *testing.T) {
-	for _, tt := range queryTesttupleTests {
+	testTable := []struct {
+		traintupleKey              string
+		expectedTypeString         string
+		expectedAlgoName           string
+		expectedAlgoHash           string
+		expectedAlgoStorageAddress string
+	}{
+		{
+			traintupleKey:              traintupleKey,
+			expectedTypeString:         "traintuple",
+			expectedAlgoName:           algoName,
+			expectedAlgoHash:           algoHash,
+			expectedAlgoStorageAddress: algoStorageAddress,
+		},
+		{
+			traintupleKey:              compositeTraintupleKey,
+			expectedTypeString:         "compositeTraintuple",
+			expectedAlgoName:           compositeAlgoName,
+			expectedAlgoHash:           compositeAlgoHash,
+			expectedAlgoStorageAddress: compositeAlgoStorageAddress,
+		},
+		{
+			traintupleKey:              aggregateTupleKey,
+			expectedTypeString:         "aggregateTuple",
+			expectedAlgoName:           aggregateAlgoName,
+			expectedAlgoHash:           aggregateAlgoHash,
+			expectedAlgoStorageAddress: aggregateAlgoStorageAddress,
+		},
+	}
+	for _, tt := range testTable {
 		t.Run("TestQueryTesttuple"+tt.expectedTypeString, func(t *testing.T) {
 			scc := new(SubstraChaincode)
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
