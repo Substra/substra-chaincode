@@ -77,8 +77,6 @@ func (traintuple *CompositeTraintuple) SetFromInput(db LedgerDB, inp inputCompos
 		return errors.Forbidden("not authorized to process dataManager %s", inp.DataManagerKey)
 	}
 
-	traintuple.Permissions = MergePermissions(dataManager.Permissions, algo.Permissions)
-
 	// fill traintuple.Dataset from dataManager and dataSample
 	traintuple.Dataset = &Dataset{
 		DataManagerKey: inp.DataManagerKey,

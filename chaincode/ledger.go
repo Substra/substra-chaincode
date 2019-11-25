@@ -120,7 +120,6 @@ type CompositeTraintuple struct {
 	OutHeadModel  CompositeTraintupleOutModel `json:"outHeadModel"`
 	OutTrunkModel CompositeTraintupleOutModel `json:"outTrunkModel"`
 	Perf          float32                     `json:"perf"`
-	Permissions   Permissions                 `json:"permissions"`
 	Rank          int                         `json:"rank"`
 	Status        string                      `json:"status"`
 	Tag           string                      `json:"tag"`
