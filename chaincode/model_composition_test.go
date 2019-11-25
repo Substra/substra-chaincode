@@ -22,13 +22,15 @@ import (
 )
 
 var modelCompositionTests = []struct {
-	head  AssetType
-	trunk AssetType
-	child AssetType
+	parent1 AssetType // head for composite
+	parent2 AssetType // trunk for composite
+	child   AssetType
 }{
-	{head: CompositeTraintupleType, trunk: TraintupleType, child: CompositeTraintupleType},
-	{head: CompositeTraintupleType, trunk: CompositeTraintupleType, child: CompositeTraintupleType},
-	// TODO (aggregate)
+	{parent1: CompositeTraintupleType, parent2: TraintupleType, child: CompositeTraintupleType},
+	{parent1: CompositeTraintupleType, parent2: CompositeTraintupleType, child: CompositeTraintupleType},
+	{parent1: CompositeTraintupleType, parent2: AggregateTupleType, child: CompositeTraintupleType},
+	{parent1: CompositeTraintupleType, parent2: CompositeTraintupleType, child: AggregateTupleType},
+	{parent1: TraintupleType, parent2: AggregateTupleType, child: AggregateTupleType},
 }
 
 // This test makes sures that a child traintuple's state is successfully updated when a parent's state is updated
@@ -36,32 +38,49 @@ var modelCompositionTests = []struct {
 // The test ensures the behavior is correct with various combinations of parent traintuple types (composite, regular).
 func TestModelComposition(t *testing.T) {
 	for _, tt := range modelCompositionTests {
-		for _, status := range []string{"successHead", "successTrunk", "successBoth", "failHead", "failTrunk"} {
-			testName := fmt.Sprintf("TestModelComposition_%s_%sHead_%sTrunk_%sChild", status, tt.head, tt.trunk, tt.child)
+		for _, status := range []string{
+			"successParent1",
+			"successParent2",
+			"successBoth",
+			"failParent1",
+			"failParent2",
+		} {
+			testName := fmt.Sprintf("TestModelComposition_%s_%sParent1_%sParent2_%sChild", status, tt.parent1, tt.parent2, tt.child)
 			t.Run(testName, func(t *testing.T) {
 				scc := new(SubstraChaincode)
 				mockStub := NewMockStubWithRegisterNode("substra", scc)
-				registerItem(t, *mockStub, "compositeAlgo")
+				registerItem(t, *mockStub, "aggregateAlgo")
 
-				// register head
-				headKey, err := registerTraintuple(mockStub, tt.head)
+				// register parents
+				parent1Key, err := registerTraintuple(mockStub, tt.parent1)
 				assert.NoError(t, err)
-
-				// register trunk
-				trunkKey, err := registerTraintuple(mockStub, tt.trunk)
+				parent2Key, err := registerTraintuple(mockStub, tt.parent2)
 				assert.NoError(t, err)
 
 				mockStub.MockTransactionStart("42")
 				db := NewLedgerDB(mockStub)
 
 				// register child traintuple...
-				child := inputCompositeTraintuple{}
-				child.createDefault()
-				child.InHeadModelKey = headKey
-				child.InTrunkModelKey = trunkKey
-				childResp, err := createCompositeTraintuple(db, assetToArgs(child))
-				assert.NoError(t, err)
-				childKey := childResp["key"]
+				childKey := ""
+				switch tt.child {
+				case CompositeTraintupleType:
+					child := inputCompositeTraintuple{}
+					child.createDefault()
+					child.InHeadModelKey = parent1Key
+					child.InTrunkModelKey = parent2Key
+					childResp, err := createCompositeTraintuple(db, assetToArgs(child))
+					assert.NoError(t, err)
+					childKey = childResp["key"]
+				case AggregateTupleType:
+					child := inputAggregateTuple{}
+					child.createDefault()
+					child.InModels = []string{parent1Key, parent2Key}
+					childResp, err := createAggregateTuple(db, assetToArgs(child))
+					assert.NoError(t, err)
+					childKey = childResp["key"]
+				default:
+					assert.NoError(t, fmt.Errorf("unsupported test case %s", tt.parent2))
+				}
 
 				// ... and its testtuple
 				childTesttuple := inputTesttuple{}
@@ -72,95 +91,59 @@ func TestModelComposition(t *testing.T) {
 				childTesttupleKey := childTestupleResp["key"]
 
 				// start parents
-				_, err = logStartCompositeTrain(db, assetToArgs(inputHash{Key: headKey}))
+				_, err = trainStart(db, tt.parent1, parent1Key)
 				assert.NoError(t, err)
-				switch tt.trunk {
-				case TraintupleType:
-					_, err = logStartTrain(db, assetToArgs(inputHash{Key: trunkKey}))
-				case CompositeTraintupleType:
-					_, err = logStartCompositeTrain(db, assetToArgs(inputHash{Key: trunkKey}))
-				default:
-					assert.NoError(t, fmt.Errorf("unsupported test case %s", tt.trunk))
-				}
+				_, err = trainStart(db, tt.parent2, parent2Key)
 				assert.NoError(t, err)
 
 				// succeed/fail parents
 				switch status {
-				case "successHead":
+				case "successParent1":
 					fallthrough
-				case "successTrunk":
+				case "successParent2":
 					fallthrough
 				case "successBoth":
-					if status == "successBoth" || status == "successHead" {
-						successHead := inputLogSuccessCompositeTrain{}
-						successHead.Key = headKey
-						successHead.fillDefaults()
-						_, err = logSuccessCompositeTrain(db, assetToArgs(successHead))
+					if status == "successBoth" || status == "successParent1" {
+						_, err = trainSuccess(db, tt.parent1, parent1Key)
 						assert.NoError(t, err)
 					}
-					if status == "successBoth" || status == "successTrunk" {
-						switch tt.trunk {
-						case TraintupleType:
-							successTrunk := inputLogSuccessTrain{}
-							successTrunk.fillDefaults()
-							successTrunk.Key = trunkKey
-							_, err = logSuccessTrain(db, assetToArgs(successTrunk))
-						case CompositeTraintupleType:
-							successTrunk := inputLogSuccessCompositeTrain{}
-							successTrunk.fillDefaults()
-							successTrunk.Key = trunkKey
-							_, err = logSuccessCompositeTrain(db, assetToArgs(successTrunk))
-						default:
-							assert.NoError(t, fmt.Errorf("unsupported test case %s", tt.trunk))
-						}
+					if status == "successBoth" || status == "successParent2" {
+						_, err = trainSuccess(db, tt.parent2, parent2Key)
 						assert.NoError(t, err)
+
 					}
-				case "failHead":
-					failHead := inputLogFailTrain{}
-					failHead.Key = headKey
-					failHead.fillDefaults()
-					_, err = logFailCompositeTrain(db, assetToArgs(failHead))
+				case "failParent1":
+					_, err = trainFail(db, tt.parent1, parent1Key)
 					assert.NoError(t, err)
-				case "failTrunk":
-					failTrunk := inputLogFailTrain{}
-					failTrunk.Key = trunkKey
-					failTrunk.fillDefaults()
-					switch tt.trunk {
-					case TraintupleType:
-						_, err = logFailTrain(db, assetToArgs(failTrunk))
-						assert.NoError(t, err)
-					case CompositeTraintupleType:
-						_, err = logFailCompositeTrain(db, assetToArgs(failTrunk))
-						assert.NoError(t, err)
-					default:
-						assert.NoError(t, fmt.Errorf("unsupported test case %s", tt.trunk))
-					}
+				case "failParent2":
+					_, err = trainFail(db, tt.parent2, parent2Key)
+					assert.NoError(t, err)
+
 				default:
 					assert.NoError(t, fmt.Errorf("unsupported test case %s", status))
 				}
 
 				// check state of child traintuple/testtuple
-				outChild, err := db.GetCompositeTraintuple(childKey)
+				_, trainChildStatus, err := db.GetGenericTraintuple(childKey)
 				assert.NoError(t, err)
-				trainChildStatus := outChild.Status
 
 				outChildTesttuple, err := db.GetTesttuple(childTesttupleKey)
 				assert.NoError(t, err)
 				testChildStatus := outChildTesttuple.Status
 
 				switch status {
-				case "successHead":
+				case "successParent1":
 					assert.Equal(t, StatusWaiting, trainChildStatus, "Only one parent has succeeded. The child traintuple should be Waiting")
 					assert.Equal(t, StatusWaiting, testChildStatus, "Only one parent has succeeded. The child testtuple should be Waiting")
-				case "successTrunk":
+				case "successParent2":
 					assert.Equal(t, StatusWaiting, trainChildStatus, "Only one parent has succeeded. The child traintuple should be Waiting")
 					assert.Equal(t, StatusWaiting, testChildStatus, "Only one parent has succeeded. The child testtuple should be Waiting")
 				case "successBoth":
 					assert.Equal(t, StatusTodo, trainChildStatus, "Both parents have succeded. The child traintuple should be Todo")
-				case "failHead":
+				case "failParent1":
 					assert.Equal(t, StatusFailed, trainChildStatus, "One parent has failed. The child traintuple should be Failed")
 					assert.Equal(t, StatusFailed, testChildStatus, "One parent has failed. The child testtuple should be Failed")
-				case "failTrunk":
+				case "failParent2":
 					assert.Equal(t, StatusFailed, trainChildStatus, "One parent has failed. The child traintuple should be Failed")
 					assert.Equal(t, StatusFailed, testChildStatus, "One parent has failed. The child testtuple should be Failed")
 				default:
@@ -168,5 +151,56 @@ func TestModelComposition(t *testing.T) {
 				}
 			})
 		}
+	}
+}
+
+func trainStart(db LedgerDB, tupleType AssetType, tupleKey string) (interface{}, error) {
+	switch tupleType {
+	case TraintupleType:
+		return logStartTrain(db, assetToArgs(inputHash{Key: tupleKey}))
+	case CompositeTraintupleType:
+		return logStartCompositeTrain(db, assetToArgs(inputHash{Key: tupleKey}))
+	case AggregateTupleType:
+		return logStartAggregateTrain(db, assetToArgs(inputHash{Key: tupleKey}))
+	default:
+		return nil, fmt.Errorf("unsupported test case %s", tupleType)
+	}
+}
+
+func trainSuccess(db LedgerDB, tupleType AssetType, tupleKey string) (interface{}, error) {
+	switch tupleType {
+	case TraintupleType:
+		successParent1 := inputLogSuccessTrain{}
+		successParent1.fillDefaults()
+		successParent1.Key = tupleKey
+		return logSuccessTrain(db, assetToArgs(successParent1))
+	case CompositeTraintupleType:
+		successParent1 := inputLogSuccessCompositeTrain{}
+		successParent1.fillDefaults()
+		successParent1.Key = tupleKey
+		return logSuccessCompositeTrain(db, assetToArgs(successParent1))
+	case AggregateTupleType:
+		successParent1 := inputLogSuccessTrain{}
+		successParent1.fillDefaults()
+		successParent1.Key = tupleKey
+		return logSuccessAggregateTrain(db, assetToArgs(successParent1))
+	default:
+		return nil, fmt.Errorf("unsupported test case %s", tupleType)
+	}
+}
+
+func trainFail(db LedgerDB, tupleType AssetType, tupleKey string) (interface{}, error) {
+	in := inputLogFailTrain{}
+	in.Key = tupleKey
+	in.fillDefaults()
+	switch tupleType {
+	case TraintupleType:
+		return logFailTrain(db, assetToArgs(in))
+	case CompositeTraintupleType:
+		return logFailCompositeTrain(db, assetToArgs(in))
+	case AggregateTupleType:
+		return logFailAggregateTrain(db, assetToArgs(in))
+	default:
+		return nil, fmt.Errorf("unsupported test case %s", tupleType)
 	}
 }

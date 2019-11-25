@@ -595,17 +595,17 @@ func TestCompositeTraintupleInModelTypes(t *testing.T) {
 	allowedHeadTypes := map[AssetType]bool{
 		TraintupleType:          false,
 		CompositeTraintupleType: true,
-		// TODO (aggregate): AggregateTraintuple
+		AggregateTupleType:      false,
 	}
 
 	// Trunk can be either:
 	// - a traintuple's out model
 	// - a composite traintuple's head out model
-	// - an aggregate traintuple's out model
+	// - an aggregate tuple's out model
 	allowedTrunkTypes := map[AssetType]bool{
 		TraintupleType:          true,
 		CompositeTraintupleType: true,
-		// TODO (aggregate): AggregateTraintuple
+		AggregateTupleType:      true,
 	}
 
 	for headType, validHeadType := range allowedHeadTypes {
@@ -631,7 +631,7 @@ func TestCompositeTraintupleInModelTypes(t *testing.T) {
 func testCompositeTraintupleInModelTypes(t *testing.T, headType AssetType, trunkType AssetType, shouldSucceed bool) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	registerItem(t, *mockStub, "compositeAlgo")
+	registerItem(t, *mockStub, "aggregateAlgo")
 
 	inpTraintuple := inputCompositeTraintuple{}
 
@@ -742,4 +742,54 @@ func TestCompositeTraintupleLogSuccessFail(t *testing.T) {
 			assert.EqualValues(t, expectedStatus, traintuple.Status, "The traintuple status should be set to %s", expectedStatus)
 		})
 	}
+}
+
+// This takes makes sure that, assuming a parent composite traintuple:
+// - a child aggregate tuple takes the *trunk* out-model from the parent as its in-model
+// - a child composite traintuple takes the *head* out-model from the parent as its head in-model
+func TestCorrectParent(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+
+	// register parent
+	resp, _ := registerItem(t, *mockStub, "compositeTraintuple")
+	var _key struct{ Key string }
+	json.Unmarshal(resp.Payload, &_key)
+	parentKey := _key.Key
+
+	// register aggregate child
+	inp1 := inputAggregateTuple{}
+	inp1.fillDefaults()
+	inp1.InModels = []string{parentKey}
+	resp = mockStub.MockInvoke("42", inp1.getArgs())
+	json.Unmarshal(resp.Payload, &_key)
+	child1Key := _key.Key
+
+	// register composite child
+	inp2 := inputCompositeTraintuple{}
+	inp2.createDefault()
+	inp2.InHeadModelKey = parentKey
+	inp2.InTrunkModelKey = traintupleKey
+	resp = mockStub.MockInvoke("42", inp2.getArgs())
+	json.Unmarshal(resp.Payload, &_key)
+	child2Key := _key.Key
+
+	// start
+	mockStub.MockInvoke("42", [][]byte{[]byte("logStartCompositeTrain"), keyToJSON(parentKey)})
+	// success
+	success := inputLogSuccessCompositeTrain{}
+	success.Key = parentKey
+	args := success.createDefault()
+	mockStub.MockInvoke("42", args)
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	// fetch aggregate child, and check its in-model is the parent's trunk out-model
+	child1, _ := queryAggregateTuple(db, assetToArgs(inputHash{Key: child1Key}))
+	assert.Equal(t, trunkModelHash, child1.InModels[0].Hash)
+
+	// fetch composite child, and check its head in-model is the parent's head out-model
+	child2, _ := queryCompositeTraintuple(db, assetToArgs(inputHash{Key: child2Key}))
+	assert.Equal(t, headModelHash, child2.InHeadModel.Hash)
 }

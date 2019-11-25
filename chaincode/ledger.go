@@ -28,9 +28,11 @@ const (
 	DataSampleType
 	AlgoType
 	CompositeAlgoType
+	AggregateAlgoType
 	TraintupleType
-	TesttupleType
 	CompositeTraintupleType
+	AggregateTupleType
+	TesttupleType
 	// when adding a new type here, don't forget to update
 	// the String() function in utils.go
 )
@@ -81,6 +83,11 @@ type CompositeAlgo struct {
 	Algo
 }
 
+// AggregateAlgo is the representation of one of the element type stored in the ledger
+type AggregateAlgo struct {
+	Algo
+}
+
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
 	AssetType     AssetType   `json:"assetType"`
@@ -117,6 +124,23 @@ type CompositeTraintuple struct {
 	Rank          int                         `json:"rank"`
 	Status        string                      `json:"status"`
 	Tag           string                      `json:"tag"`
+}
+
+// AggregateTuple is like a traintuple, but for aggregate model composition
+type AggregateTuple struct {
+	AlgoKey       string      `json:"algoKey"`
+	AssetType     AssetType   `json:"assetType"`
+	ComputePlanID string      `json:"computePlanID"`
+	Creator       string      `json:"creator"`
+	InModelKeys   []string    `json:"inModels"`
+	Log           string      `json:"log"`
+	ObjectiveKey  string      `json:"objectiveKey"`
+	OutModel      *HashDress  `json:"outModel"`
+	Permissions   Permissions `json:"permissions"` // TODO (aggregate): what do permissions mean here?
+	Rank          int         `json:"rank"`
+	Status        string      `json:"status"`
+	Tag           string      `json:"tag"`
+	Worker        string      `json:"worker"`
 }
 
 // CompositeTraintupleOutModel is the out-model of a CompositeTraintuple

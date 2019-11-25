@@ -63,7 +63,13 @@ func queryModelDetails(db LedgerDB, args []string) (outModelDetails outputModelD
 			return
 		}
 		outModelDetails.CompositeTraintuple = &out
-		// TODO (aggregate): AggregateTraintupleType
+	case AggregateTupleType:
+		var out outputAggregateTuple
+		out, err = getOutputAggregateTuple(db, inp.Key)
+		if err != nil {
+			return
+		}
+		outModelDetails.AggregateTuple = &out
 	}
 
 	// get certified and non-certified testtuples related to traintuple

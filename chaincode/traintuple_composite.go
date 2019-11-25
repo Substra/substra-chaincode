@@ -127,8 +127,8 @@ func (traintuple *CompositeTraintuple) SetFromParents(db LedgerDB, inp inputComp
 	// It can be either:
 	// - a traintuple's out model
 	// - a composite traintuple's head out model
-	// - an aggregate traintuple's out model
-	hashDress, err = db.GetOutModelHashDress(inp.InTrunkModelKey, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType /* TODO (aggregate): add AggregateTraintupleTYpe */})
+	// - an aggregate tuple's out model
+	hashDress, err = db.GetOutModelHashDress(inp.InTrunkModelKey, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType, AggregateTupleType})
 	if err != nil {
 		return err
 	}
@@ -180,7 +180,6 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db LedgerDB, inp inputCo
 		return nil
 	}
 	var ttKeys []string
-	// TODO (ask Camille?): does any of this make sense for composite ?
 	ttKeys, err = db.GetIndexKeys("compositeTraintuple~computeplanid~worker~rank~key", []string{"compositeTraintuple", inp.ComputePlanID})
 	if err != nil {
 		return err
@@ -547,23 +546,8 @@ func (traintuple *CompositeTraintuple) validateNewStatus(db LedgerDB, status str
 	return nil
 }
 
-// isReady checks if inModels of a traintuple have been trained, except the newDoneTraintupleKey (since the transaction is not commited)
-// and updates the traintuple status if necessary
 func (traintuple *CompositeTraintuple) isReady(db LedgerDB, newDoneTraintupleKey string) (ready bool, err error) {
-	for _, key := range [2]string{traintuple.InHeadModel, traintuple.InTrunkModel} {
-		// don't check newly done traintuple
-		if key == newDoneTraintupleKey {
-			continue
-		}
-		_, status, err := db.GetGenericTraintuple(key)
-		if err != nil {
-			return false, err
-		}
-		if status != StatusDone {
-			return false, nil
-		}
-	}
-	return true, nil
+	return IsReady(db, []string{traintuple.InHeadModel, traintuple.InTrunkModel}, newDoneTraintupleKey)
 }
 
 // commitStatusUpdate update the traintuple status in the ledger

@@ -243,6 +243,12 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 			return fmt.Errorf("could not retrieve composite algo with key %s - %s", in.AlgoKey, err.Error())
 		}
 		algo = compositeAlgo.Algo
+	case AggregateTupleType:
+		aggregateAlgo, err := db.GetAggregateAlgo(in.AlgoKey)
+		if err != nil {
+			return fmt.Errorf("could not retrieve aggregate algo with key %s - %s", in.AlgoKey, err.Error())
+		}
+		algo = aggregateAlgo.Algo
 	}
 	out.Algo = &HashDressName{
 		Name:           algo.Name,
@@ -269,6 +275,7 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 }
 
 type outputModelDetails struct {
+	AggregateTuple         *outputAggregateTuple      `json:"aggregateTuple,omitempty"`
 	CompositeTraintuple    *outputCompositeTraintuple `json:"compositeTraintuple,omitempty"`
 	Traintuple             *outputTraintuple          `json:"traintuple,omitempty"`
 	Testtuple              outputTesttuple            `json:"testtuple"`
@@ -286,6 +293,7 @@ type TuplesEvent struct {
 	Testtuples           []outputTesttuple           `json:"testtuple"`
 	Traintuples          []outputTraintuple          `json:"traintuple"`
 	CompositeTraintuples []outputCompositeTraintuple `json:"compositeTraintuple"`
+	AggregateTuples      []outputAggregateTuple      `json:"aggregateTuple"`
 }
 
 // SetTesttuples add one or several testtuples to the event struct

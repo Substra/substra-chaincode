@@ -64,24 +64,32 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = createTraintuple(db, args)
 	case "createCompositeTraintuple":
 		result, err = createCompositeTraintuple(db, args)
+	case "createAggregateTuple":
+		result, err = createAggregateTuple(db, args)
 	case "logFailTest":
 		result, err = logFailTest(db, args)
 	case "logFailTrain":
 		result, err = logFailTrain(db, args)
 	case "logFailCompositeTrain":
 		result, err = logFailCompositeTrain(db, args)
+	case "logFailAggregateTrain":
+		result, err = logFailAggregateTrain(db, args)
 	case "logStartTest":
 		result, err = logStartTest(db, args)
 	case "logStartTrain":
 		result, err = logStartTrain(db, args)
 	case "logStartCompositeTrain":
 		result, err = logStartCompositeTrain(db, args)
+	case "logStartAggregateTrain":
+		result, err = logStartAggregateTrain(db, args)
 	case "logSuccessTest":
 		result, err = logSuccessTest(db, args)
 	case "logSuccessTrain":
 		result, err = logSuccessTrain(db, args)
 	case "logSuccessCompositeTrain":
 		result, err = logSuccessCompositeTrain(db, args)
+	case "logSuccessAggregateTrain":
+		result, err = logSuccessAggregateTrain(db, args)
 	case "queryAlgo":
 		result, err = queryAlgo(db, args)
 	case "queryAlgos":
@@ -90,6 +98,10 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = queryCompositeAlgo(db, args)
 	case "queryCompositeAlgos":
 		result, err = queryCompositeAlgos(db, args)
+	case "queryAggregateAlgo":
+		result, err = queryAggregateAlgo(db, args)
+	case "queryAggregateAlgos":
+		result, err = queryAggregateAlgos(db, args)
 	case "queryDataManager":
 		result, err = queryDataManager(db, args)
 	case "queryDataManagers":
@@ -118,10 +130,14 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = queryTraintuple(db, args)
 	case "queryCompositeTraintuple":
 		result, err = queryCompositeTraintuple(db, args)
+	case "queryAggregateTuple":
+		result, err = queryAggregateTuple(db, args)
 	case "queryTraintuples":
 		result, err = queryTraintuples(db, args)
 	case "queryCompositeTraintuples":
 		result, err = queryCompositeTraintuples(db, args)
+	case "queryAggregateTuples":
+		result, err = queryAggregateTuples(db, args)
 	case "queryComputePlan":
 		result, err = queryComputePlan(db, args)
 	case "queryComputePlans":
@@ -130,6 +146,8 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = registerAlgo(db, args)
 	case "registerCompositeAlgo":
 		result, err = registerCompositeAlgo(db, args)
+	case "registerAggregateAlgo":
+		result, err = registerAggregateAlgo(db, args)
 	case "registerDataManager":
 		result, err = registerDataManager(db, args)
 	case "registerDataSample":

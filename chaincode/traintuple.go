@@ -477,8 +477,12 @@ func UpdateTraintupleChildren(db LedgerDB, traintupleKey string, traintupleStatu
 	if err != nil {
 		return fmt.Errorf("error while getting associated composite traintuples to update their inModel")
 	}
+	childAggregateTupleKeys, err := db.GetIndexKeys("aggregateTuple~inModel~key", []string{"aggregateTuple", traintupleKey})
+	if err != nil {
+		return fmt.Errorf("error while getting associated aggregate tuples to update their inModel")
+	}
 
-	allChildKeys := append(childTraintupleKeys, childCompositeTraintupleKeys...)
+	allChildKeys := append(append(childTraintupleKeys, childCompositeTraintupleKeys...), childAggregateTupleKeys...)
 
 	for _, childTraintupleKey := range allChildKeys {
 		childTraintupleType, childTraintupleStatus, err := db.GetGenericTraintuple(childTraintupleKey)
@@ -506,7 +510,11 @@ func UpdateTraintupleChildren(db LedgerDB, traintupleKey string, traintupleStatu
 			if err != nil {
 				return err
 			}
-		// TODO (aggregate)
+		case AggregateTupleType:
+			childTraintupleStatus, err = UpdateAggregateTupleChild(db, traintupleKey, childTraintupleKey, traintupleStatus, event)
+			if err != nil {
+				return err
+			}
 		default:
 			return fmt.Errorf("Unknown child traintuple type: %s", childTraintupleType)
 		}
@@ -573,19 +581,22 @@ func UpdateTraintupleChild(db LedgerDB, parentTraintupleKey string, childTraintu
 	return
 }
 
-// isReady checks if inModels of a traintuple have been trained, except the newDoneTraintupleKey (since the transaction is not commited)
-// and updates the traintuple status if necessary
 func (traintuple *Traintuple) isReady(db LedgerDB, newDoneTraintupleKey string) (ready bool, err error) {
-	for _, key := range traintuple.InModelKeys {
+	return IsReady(db, traintuple.InModelKeys, newDoneTraintupleKey)
+}
+
+// IsReady checks if inModels of a traintuple have been trained, except the newDoneTraintupleKey (since the transaction is not commited)
+func IsReady(db LedgerDB, inModelKeys []string, newDoneTraintupleKey string) (ready bool, err error) {
+	for _, key := range inModelKeys {
 		// don't check newly done traintuple
 		if key == newDoneTraintupleKey {
 			continue
 		}
-		tt, err := db.GetTraintuple(key)
+		_, status, err := db.GetGenericTraintuple(key)
 		if err != nil {
 			return false, err
 		}
-		if tt.Status != StatusDone {
+		if status != StatusDone {
 			return false, nil
 		}
 	}
