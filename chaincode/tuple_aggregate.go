@@ -21,7 +21,7 @@ import (
 )
 
 // -------------------------------------------------------------------------------------------
-// Methods on receivers traintuple
+// Methods on receivers AggregateTuple
 // -------------------------------------------------------------------------------------------
 
 // SetFromInput is a method of the receiver AggregateTuple.
@@ -59,7 +59,7 @@ func (tuple *AggregateTuple) SetFromInput(db LedgerDB, inp inputAggregateTuple) 
 	tuple.ObjectiveKey = inp.ObjectiveKey
 
 	// TODO (aggregate): uncomment + add test
-	// traintuple.Permissions = MergePermissions(dataManager.Permissions, algo.Permissions)
+	// tuple.Permissions = MergePermissions(dataManager.Permissions, algo.Permissions)
 
 	tuple.Worker = inp.Worker
 	return nil
@@ -153,32 +153,32 @@ func (tuple *AggregateTuple) AddToComputePlan(db LedgerDB, inp inputAggregateTup
 
 // Save will put in the legder interface both the aggregate tuple with its key
 // and all the associated composite keys
-func (tuple *AggregateTuple) Save(db LedgerDB, traintupleKey string) error {
+func (tuple *AggregateTuple) Save(db LedgerDB, aggregateTupleKey string) error {
 
 	// store in ledger
-	if err := db.Add(traintupleKey, tuple); err != nil {
+	if err := db.Add(aggregateTupleKey, tuple); err != nil {
 		return err
 	}
 
 	// create composite keys
-	if err := db.CreateIndex("aggregateTuple~algo~key", []string{"aggregateTuple", tuple.AlgoKey, traintupleKey}); err != nil {
+	if err := db.CreateIndex("aggregateTuple~algo~key", []string{"aggregateTuple", tuple.AlgoKey, aggregateTupleKey}); err != nil {
 		return err
 	}
-	if err := db.CreateIndex("aggregateTuple~worker~status~key", []string{"aggregateTuple", tuple.Worker, tuple.Status, traintupleKey}); err != nil {
+	if err := db.CreateIndex("aggregateTuple~worker~status~key", []string{"aggregateTuple", tuple.Worker, tuple.Status, aggregateTupleKey}); err != nil {
 		return err
 	}
 	for _, inModelKey := range tuple.InModelKeys {
-		if err := db.CreateIndex("aggregateTuple~inModel~key", []string{"aggregateTuple", inModelKey, traintupleKey}); err != nil {
+		if err := db.CreateIndex("aggregateTuple~inModel~key", []string{"aggregateTuple", inModelKey, aggregateTupleKey}); err != nil {
 			return err
 		}
 	}
 	if tuple.ComputePlanID != "" {
-		if err := db.CreateIndex("aggregateTuple~computeplanid~worker~rank~key", []string{"aggregateTuple", tuple.ComputePlanID, tuple.Worker, strconv.Itoa(tuple.Rank), traintupleKey}); err != nil {
+		if err := db.CreateIndex("aggregateTuple~computeplanid~worker~rank~key", []string{"aggregateTuple", tuple.ComputePlanID, tuple.Worker, strconv.Itoa(tuple.Rank), aggregateTupleKey}); err != nil {
 			return err
 		}
 	}
 	if tuple.Tag != "" {
-		err := db.CreateIndex("aggregateTuple~tag~key", []string{"aggregateTuple", tuple.Tag, traintupleKey})
+		err := db.CreateIndex("aggregateTuple~tag~key", []string{"aggregateTuple", tuple.Tag, aggregateTupleKey})
 		if err != nil {
 			return err
 		}
@@ -198,35 +198,35 @@ func createAggregateTuple(db LedgerDB, args []string) (map[string]string, error)
 		return nil, err
 	}
 
-	traintuple := AggregateTuple{}
-	err = traintuple.SetFromInput(db, inp)
+	aggregateTuple := AggregateTuple{}
+	err = aggregateTuple.SetFromInput(db, inp)
 	if err != nil {
 		return nil, err
 	}
-	err = traintuple.SetFromParents(db, inp.InModels)
+	err = aggregateTuple.SetFromParents(db, inp.InModels)
 	if err != nil {
 		return nil, err
 	}
 
-	traintupleKey := traintuple.GetKey()
-	// Test if the key (ergo the traintuple) already exists
-	tupleExists, err := db.KeyExists(traintupleKey)
+	aggregateTupleKey := aggregateTuple.GetKey()
+	// Test if the key (ergo the aggregateTuple) already exists
+	tupleExists, err := db.KeyExists(aggregateTupleKey)
 	if err != nil {
 		return nil, err
 	}
 	if tupleExists {
-		return nil, errors.Conflict("traintuple already exists").WithKey(traintupleKey)
+		return nil, errors.Conflict("aggregateTuple already exists").WithKey(aggregateTupleKey)
 	}
-	err = traintuple.AddToComputePlan(db, inp, traintupleKey)
+	err = aggregateTuple.AddToComputePlan(db, inp, aggregateTupleKey)
 	if err != nil {
 		return nil, err
 	}
-	err = traintuple.Save(db, traintupleKey)
+	err = aggregateTuple.Save(db, aggregateTupleKey)
 	if err != nil {
 		return nil, err
 	}
 	out := outputAggregateTuple{}
-	err = out.Fill(db, traintuple, traintupleKey)
+	err = out.Fill(db, aggregateTuple, aggregateTupleKey)
 	if err != nil {
 		return nil, err
 	}
@@ -238,64 +238,64 @@ func createAggregateTuple(db LedgerDB, args []string) (map[string]string, error)
 		return nil, err
 	}
 
-	return map[string]string{"key": traintupleKey}, nil
+	return map[string]string{"key": aggregateTupleKey}, nil
 }
 
-// logStartAggregateTrain modifies a traintuple by changing its status from todo to doing
-func logStartAggregateTrain(db LedgerDB, args []string) (outputTraintuple outputAggregateTuple, err error) {
+// logStartAggregateTrain modifies a aggregateTuple by changing its status from todo to doing
+func logStartAggregateTrain(db LedgerDB, args []string) (outputAggregateTuple outputAggregateTuple, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
 
-	// get traintuple, check validity of the update
-	traintuple, err := db.GetAggregateTuple(inp.Key)
+	// get aggregateTuple, check validity of the update
+	aggregateTuple, err := db.GetAggregateTuple(inp.Key)
 	if err != nil {
 		return
 	}
-	if err = validateTupleOwner(db, traintuple.Worker); err != nil {
+	if err = validateTupleOwner(db, aggregateTuple.Worker); err != nil {
 		return
 	}
-	if err = traintuple.commitStatusUpdate(db, inp.Key, StatusDoing); err != nil {
+	if err = aggregateTuple.commitStatusUpdate(db, inp.Key, StatusDoing); err != nil {
 		return
 	}
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	outputAggregateTuple.Fill(db, aggregateTuple, inp.Key)
 	return
 }
 
-// logFailAggregateTrain modifies a traintuple by changing its status to fail and reports associated logs
-func logFailAggregateTrain(db LedgerDB, args []string) (outputTraintuple outputAggregateTuple, err error) {
+// logFailAggregateTrain modifies a aggregateTuple by changing its status to fail and reports associated logs
+func logFailAggregateTrain(db LedgerDB, args []string) (outputAggregateTuple outputAggregateTuple, err error) {
 	inp := inputLogFailTrain{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
 
-	// get, update and commit traintuple
-	traintuple, err := db.GetAggregateTuple(inp.Key)
+	// get, update and commit aggregateTuple
+	aggregateTuple, err := db.GetAggregateTuple(inp.Key)
 	if err != nil {
 		return
 	}
-	traintuple.Log += inp.Log
+	aggregateTuple.Log += inp.Log
 
-	if err = validateTupleOwner(db, traintuple.Worker); err != nil {
+	if err = validateTupleOwner(db, aggregateTuple.Worker); err != nil {
 		return
 	}
-	if err = traintuple.commitStatusUpdate(db, inp.Key, StatusFailed); err != nil {
+	if err = aggregateTuple.commitStatusUpdate(db, inp.Key, StatusFailed); err != nil {
 		return
 	}
 
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	outputAggregateTuple.Fill(db, aggregateTuple, inp.Key)
 
 	// update depending tuples
 	event := TuplesEvent{}
-	err = UpdateTesttupleChildren(db, inp.Key, traintuple.Status, &event)
+	err = UpdateTesttupleChildren(db, inp.Key, aggregateTuple.Status, &event)
 	if err != nil {
 		return
 	}
 
-	err = UpdateTraintupleChildren(db, inp.Key, traintuple.Status, &event)
+	err = UpdateTraintupleChildren(db, inp.Key, outputAggregateTuple.Status, &event)
 	if err != nil {
 		return
 	}
@@ -308,45 +308,45 @@ func logFailAggregateTrain(db LedgerDB, args []string) (outputTraintuple outputA
 	return
 }
 
-// logSuccessAggregateTrain modifies a traintuple by changing its status from doing to done
+// logSuccessAggregateTrain modifies an aggregateTupl by changing its status from doing to done
 // reports logs and associated performances
-func logSuccessAggregateTrain(db LedgerDB, args []string) (outputTraintuple outputAggregateTuple, err error) {
+func logSuccessAggregateTrain(db LedgerDB, args []string) (outputAggregateTuple outputAggregateTuple, err error) {
 	inp := inputLogSuccessTrain{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
-	traintupleKey := inp.Key
+	aggregateTupleKey := inp.Key
 
-	// get, update and commit traintuple
-	traintuple, err := db.GetAggregateTuple(traintupleKey)
+	// get, update and commit aggregateTuple
+	aggregateTuple, err := db.GetAggregateTuple(aggregateTupleKey)
 	if err != nil {
 		return
 	}
-	traintuple.OutModel = &HashDress{
+	aggregateTuple.OutModel = &HashDress{
 		Hash:           inp.OutModel.Hash,
 		StorageAddress: inp.OutModel.StorageAddress}
-	traintuple.Log += inp.Log
+	aggregateTuple.Log += inp.Log
 
-	if err = validateTupleOwner(db, traintuple.Worker); err != nil {
+	if err = validateTupleOwner(db, aggregateTuple.Worker); err != nil {
 		return
 	}
-	if err = traintuple.commitStatusUpdate(db, traintupleKey, StatusDone); err != nil {
+	if err = aggregateTuple.commitStatusUpdate(db, aggregateTupleKey, StatusDone); err != nil {
 		return
 	}
 
 	event := TuplesEvent{}
-	err = UpdateTraintupleChildren(db, traintupleKey, traintuple.Status, &event)
+	err = UpdateTraintupleChildren(db, aggregateTupleKey, aggregateTuple.Status, &event)
 	if err != nil {
 		return
 	}
 
-	err = UpdateTesttupleChildren(db, traintupleKey, traintuple.Status, &event)
+	err = UpdateTesttupleChildren(db, aggregateTupleKey, aggregateTuple.Status, &event)
 	if err != nil {
 		return
 	}
 
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	outputAggregateTuple.Fill(db, aggregateTuple, inp.Key)
 	err = SendTuplesEvent(db.cc, event)
 	if err != nil {
 		return
@@ -356,76 +356,76 @@ func logSuccessAggregateTrain(db LedgerDB, args []string) (outputTraintuple outp
 }
 
 // queryAggregateTuple returns info about an aggregate tuple given its key
-func queryAggregateTuple(db LedgerDB, args []string) (outputTraintuple outputAggregateTuple, err error) {
+func queryAggregateTuple(db LedgerDB, args []string) (outputAggregateTuple outputAggregateTuple, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
-	traintuple, err := db.GetAggregateTuple(inp.Key)
+	aggregateTuple, err := db.GetAggregateTuple(inp.Key)
 	if err != nil {
 		return
 	}
-	if traintuple.AssetType != AggregateTupleType {
+	if aggregateTuple.AssetType != AggregateTupleType {
 		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	outputAggregateTuple.Fill(db, aggregateTuple, inp.Key)
 	return
 }
 
 // queryAggregateTuples returns all aggregate tuples
 func queryAggregateTuples(db LedgerDB, args []string) ([]outputAggregateTuple, error) {
-	outTraintuples := []outputAggregateTuple{}
+	outputAggregateTuples := []outputAggregateTuple{}
 
 	if len(args) != 0 {
 		err := errors.BadRequest("incorrect number of arguments, expecting nothing")
-		return outTraintuples, err
+		return outputAggregateTuples, err
 	}
 	elementsKeys, err := db.GetIndexKeys("aggregateTuple~algo~key", []string{"aggregateTuple"})
 	if err != nil {
-		return outTraintuples, err
+		return outputAggregateTuples, err
 	}
 	for _, key := range elementsKeys {
-		outputTraintuple, err := getOutputAggregateTuple(db, key)
+		outputAggregateTuple, err := getOutputAggregateTuple(db, key)
 		if err != nil {
-			return outTraintuples, err
+			return outputAggregateTuples, err
 		}
-		outTraintuples = append(outTraintuples, outputTraintuple)
+		outputAggregateTuples = append(outputAggregateTuples, outputAggregateTuple)
 	}
-	return outTraintuples, nil
+	return outputAggregateTuples, nil
 }
 
 // ----------------------------------------------------------
 // Utils for smartcontracts related to aggregate tuples
 // ----------------------------------------------------------
 
-// getOutputAggregateTuple takes as input a traintuple key and returns the outputAggregateTuple
-func getOutputAggregateTuple(db LedgerDB, traintupleKey string) (outTraintuple outputAggregateTuple, err error) {
-	traintuple, err := db.GetAggregateTuple(traintupleKey)
+// getOutputAggregateTuple takes as input a aggregateTuple key and returns the outputAggregateTuple
+func getOutputAggregateTuple(db LedgerDB, aggregateTupleKey string) (outAggreagateTuple outputAggregateTuple, err error) {
+	aggregateTuple, err := db.GetAggregateTuple(aggregateTupleKey)
 	if err != nil {
 		return
 	}
-	outTraintuple.Fill(db, traintuple, traintupleKey)
+	outAggreagateTuple.Fill(db, aggregateTuple, aggregateTupleKey)
 	return
 }
 
 // UpdateAggregateTupleChild updates the status of a waiting trainuple, given the new parent tuple status
-func UpdateAggregateTupleChild(db LedgerDB, parentTraintupleKey string, childTraintupleKey string, traintupleStatus string, event *TuplesEvent) (childStatus string, err error) {
-	// get and update traintuple
-	childTraintuple, err := db.GetAggregateTuple(childTraintupleKey)
+func UpdateAggregateTupleChild(db LedgerDB, parentAggregateTupleKey string, childAggregateTupleKey string, aggregateTupleStatus string, event *TuplesEvent) (childStatus string, err error) {
+	// get and update aggregatetuple
+	childAggregateTuple, err := db.GetAggregateTuple(childAggregateTupleKey)
 	if err != nil {
 		return
 	}
 
-	childStatus = childTraintuple.Status
+	childStatus = childAggregateTuple.Status
 
 	// get traintuple new status
 	var newStatus string
-	if traintupleStatus == StatusFailed {
+	if aggregateTupleStatus == StatusFailed {
 		newStatus = StatusFailed
-	} else if traintupleStatus == StatusDone {
-		ready, _err := childTraintuple.isReady(db, parentTraintupleKey)
+	} else if aggregateTupleStatus == StatusDone {
+		ready, _err := childAggregateTuple.isReady(db, parentAggregateTupleKey)
 		if _err != nil {
 			err = _err
 			return
@@ -439,16 +439,16 @@ func UpdateAggregateTupleChild(db LedgerDB, parentTraintupleKey string, childTra
 	if newStatus == "" {
 		return
 	}
-	if err = childTraintuple.commitStatusUpdate(db, childTraintupleKey, newStatus); err != nil {
+	if err = childAggregateTuple.commitStatusUpdate(db, childAggregateTupleKey, newStatus); err != nil {
 		return
 	}
 
 	// update return value after status update
-	childStatus = childTraintuple.Status
+	childStatus = childAggregateTuple.Status
 
 	if newStatus == StatusTodo {
 		out := outputAggregateTuple{}
-		err = out.Fill(db, childTraintuple, childTraintupleKey)
+		err = out.Fill(db, childAggregateTuple, childAggregateTupleKey)
 		if err != nil {
 			return
 		}
@@ -458,47 +458,47 @@ func UpdateAggregateTupleChild(db LedgerDB, parentTraintupleKey string, childTra
 	return
 }
 
-func (tuple *AggregateTuple) isReady(db LedgerDB, newDoneTraintupleKey string) (ready bool, err error) {
-	return IsReady(db, tuple.InModelKeys, newDoneTraintupleKey)
+func (tuple *AggregateTuple) isReady(db LedgerDB, newDoneAggregateTupleKey string) (ready bool, err error) {
+	return IsReady(db, tuple.InModelKeys, newDoneAggregateTupleKey)
 }
 
 // getOutputAggregateTuples takes as input a list of keys and returns a paylaod containing a list of associated retrieved elements
-func getOutputAggregateTuples(db LedgerDB, traintupleKeys []string) (outTraintuples []outputAggregateTuple, err error) {
-	for _, key := range traintupleKeys {
-		var outputTraintuple outputAggregateTuple
-		outputTraintuple, err = getOutputAggregateTuple(db, key)
+func getOutputAggregateTuples(db LedgerDB, aggregateTupleKeys []string) (outAggreagateTuples []outputAggregateTuple, err error) {
+	for _, key := range aggregateTupleKeys {
+		var outputAggregateTuple outputAggregateTuple
+		outputAggregateTuple, err = getOutputAggregateTuple(db, key)
 		if err != nil {
 			return
 		}
-		outTraintuples = append(outTraintuples, outputTraintuple)
+		outAggreagateTuples = append(outAggreagateTuples, outputAggregateTuple)
 	}
 	return
 }
 
-// commitStatusUpdate update the traintuple status in the ledger
-func (tuple *AggregateTuple) commitStatusUpdate(db LedgerDB, traintupleKey string, newStatus string) error {
+// commitStatusUpdate update the aggreagatetuple status in the ledger
+func (tuple *AggregateTuple) commitStatusUpdate(db LedgerDB, aggregateTupleKey string, newStatus string) error {
 	if tuple.Status == newStatus {
-		return fmt.Errorf("cannot update traintuple %s - status already %s", traintupleKey, newStatus)
+		return fmt.Errorf("cannot update aggregateTuple %s - status already %s", aggregateTupleKey, newStatus)
 	}
 
 	if err := tuple.validateNewStatus(db, newStatus); err != nil {
-		return fmt.Errorf("update traintuple %s failed: %s", traintupleKey, err.Error())
+		return fmt.Errorf("update aggregateTuple %s failed: %s", aggregateTupleKey, err.Error())
 	}
 
 	oldStatus := tuple.Status
 	tuple.Status = newStatus
-	if err := db.Put(traintupleKey, tuple); err != nil {
-		return fmt.Errorf("failed to update traintuple %s - %s", traintupleKey, err.Error())
+	if err := db.Put(aggregateTupleKey, tuple); err != nil {
+		return fmt.Errorf("failed to update aggregateTuple %s - %s", aggregateTupleKey, err.Error())
 	}
 
 	// update associated composite keys
 	indexName := "aggregateTuple~worker~status~key"
-	oldAttributes := []string{"aggregateTuple", tuple.Worker, oldStatus, traintupleKey}
-	newAttributes := []string{"aggregateTuple", tuple.Worker, tuple.Status, traintupleKey}
+	oldAttributes := []string{"aggregateTuple", tuple.Worker, oldStatus, aggregateTupleKey}
+	newAttributes := []string{"aggregateTuple", tuple.Worker, tuple.Status, aggregateTupleKey}
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
-	logger.Infof("traintuple %s status updated: %s (from=%s)", traintupleKey, newStatus, oldStatus)
+	logger.Infof("aggregateTuple %s status updated: %s (from=%s)", aggregateTupleKey, newStatus, oldStatus)
 	return nil
 }
 
