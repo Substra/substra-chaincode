@@ -293,7 +293,7 @@ type TuplesEvent struct {
 	Testtuples           []outputTesttuple           `json:"testtuple"`
 	Traintuples          []outputTraintuple          `json:"traintuple"`
 	CompositeTraintuples []outputCompositeTraintuple `json:"compositeTraintuple"`
-	AggregateTuples      []outputAggregateTuple      `json:"aggregateTuple"`
+	AggregateTuples      []outputAggregateTuple      `json:"aggregatetuple"`
 }
 
 // SetTesttuples add one or several testtuples to the event struct
