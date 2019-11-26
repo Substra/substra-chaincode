@@ -13,4 +13,7 @@ branches:
 
 install: skip
 
-script: cd chaincode && go test -v ./...
+script:
+  - cd chaincode
+  - go test -v ./...
+  - go build
