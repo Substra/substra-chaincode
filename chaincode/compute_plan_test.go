@@ -24,48 +24,48 @@ import (
 func TestCreateComputePlan(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	myStub := myMockStub{MockStub: mockStub}
-	myStub.saveWhenWriting = true
 	registerItem(t, *mockStub, "algo")
-	myStub.MockTransactionStart("42")
-	myStub.saveWhenWriting = false
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlan(NewLedgerDB(&myStub), assetToArgs(inCP))
-	assert.NoError(t, err)
-	assert.NotNil(t, outCP)
-	assert.EqualValues(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
-
-	// Save all that was written in the mocked ledger
-	myStub.saveWrittenState(t)
+	outCP, err := createComputePlanInternal(db, inCP)
+	validateComputePlan(t, outCP, defaultComputePlan)
 
 	// Check the traintuples
-	traintuples, err := queryTraintuples(NewLedgerDB(&myStub), []string{})
+	traintuples, err := queryTraintuples(db, []string{})
 	assert.NoError(t, err)
 	assert.Len(t, traintuples, 2)
-	require.Contains(t, outCP.TraintupleKeys, traintuples[0].Key)
-	require.Contains(t, outCP.TraintupleKeys, traintuples[1].Key)
+	require.Contains(t, outCP.TrainingTaskKeys, traintuples[0].Key)
+	require.Contains(t, outCP.TrainingTaskKeys, traintuples[1].Key)
 	var first, second outputTraintuple
 	for _, el := range traintuples {
 		switch el.Key {
-		case outCP.TraintupleKeys[0]:
+		case outCP.TrainingTaskKeys[0]:
 			first = el
-		case outCP.TraintupleKeys[1]:
+		case outCP.TrainingTaskKeys[1]:
 			second = el
 		}
 	}
+
+	// check first traintuple
 	assert.NotZero(t, first)
-	assert.NotZero(t, second)
 	assert.EqualValues(t, first.Key, first.ComputePlanID)
+	assert.Equal(t, inCP.TrainingTasks[0].AlgoKey, first.Algo.Hash)
+	assert.Equal(t, StatusTodo, first.Status)
+
+	// check second traintuple
+	assert.NotZero(t, second)
+	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
 	assert.EqualValues(t, first.ComputePlanID, second.ComputePlanID)
 	assert.Len(t, second.InModels, 1)
-	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
-	assert.Equal(t, first.Status, StatusTodo)
-	assert.Equal(t, second.Status, StatusWaiting)
+	assert.Equal(t, inCP.TrainingTasks[1].AlgoKey, second.Algo.Hash)
+	assert.Equal(t, StatusWaiting, second.Status)
 
 	// Check the testtuples
-	testtuples, err := queryTesttuples(NewLedgerDB(&myStub), []string{})
+	testtuples, err := queryTesttuples(db, []string{})
 	assert.NoError(t, err)
 	require.Len(t, testtuples, 1)
 	testtuple := testtuples[0]
@@ -77,23 +77,19 @@ func TestCreateComputePlan(t *testing.T) {
 func TestQueryComputePlan(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	myStub := myMockStub{MockStub: mockStub}
-	myStub.saveWhenWriting = true
 	registerItem(t, *mockStub, "algo")
-	myStub.MockTransactionStart("42")
-	myStub.saveWhenWriting = false
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlan(NewLedgerDB(&myStub), assetToArgs(inCP))
+	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	assert.Equal(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
+	assert.Equal(t, outCP.ComputePlanID, outCP.TrainingTaskKeys[0])
 
-	// Save all that was written in the mocked ledger
-	myStub.saveWrittenState(t)
-
-	cp, err := queryComputePlan(NewLedgerDB(&myStub), assetToArgs(inputHash{Key: outCP.ComputePlanID}))
+	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
 	assert.NotNil(t, cp)
 	validateComputePlan(t, cp, defaultComputePlan)
@@ -102,39 +98,94 @@ func TestQueryComputePlan(t *testing.T) {
 func TestQueryComputePlans(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	myStub := myMockStub{MockStub: mockStub}
-	myStub.saveWhenWriting = true
 	registerItem(t, *mockStub, "algo")
-	myStub.MockTransactionStart("42")
-	myStub.saveWhenWriting = false
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlan(NewLedgerDB(&myStub), assetToArgs(inCP))
+	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	assert.Equal(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
+	assert.Equal(t, outCP.ComputePlanID, outCP.TrainingTaskKeys[0])
 
-	// Save all that was written in the mocked ledger
-	myStub.saveWrittenState(t)
-
-	cps, err := queryComputePlans(NewLedgerDB(&myStub), []string{})
+	cps, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Len(t, cps, 1, "queryComputePlans should return one compute plan")
 	validateComputePlan(t, cps[0], defaultComputePlan)
 }
 
-func validateComputePlan(t *testing.T, cp outputComputePlanDetails, in inputComputePlan) {
-	assert.Len(t, cp.Traintuples, 2)
-	cpID := cp.Traintuples[0]
+func TestComputePlanEmptyTesttuples(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "algo")
 
-	assert.Equal(t, cpID, cp.ComputePlanID)
-	assert.Equal(t, in.AlgoKey, cp.AlgoKey)
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	inCP := inputComputePlan{
+		ObjectiveKey: objectiveDescriptionHash,
+		TrainingTasks: []inputComputePlanTrainingTask{
+			inputComputePlanTrainingTask{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        algoHash,
+				ID:             traintupleID1,
+			},
+			inputComputePlanTrainingTask{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash2},
+				ID:             traintupleID2,
+				AlgoKey:        algoHash,
+				InModelsIDs:    []string{traintupleID1},
+			},
+		},
+		Testtuples: []inputComputePlanTesttuple{},
+	}
+
+	outCP, err := createComputePlanInternal(db, inCP)
+	assert.NoError(t, err)
+	assert.NotNil(t, outCP)
+	assert.Equal(t, outCP.ComputePlanID, outCP.TrainingTaskKeys[0])
+	assert.Equal(t, []string{}, outCP.TesttupleKeys)
+
+	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
+	assert.NoError(t, err, "calling queryComputePlan should succeed")
+	assert.NotNil(t, cp)
+	assert.Equal(t, []string{}, outCP.TesttupleKeys)
+
+	cps, err := queryComputePlans(db, []string{})
+	assert.NoError(t, err, "calling queryComputePlans should succeed")
+	assert.Len(t, cps, 1, "queryComputePlans should return one compute plan")
+	assert.Equal(t, []string{}, cps[0].TesttupleKeys)
+}
+
+func TestQueryComputePlanEmpty(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "algo")
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	cps, err := queryComputePlans(db, []string{})
+	assert.NoError(t, err, "calling queryComputePlans should succeed")
+	assert.Equal(t, []outputComputePlan{}, cps)
+}
+
+func validateComputePlan(t *testing.T, cp outputComputePlan, in inputComputePlan) {
+	assert.Len(t, cp.TrainingTaskKeys, 2)
+	cpID := cp.TrainingTaskKeys[0]
+
 	assert.Equal(t, in.ObjectiveKey, cp.ObjectiveKey)
 
-	assert.NotEmpty(t, cp.Traintuples[0])
-	assert.NotEmpty(t, cp.Traintuples[1])
+	assert.Equal(t, cpID, cp.ComputePlanID)
+	assert.Equal(t, in.ObjectiveKey, cp.ObjectiveKey)
 
-	require.Len(t, cp.Testtuples, 1)
-	assert.NotEmpty(t, cp.Testtuples[0])
+	assert.NotEmpty(t, cp.TrainingTaskKeys[0])
+	assert.NotEmpty(t, cp.TrainingTaskKeys[1])
+
+	require.Len(t, cp.TesttupleKeys, 1)
+	assert.NotEmpty(t, cp.TesttupleKeys[0])
 }

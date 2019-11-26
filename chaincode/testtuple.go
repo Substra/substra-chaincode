@@ -213,41 +213,50 @@ func (testtuple *Testtuple) Save(db LedgerDB, testtupleKey string) error {
 
 // createTesttuple adds a Testtuple in the ledger
 func createTesttuple(db LedgerDB, args []string) (map[string]string, error) {
+
 	inp := inputTesttuple{}
 	err := AssetFromJSON(args, &inp)
 	if err != nil {
 		return nil, err
 	}
-
-	// check validity of input arg and set testtuple
-	testtuple := Testtuple{}
-	err = testtuple.SetFromTraintuple(db, inp.TraintupleKey)
+	key, err := createTesttupleInternal(db, inp)
 	if err != nil {
 		return nil, err
 	}
+
+	return map[string]string{"key": key}, nil
+}
+
+func createTesttupleInternal(db LedgerDB, inp inputTesttuple) (string, error) {
+	// check validity of input arg and set testtuple
+	testtuple := Testtuple{}
+	err := testtuple.SetFromTraintuple(db, inp.TraintupleKey)
+	if err != nil {
+		return "", err
+	}
 	err = testtuple.SetFromInput(db, inp)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	testtupleKey := testtuple.GetKey()
 	err = testtuple.Save(db, testtupleKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	out := outputTesttuple{}
 	err = out.Fill(db, testtupleKey, testtuple)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	event := TuplesEvent{}
 	event.SetTesttuples(out)
 	err = SendTuplesEvent(db.cc, event)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return map[string]string{"key": testtupleKey}, nil
+	return testtupleKey, nil
 }
 
 // logStartTest modifies a testtuple by changing its status from todo to doing

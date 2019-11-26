@@ -318,9 +318,10 @@ func (te *TuplesEvent) AddTesttuple(out outputTesttuple) {
 }
 
 type outputComputePlan struct {
-	ComputePlanID  string   `json:"computePlanID"`
-	TraintupleKeys []string `json:"traintupleKeys"`
-	TesttupleKeys  []string `json:"testtupleKeys"`
+	ComputePlanID    string   `json:"computePlanID"`
+	ObjectiveKey     string   `json:"objectiveKey"`
+	TrainingTaskKeys []string `json:"trainingTaskKeys"`
+	TesttupleKeys    []string `json:"testtupleKeys"`
 }
 
 type outputPermissions struct {
@@ -380,12 +381,4 @@ func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string
 	out.Tag = in.Tag
 
 	return nil
-}
-
-type outputComputePlanDetails struct {
-	ComputePlanID string   `json:"computePlanID"`
-	AlgoKey       string   `json:"algoKey"`
-	ObjectiveKey  string   `json:"objectiveKey"`
-	Traintuples   []string `json:"traintuples"`
-	Testtuples    []string `json:"testtuples"`
 }

@@ -19,18 +19,19 @@ var (
 	traintupleID2      = "secondTraintupleID"
 	testtupleID        = "testtupleID"
 	defaultComputePlan = inputComputePlan{
-		AlgoKey:      algoHash,
 		ObjectiveKey: objectiveDescriptionHash,
-		Traintuples: []inputComputePlanTraintuple{
-			inputComputePlanTraintuple{
+		TrainingTasks: []inputComputePlanTrainingTask{
+			inputComputePlanTrainingTask{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        algoHash,
 				ID:             traintupleID1,
 			},
-			inputComputePlanTraintuple{
+			inputComputePlanTrainingTask{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash2},
 				ID:             traintupleID2,
+				AlgoKey:        algoHash,
 				InModelsIDs:    []string{traintupleID1},
 			},
 		},

@@ -73,7 +73,7 @@ func (traintuple *Traintuple) SetFromInput(db LedgerDB, inp inputTraintuple) err
 
 	dataManager, err := db.GetDataManager(inp.DataManagerKey)
 	if err != nil {
-		return errors.BadRequest(err, "could not retrieve dataManager with key %s", inp.DataManagerKey)
+		return errors.BadRequest(err, "could not retrieve dataManager with key \"%s\"", inp.DataManagerKey)
 	}
 	if !dataManager.Permissions.CanProcess(dataManager.Owner, creator) {
 		return errors.Forbidden("not authorized to process dataManager %s", inp.DataManagerKey)
@@ -218,46 +218,57 @@ func createTraintuple(db LedgerDB, args []string) (map[string]string, error) {
 		return nil, err
 	}
 
-	traintuple := Traintuple{}
-	err = traintuple.SetFromInput(db, inp)
+	key, err := createTraintupleInternal(db, inp)
+
 	if err != nil {
 		return nil, err
 	}
+
+	return map[string]string{"key": key}, nil
+}
+
+func createTraintupleInternal(db LedgerDB, inp inputTraintuple) (string, error) {
+	traintuple := Traintuple{}
+	err := traintuple.SetFromInput(db, inp)
+	if err != nil {
+		return "", err
+	}
 	err = traintuple.SetFromParents(db, inp.InModels)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	traintupleKey := traintuple.GetKey()
 	// Test if the key (ergo the traintuple) already exists
 	tupleExists, err := db.KeyExists(traintupleKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	if tupleExists {
-		return nil, errors.Conflict("traintuple already exists").WithKey(traintupleKey)
+		return "", errors.Conflict("traintuple already exists").WithKey(traintupleKey)
 	}
 	err = traintuple.AddToComputePlan(db, inp, traintupleKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	err = traintuple.Save(db, traintupleKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
+
 	out := outputTraintuple{}
 	err = out.Fill(db, traintuple, traintupleKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	event := TuplesEvent{}
 	event.SetTraintuples(out)
 	err = SendTuplesEvent(db.cc, event)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return map[string]string{"key": traintupleKey}, nil
+	return traintupleKey, nil
 }
 
 // logStartTrain modifies a traintuple by changing its status from todo to doing
