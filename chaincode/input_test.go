@@ -15,34 +15,9 @@
 package main
 
 var (
-	traintupleID1      = "firstTraintupleID"
-	traintupleID2      = "secondTraintupleID"
-	testtupleID        = "testtupleID"
-	defaultComputePlan = inputComputePlan{
-		ObjectiveKey: objectiveDescriptionHash,
-		TrainingTasks: []inputComputePlanTrainingTask{
-			inputComputePlanTrainingTask{
-				DataManagerKey: dataManagerOpenerHash,
-				DataSampleKeys: []string{trainDataSampleHash1},
-				AlgoKey:        algoHash,
-				ID:             traintupleID1,
-			},
-			inputComputePlanTrainingTask{
-				DataManagerKey: dataManagerOpenerHash,
-				DataSampleKeys: []string{trainDataSampleHash2},
-				ID:             traintupleID2,
-				AlgoKey:        algoHash,
-				InModelsIDs:    []string{traintupleID1},
-			},
-		},
-		Testtuples: []inputComputePlanTesttuple{
-			inputComputePlanTesttuple{
-				DataManagerKey: dataManagerOpenerHash,
-				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
-				TraintupleID:   traintupleID2,
-			},
-		},
-	}
+	traintupleID1 = "firstTraintupleID"
+	traintupleID2 = "secondTraintupleID"
+	testtupleID   = "testtupleID"
 )
 
 func (dataManager *inputDataManager) createDefault() [][]byte {
