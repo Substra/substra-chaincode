@@ -227,7 +227,7 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 	if err != nil {
 		return fmt.Errorf("could not retrieve traintuple type with key %s - %s", in.TraintupleKey, err.Error())
 	}
-	out.TraintupleType = LowerFirst(traintupleType.String())
+	out.TupleType = LowerFirst(traintupleType.String())
 
 	// fill algo
 	var algo Algo
@@ -275,7 +275,7 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 }
 
 type outputModelDetails struct {
-	AggregateTuple         *outputAggregateTuple      `json:"aggregateTuple,omitempty"`
+	AggregateTuple         *outputAggregateTuple      `json:"aggregatetuple,omitempty"`
 	CompositeTraintuple    *outputCompositeTraintuple `json:"compositeTraintuple,omitempty"`
 	Traintuple             *outputTraintuple          `json:"traintuple,omitempty"`
 	Testtuple              outputTesttuple            `json:"testtuple"`
@@ -283,7 +283,7 @@ type outputModelDetails struct {
 }
 
 type outputModel struct {
-	AggregateTuple      *outputAggregateTuple      `json:"aggregateTuple,omitempty"`
+	AggregateTuple      *outputAggregateTuple      `json:"aggregatetuple,omitempty"`
 	CompositeTraintuple *outputCompositeTraintuple `json:"compositeTraintuple,omitempty"`
 	Traintuple          *outputTraintuple          `json:"traintuple,omitempty"`
 	Testtuple           outputTesttuple            `json:"testtuple"`
