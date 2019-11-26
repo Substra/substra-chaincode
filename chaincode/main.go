@@ -163,7 +163,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	case "queryNodes":
 		result, err = queryNodes(db, args)
 	default:
-		err = fmt.Errorf("function not implemented")
+		err = fmt.Errorf("function \"%s\" not implemented", fn)
 	}
 	logger.Infof("Response from chaincode: %#v, error: %s", result, err)
 	// Return the result as success payload
