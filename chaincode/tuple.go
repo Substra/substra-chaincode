@@ -139,6 +139,24 @@ func queryModels(db LedgerDB, args []string) (outModels []outputModel, err error
 		outModels = append(outModels, outputModel)
 	}
 
+	// populate from composite traintuples
+	aggregateTupleKeys, err := db.GetIndexKeys("aggregateTuple~algo~key", []string{"aggregateTuple"})
+	if err != nil {
+		return
+	}
+	for _, aggregateTupleKey := range aggregateTupleKeys {
+		var outputModel outputModel
+		var out outputAggregateTuple
+
+		out, err = getOutputAggregateTuple(db, aggregateTupleKey)
+		if err != nil {
+			return
+		}
+		outputModel.AggregateTuple = &out
+		outputModel.Testtuple, err = getCertifiedOutputTesttuple(db, aggregateTupleKey)
+		outModels = append(outModels, outputModel)
+	}
+
 	return
 }
 

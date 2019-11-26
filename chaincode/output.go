@@ -283,6 +283,7 @@ type outputModelDetails struct {
 }
 
 type outputModel struct {
+	AggregateTuple      *outputAggregateTuple      `json:"aggregateTuple,omitempty"`
 	CompositeTraintuple *outputCompositeTraintuple `json:"compositeTraintuple,omitempty"`
 	Traintuple          *outputTraintuple          `json:"traintuple,omitempty"`
 	Testtuple           outputTesttuple            `json:"testtuple"`
