@@ -72,7 +72,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = logFailTrain(db, args)
 	case "logFailCompositeTrain":
 		result, err = logFailCompositeTrain(db, args)
-	case "logFailAggregateTrain":
+	case "logFailAggregate":
 		result, err = logFailAggregateTrain(db, args)
 	case "logStartTest":
 		result, err = logStartTest(db, args)
@@ -80,7 +80,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = logStartTrain(db, args)
 	case "logStartCompositeTrain":
 		result, err = logStartCompositeTrain(db, args)
-	case "logStartAggregateTrain":
+	case "logStartAggregate":
 		result, err = logStartAggregateTrain(db, args)
 	case "logSuccessTest":
 		result, err = logSuccessTest(db, args)
@@ -88,7 +88,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = logSuccessTrain(db, args)
 	case "logSuccessCompositeTrain":
 		result, err = logSuccessCompositeTrain(db, args)
-	case "logSuccessAggregateTrain":
+	case "logSuccessAggregate":
 		result, err = logSuccessAggregateTrain(db, args)
 	case "queryAlgo":
 		result, err = queryAlgo(db, args)

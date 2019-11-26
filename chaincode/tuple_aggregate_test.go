@@ -320,8 +320,8 @@ func TestTraintupleAggregate(t *testing.T) {
 	success.fillDefaults()
 
 	argsSlice := [][][]byte{
-		[][]byte{[]byte("logStartAggregateTrain"), keyToJSON(traintupleKey)},
-		[][]byte{[]byte("logSuccessAggregateTrain"), assetToJSON(success)},
+		[][]byte{[]byte("logStartAggregate"), keyToJSON(traintupleKey)},
+		[][]byte{[]byte("logSuccessAggregate"), assetToJSON(success)},
 	}
 	traintupleStatus := []string{StatusDoing, StatusDone}
 	for i := range traintupleStatus {
@@ -480,7 +480,7 @@ func TestAggregateTupleLogSuccessFail(t *testing.T) {
 			key := _key.Key
 
 			// start
-			resp = mockStub.MockInvoke("42", [][]byte{[]byte("logStartAggregateTrain"), keyToJSON(key)})
+			resp = mockStub.MockInvoke("42", [][]byte{[]byte("logStartAggregate"), keyToJSON(key)})
 
 			var expectedStatus string
 
@@ -490,14 +490,14 @@ func TestAggregateTupleLogSuccessFail(t *testing.T) {
 				success.Key = key
 				success.createDefault()
 				success.fillDefaults()
-				resp = mockStub.MockInvoke("42", [][]byte{[]byte("logSuccessAggregateTrain"), assetToJSON(success)})
+				resp = mockStub.MockInvoke("42", [][]byte{[]byte("logSuccessAggregate"), assetToJSON(success)})
 				require.EqualValuesf(t, 200, resp.Status, "traintuple should be successfully set to 'success': %s", resp.Message)
 				expectedStatus = "done"
 			case StatusFailed:
 				failed := inputLogFailTrain{}
 				failed.Key = key
 				failed.fillDefaults()
-				resp = mockStub.MockInvoke("42", [][]byte{[]byte("logFailAggregateTrain"), assetToJSON(failed)})
+				resp = mockStub.MockInvoke("42", [][]byte{[]byte("logFailAggregate"), assetToJSON(failed)})
 				require.EqualValuesf(t, 200, resp.Status, "traintuple should be successfully set to 'failed': %s", resp.Message)
 				expectedStatus = "failed"
 			}
