@@ -227,7 +227,7 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 	if err != nil {
 		return fmt.Errorf("could not retrieve traintuple type with key %s - %s", in.TraintupleKey, err.Error())
 	}
-	out.TupleType = LowerFirst(traintupleType.String())
+	out.TraintupleType = LowerFirst(traintupleType.String())
 
 	// fill algo
 	var algo Algo
