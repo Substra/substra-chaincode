@@ -64,7 +64,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = createTraintuple(db, args)
 	case "createCompositeTraintuple":
 		result, err = createCompositeTraintuple(db, args)
-	case "createAggregateTuple":
+	case "createAggregatetuple":
 		result, err = createAggregateTuple(db, args)
 	case "logFailTest":
 		result, err = logFailTest(db, args)
@@ -130,13 +130,13 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = queryTraintuple(db, args)
 	case "queryCompositeTraintuple":
 		result, err = queryCompositeTraintuple(db, args)
-	case "queryAggregateTuple":
+	case "queryAggregatetuple":
 		result, err = queryAggregateTuple(db, args)
 	case "queryTraintuples":
 		result, err = queryTraintuples(db, args)
 	case "queryCompositeTraintuples":
 		result, err = queryCompositeTraintuples(db, args)
-	case "queryAggregateTuples":
+	case "queryAggregatetuples":
 		result, err = queryAggregateTuples(db, args)
 	case "queryComputePlan":
 		result, err = queryComputePlan(db, args)

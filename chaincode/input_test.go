@@ -252,7 +252,7 @@ func (aggregateTuple *inputAggregateTuple) fillDefaults() {
 }
 
 func (aggregateTuple *inputAggregateTuple) getArgs() [][]byte {
-	args := append([][]byte{[]byte("createAggregateTuple")}, assetToJSON(aggregateTuple))
+	args := append([][]byte{[]byte("createAggregatetuple")}, assetToJSON(aggregateTuple))
 	return args
 }
 
