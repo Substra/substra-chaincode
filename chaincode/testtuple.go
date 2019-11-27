@@ -135,8 +135,8 @@ func (testtuple *Testtuple) SetFromTraintuple(db LedgerDB, traintupleKey string)
 		status = compositeTraintuple.Status
 		testtuple.ObjectiveKey = compositeTraintuple.ObjectiveKey
 		testtuple.AlgoKey = compositeTraintuple.AlgoKey
-	case AggregateTupleType:
-		tuple, err := db.GetAggregateTuple(traintupleKey)
+	case AggregatetupleType:
+		tuple, err := db.GetAggregatetuple(traintupleKey)
 		if err != nil {
 			return errors.BadRequest(err, "could not retrieve traintuple with key %s", traintupleKey)
 		}

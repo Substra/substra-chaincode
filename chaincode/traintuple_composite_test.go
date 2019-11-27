@@ -595,7 +595,7 @@ func TestCompositeTraintupleInModelTypes(t *testing.T) {
 	allowedHeadTypes := map[AssetType]bool{
 		TraintupleType:          false,
 		CompositeTraintupleType: true,
-		AggregateTupleType:      false,
+		AggregatetupleType:      false,
 	}
 
 	// Trunk can be either:
@@ -605,7 +605,7 @@ func TestCompositeTraintupleInModelTypes(t *testing.T) {
 	allowedTrunkTypes := map[AssetType]bool{
 		TraintupleType:          true,
 		CompositeTraintupleType: true,
-		AggregateTupleType:      true,
+		AggregatetupleType:      true,
 	}
 
 	for headType, validHeadType := range allowedHeadTypes {
@@ -758,7 +758,7 @@ func TestCorrectParent(t *testing.T) {
 	parentKey := _key.Key
 
 	// register aggregate child
-	inp1 := inputAggregateTuple{}
+	inp1 := inputAggregatetuple{}
 	inp1.fillDefaults()
 	inp1.InModels = []string{parentKey}
 	resp = mockStub.MockInvoke("42", inp1.getArgs())
@@ -786,7 +786,7 @@ func TestCorrectParent(t *testing.T) {
 	db := NewLedgerDB(mockStub)
 
 	// fetch aggregate child, and check its in-model is the parent's trunk out-model
-	child1, _ := queryAggregateTuple(db, assetToArgs(inputHash{Key: child1Key}))
+	child1, _ := queryAggregatetuple(db, assetToArgs(inputHash{Key: child1Key}))
 	assert.Equal(t, trunkModelHash, child1.InModels[0].Hash)
 
 	// fetch composite child, and check its head in-model is the parent's head out-model

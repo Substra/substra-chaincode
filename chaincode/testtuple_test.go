@@ -138,8 +138,8 @@ func TestQueryTesttuple(t *testing.T) {
 			expectedAlgoStorageAddress: compositeAlgoStorageAddress,
 		},
 		{
-			traintupleKey:              aggregateTupleKey,
-			expectedTypeString:         "aggregateTuple",
+			traintupleKey:              aggregatetupleKey,
+			expectedTypeString:         "aggregatetuple",
 			expectedAlgoName:           aggregateAlgoName,
 			expectedAlgoHash:           aggregateAlgoHash,
 			expectedAlgoStorageAddress: aggregateAlgoStorageAddress,
@@ -149,7 +149,7 @@ func TestQueryTesttuple(t *testing.T) {
 		t.Run("TestQueryTesttuple"+tt.expectedTypeString, func(t *testing.T) {
 			scc := new(SubstraChaincode)
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
-			registerItem(t, *mockStub, "aggregateTuple")
+			registerItem(t, *mockStub, "aggregatetuple")
 
 			// create testtuple
 			dataSampleKeys := []string{trainDataSampleHash1, trainDataSampleHash2}

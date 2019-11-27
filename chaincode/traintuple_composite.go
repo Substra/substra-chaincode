@@ -126,7 +126,7 @@ func (traintuple *CompositeTraintuple) SetFromParents(db LedgerDB, inp inputComp
 	// - a traintuple's out model
 	// - a composite traintuple's head out model
 	// - an aggregate tuple's out model
-	hashDress, err = db.GetOutModelHashDress(inp.InTrunkModelKey, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType, AggregateTupleType})
+	hashDress, err = db.GetOutModelHashDress(inp.InTrunkModelKey, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
 	if err != nil {
 		return err
 	}

@@ -149,8 +149,8 @@ func (assetType AssetType) String() string {
 		return "Traintuple"
 	case CompositeTraintupleType:
 		return "CompositeTraintuple"
-	case AggregateTupleType:
-		return "AggregateTuple"
+	case AggregatetupleType:
+		return "Aggregatetuple"
 	case TesttupleType:
 		return "Testtuple"
 	default:

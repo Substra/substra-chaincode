@@ -31,7 +31,7 @@ const (
 	AggregateAlgoType
 	TraintupleType
 	CompositeTraintupleType
-	AggregateTupleType
+	AggregatetupleType
 	TesttupleType
 	// when adding a new type here, don't forget to update
 	// the String() function in utils.go
@@ -125,8 +125,8 @@ type CompositeTraintuple struct {
 	Tag           string                      `json:"tag"`
 }
 
-// AggregateTuple is like a traintuple, but for aggregate model composition
-type AggregateTuple struct {
+// Aggregatetuple is like a traintuple, but for aggregate model composition
+type Aggregatetuple struct {
 	AlgoKey       string      `json:"algoKey"`
 	AssetType     AssetType   `json:"assetType"`
 	ComputePlanID string      `json:"computePlanID"`

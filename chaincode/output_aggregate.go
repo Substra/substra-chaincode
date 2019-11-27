@@ -16,7 +16,7 @@ package main
 
 import "fmt"
 
-type outputAggregateTuple struct {
+type outputAggregatetuple struct {
 	Key           string            `json:"key"`
 	Algo          *HashDressName    `json:"algo"`
 	Creator       string            `json:"creator"`
@@ -40,22 +40,22 @@ func (out *outputAggregateAlgo) Fill(key string, in AggregateAlgo) {
 	out.outputAlgo.Fill(key, in.Algo)
 }
 
-// Fill is a method of the receiver outputAggregateTuple. It returns all elements necessary to do a training task from an aggregate trainuple stored in the ledger
-func (outputAggregateTuple *outputAggregateTuple) Fill(db LedgerDB, traintuple AggregateTuple, traintupleKey string) (err error) {
-	outputAggregateTuple.Key = traintupleKey
-	outputAggregateTuple.Creator = traintuple.Creator
-	outputAggregateTuple.Log = traintuple.Log
-	outputAggregateTuple.Status = traintuple.Status
-	outputAggregateTuple.Rank = traintuple.Rank
-	outputAggregateTuple.ComputePlanID = traintuple.ComputePlanID
-	outputAggregateTuple.OutModel = traintuple.OutModel
-	outputAggregateTuple.Tag = traintuple.Tag
+// Fill is a method of the receiver outputAggregatetuple. It returns all elements necessary to do a training task from an aggregate trainuple stored in the ledger
+func (outputAggregatetuple *outputAggregatetuple) Fill(db LedgerDB, traintuple Aggregatetuple, traintupleKey string) (err error) {
+	outputAggregatetuple.Key = traintupleKey
+	outputAggregatetuple.Creator = traintuple.Creator
+	outputAggregatetuple.Log = traintuple.Log
+	outputAggregatetuple.Status = traintuple.Status
+	outputAggregatetuple.Rank = traintuple.Rank
+	outputAggregatetuple.ComputePlanID = traintuple.ComputePlanID
+	outputAggregatetuple.OutModel = traintuple.OutModel
+	outputAggregatetuple.Tag = traintuple.Tag
 	algo, err := db.GetAggregateAlgo(traintuple.AlgoKey)
 	if err != nil {
 		err = fmt.Errorf("could not retrieve aggregate algo with key %s - %s", traintuple.AlgoKey, err.Error())
 		return
 	}
-	outputAggregateTuple.Algo = &HashDressName{
+	outputAggregatetuple.Algo = &HashDressName{
 		Name:           algo.Name,
 		Hash:           traintuple.AlgoKey,
 		StorageAddress: algo.StorageAddress}
@@ -74,7 +74,7 @@ func (outputAggregateTuple *outputAggregateTuple) Fill(db LedgerDB, traintuple A
 		Hash:           objective.Metrics.Hash,
 		StorageAddress: objective.Metrics.StorageAddress,
 	}
-	outputAggregateTuple.Objective = &TtObjective{
+	outputAggregatetuple.Objective = &TtObjective{
 		Key:     traintuple.ObjectiveKey,
 		Metrics: &metrics,
 	}
@@ -84,7 +84,7 @@ func (outputAggregateTuple *outputAggregateTuple) Fill(db LedgerDB, traintuple A
 		if inModelKey == "" {
 			break
 		}
-		hashDress, _err := db.GetOutModelHashDress(inModelKey, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType, AggregateTupleType})
+		hashDress, _err := db.GetOutModelHashDress(inModelKey, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
 		if _err != nil {
 			err = fmt.Errorf("could not fill in-model with key \"%s\": %s", inModelKey, _err.Error())
 			return
@@ -96,20 +96,20 @@ func (outputAggregateTuple *outputAggregateTuple) Fill(db LedgerDB, traintuple A
 			inModel.Hash = hashDress.Hash
 			inModel.StorageAddress = hashDress.StorageAddress
 		}
-		outputAggregateTuple.InModels = append(outputAggregateTuple.InModels, inModel)
+		outputAggregatetuple.InModels = append(outputAggregatetuple.InModels, inModel)
 	}
 
-	outputAggregateTuple.Worker = traintuple.Worker
+	outputAggregatetuple.Worker = traintuple.Worker
 
 	return
 }
 
-// AddAggregateTuple adds one aggregate tuple to the event struct
-func (te *TuplesEvent) AddAggregateTuple(out outputAggregateTuple) {
-	te.AggregateTuples = append(te.AggregateTuples, out)
+// AddAggregatetuple adds one aggregate tuple to the event struct
+func (te *TuplesEvent) AddAggregatetuple(out outputAggregatetuple) {
+	te.Aggregatetuples = append(te.Aggregatetuples, out)
 }
 
-// SetAggregateTuples adds one or several tuples to the event struct
-func (te *TuplesEvent) SetAggregateTuples(otuples ...outputAggregateTuple) {
-	te.AggregateTuples = otuples
+// SetAggregatetuples adds one or several tuples to the event struct
+func (te *TuplesEvent) SetAggregatetuples(otuples ...outputAggregatetuple) {
+	te.Aggregatetuples = otuples
 }

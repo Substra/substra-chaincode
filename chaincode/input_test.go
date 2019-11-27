@@ -234,25 +234,25 @@ func (traintuple *inputCompositeTraintuple) getArgs() [][]byte {
 	return args
 }
 
-func (aggregateTuple *inputAggregateTuple) createDefault() [][]byte {
-	aggregateTuple.fillDefaults()
-	return aggregateTuple.getArgs()
+func (aggregatetuple *inputAggregatetuple) createDefault() [][]byte {
+	aggregatetuple.fillDefaults()
+	return aggregatetuple.getArgs()
 }
 
-func (aggregateTuple *inputAggregateTuple) fillDefaults() {
-	if aggregateTuple.AlgoKey == "" {
-		aggregateTuple.AlgoKey = aggregateAlgoHash
+func (aggregatetuple *inputAggregatetuple) fillDefaults() {
+	if aggregatetuple.AlgoKey == "" {
+		aggregatetuple.AlgoKey = aggregateAlgoHash
 	}
-	if aggregateTuple.ObjectiveKey == "" {
-		aggregateTuple.ObjectiveKey = objectiveDescriptionHash
+	if aggregatetuple.ObjectiveKey == "" {
+		aggregatetuple.ObjectiveKey = objectiveDescriptionHash
 	}
-	if aggregateTuple.Worker == "" {
-		aggregateTuple.Worker = worker
+	if aggregatetuple.Worker == "" {
+		aggregatetuple.Worker = worker
 	}
 }
 
-func (aggregateTuple *inputAggregateTuple) getArgs() [][]byte {
-	args := append([][]byte{[]byte("createAggregatetuple")}, assetToJSON(aggregateTuple))
+func (aggregatetuple *inputAggregatetuple) getArgs() [][]byte {
+	args := append([][]byte{[]byte("createAggregatetuple")}, assetToJSON(aggregatetuple))
 	return args
 }
 

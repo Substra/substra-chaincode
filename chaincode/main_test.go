@@ -59,7 +59,7 @@ const trunkModelAddress = "https://substrabac/model/titi"
 const worker = "SampleOrg"
 const traintupleKey = "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
 const compositeTraintupleKey = "57104c72d50215d8cfa288059fdf47bcc5f808f6685a5f08fa08f792cd782c68"
-const aggregateTupleKey = "af689258ffecdb5172b285b04475ac44941b7e6acd88a0d076059ce520cb0a95"
+const aggregatetupleKey = "af689258ffecdb5172b285b04475ac44941b7e6acd88a0d076059ce520cb0a95"
 
 var (
 	pipeline = flag.Bool("pipeline", false, "Print out the pipeline test output")
@@ -237,15 +237,15 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 		return resp, inpCompositeTraintuple
 	}
 	// 10. Add aggregate tuple
-	inpAggregateTuple := inputAggregateTuple{}
-	args = inpAggregateTuple.createDefault()
+	inpAggregatetuple := inputAggregatetuple{}
+	args = inpAggregatetuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding aggregate tuple with status %d and message %s", resp.Status, resp.Message)
-	if itemType == "aggregateTuple" {
-		return resp, inpAggregateTuple
+	if itemType == "aggregatetuple" {
+		return resp, inpAggregatetuple
 	}
 
-	return resp, inpAggregateTuple
+	return resp, inpAggregatetuple
 }
 
 func registerTraintuple(mockStub *MockStub, assetType AssetType) (key string, err error) {
@@ -293,7 +293,7 @@ func registerTraintuple(mockStub *MockStub, assetType AssetType) (key string, er
 		var _key struct{ Key string }
 		json.Unmarshal(resp.Payload, &_key)
 		return _key.Key, nil
-	case AggregateTupleType:
+	case AggregatetupleType:
 		inpAlgo := inputAggregateAlgo{inputAlgo{Hash: randAlgoKey}}
 		args := inpAlgo.createDefault()
 		resp := mockStub.MockInvoke("42", args)
@@ -301,7 +301,7 @@ func registerTraintuple(mockStub *MockStub, assetType AssetType) (key string, er
 			err = fmt.Errorf("Failed to register random algo: %s", resp.Message)
 			return
 		}
-		inpTraintuple := inputAggregateTuple{AlgoKey: randAlgoKey}
+		inpTraintuple := inputAggregatetuple{AlgoKey: randAlgoKey}
 		args = inpTraintuple.createDefault()
 		resp = mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {

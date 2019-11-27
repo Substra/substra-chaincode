@@ -467,12 +467,12 @@ func UpdateTraintupleChildren(db LedgerDB, traintupleKey string, traintupleStatu
 	if err != nil {
 		return fmt.Errorf("error while getting associated composite traintuples to update their inModel")
 	}
-	childAggregateTupleKeys, err := db.GetIndexKeys("aggregateTuple~inModel~key", []string{"aggregateTuple", traintupleKey})
+	childAggregatetupleKeys, err := db.GetIndexKeys("aggregatetuple~inModel~key", []string{"aggregatetuple", traintupleKey})
 	if err != nil {
 		return fmt.Errorf("error while getting associated aggregate tuples to update their inModel")
 	}
 
-	allChildKeys := append(append(childTraintupleKeys, childCompositeTraintupleKeys...), childAggregateTupleKeys...)
+	allChildKeys := append(append(childTraintupleKeys, childCompositeTraintupleKeys...), childAggregatetupleKeys...)
 
 	for _, childTraintupleKey := range allChildKeys {
 		childTraintupleType, childTraintupleStatus, err := db.GetGenericTraintuple(childTraintupleKey)
@@ -500,8 +500,8 @@ func UpdateTraintupleChildren(db LedgerDB, traintupleKey string, traintupleStatu
 			if err != nil {
 				return err
 			}
-		case AggregateTupleType:
-			childTraintupleStatus, err = UpdateAggregateTupleChild(db, traintupleKey, childTraintupleKey, traintupleStatus, event)
+		case AggregatetupleType:
+			childTraintupleStatus, err = UpdateAggregatetupleChild(db, traintupleKey, childTraintupleKey, traintupleStatus, event)
 			if err != nil {
 				return err
 			}

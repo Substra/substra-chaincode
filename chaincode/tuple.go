@@ -63,13 +63,13 @@ func queryModelDetails(db LedgerDB, args []string) (outModelDetails outputModelD
 			return
 		}
 		outModelDetails.CompositeTraintuple = &out
-	case AggregateTupleType:
-		var out outputAggregateTuple
-		out, err = getOutputAggregateTuple(db, inp.Key)
+	case AggregatetupleType:
+		var out outputAggregatetuple
+		out, err = getOutputAggregatetuple(db, inp.Key)
 		if err != nil {
 			return
 		}
-		outModelDetails.AggregateTuple = &out
+		outModelDetails.Aggregatetuple = &out
 	}
 
 	// get certified and non-certified testtuples related to traintuple
@@ -140,20 +140,20 @@ func queryModels(db LedgerDB, args []string) (outModels []outputModel, err error
 	}
 
 	// populate from composite traintuples
-	aggregateTupleKeys, err := db.GetIndexKeys("aggregateTuple~algo~key", []string{"aggregateTuple"})
+	aggregatetupleKeys, err := db.GetIndexKeys("aggregatetuple~algo~key", []string{"aggregatetuple"})
 	if err != nil {
 		return
 	}
-	for _, aggregateTupleKey := range aggregateTupleKeys {
+	for _, aggregatetupleKey := range aggregatetupleKeys {
 		var outputModel outputModel
-		var out outputAggregateTuple
+		var out outputAggregatetuple
 
-		out, err = getOutputAggregateTuple(db, aggregateTupleKey)
+		out, err = getOutputAggregatetuple(db, aggregatetupleKey)
 		if err != nil {
 			return
 		}
-		outputModel.AggregateTuple = &out
-		outputModel.Testtuple, err = getCertifiedOutputTesttuple(db, aggregateTupleKey)
+		outputModel.Aggregatetuple = &out
+		outputModel.Testtuple, err = getCertifiedOutputTesttuple(db, aggregatetupleKey)
 		outModels = append(outModels, outputModel)
 	}
 
