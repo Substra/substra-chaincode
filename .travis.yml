@@ -13,8 +13,7 @@ branches:
 install: skip
 
 before_script:
-  - go get golang.org/x/lint
-  - export PATH=$GOPATH/bin:$PATH
+  - go get -u golang.org/x/lint
 
 script:
   - cd chaincode
