@@ -17,6 +17,7 @@ before_script:
   - go get -u golang.org/x/lint
 
 script:
+  - find / -type f -name golint 2>/dev/null
   - echo $GOPATH
   - cd chaincode
   - golint
