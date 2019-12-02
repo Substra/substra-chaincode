@@ -1507,7 +1507,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"objectiveKey\
  "testtupleKeys": [
   "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96"
  ],
- "trainingTaskKeys": [
+ "traintupleKeys": [
   "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
   "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
  ]
@@ -1594,7 +1594,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"432fcf
  "testtupleKeys": [
   "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96"
  ],
- "trainingTaskKeys": [
+ "traintupleKeys": [
   "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
   "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
  ]
@@ -1613,7 +1613,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
   "testtupleKeys": [
    "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96"
   ],
-  "trainingTaskKeys": [
+  "traintupleKeys": [
    "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
    "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
   ]
