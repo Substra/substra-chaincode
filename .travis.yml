@@ -10,13 +10,13 @@ branches:
   only:
     - master
 
-install: skip
-
 before_script:
-  - GO111MODULE=off go get golang.org/x/lint
+  - go get golang.org/x/lint/golint
+  - export PATH=$GOPATH/bin:$PATH
 
 script:
   - cd chaincode
-  - go test -v ./...
-  - go build
   - golint
+  - go test -v ./...
+  - go build -v
+
