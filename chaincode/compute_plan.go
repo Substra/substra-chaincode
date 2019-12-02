@@ -21,7 +21,7 @@ import (
 	"strconv"
 )
 
-func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTrainingTask, traintupleKeysByID map[string]string) error {
+func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, traintupleKeysByID map[string]string) error {
 	inpTraintuple.DataManagerKey = inpCP.DataManagerKey
 	inpTraintuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpTraintuple.AlgoKey = inpCP.AlgoKey
@@ -67,32 +67,40 @@ func createComputePlanInternal(db LedgerDB, inp inputComputePlan) (resp outputCo
 	traintupleKeysByID := map[string]string{}
 
 	resp.ObjectiveKey = inp.ObjectiveKey
-	resp.TrainingTaskKeys = []string{}
+	resp.TraintupleKeys = []string{}
 
-	for i, computeTraintuple := range inp.TrainingTasks {
-		inpTraintuple := inputTraintuple{
-			Rank:         strconv.Itoa(i),
-			ObjectiveKey: inp.ObjectiveKey,
-		}
-		if i != 0 {
-			inpTraintuple.ComputePlanID = resp.ComputePlanID
-		}
-		err = inpTraintuple.Fill(computeTraintuple, traintupleKeysByID)
-		if err != nil {
-			return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeTraintuple.ID)
-		}
+	DAG, err := createComputeDAG(inp)
+	if err != nil {
+		return resp, errors.BadRequest(err)
+	}
+	for i, task := range DAG.OrderTasks {
+		switch task.TaskType {
+		case TraintupleType:
+			computeTraintuple := inp.Traintuples[task.InputIndex]
+			inpTraintuple := inputTraintuple{
+				Rank:         strconv.Itoa(i),
+				ObjectiveKey: inp.ObjectiveKey,
+			}
+			if i != 0 {
+				inpTraintuple.ComputePlanID = resp.ComputePlanID
+			}
+			err = inpTraintuple.Fill(computeTraintuple, traintupleKeysByID)
+			if err != nil {
+				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeTraintuple.ID)
+			}
 
-		traintupleKey, err := createTraintupleInternal(db, inpTraintuple)
-		if err != nil {
-			return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeTraintuple.ID)
-		}
+			traintupleKey, err := createTraintupleInternal(db, inpTraintuple)
+			if err != nil {
+				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeTraintuple.ID)
+			}
 
-		if i == 0 {
-			resp.ComputePlanID = traintupleKey
-		}
+			if i == 0 {
+				resp.ComputePlanID = traintupleKey
+			}
 
-		traintupleKeysByID[computeTraintuple.ID] = traintupleKey
-		resp.TrainingTaskKeys = append(resp.TrainingTaskKeys, traintupleKey)
+			traintupleKeysByID[computeTraintuple.ID] = traintupleKey
+			resp.TraintupleKeys = append(resp.TraintupleKeys, traintupleKey)
+		}
 	}
 
 	resp.TesttupleKeys = []string{}
@@ -189,10 +197,10 @@ func getComputePlan(db LedgerDB, key string) (resp outputComputePlan, err error)
 
 	// 3. Create response
 	resp = outputComputePlan{
-		ComputePlanID:    key,
-		ObjectiveKey:     (*firstTt).ObjectiveKey,
-		TrainingTaskKeys: ttKeys,
-		TesttupleKeys:    tstKeys,
+		ComputePlanID:  key,
+		ObjectiveKey:   (*firstTt).ObjectiveKey,
+		TraintupleKeys: ttKeys,
+		TesttupleKeys:  tstKeys,
 	}
 	return
 }

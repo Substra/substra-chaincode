@@ -49,14 +49,14 @@ var (
 	//
 	defaultComputePlan = inputComputePlan{
 		ObjectiveKey: objectiveDescriptionHash,
-		TrainingTasks: []inputComputePlanTrainingTask{
-			inputComputePlanTrainingTask{
+		Traintuples: []inputComputePlanTraintuple{
+			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        algoHash,
 				ID:             traintupleID1,
 			},
-			inputComputePlanTrainingTask{
+			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash2},
 				ID:             traintupleID2,
@@ -91,14 +91,14 @@ func TestCreateComputePlan(t *testing.T) {
 	traintuples, err := queryTraintuples(db, []string{})
 	assert.NoError(t, err)
 	assert.Len(t, traintuples, 2)
-	require.Contains(t, outCP.TrainingTaskKeys, traintuples[0].Key)
-	require.Contains(t, outCP.TrainingTaskKeys, traintuples[1].Key)
+	require.Contains(t, outCP.TraintupleKeys, traintuples[0].Key)
+	require.Contains(t, outCP.TraintupleKeys, traintuples[1].Key)
 	var first, second outputTraintuple
 	for _, el := range traintuples {
 		switch el.Key {
-		case outCP.TrainingTaskKeys[0]:
+		case outCP.TraintupleKeys[0]:
 			first = el
-		case outCP.TrainingTaskKeys[1]:
+		case outCP.TraintupleKeys[1]:
 			second = el
 		}
 	}
@@ -106,7 +106,7 @@ func TestCreateComputePlan(t *testing.T) {
 	// check first traintuple
 	assert.NotZero(t, first)
 	assert.EqualValues(t, first.Key, first.ComputePlanID)
-	assert.Equal(t, inCP.TrainingTasks[0].AlgoKey, first.Algo.Hash)
+	assert.Equal(t, inCP.Traintuples[0].AlgoKey, first.Algo.Hash)
 	assert.Equal(t, StatusTodo, first.Status)
 
 	// check second traintuple
@@ -114,7 +114,7 @@ func TestCreateComputePlan(t *testing.T) {
 	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
 	assert.EqualValues(t, first.ComputePlanID, second.ComputePlanID)
 	assert.Len(t, second.InModels, 1)
-	assert.Equal(t, inCP.TrainingTasks[1].AlgoKey, second.Algo.Hash)
+	assert.Equal(t, inCP.Traintuples[1].AlgoKey, second.Algo.Hash)
 	assert.Equal(t, StatusWaiting, second.Status)
 
 	// Check the testtuples
@@ -140,7 +140,7 @@ func TestQueryComputePlan(t *testing.T) {
 	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	assert.Equal(t, outCP.ComputePlanID, outCP.TrainingTaskKeys[0])
+	assert.Equal(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
 
 	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
@@ -161,7 +161,7 @@ func TestQueryComputePlans(t *testing.T) {
 	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	assert.Equal(t, outCP.ComputePlanID, outCP.TrainingTaskKeys[0])
+	assert.Equal(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
 
 	cps, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
@@ -179,14 +179,14 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 
 	inCP := inputComputePlan{
 		ObjectiveKey: objectiveDescriptionHash,
-		TrainingTasks: []inputComputePlanTrainingTask{
-			inputComputePlanTrainingTask{
+		Traintuples: []inputComputePlanTraintuple{
+			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        algoHash,
 				ID:             traintupleID1,
 			},
-			inputComputePlanTrainingTask{
+			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash2},
 				ID:             traintupleID2,
@@ -200,7 +200,7 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	assert.Equal(t, outCP.ComputePlanID, outCP.TrainingTaskKeys[0])
+	assert.Equal(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
 	assert.Equal(t, []string{}, outCP.TesttupleKeys)
 
 	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
@@ -228,16 +228,16 @@ func TestQueryComputePlanEmpty(t *testing.T) {
 }
 
 func validateComputePlan(t *testing.T, cp outputComputePlan, in inputComputePlan) {
-	assert.Len(t, cp.TrainingTaskKeys, 2)
-	cpID := cp.TrainingTaskKeys[0]
+	assert.Len(t, cp.TraintupleKeys, 2)
+	cpID := cp.TraintupleKeys[0]
 
 	assert.Equal(t, in.ObjectiveKey, cp.ObjectiveKey)
 
 	assert.Equal(t, cpID, cp.ComputePlanID)
 	assert.Equal(t, in.ObjectiveKey, cp.ObjectiveKey)
 
-	assert.NotEmpty(t, cp.TrainingTaskKeys[0])
-	assert.NotEmpty(t, cp.TrainingTaskKeys[1])
+	assert.NotEmpty(t, cp.TraintupleKeys[0])
+	assert.NotEmpty(t, cp.TraintupleKeys[1])
 
 	require.Len(t, cp.TesttupleKeys, 1)
 	assert.NotEmpty(t, cp.TesttupleKeys[0])

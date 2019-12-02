@@ -145,16 +145,15 @@ type inputQueryFilter struct {
 
 // inputConputePlan represent a coherent set of tuples uploaded together.
 // They share the same Objective represented by its key.
-// TrainingTasks is the list of all the training tasks planed by the compute plan.
 // Beware, it's order sensitive since the `InModelsIDs` can only be interpreted
 // if the training tasks matching those IDs have already been created.
 type inputComputePlan struct {
-	ObjectiveKey  string                         `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
-	TrainingTasks []inputComputePlanTrainingTask `validate:"required,gt=0" json:"trainingTasks"`
-	Testtuples    []inputComputePlanTesttuple    `validate:"omitempty" json:"testtuples"`
+	ObjectiveKey string                       `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
+	Traintuples  []inputComputePlanTraintuple `validate:"required,gt=0" json:"traintuples"`
+	Testtuples   []inputComputePlanTesttuple  `validate:"omitempty" json:"testtuples"`
 }
 
-type inputComputePlanTrainingTask struct {
+type inputComputePlanTraintuple struct {
 	DataManagerKey string   `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
 	DataSampleKeys []string `validate:"required,dive,len=64,hexadecimal" json:"dataSampleKeys"`
 	AlgoKey        string   `validate:"required,len=64,hexadecimal" json:"algoKey"`
