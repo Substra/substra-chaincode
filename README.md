@@ -1,4 +1,7 @@
 # substra-chaincode
+
+[![Build Status](https://travis-ci.org/SubstraFoundation/substra-chaincode.svg?branch=master)](https://travis-ci.org/SubstraFoundation/substra-chaincode)
+
 Chaincode for the Substra platform
 
 > :warning: This project is under active development. Please wait a while before using it...
