@@ -9,14 +9,14 @@ env:
 branches:
   only:
     - master
-    
-install: true
+
+install: skip
 
 before_install:
-  - go install golang.org/x/lint/golint
+  - GO111MODULE=off go install golang.org/x/lint/golint
 
 script:
   - cd chaincode
   - go test -v ./...
   - go build
-  - test -z "`golint ./...`"
+  - golint
