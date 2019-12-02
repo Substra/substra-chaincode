@@ -10,6 +10,9 @@ branches:
   only:
     - master
 
+before_install:
+  - go get -u golang.org/x/lint
+  
 install: skip
 
 before_script:
