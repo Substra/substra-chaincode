@@ -17,6 +17,6 @@ before_script:
 
 script:
   - cd chaincode
-  - golint
+  - $GOPATH/bin/golint
   - go test -v ./...
   - go build
