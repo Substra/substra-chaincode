@@ -16,3 +16,4 @@ script:
   - cd chaincode
   - go test -v ./...
   - go build
+  - golint
