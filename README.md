@@ -16,7 +16,7 @@ go version 1.11.x
 ### Run the tests
 
 ```
-cd chaincode/
+cd chaincode
 go test
 ```
 
