@@ -88,7 +88,7 @@ func (tuple *Aggregatetuple) SetFromParents(db LedgerDB, inModels []string) erro
 		case CompositeTraintupleType:
 			tuple, err := db.GetCompositeTraintuple(parentTraintupleKey)
 			if err == nil {
-				// if parent is aggregate, always take the "trunk" out-model
+				// if the parent is composite, always take the "trunk" out-model
 				parentOutModel = tuple.OutTrunkModel.OutModel
 				parentPermissions = tuple.OutTrunkModel.Permissions
 			}
