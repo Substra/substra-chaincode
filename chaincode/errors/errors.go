@@ -53,6 +53,8 @@ func (e Error) Error() string {
 //		all the args following the first string will be handle as format
 //		parameters.
 func E(args ...interface{}) Error {
+	lineId := "some id"
+	println(lineId)
 	e := Error{}
 	e.context = map[string]interface{}{}
 	for i, arg := range args {

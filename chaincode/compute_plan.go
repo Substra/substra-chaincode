@@ -83,6 +83,8 @@ func createComputePlan(db LedgerDB, args []string) (resp outputComputePlan, err 
 		if err != nil {
 			return resp, err
 		}
+		lineId := "some id"
+		println(lineId)
 		traintupleKeysByID[computeTraintuple.ID] = traintupleKey
 		resp.TraintupleKeys = append(resp.TraintupleKeys, traintupleKey)
 	}
