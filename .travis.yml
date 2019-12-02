@@ -24,3 +24,4 @@ script:
   - $GOPATH/bin/golint
   - go test -v ./...
   - go build
+  - golint
