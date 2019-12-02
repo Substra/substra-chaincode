@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"reflect"
 	"strings"
@@ -43,10 +44,22 @@ const testDataSampleHash2 = "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021f
 const algoHash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const algoStorageAddress = "https://toto/algo/222/algo"
 const algoName = "hog + svm"
+const compositeAlgoHash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcd"
+const compositeAlgoStorageAddress = "https://toto/compositeAlgo/222/algo"
+const compositeAlgoName = "hog + svm composite"
+const aggregateAlgoHash = "dddbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482ddd"
+const aggregateAlgoStorageAddress = "https://toto/aggregateAlgo/222/algo"
+const aggregateAlgoName = "hog + svm aggregate"
 const modelHash = "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed"
 const modelAddress = "https://substrabac/model/toto"
+const headModelHash = modelHash
+const headModelAddress = modelAddress
+const trunkModelHash = "ccdbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482ecc"
+const trunkModelAddress = "https://substrabac/model/titi"
 const worker = "SampleOrg"
 const traintupleKey = "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+const compositeTraintupleKey = "57104c72d50215d8cfa288059fdf47bcc5f808f6685a5f08fa08f792cd782c68"
+const aggregatetupleKey = "af689258ffecdb5172b285b04475ac44941b7e6acd88a0d076059ce520cb0a95"
 
 var (
 	pipeline = flag.Bool("pipeline", false, "Print out the pipeline test output")
@@ -191,12 +204,117 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	if itemType == "algo" {
 		return resp, inpAlgo
 	}
-	// 6. Add traintuple
+	// 6. Add composite algo
+	inpCompositeAlgo := inputCompositeAlgo{}
+	args = inpCompositeAlgo.createDefault()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding composite algo with status %d and message %s", resp.Status, resp.Message)
+	if itemType == "compositeAlgo" {
+		return resp, inpCompositeAlgo
+	}
+	// 7. Add aggregate algo
+	inpAggregateAlgo := inputAggregateAlgo{}
+	args = inpAggregateAlgo.createDefault()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding aggregate algo with status %d and message %s", resp.Status, resp.Message)
+	if itemType == "aggregateAlgo" {
+		return resp, inpAggregateAlgo
+	}
+	// 8. Add traintuple
 	inpTraintuple := inputTraintuple{}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
-	return resp, inpTraintuple
+	if itemType == "traintuple" {
+		return resp, inpTraintuple
+	}
+	// 9. Add composite traintuple
+	inpCompositeTraintuple := inputCompositeTraintuple{}
+	args = inpCompositeTraintuple.createDefault()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding composite traintuple with status %d and message %s", resp.Status, resp.Message)
+	if itemType == "compositeTraintuple" {
+		return resp, inpCompositeTraintuple
+	}
+	// 10. Add aggregate tuple
+	inpAggregatetuple := inputAggregatetuple{}
+	args = inpAggregatetuple.createDefault()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding aggregate tuple with status %d and message %s", resp.Status, resp.Message)
+	if itemType == "aggregatetuple" {
+		return resp, inpAggregatetuple
+	}
+
+	return resp, inpAggregatetuple
+}
+
+func registerTraintuple(mockStub *MockStub, assetType AssetType) (key string, err error) {
+
+	randAlgoKey := GetRandomHash()
+
+	// 1. Generate and register random algo
+	// 2. Generate and register traintuple using that algo
+
+	switch assetType {
+	case CompositeTraintupleType:
+		inpAlgo := inputCompositeAlgo{inputAlgo{Hash: randAlgoKey}}
+		args := inpAlgo.createDefault()
+		resp := mockStub.MockInvoke("42", args)
+		if resp.Status != 200 {
+			err = fmt.Errorf("Failed to register random algo: %s", resp.Message)
+			return
+		}
+		inpTraintuple := inputCompositeTraintuple{AlgoKey: randAlgoKey}
+		inpTraintuple.fillDefaults()
+		args = inpTraintuple.getArgs()
+		resp = mockStub.MockInvoke("42", args)
+		if resp.Status != 200 {
+			err = fmt.Errorf("Failed to register traintuple: %s", resp.Message)
+			return
+		}
+		var _key struct{ Key string }
+		json.Unmarshal(resp.Payload, &_key)
+		return _key.Key, nil
+	case TraintupleType:
+		inpAlgo := inputAlgo{Hash: randAlgoKey}
+		args := inpAlgo.createDefault()
+		resp := mockStub.MockInvoke("42", args)
+		if resp.Status != 200 {
+			err = fmt.Errorf("Failed to register random algo: %s", resp.Message)
+			return
+		}
+		inpTraintuple := inputTraintuple{AlgoKey: randAlgoKey}
+		args = inpTraintuple.createDefault()
+		resp = mockStub.MockInvoke("42", args)
+		if resp.Status != 200 {
+			err = fmt.Errorf("Failed to register traintuple: %s", resp.Message)
+			return
+		}
+		var _key struct{ Key string }
+		json.Unmarshal(resp.Payload, &_key)
+		return _key.Key, nil
+	case AggregatetupleType:
+		inpAlgo := inputAggregateAlgo{inputAlgo{Hash: randAlgoKey}}
+		args := inpAlgo.createDefault()
+		resp := mockStub.MockInvoke("42", args)
+		if resp.Status != 200 {
+			err = fmt.Errorf("Failed to register random algo: %s", resp.Message)
+			return
+		}
+		inpTraintuple := inputAggregatetuple{AlgoKey: randAlgoKey}
+		args = inpTraintuple.createDefault()
+		resp = mockStub.MockInvoke("42", args)
+		if resp.Status != 200 {
+			err = fmt.Errorf("Failed to register traintuple: %s", resp.Message)
+			return
+		}
+		var _key struct{ Key string }
+		json.Unmarshal(resp.Payload, &_key)
+		return _key.Key, nil
+	default:
+		err = fmt.Errorf("Invalid asset type: %v", assetType)
+		return
+	}
 }
 
 func printResp(buf io.Writer, payload []byte) {
@@ -499,4 +617,14 @@ func TestQueryEmptyResponse(t *testing.T) {
 			assert.Equal(t, expectedPayload, resp.Payload, "payload is not an empty list")
 		})
 	}
+}
+
+var characterRunes = []rune("abcdef0123456789")
+
+func GetRandomHash() string {
+	b := make([]rune, 64)
+	for i := range b {
+		b[i] = characterRunes[rand.Intn(len(characterRunes))]
+	}
+	return string(b)
 }

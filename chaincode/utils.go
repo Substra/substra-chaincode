@@ -19,6 +19,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -117,4 +119,53 @@ func GetTxCreator(stub shim.ChaincodeStubInterface) (string, error) {
 	}
 
 	return sID.GetMspid(), nil
+}
+
+// LowerFirst returns the input string with the first letter lowercased
+func LowerFirst(s string) string {
+	if s == "" {
+		return ""
+	}
+	r, n := utf8.DecodeRuneInString(s)
+	return string(unicode.ToLower(r)) + s[n:]
+}
+
+// String returns a string representation for an asset type
+func (assetType AssetType) String() string {
+	switch assetType {
+	case ObjectiveType:
+		return "Objective"
+	case DataManagerType:
+		return "DataManager"
+	case DataSampleType:
+		return "DataSample"
+	case AlgoType:
+		return "Algo"
+	case CompositeAlgoType:
+		return "CompositeAlgo"
+	case AggregateAlgoType:
+		return "AggregateAlgo"
+	case TraintupleType:
+		return "Traintuple"
+	case CompositeTraintupleType:
+		return "CompositeTraintuple"
+	case AggregatetupleType:
+		return "Aggregatetuple"
+	case TesttupleType:
+		return "Testtuple"
+	default:
+		return fmt.Sprintf("(unknown asset type: %d)", assetType)
+	}
+}
+
+// String returns a string representation for a composite model type
+func (modelType CompositeModelType) String() string {
+	switch modelType {
+	case HeadType:
+		return "Head"
+	case TrunkType:
+		return "Trunk"
+	default:
+		return fmt.Sprintf("(unknown model type: %d)", modelType)
+	}
 }

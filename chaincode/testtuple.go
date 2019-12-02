@@ -102,23 +102,57 @@ func (testtuple *Testtuple) SetFromInput(db LedgerDB, inp inputTesttuple) error 
 //  - Status
 func (testtuple *Testtuple) SetFromTraintuple(db LedgerDB, traintupleKey string) error {
 
-	// check associated traintuple
-	traintuple, err := db.GetTraintuple(traintupleKey)
-	if err != nil {
-		return errors.BadRequest(err, "could not retrieve traintuple with key %s", traintupleKey)
-	}
+	var status, tupleCreator string
+	var permissions Permissions
+
 	creator, err := GetTxCreator(db.cc)
 	if err != nil {
 		return err
 	}
-	if !traintuple.Permissions.CanProcess(traintuple.Creator, creator) {
+	testtuple.TraintupleKey = traintupleKey
+	traintupleType, err := db.GetAssetType(traintupleKey)
+	if err != nil {
+		return errors.BadRequest(err, "key %s is not a valid asset", traintupleKey)
+	}
+	switch traintupleType {
+	case TraintupleType:
+		traintuple, err := db.GetTraintuple(traintupleKey)
+		if err != nil {
+			return errors.BadRequest(err, "could not retrieve traintuple with key %s", traintupleKey)
+		}
+		permissions = traintuple.Permissions
+		tupleCreator = traintuple.Creator
+		status = traintuple.Status
+		testtuple.ObjectiveKey = traintuple.ObjectiveKey
+		testtuple.AlgoKey = traintuple.AlgoKey
+	case CompositeTraintupleType:
+		compositeTraintuple, err := db.GetCompositeTraintuple(traintupleKey)
+		if err != nil {
+			return errors.BadRequest(err, "could not retrieve composite traintuple with key %s", traintupleKey)
+		}
+		permissions = compositeTraintuple.OutHeadModel.Permissions
+		tupleCreator = compositeTraintuple.Creator
+		status = compositeTraintuple.Status
+		testtuple.ObjectiveKey = compositeTraintuple.ObjectiveKey
+		testtuple.AlgoKey = compositeTraintuple.AlgoKey
+	case AggregatetupleType:
+		tuple, err := db.GetAggregatetuple(traintupleKey)
+		if err != nil {
+			return errors.BadRequest(err, "could not retrieve traintuple with key %s", traintupleKey)
+		}
+		permissions = tuple.Permissions
+		tupleCreator = tuple.Creator
+		status = tuple.Status
+		testtuple.ObjectiveKey = tuple.ObjectiveKey
+		testtuple.AlgoKey = tuple.AlgoKey
+	default:
+		return errors.BadRequest("key %s is not a valid traintuple", traintupleKey)
+	}
+
+	if !permissions.CanProcess(tupleCreator, creator) {
 		return errors.Forbidden("not authorized to process traintuple %s", traintupleKey)
 	}
-	testtuple.ObjectiveKey = traintuple.ObjectiveKey
-	testtuple.AlgoKey = traintuple.AlgoKey
-	testtuple.TraintupleKey = traintupleKey
-
-	switch status := traintuple.Status; status {
+	switch status {
 	case StatusDone:
 		testtuple.Status = StatusTodo
 	case StatusFailed:
