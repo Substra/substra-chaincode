@@ -9,19 +9,14 @@ env:
 branches:
   only:
     - master
-
-before_install:
-  - go install -u golang.org/x/lint
+    
+install: skip
 
 before_script:
-  - go install -u golang.org/x/lint
+  - go get -u golang.org/x/lint
 
 script:
-  - find / -type f -name golint 2>/dev/null
-  - echo $GOPATH
   - cd chaincode
-  - golint
-  - $GOPATH/bin/golint
   - go test -v ./...
   - go build
   - golint
