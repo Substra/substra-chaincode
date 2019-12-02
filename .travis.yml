@@ -18,6 +18,9 @@ before_script:
 script:
   - cd chaincode
   - go test -v ./...
-  - go build -v
-  - test -z "`go list ./... | grep -v /vendor/ | xargs -L1 golint`"
+  # Run golint on the modules we wrote (but not on /vendor). 
+  # Keep on going if linting fails.
+  - golint_stdout="`go list ./... | grep -v /vendor/ | xargs -L1 golint`"
+  - go build -v  
+  - [ -n "$golint_stdout" ] && echo "Lint error: $golint_stdout" && exit 1
 
