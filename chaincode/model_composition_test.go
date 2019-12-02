@@ -97,11 +97,7 @@ func TestModelComposition(t *testing.T) {
 
 				// succeed/fail parents
 				switch status {
-				case "successParent1":
-					fallthrough
-				case "successParent2":
-					fallthrough
-				case "successBoth":
+				case "successParent1", "successParent2", "successBoth":
 					if status == "successBoth" || status == "successParent1" {
 						_, err = trainSuccess(db, tt.parent1, parent1Key)
 						assert.NoError(t, err)

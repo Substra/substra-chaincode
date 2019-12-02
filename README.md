@@ -31,19 +31,27 @@ Note for internal use only: See the [technical specifications](https://github.co
 
 ### Implemented smart contracts
 
+- `createAggregatetuple`
 - `createCompositeTraintuple`
 - `createComputePlan`
 - `createTesttuple`
 - `createTraintuple`
+- `logFailAggregate`
 - `logFailCompositeTrain`
 - `logFailTest`
 - `logFailTrain`
+- `logStartAggregate`
 - `logStartCompositeTrain`
 - `logStartTest`
 - `logStartTrain`
+- `logSuccessAggregate`
 - `logSuccessCompositeTrain`
 - `logSuccessTest`
 - `logSuccessTrain`
+- `queryAggregateAlgo`
+- `queryAggregateAlgos`
+- `queryAggregatetuple`
+- `queryAggregatetuples`
 - `queryAlgo`
 - `queryAlgos`
 - `queryCompositeAlgo`
@@ -67,6 +75,7 @@ Note for internal use only: See the [technical specifications](https://github.co
 - `queryTesttuples`
 - `queryTraintuple`
 - `queryTraintuples`
+- `registerAggregateAlgo`
 - `registerAlgo`
 - `registerCompositeAlgo`
 - `registerDataManager`

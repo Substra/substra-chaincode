@@ -326,19 +326,21 @@ const (
 // Return an error if the traintupleKey was not found.
 func (db *LedgerDB) GetOutModelHashDress(traintupleKey string, modelType CompositeModelType, allowedAssetTypes []AssetType) (*HashDress, error) {
 	for _, assetType := range allowedAssetTypes {
-		switch AssetType(assetType) {
+		switch assetType {
 		case CompositeTraintupleType:
 			tuple, err := db.GetCompositeTraintuple(traintupleKey)
-			if err == nil {
-				switch modelType {
-				case HeadType:
-					return tuple.OutHeadModel.OutModel, nil
-				case TrunkType:
-					return tuple.OutTrunkModel.OutModel, nil
-				default:
-					return nil, fmt.Errorf("GetOutModelHashDress: Unsupported composite model type %s", modelType)
-				}
+			if err != nil {
+				continue
 			}
+			switch modelType {
+			case HeadType:
+				return tuple.OutHeadModel.OutModel, nil
+			case TrunkType:
+				return tuple.OutTrunkModel.OutModel, nil
+			default:
+				return nil, fmt.Errorf("GetOutModelHashDress: Unsupported composite model type %s", modelType)
+			}
+
 		case TraintupleType:
 			tuple, err := db.GetTraintuple(traintupleKey)
 			if err == nil {
@@ -354,14 +356,11 @@ func (db *LedgerDB) GetOutModelHashDress(traintupleKey string, modelType Composi
 		}
 	}
 
-	allowedStr := ""
-	for idx, assetType := range allowedAssetTypes {
-		if idx != 0 {
-			allowedStr = allowedStr + ", "
-		}
-		allowedStr = allowedStr + assetType.String()
-	}
-	return nil, errors.NotFound("GetOutModelHashDress: Could not find traintuple %s with key \"%s\". Allowed types: {%s}.", modelType, traintupleKey, allowedStr)
+	return nil, errors.NotFound(
+		"GetOutModelHashDress: Could not find traintuple %s with key \"%s\". Allowed types: %v.",
+		modelType,
+		traintupleKey,
+		allowedAssetTypes)
 }
 
 // GetTesttuple fetches a Testtuple from the ledger using its unique key
