@@ -10,6 +10,11 @@ branches:
   only:
     - master
 
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod   
+    
 install: skip
 
 before_script:
@@ -20,4 +25,3 @@ script:
   - golint
   - go test -v ./...
   - go build -v
-
