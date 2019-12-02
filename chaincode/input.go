@@ -15,6 +15,7 @@
 package main
 
 var (
+	// OpenPermissions represent struct for default public permissions that could apply to assets
 	OpenPermissions = inputPermissions{
 		Process: inputPermission{
 			Public:        true,
