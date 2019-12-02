@@ -14,10 +14,10 @@ install: skip
 
 before_script:
   - go get golang.org/x/lint
+  - export PATH=$GOPATH/bin:$PATH
 
 script:
   - cd chaincode
   - golint
   - go test -v ./...
   - go build
-  
