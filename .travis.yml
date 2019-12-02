@@ -20,5 +20,5 @@ script:
   - go test -v ./...
   - golint_stdout="`go list ./... | grep -v /vendor/ | xargs golint`"
   - go build -v  
-  - test -z "$golint_stdout" || (echo -e "golint error(s):\n$golint_stdout" && exit 1)
+  - test -z "$golint_stdout" || (echo -e "FAIL:" "golint error(s):\n$golint_stdout" && exit 1)
 
