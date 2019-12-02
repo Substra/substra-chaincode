@@ -12,7 +12,7 @@ branches:
 
 install: skip
 
-before_install:
+before_script:
   - GO111MODULE=off go get golang.org/x/lint
 
 script:
