@@ -199,16 +199,17 @@ func (outputTraintuple *outputTraintuple) Fill(db LedgerDB, traintuple Traintupl
 }
 
 type outputTesttuple struct {
-	Key       string         `json:"key"`
-	Algo      *HashDressName `json:"algo"`
-	Certified bool           `json:"certified"`
-	Creator   string         `json:"creator"`
-	Dataset   *TtDataset     `json:"dataset"`
-	Log       string         `json:"log"`
-	Model     *Model         `json:"model"`
-	Objective *TtObjective   `json:"objective"`
-	Status    string         `json:"status"`
-	Tag       string         `json:"tag"`
+	Key            string         `json:"key"`
+	Algo           *HashDressName `json:"algo"`
+	Certified      bool           `json:"certified"`
+	Creator        string         `json:"creator"`
+	Dataset        *TtDataset     `json:"dataset"`
+	Log            string         `json:"log"`
+	TraintupleType string         `json:"traintupleType"`
+	TraintupleKey  string         `json:"traintupleKey"`
+	Objective      *TtObjective   `json:"objective"`
+	Status         string         `json:"status"`
+	Tag            string         `json:"tag"`
 }
 
 func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
@@ -217,14 +218,37 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 	out.Creator = in.Creator
 	out.Dataset = in.Dataset
 	out.Log = in.Log
-	out.Model = in.Model
+	out.TraintupleKey = in.TraintupleKey
 	out.Status = in.Status
 	out.Tag = in.Tag
 
-	// fill algo
-	algo, err := db.GetAlgo(in.AlgoKey)
+	// fill type
+	traintupleType, err := db.GetAssetType(in.TraintupleKey)
 	if err != nil {
-		return fmt.Errorf("could not retrieve algo with key %s - %s", in.AlgoKey, err.Error())
+		return fmt.Errorf("could not retrieve traintuple type with key %s - %s", in.TraintupleKey, err.Error())
+	}
+	out.TraintupleType = LowerFirst(traintupleType.String())
+
+	// fill algo
+	var algo Algo
+	switch traintupleType {
+	case TraintupleType:
+		algo, err = db.GetAlgo(in.AlgoKey)
+		if err != nil {
+			return fmt.Errorf("could not retrieve algo with key %s - %s", in.AlgoKey, err.Error())
+		}
+	case CompositeTraintupleType:
+		compositeAlgo, err := db.GetCompositeAlgo(in.AlgoKey)
+		if err != nil {
+			return fmt.Errorf("could not retrieve composite algo with key %s - %s", in.AlgoKey, err.Error())
+		}
+		algo = compositeAlgo.Algo
+	case AggregatetupleType:
+		aggregateAlgo, err := db.GetAggregateAlgo(in.AlgoKey)
+		if err != nil {
+			return fmt.Errorf("could not retrieve aggregate algo with key %s - %s", in.AlgoKey, err.Error())
+		}
+		algo = aggregateAlgo.Algo
 	}
 	out.Algo = &HashDressName{
 		Name:           algo.Name,
@@ -251,20 +275,26 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 }
 
 type outputModelDetails struct {
-	Traintuple             outputTraintuple  `json:"traintuple"`
-	Testtuple              outputTesttuple   `json:"testtuple"`
-	NonCertifiedTesttuples []outputTesttuple `json:"nonCertifiedTesttuples"`
+	Aggregatetuple         *outputAggregatetuple      `json:"aggregatetuple,omitempty"`
+	CompositeTraintuple    *outputCompositeTraintuple `json:"compositeTraintuple,omitempty"`
+	Traintuple             *outputTraintuple          `json:"traintuple,omitempty"`
+	Testtuple              outputTesttuple            `json:"testtuple"`
+	NonCertifiedTesttuples []outputTesttuple          `json:"nonCertifiedTesttuples"`
 }
 
 type outputModel struct {
-	Traintuple outputTraintuple `json:"traintuple"`
-	Testtuple  outputTesttuple  `json:"testtuple"`
+	Aggregatetuple      *outputAggregatetuple      `json:"aggregatetuple,omitempty"`
+	CompositeTraintuple *outputCompositeTraintuple `json:"compositeTraintuple,omitempty"`
+	Traintuple          *outputTraintuple          `json:"traintuple,omitempty"`
+	Testtuple           outputTesttuple            `json:"testtuple"`
 }
 
 // TuplesEvent is the collection of tuples sent in an event
 type TuplesEvent struct {
-	Testtuples  []outputTesttuple  `json:"testtuple"`
-	Traintuples []outputTraintuple `json:"traintuple"`
+	Testtuples           []outputTesttuple           `json:"testtuple"`
+	Traintuples          []outputTraintuple          `json:"traintuple"`
+	CompositeTraintuples []outputCompositeTraintuple `json:"compositeTraintuple"`
+	Aggregatetuples      []outputAggregatetuple      `json:"aggregatetuple"`
 }
 
 // SetTesttuples add one or several testtuples to the event struct
@@ -325,12 +355,12 @@ func (out outputBoardTuples) Less(i, j int) bool {
 }
 
 type outputBoardTuple struct {
-	Algo    *HashDressName `json:"algo"`
-	Creator string         `json:"creator"`
-	Key     string         `json:"key"`
-	Model   *Model         `json:"model"`
-	Perf    float32        `json:"perf"`
-	Tag     string         `json:"tag"`
+	Algo          *HashDressName `json:"algo"`
+	Creator       string         `json:"creator"`
+	Key           string         `json:"key"`
+	TraintupleKey string         `json:"traintupleKey"`
+	Perf          float32        `json:"perf"`
+	Tag           string         `json:"tag"`
 }
 
 func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string) error {
@@ -345,8 +375,17 @@ func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string
 		Hash:           in.AlgoKey,
 		StorageAddress: algo.StorageAddress,
 	}
-	out.Model = in.Model
+	out.TraintupleKey = in.TraintupleKey
 	out.Perf = in.Dataset.Perf
 	out.Tag = in.Tag
+
 	return nil
+}
+
+type outputComputePlanDetails struct {
+	ComputePlanID string   `json:"computePlanID"`
+	AlgoKey       string   `json:"algoKey"`
+	ObjectiveKey  string   `json:"objectiveKey"`
+	Traintuples   []string `json:"traintuples"`
+	Testtuples    []string `json:"testtuples"`
 }

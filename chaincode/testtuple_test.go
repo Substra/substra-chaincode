@@ -16,6 +16,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -111,4 +113,158 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 409, resp.Status)
 	assert.Contains(t, resp.Message, "already exists")
+}
+
+func TestQueryTesttuple(t *testing.T) {
+	testTable := []struct {
+		traintupleKey              string
+		expectedTypeString         string
+		expectedAlgoName           string
+		expectedAlgoHash           string
+		expectedAlgoStorageAddress string
+	}{
+		{
+			traintupleKey:              traintupleKey,
+			expectedTypeString:         "traintuple",
+			expectedAlgoName:           algoName,
+			expectedAlgoHash:           algoHash,
+			expectedAlgoStorageAddress: algoStorageAddress,
+		},
+		{
+			traintupleKey:              compositeTraintupleKey,
+			expectedTypeString:         "compositeTraintuple",
+			expectedAlgoName:           compositeAlgoName,
+			expectedAlgoHash:           compositeAlgoHash,
+			expectedAlgoStorageAddress: compositeAlgoStorageAddress,
+		},
+		{
+			traintupleKey:              aggregatetupleKey,
+			expectedTypeString:         "aggregatetuple",
+			expectedAlgoName:           aggregateAlgoName,
+			expectedAlgoHash:           aggregateAlgoHash,
+			expectedAlgoStorageAddress: aggregateAlgoStorageAddress,
+		},
+	}
+	for _, tt := range testTable {
+		t.Run("TestQueryTesttuple"+tt.expectedTypeString, func(t *testing.T) {
+			scc := new(SubstraChaincode)
+			mockStub := NewMockStubWithRegisterNode("substra", scc)
+			registerItem(t, *mockStub, "aggregatetuple")
+
+			// create testtuple
+			dataSampleKeys := []string{trainDataSampleHash1, trainDataSampleHash2}
+			inpTesttuple := inputTesttuple{
+				TraintupleKey:  tt.traintupleKey,
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: dataSampleKeys,
+			}
+			inpTesttuple.fillDefaults()
+			resp := mockStub.MockInvoke("42", inpTesttuple.getArgs())
+			res := map[string]string{}
+			json.Unmarshal(resp.Payload, &res)
+			testtupleKey := res["key"]
+
+			// query testtuple
+			args := [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
+			resp = mockStub.MockInvoke("42", args)
+			respTesttuple := resp.Payload
+			testtuple := outputTesttuple{}
+			bytesToStruct(respTesttuple, &testtuple)
+
+			// assert
+			assert.Equal(t, worker, testtuple.Creator)
+			assert.Equal(t, worker, testtuple.Dataset.Worker)
+			assert.Equal(t, inpTesttuple.TraintupleKey, testtuple.TraintupleKey)
+			assert.Equal(t, tt.expectedTypeString, testtuple.TraintupleType)
+			assert.Equal(t, tt.expectedAlgoName, testtuple.Algo.Name)
+			assert.Equal(t, tt.expectedAlgoHash, testtuple.Algo.Hash)
+			assert.Equal(t, tt.expectedAlgoStorageAddress, testtuple.Algo.StorageAddress)
+			assert.Equal(t, StatusWaiting, testtuple.Status)
+			assert.Equal(t, objectiveDescriptionHash, testtuple.Objective.Key)
+			assert.Equal(t, objectiveMetricsHash, testtuple.Objective.Metrics.Hash)
+			assert.Equal(t, objectiveMetricsStorageAddress, testtuple.Objective.Metrics.StorageAddress)
+			assert.Equal(t, "", testtuple.Log)
+			assert.Equal(t, "", testtuple.Tag)
+			assert.EqualValues(t, 0, testtuple.Dataset.Perf)
+			assert.Equal(t, dataSampleKeys, testtuple.Dataset.DataSampleKeys)
+			assert.Equal(t, dataManagerOpenerHash, testtuple.Dataset.OpenerHash)
+			assert.False(t, testtuple.Certified)
+		})
+	}
+}
+
+func TestTesttupleOnCompositeTraintuple(t *testing.T) {
+	for _, status := range []string{StatusDone, StatusFailed} {
+		testName := fmt.Sprintf("TestTesttupleOnCompositeTraintuple_%s", status)
+		t.Run(testName, func(t *testing.T) {
+			scc := new(SubstraChaincode)
+			mockStub := NewMockStubWithRegisterNode("substra", scc)
+
+			registerItem(t, *mockStub, "compositeTraintuple")
+
+			inp := inputTesttuple{
+				TraintupleKey: compositeTraintupleKey,
+			}
+			// Create a testtuple before training
+			args := inp.createDefault()
+			resp := mockStub.MockInvoke("42", args)
+			assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
+			values := map[string]string{}
+			bytesToStruct(resp.Payload, &values)
+			testTupleKey := values["key"]
+
+			// Start training
+			mockStub.MockTransactionStart("42")
+			db := NewLedgerDB(mockStub)
+			_, err := logStartCompositeTrain(db, assetToArgs(inputHash{Key: compositeTraintupleKey}))
+			assert.NoError(t, err)
+
+			// Succeed/fail training
+			expectedTesttupleStatus := ""
+			switch status {
+			case StatusDone:
+				inLog := inputLogSuccessCompositeTrain{}
+				inLog.fillDefaults()
+				_, err = logSuccessCompositeTrain(db, assetToArgs(inLog))
+				assert.NoError(t, err)
+				expectedTesttupleStatus = StatusTodo
+			case StatusFailed:
+				inLog := inputLogFailTrain{}
+				inLog.Key = compositeTraintupleKey
+				inLog.fillDefaults()
+				_, err = logFailCompositeTrain(db, assetToArgs(inLog))
+				assert.NoError(t, err)
+				expectedTesttupleStatus = StatusFailed
+			default:
+				assert.NoError(t, fmt.Errorf("Unknown status %s", status))
+			}
+
+			testTuple, err := queryTesttuple(db, assetToArgs(inputHash{Key: testTupleKey}))
+			assert.NoError(t, err)
+			assert.Equal(t, expectedTesttupleStatus, testTuple.Status)
+			assert.Equal(t, compositeTraintupleKey, testTuple.TraintupleKey)
+
+			// Create a new testtuple *after* the traintuple has been set to failed/succeeded
+			inp.DataManagerKey = dataManagerOpenerHash
+			inp.DataSampleKeys = []string{trainDataSampleHash1}
+			args = inp.createDefault()
+			resp = mockStub.MockInvoke("42", args)
+
+			switch status {
+			case StatusDone:
+				assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
+				values = map[string]string{}
+				bytesToStruct(resp.Payload, &values)
+				testTupleKey = values["key"]
+				testTuple, err := queryTesttuple(db, assetToArgs(inputHash{Key: testTupleKey}))
+				assert.NoError(t, err)
+				assert.Equal(t, StatusTodo, testTuple.Status)
+			case StatusFailed:
+				assert.EqualValues(t, 400, resp.Status, "status should show an error since the traintuple is failed")
+				assert.Contains(t, resp.Message, "could not register this testtuple")
+			default:
+				assert.NoError(t, fmt.Errorf("Unknown status %s", status))
+			}
+		})
+	}
 }

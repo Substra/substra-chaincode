@@ -60,7 +60,8 @@ func (testtuple *Testtuple) SetFromInput(db LedgerDB, inp inputTesttuple) error 
 
 	var dataManagerKey string
 	var dataSampleKeys []string
-	if len(inp.DataManagerKey) > 0 && len(inp.DataSampleKeys) > 0 {
+	switch {
+	case len(inp.DataManagerKey) > 0 && len(inp.DataSampleKeys) > 0:
 		// non-certified testtuple
 		// test dataset are specified by the user
 		dataSampleKeys = inp.DataSampleKeys
@@ -71,13 +72,13 @@ func (testtuple *Testtuple) SetFromInput(db LedgerDB, inp inputTesttuple) error 
 		dataManagerKey = inp.DataManagerKey
 		sort.Strings(dataSampleKeys)
 		testtuple.Certified = objectiveDataManagerKey == dataManagerKey && reflect.DeepEqual(objectiveDataSampleKeys, dataSampleKeys)
-	} else if len(inp.DataManagerKey) > 0 || len(inp.DataSampleKeys) > 0 {
+	case len(inp.DataManagerKey) > 0 || len(inp.DataSampleKeys) > 0:
 		return errors.BadRequest("invalid input: dataManagerKey and dataSampleKey should be provided together")
-	} else if objective.TestDataset != nil {
+	case objective.TestDataset != nil:
 		dataSampleKeys = objectiveDataSampleKeys
 		dataManagerKey = objectiveDataManagerKey
 		testtuple.Certified = true
-	} else {
+	default:
 		return errors.BadRequest("can not create a certified testtuple, no data associated with objective %s", testtuple.ObjectiveKey)
 	}
 	// retrieve dataManager owner
@@ -101,29 +102,57 @@ func (testtuple *Testtuple) SetFromInput(db LedgerDB, inp inputTesttuple) error 
 //  - Status
 func (testtuple *Testtuple) SetFromTraintuple(db LedgerDB, traintupleKey string) error {
 
-	// check associated traintuple
-	traintuple, err := db.GetTraintuple(traintupleKey)
-	if err != nil {
-		return errors.BadRequest(err, "could not retrieve traintuple with key %s", traintupleKey)
-	}
+	var status, tupleCreator string
+	var permissions Permissions
+
 	creator, err := GetTxCreator(db.cc)
 	if err != nil {
 		return err
 	}
-	if !traintuple.Permissions.CanProcess(traintuple.Creator, creator) {
-		return errors.Forbidden("not authorized to process traintuple %s", traintupleKey)
+	testtuple.TraintupleKey = traintupleKey
+	traintupleType, err := db.GetAssetType(traintupleKey)
+	if err != nil {
+		return errors.BadRequest(err, "key %s is not a valid asset", traintupleKey)
 	}
-	testtuple.ObjectiveKey = traintuple.ObjectiveKey
-	testtuple.AlgoKey = traintuple.AlgoKey
-	testtuple.Model = &Model{
-		TraintupleKey: traintupleKey,
-	}
-	if traintuple.OutModel != nil {
-		testtuple.Model.Hash = traintuple.OutModel.Hash
-		testtuple.Model.StorageAddress = traintuple.OutModel.StorageAddress
+	switch traintupleType {
+	case TraintupleType:
+		traintuple, err := db.GetTraintuple(traintupleKey)
+		if err != nil {
+			return errors.BadRequest(err, "could not retrieve traintuple with key %s", traintupleKey)
+		}
+		permissions = traintuple.Permissions
+		tupleCreator = traintuple.Creator
+		status = traintuple.Status
+		testtuple.ObjectiveKey = traintuple.ObjectiveKey
+		testtuple.AlgoKey = traintuple.AlgoKey
+	case CompositeTraintupleType:
+		compositeTraintuple, err := db.GetCompositeTraintuple(traintupleKey)
+		if err != nil {
+			return errors.BadRequest(err, "could not retrieve composite traintuple with key %s", traintupleKey)
+		}
+		permissions = compositeTraintuple.OutHeadModel.Permissions
+		tupleCreator = compositeTraintuple.Creator
+		status = compositeTraintuple.Status
+		testtuple.ObjectiveKey = compositeTraintuple.ObjectiveKey
+		testtuple.AlgoKey = compositeTraintuple.AlgoKey
+	case AggregatetupleType:
+		tuple, err := db.GetAggregatetuple(traintupleKey)
+		if err != nil {
+			return errors.BadRequest(err, "could not retrieve traintuple with key %s", traintupleKey)
+		}
+		permissions = tuple.Permissions
+		tupleCreator = tuple.Creator
+		status = tuple.Status
+		testtuple.ObjectiveKey = tuple.ObjectiveKey
+		testtuple.AlgoKey = tuple.AlgoKey
+	default:
+		return errors.BadRequest("key %s is not a valid traintuple", traintupleKey)
 	}
 
-	switch status := traintuple.Status; status {
+	if !permissions.CanProcess(tupleCreator, creator) {
+		return errors.Forbidden("not authorized to process traintuple %s", traintupleKey)
+	}
+	switch status {
 	case StatusDone:
 		testtuple.Status = StatusTodo
 	case StatusFailed:
@@ -140,7 +169,7 @@ func (testtuple *Testtuple) SetFromTraintuple(db LedgerDB, traintupleKey string)
 func (testtuple *Testtuple) GetKey() string {
 	// create testtuple key and check if it already exists
 	hashKeys := []string{
-		testtuple.Model.TraintupleKey,
+		testtuple.TraintupleKey,
 		testtuple.Dataset.OpenerHash,
 		testtuple.Creator,
 	}
@@ -166,7 +195,7 @@ func (testtuple *Testtuple) Save(db LedgerDB, testtupleKey string) error {
 	if err = db.CreateIndex("testtuple~worker~status~key", []string{"testtuple", testtuple.Dataset.Worker, testtuple.Status, testtupleKey}); err != nil {
 		return err
 	}
-	if err = db.CreateIndex("testtuple~traintuple~certified~key", []string{"testtuple", testtuple.Model.TraintupleKey, strconv.FormatBool(testtuple.Certified), testtupleKey}); err != nil {
+	if err = db.CreateIndex("testtuple~traintuple~certified~key", []string{"testtuple", testtuple.TraintupleKey, strconv.FormatBool(testtuple.Certified), testtupleKey}); err != nil {
 		return err
 	}
 	if testtuple.Tag != "" {
@@ -371,10 +400,7 @@ func getOutputTesttuples(db LedgerDB, testtupleKeys []string) (outTesttuples []o
 // validateNewStatus verifies that the new status is consistent with the tuple current status
 func (testtuple *Testtuple) validateNewStatus(db LedgerDB, status string) error {
 	// check validity of worker and change of status
-	if err := checkUpdateTuple(db, testtuple.Dataset.Worker, testtuple.Status, status); err != nil {
-		return err
-	}
-	return nil
+	return checkUpdateTuple(db, testtuple.Dataset.Worker, testtuple.Status, status)
 }
 
 // commitStatusUpdate update the testtuple status in the ledger

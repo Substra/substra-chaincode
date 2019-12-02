@@ -29,7 +29,7 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
 	inpObjective := inputObjective{DescriptionHash: objHash}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
@@ -56,7 +56,7 @@ func TestTraintupleWithSingleDatasample(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
 	inpObjective := inputObjective{DescriptionHash: objHash}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
@@ -86,10 +86,10 @@ func TestTraintupleWithSingleDatasample(t *testing.T) {
 
 func TestTraintupleWithDuplicatedDatasamples(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
 	inpObjective := inputObjective{DescriptionHash: objHash}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
@@ -239,8 +239,7 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 		ComputePlanID: key}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 400, resp.Status, resp.Message, "sould fail for it doesn't have the same algo key")
-	assert.Contains(t, resp.Message, "does not have the same algo key")
+	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able to create a traintuple with the same ComputePlanID and different algo keys")
 }
 
 func TestTraintuple(t *testing.T) {

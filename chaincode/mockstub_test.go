@@ -44,6 +44,9 @@ const (
 // MockStub is an implementation of ChaincodeStubInterface for unit testing chaincode.
 // Use this instead of ChaincodeStub in your chaincode's unit test calls to Init or Invoke.
 type MockStub struct {
+	// The transaction creator
+	Creator string
+
 	// arguments the stub was called with
 	args [][]byte
 
@@ -398,7 +401,7 @@ yuGnBXj8ytqU0CwIPX4WecigUCAkVDNx
 
 func (stub *MockStub) GetCreator() ([]byte, error) {
 	sid := &msp.SerializedIdentity{
-		Mspid:   "SampleOrg",
+		Mspid:   stub.Creator,
 		IdBytes: []byte(fakeCertificate),
 	}
 
@@ -478,6 +481,7 @@ func (stub *MockStub) GetPrivateDataValidationParameter(collection, key string) 
 func NewMockStub(name string, cc shim.Chaincode) *MockStub {
 	mockLogger.Debug("MockStub(", name, cc, ")")
 	s := new(MockStub)
+	s.Creator = worker
 	s.Name = name
 	s.cc = cc
 	s.State = make(map[string][]byte)

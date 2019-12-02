@@ -1,11 +1,25 @@
 # substra-chaincode
 Chaincode for the Substra platform
 
-> :warning: This project is under active development. Please, wait some times before using it...
+> :warning: This project is under active development. Please wait a while before using it...
 
 ## License
 
 This project is developed under the Apache License, Version 2.0 (Apache-2.0), located in the [LICENSE](./LICENSE) file.
+
+## Local development
+
+### Prerequisites
+
+go version 1.11.x
+
+### Run the tests
+
+```
+cd chaincode/
+go test
+```
+
 ## Devmode
 
 See [chaincode-docker-devmode](./chaincode-docker-devmode/README.rst)
@@ -17,37 +31,59 @@ Note for internal use only: See the [technical specifications](https://github.co
 
 ### Implemented smart contracts
 
+- `createAggregatetuple`
+- `createCompositeTraintuple`
 - `createComputePlan`
 - `createTesttuple`
 - `createTraintuple`
+- `logFailAggregate`
+- `logFailCompositeTrain`
 - `logFailTest`
 - `logFailTrain`
+- `logStartAggregate`
+- `logStartCompositeTrain`
 - `logStartTest`
 - `logStartTrain`
+- `logSuccessAggregate`
+- `logSuccessCompositeTrain`
 - `logSuccessTest`
 - `logSuccessTrain`
+- `queryAggregateAlgo`
+- `queryAggregateAlgos`
+- `queryAggregatetuple`
+- `queryAggregatetuples`
 - `queryAlgo`
 - `queryAlgos`
+- `queryCompositeAlgo`
+- `queryCompositeAlgos`
+- `queryCompositeTraintuple`
+- `queryCompositeTraintuples`
+- `queryComputePlan`
+- `queryComputePlans`
 - `queryDataManager`
 - `queryDataManagers`
+- `queryDataSamples`
 - `queryDataset`
 - `queryFilter`
 - `queryModelDetails`
 - `queryModels`
+- `queryNodes`
 - `queryObjective`
+- `queryObjectiveLeaderboard`
 - `queryObjectives`
 - `queryTesttuple`
 - `queryTesttuples`
 - `queryTraintuple`
 - `queryTraintuples`
+- `registerAggregateAlgo`
 - `registerAlgo`
+- `registerCompositeAlgo`
 - `registerDataManager`
 - `registerDataSample`
+- `registerNode`
 - `registerObjective`
 - `updateDataManager`
 - `updateDataSample`
-- `registerNode`
-- `queryNodes`
 
 ### Examples
 
@@ -739,11 +775,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   },
   "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
   "log": "",
-  "model": {
-   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-   "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-  },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "metrics": {
@@ -752,7 +783,9 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
    }
   },
   "status": "todo",
-  "tag": ""
+  "tag": "",
+  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+  "traintupleType": "traintuple"
  },
  {
   "algo": {
@@ -773,11 +806,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   },
   "key": "c5f71e7a53c8a88af3e9b0311eaec68abd30718a388e8f8b45b0547ef2289dcd",
   "log": "",
-  "model": {
-   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-   "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-  },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "metrics": {
@@ -786,7 +814,9 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
    }
   },
   "status": "todo",
-  "tag": ""
+  "tag": "",
+  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+  "traintupleType": "traintuple"
  }
 ]
 ```
@@ -824,11 +854,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"5ae68332a1
  },
  "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
  "log": "",
- "model": {
-  "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-  "storageAddress": "https://substrabac/model/toto",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
- },
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
   "metrics": {
@@ -837,7 +862,9 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"5ae68332a1
   }
  },
  "status": "doing",
- "tag": ""
+ "tag": "",
+ "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+ "traintupleType": "traintuple"
 }
 ```
 #### ------------ Log Success Testing ------------
@@ -876,11 +903,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"5ae68332
  },
  "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
  "log": "no error, ah ah ah",
- "model": {
-  "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-  "storageAddress": "https://substrabac/model/toto",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
- },
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
   "metrics": {
@@ -889,7 +911,9 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"5ae68332
   }
  },
  "status": "done",
- "tag": ""
+ "tag": "",
+ "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+ "traintupleType": "traintuple"
 }
 ```
 #### ------------ Query Testtuple from its key ------------
@@ -926,11 +950,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"5ae68332a
  },
  "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
  "log": "no error, ah ah ah",
- "model": {
-  "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-  "storageAddress": "https://substrabac/model/toto",
-  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
- },
  "objective": {
   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
   "metrics": {
@@ -939,7 +958,9 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"5ae68332a
   }
  },
  "status": "done",
- "tag": ""
+ "tag": "",
+ "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+ "traintupleType": "traintuple"
 }
 ```
 #### ------------ Query all Testtuples ------------
@@ -969,11 +990,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   },
   "key": "d009acea2d213bc7149ee15b0eb23217e7f06154b79c7046a73eb13a50c3f9dc",
   "log": "",
-  "model": {
-   "hash": "",
-   "storageAddress": "",
-   "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
-  },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "metrics": {
@@ -982,7 +998,9 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    }
   },
   "status": "waiting",
-  "tag": ""
+  "tag": "",
+  "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab",
+  "traintupleType": "traintuple"
  },
  {
   "algo": {
@@ -1003,11 +1021,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   },
   "key": "c5f71e7a53c8a88af3e9b0311eaec68abd30718a388e8f8b45b0547ef2289dcd",
   "log": "",
-  "model": {
-   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-   "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-  },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "metrics": {
@@ -1016,7 +1029,9 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    }
   },
   "status": "todo",
-  "tag": ""
+  "tag": "",
+  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+  "traintupleType": "traintuple"
  },
  {
   "algo": {
@@ -1037,11 +1052,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   },
   "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
   "log": "no error, ah ah ah",
-  "model": {
-   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-   "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-  },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "metrics": {
@@ -1050,7 +1060,9 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    }
   },
   "status": "done",
-  "tag": ""
+  "tag": "",
+  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+  "traintupleType": "traintuple"
  }
 ]
 ```
@@ -1090,11 +1102,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
    },
    "key": "c5f71e7a53c8a88af3e9b0311eaec68abd30718a388e8f8b45b0547ef2289dcd",
    "log": "",
-   "model": {
-    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-    "storageAddress": "https://substrabac/model/toto",
-    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-   },
    "objective": {
     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "metrics": {
@@ -1103,7 +1110,9 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
     }
    },
    "status": "todo",
-   "tag": ""
+   "tag": "",
+   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+   "traintupleType": "traintuple"
   }
  ],
  "testtuple": {
@@ -1125,11 +1134,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
   },
   "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
   "log": "no error, ah ah ah",
-  "model": {
-   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-   "storageAddress": "https://substrabac/model/toto",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-  },
   "objective": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "metrics": {
@@ -1138,7 +1142,9 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
    }
   },
   "status": "done",
-  "tag": ""
+  "tag": "",
+  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+  "traintupleType": "traintuple"
  },
  "traintuple": {
   "algo": {
@@ -1211,11 +1217,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    },
    "key": "d009acea2d213bc7149ee15b0eb23217e7f06154b79c7046a73eb13a50c3f9dc",
    "log": "",
-   "model": {
-    "hash": "",
-    "storageAddress": "",
-    "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
-   },
    "objective": {
     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "metrics": {
@@ -1224,7 +1225,9 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     }
    },
    "status": "waiting",
-   "tag": ""
+   "tag": "",
+   "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab",
+   "traintupleType": "traintuple"
   },
   "traintuple": {
    "algo": {
@@ -1291,11 +1294,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    },
    "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
    "log": "no error, ah ah ah",
-   "model": {
-    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-    "storageAddress": "https://substrabac/model/toto",
-    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-   },
    "objective": {
     "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "metrics": {
@@ -1304,7 +1302,9 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     }
    },
    "status": "done",
-   "tag": ""
+   "tag": "",
+   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+   "traintupleType": "traintuple"
   },
   "traintuple": {
    "algo": {
@@ -1563,14 +1563,58 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
    },
    "creator": "SampleOrg",
    "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
-   "model": {
-    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-    "storageAddress": "https://substrabac/model/toto",
-    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-   },
    "perf": 0.9,
-   "tag": ""
+   "tag": "",
+   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
   }
  ]
 }
+```
+Smart contract: `queryComputePlan`
+
+##### JSON Inputs:
+```go
+{
+ "key": string (required,len=64,hexadecimal),
+}
+```
+##### Command peer example:
+```bash
+peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369\"}"]}' -C myc
+```
+##### Command output:
+```json
+{
+ "algoKey": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+ "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+ "objectiveKey": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+ "testtuples": [
+  "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96"
+ ],
+ "traintuples": [
+  "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+  "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
+ ]
+}
+```
+##### Command peer example:
+```bash
+peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
+```
+##### Command output:
+```json
+[
+ {
+  "algoKey": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+  "objectiveKey": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+  "testtuples": [
+   "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96"
+  ],
+  "traintuples": [
+   "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+   "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
+  ]
+ }
+]
 ```

@@ -27,8 +27,14 @@ const (
 	DataManagerType
 	DataSampleType
 	AlgoType
+	CompositeAlgoType
+	AggregateAlgoType
 	TraintupleType
+	CompositeTraintupleType
+	AggregatetupleType
 	TesttupleType
+	// when adding a new type here, don't forget to update
+	// the String() function in utils.go
 )
 
 // Objective is the representation of one of the element type stored in the ledger
@@ -72,6 +78,16 @@ type Algo struct {
 	Permissions    Permissions `json:"permissions"`
 }
 
+// CompositeAlgo is the representation of one of the element type stored in the ledger
+type CompositeAlgo struct {
+	Algo
+}
+
+// AggregateAlgo is the representation of one of the element type stored in the ledger
+type AggregateAlgo struct {
+	Algo
+}
+
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
 	AssetType     AssetType   `json:"assetType"`
@@ -90,19 +106,61 @@ type Traintuple struct {
 	Tag           string      `json:"tag"`
 }
 
+// CompositeTraintuple is like a traintuple, but for composite model composition
+type CompositeTraintuple struct {
+	AlgoKey       string                      `json:"algoKey"`
+	AssetType     AssetType                   `json:"assetType"`
+	ComputePlanID string                      `json:"computePlanID"`
+	Creator       string                      `json:"creator"`
+	Dataset       *Dataset                    `json:"dataset"`
+	InHeadModel   string                      `json:"inHeadModel"`
+	InTrunkModel  string                      `json:"inTrunkModel"`
+	Log           string                      `json:"log"`
+	ObjectiveKey  string                      `json:"objectiveKey"`
+	OutHeadModel  CompositeTraintupleOutModel `json:"outHeadModel"`
+	OutTrunkModel CompositeTraintupleOutModel `json:"outTrunkModel"`
+	Perf          float32                     `json:"perf"`
+	Rank          int                         `json:"rank"`
+	Status        string                      `json:"status"`
+	Tag           string                      `json:"tag"`
+}
+
+// Aggregatetuple is like a traintuple, but for aggregate model composition
+type Aggregatetuple struct {
+	AlgoKey       string      `json:"algoKey"`
+	AssetType     AssetType   `json:"assetType"`
+	ComputePlanID string      `json:"computePlanID"`
+	Creator       string      `json:"creator"`
+	InModelKeys   []string    `json:"inModels"`
+	Log           string      `json:"log"`
+	ObjectiveKey  string      `json:"objectiveKey"`
+	OutModel      *HashDress  `json:"outModel"`
+	Permissions   Permissions `json:"permissions"` // TODO (aggregate): what do permissions mean here?
+	Rank          int         `json:"rank"`
+	Status        string      `json:"status"`
+	Tag           string      `json:"tag"`
+	Worker        string      `json:"worker"`
+}
+
+// CompositeTraintupleOutModel is the out-model of a CompositeTraintuple
+type CompositeTraintupleOutModel struct {
+	OutModel    *HashDress  `json:"outModel"`
+	Permissions Permissions `json:"permissions"`
+}
+
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Testtuple struct {
-	AssetType    AssetType   `json:"assetType"`
-	AlgoKey      string      `json:"algo"`
-	Certified    bool        `json:"certified"`
-	Creator      string      `json:"creator"`
-	Dataset      *TtDataset  `json:"dataset"`
-	Log          string      `json:"log"`
-	Model        *Model      `json:"model"`
-	ObjectiveKey string      `json:"objective"`
-	Permissions  Permissions `json:"permissions"`
-	Status       string      `json:"status"`
-	Tag          string      `json:"tag"`
+	AssetType     AssetType   `json:"assetType"`
+	AlgoKey       string      `json:"algo"`
+	Certified     bool        `json:"certified"`
+	Creator       string      `json:"creator"`
+	Dataset       *TtDataset  `json:"dataset"`
+	Log           string      `json:"log"`
+	TraintupleKey string      `json:"traintupleKey"`
+	ObjectiveKey  string      `json:"objective"`
+	Permissions   Permissions `json:"permissions"`
+	Status        string      `json:"status"`
+	Tag           string      `json:"tag"`
 }
 
 // ---------------------------------------------------------------------------------

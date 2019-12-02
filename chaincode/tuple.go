@@ -20,7 +20,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"sort"
-	"strconv"
 )
 
 // List of the possible tuple's status
@@ -36,111 +35,6 @@ const (
 // Smart contracts related to multiple tuple types
 // ------------------------------------------------
 
-// createComputePlan is the wrapper for the substra smartcontract CreateComputePlan
-func createComputePlan(db LedgerDB, args []string) (resp outputComputePlan, err error) {
-	inp := inputComputePlan{}
-	err = AssetFromJSON(args, &inp)
-	if err != nil {
-		return
-	}
-	traintupleKeysByID := map[string]string{}
-	resp.TraintupleKeys = []string{}
-	var traintuplesTodo []outputTraintuple
-	for i, computeTraintuple := range inp.Traintuples {
-		inpTraintuple := inputTraintuple{}
-		inpTraintuple.AlgoKey = inp.AlgoKey
-		inpTraintuple.ObjectiveKey = inp.ObjectiveKey
-		inpTraintuple.DataManagerKey = computeTraintuple.DataManagerKey
-		inpTraintuple.DataSampleKeys = computeTraintuple.DataSampleKeys
-		inpTraintuple.Tag = computeTraintuple.Tag
-		inpTraintuple.Rank = strconv.Itoa(i)
-
-		traintuple := Traintuple{}
-		err := traintuple.SetFromInput(db, inpTraintuple)
-		if err != nil {
-			return resp, err
-		}
-
-		// Set the inModels by matching the id to traintuples key previously
-		// encontered in this compute plan
-		for _, InModelID := range computeTraintuple.InModelsIDs {
-			inModelKey, ok := traintupleKeysByID[InModelID]
-			if !ok {
-				return resp, errors.BadRequest("traintuple ID %s: model ID %s not found, check traintuple list order", computeTraintuple.ID, InModelID)
-			}
-			traintuple.InModelKeys = append(traintuple.InModelKeys, inModelKey)
-		}
-
-		traintupleKey := traintuple.GetKey()
-
-		// Set the ComputePlanID
-		if i == 0 {
-			traintuple.ComputePlanID = traintupleKey
-			resp.ComputePlanID = traintuple.ComputePlanID
-		} else {
-			traintuple.ComputePlanID = resp.ComputePlanID
-		}
-
-		// Set status: if it has parents it's waiting
-		// if not it's todo and it has to be included in the event
-		if len(computeTraintuple.InModelsIDs) > 0 {
-			traintuple.Status = StatusWaiting
-		} else {
-			traintuple.Status = StatusTodo
-			out := outputTraintuple{}
-			err = out.Fill(db, traintuple, traintupleKey)
-			if err != nil {
-				return resp, err
-			}
-			traintuplesTodo = append(traintuplesTodo, out)
-		}
-
-		err = traintuple.Save(db, traintupleKey)
-		if err != nil {
-			return resp, err
-		}
-		traintupleKeysByID[computeTraintuple.ID] = traintupleKey
-		resp.TraintupleKeys = append(resp.TraintupleKeys, traintupleKey)
-	}
-
-	resp.TesttupleKeys = []string{}
-	for index, computeTesttuple := range inp.Testtuples {
-		traintupleKey, ok := traintupleKeysByID[computeTesttuple.TraintupleID]
-		if !ok {
-			return resp, errors.BadRequest("testtuple index %s: traintuple ID %s not found", index, computeTesttuple.TraintupleID)
-		}
-		testtuple := Testtuple{}
-		testtuple.Model = &Model{TraintupleKey: traintupleKey}
-		testtuple.ObjectiveKey = inp.ObjectiveKey
-		testtuple.AlgoKey = inp.AlgoKey
-
-		inputTesttuple := inputTesttuple{}
-		inputTesttuple.DataManagerKey = computeTesttuple.DataManagerKey
-		inputTesttuple.DataSampleKeys = computeTesttuple.DataSampleKeys
-		inputTesttuple.Tag = computeTesttuple.Tag
-		err = testtuple.SetFromInput(db, inputTesttuple)
-		if err != nil {
-			return resp, err
-		}
-		testtuple.Status = StatusWaiting
-		testtupleKey := testtuple.GetKey()
-		err = testtuple.Save(db, testtupleKey)
-		if err != nil {
-			return resp, err
-		}
-		resp.TesttupleKeys = append(resp.TesttupleKeys, testtupleKey)
-	}
-
-	event := TuplesEvent{}
-	event.SetTraintuples(traintuplesTodo...)
-	err = SendTuplesEvent(db.cc, event)
-	if err != nil {
-		return resp, err
-	}
-
-	return resp, err
-}
-
 // queryModelDetails returns info about the testtuple and algo related to a traintuple
 func queryModelDetails(db LedgerDB, args []string) (outModelDetails outputModelDetails, err error) {
 	inp := inputHash{}
@@ -149,10 +43,33 @@ func queryModelDetails(db LedgerDB, args []string) (outModelDetails outputModelD
 		return
 	}
 
-	// get associated traintuple
-	outModelDetails.Traintuple, err = getOutputTraintuple(db, inp.Key)
+	// get traintuple type
+	traintupleType, err := db.GetAssetType(inp.Key)
 	if err != nil {
 		return
+	}
+	switch traintupleType {
+	case TraintupleType:
+		var out outputTraintuple
+		out, err = getOutputTraintuple(db, inp.Key)
+		if err != nil {
+			return
+		}
+		outModelDetails.Traintuple = &out
+	case CompositeTraintupleType:
+		var out outputCompositeTraintuple
+		out, err = getOutputCompositeTraintuple(db, inp.Key)
+		if err != nil {
+			return
+		}
+		outModelDetails.CompositeTraintuple = &out
+	case AggregatetupleType:
+		var out outputAggregatetuple
+		out, err = getOutputAggregatetuple(db, inp.Key)
+		if err != nil {
+			return
+		}
+		outModelDetails.Aggregatetuple = &out
 	}
 
 	// get certified and non-certified testtuples related to traintuple
@@ -186,35 +103,60 @@ func queryModels(db LedgerDB, args []string) (outModels []outputModel, err error
 		return
 	}
 
+	// populate from regular traintuples
 	traintupleKeys, err := db.GetIndexKeys("traintuple~algo~key", []string{"traintuple"})
 	if err != nil {
 		return
 	}
 	for _, traintupleKey := range traintupleKeys {
 		var outputModel outputModel
+		var out outputTraintuple
 
-		// get traintuple
-		outputModel.Traintuple, err = getOutputTraintuple(db, traintupleKey)
+		out, err = getOutputTraintuple(db, traintupleKey)
 		if err != nil {
 			return
 		}
-
-		// get associated testtuple
-		var testtupleKeys []string
-		testtupleKeys, err = db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey, "true"})
-		if err != nil {
-			return
-		}
-		if len(testtupleKeys) == 1 {
-			// get testtuple and serialize it
-			testtupleKey := testtupleKeys[0]
-			outputModel.Testtuple, err = getOutputTesttuple(db, testtupleKey)
-			if err != nil {
-				return
-			}
-		}
+		outputModel.Traintuple = &out
+		outputModel.Testtuple, err = getCertifiedOutputTesttuple(db, traintupleKey)
 		outModels = append(outModels, outputModel)
 	}
+
+	// populate from composite traintuples
+	compositeTraintupleKeys, err := db.GetIndexKeys("compositeTraintuple~algo~key", []string{"compositeTraintuple"})
+	if err != nil {
+		return
+	}
+	for _, compositeTraintupleKey := range compositeTraintupleKeys {
+		var outputModel outputModel
+		var out outputCompositeTraintuple
+
+		out, err = getOutputCompositeTraintuple(db, compositeTraintupleKey)
+		if err != nil {
+			return
+		}
+		outputModel.CompositeTraintuple = &out
+		outputModel.Testtuple, err = getCertifiedOutputTesttuple(db, compositeTraintupleKey)
+		outModels = append(outModels, outputModel)
+	}
+
+	// populate from composite traintuples
+	aggregatetupleKeys, err := db.GetIndexKeys("aggregatetuple~algo~key", []string{"aggregatetuple"})
+	if err != nil {
+		return
+	}
+	for _, aggregatetupleKey := range aggregatetupleKeys {
+		var outputModel outputModel
+		var out outputAggregatetuple
+
+		out, err = getOutputAggregatetuple(db, aggregatetupleKey)
+		if err != nil {
+			return
+		}
+		outputModel.Aggregatetuple = &out
+		outputModel.Testtuple, err = getCertifiedOutputTesttuple(db, aggregatetupleKey)
+		outModels = append(outModels, outputModel)
+	}
+
 	return
 }
 
@@ -222,6 +164,7 @@ func queryModels(db LedgerDB, args []string) (outModels []outputModel, err error
 // Utils for smartcontracts related to  multiple tuple types
 // ----------------------------------------------------------
 
+/* Unused
 // checkLog checks the validity of logs
 func checkLog(log string) (err error) {
 	maxLength := 200
@@ -230,6 +173,7 @@ func checkLog(log string) (err error) {
 	}
 	return
 }
+*/
 
 func validateTupleOwner(db LedgerDB, worker string) error {
 	txCreator, err := GetTxCreator(db.cc)
@@ -263,4 +207,25 @@ func HashForKey(objectType string, hashElements ...string) string {
 	}
 	sum := sha256.Sum256([]byte(toHash))
 	return hex.EncodeToString(sum[:])
+}
+
+func getCertifiedOutputTesttuple(db LedgerDB, traintupleKey string) (outputTesttuple, error) {
+	var out outputTesttuple
+	// get associated testtuple
+	var testtupleKeys []string
+	testtupleKeys, err := db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey, "true"})
+	if err != nil {
+		return out, err
+	}
+	if len(testtupleKeys) == 0 {
+		return out, nil
+	}
+	// get testtuple and serialize it
+	testtupleKey := testtupleKeys[0]
+	out, err = getOutputTesttuple(db, testtupleKey)
+	if err != nil {
+		return out, err
+	}
+
+	return out, nil
 }

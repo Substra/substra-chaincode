@@ -1,11 +1,12 @@
 module chaincode
 
-go 1.12
+go 1.11
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
 	github.com/Shopify/sarama v1.22.1 // indirect
 	github.com/containerd/continuity v0.0.0-20190426062206-aaeac12a7ffc // indirect
+	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/fsouza/go-dockerclient v1.4.0 // indirect
 	github.com/go-playground/locales v0.12.1 // indirect
@@ -17,7 +18,6 @@ require (
 	github.com/hashicorp/go-version v1.2.0 // indirect
 	github.com/hyperledger/fabric v1.4.1
 	github.com/hyperledger/fabric-amcl v0.0.0-20181230093703-5ccba6eab8d6 // indirect
-	github.com/hyperledger/fabric-lib-go v1.0.0 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/leodido/go-urn v1.1.0 // indirect
@@ -30,14 +30,11 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/spf13/afero v1.2.2 // indirect
-	github.com/spf13/cobra v0.0.5 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
+	github.com/spf13/viper v1.3.2 // indirect
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.3.0
 	github.com/sykesm/zap-logfmt v0.0.2 // indirect
-	github.com/syndtr/goleveldb v1.0.0 // indirect
-	github.com/tedsuo/ifrit v0.0.0-20180802180643-bea94bb476cc // indirect
-	github.com/willf/bitset v1.1.10 // indirect
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/zap v1.10.0 // indirect
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f // indirect
@@ -49,5 +46,5 @@ require (
 	google.golang.org/grpc v1.21.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
-	gopkg.in/go-playground/validator.v9 v9.29.0
+	gopkg.in/go-playground/validator.v9 v9.30.0
 )
