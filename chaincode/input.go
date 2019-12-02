@@ -14,6 +14,15 @@
 
 package main
 
+var (
+	OpenPermissions = inputPermissions{
+		Process: inputPermission{
+			Public:        true,
+			AuthorizedIDs: []string{},
+		},
+	}
+)
+
 // -------------------------------------------------------------------------------------------
 // Struct used to represent inputs for smart contracts. In Hyperledger Fabric, we get as input
 // arg  [][]byte or []string, and it is not possible to input a string looking like a json

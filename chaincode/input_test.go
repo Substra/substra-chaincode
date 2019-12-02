@@ -42,12 +42,6 @@ var (
 			},
 		},
 	}
-	OpenPermissions = inputPermissions{
-		Process: inputPermission{
-			Public:        true,
-			AuthorizedIDs: []string{},
-		},
-	}
 )
 
 func (dataManager *inputDataManager) createDefault() [][]byte {
