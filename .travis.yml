@@ -12,8 +12,12 @@ branches:
 
 install: skip
 
+before_script:
+  - go get -x github.com/golang/lint/golint
+
 script:
+  - golint
   - cd chaincode
   - go test -v ./...
   - go build
-  - golint
+  
