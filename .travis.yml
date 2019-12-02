@@ -10,13 +10,13 @@ branches:
   only:
     - master
     
-install: skip
+install: true
 
-before_script:
-  - go get -u golang.org/x/lint
+before_install:
+  - go install golang.org/x/lint/golint
 
 script:
   - cd chaincode
   - go test -v ./...
   - go build
-  - golint
+  - test -z "`golint ./...`"
