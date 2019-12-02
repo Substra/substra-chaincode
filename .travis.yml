@@ -13,7 +13,7 @@ branches:
 install: skip
 
 before_install:
-  - GO111MODULE=off go install golang.org/x/lint
+  - GO111MODULE=off go get golang.org/x/lint
 
 script:
   - cd chaincode
