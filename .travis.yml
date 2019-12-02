@@ -10,6 +10,8 @@ branches:
   only:
     - master
 
+install: skip
+
 before_script:
   - go get golang.org/x/lint/golint
   - export PATH=$GOPATH/bin:$PATH
