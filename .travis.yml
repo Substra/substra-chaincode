@@ -11,10 +11,10 @@ branches:
     - master
 
 before_install:
-  - go get -u golang.org/x/lint
+  - go install -u golang.org/x/lint
 
 before_script:
-  - go get -u golang.org/x/lint
+  - go install -u golang.org/x/lint
 
 script:
   - find / -type f -name golint 2>/dev/null
