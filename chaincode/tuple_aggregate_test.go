@@ -36,7 +36,7 @@ func TestTraintupleWithNoTestDatasetAggregate(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
 	inpObjective := inputObjective{DescriptionHash: objHash}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
@@ -66,7 +66,7 @@ func TestTraintupleWithSingleDatasampleAggregate(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
 	inpObjective := inputObjective{DescriptionHash: objHash}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
@@ -440,7 +440,7 @@ func TestAggregatetuplePermissions(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
 	inpObjective := inputObjective{DescriptionHash: objHash}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}

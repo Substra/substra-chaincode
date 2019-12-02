@@ -37,7 +37,7 @@ func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
 	inpObjective := inputObjective{DescriptionHash: objHash}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
@@ -67,7 +67,7 @@ func TestTraintupleWithSingleDatasampleComposite(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	objHash := strings.Replace(objectiveDescriptionHash, "1", "2")
 	inpObjective := inputObjective{DescriptionHash: objHash}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
@@ -101,7 +101,7 @@ func TestTraintupleWithDuplicatedDatasamplesComposite(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
 	inpObjective := inputObjective{DescriptionHash: objHash}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
@@ -528,7 +528,7 @@ func TestCreateCompositeTraintupleInModels(t *testing.T) {
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
 			registerItem(t, *mockStub, "trainDataset")
 
-			objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
+			objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
 			inpObjective := inputObjective{DescriptionHash: objHash}
 			inpObjective.createDefault()
 			inpObjective.TestDataset = inputDataset{}
