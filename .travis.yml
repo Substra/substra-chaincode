@@ -17,7 +17,7 @@ before_script:
 
 script:
   - cd chaincode
-  - golint
   - go test -v ./...
   - go build -v
+  - go list ./... | grep -v /vendor/ | xargs -L1 golint -set_exit_status
 
