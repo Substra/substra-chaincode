@@ -14,7 +14,7 @@ cache:
   directories:
     - $HOME/.cache/go-build
     - $HOME/gopath/pkg/mod   
-    
+
 install: skip
 
 before_script:
