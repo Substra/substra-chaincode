@@ -14,7 +14,7 @@ This project is developed under the Apache License, Version 2.0 (Apache-2.0), lo
 
 ### Prerequisites
 
-go version 1.11.x
+go version 1.12.x
 
 ### Run the tests
 
