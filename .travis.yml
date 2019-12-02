@@ -12,8 +12,6 @@ branches:
 
 before_install:
   - go get -u golang.org/x/lint
-  
-install: skip
 
 before_script:
   - go get -u golang.org/x/lint
