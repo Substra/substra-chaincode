@@ -207,6 +207,9 @@ func (tuple *Aggregatetuple) Save(db LedgerDB, aggregatetupleKey string) error {
 		if err := db.CreateIndex("computePlan~computeplanid~worker~rank~key", []string{"computePlan", tuple.ComputePlanID, tuple.Worker, strconv.Itoa(tuple.Rank), aggregatetupleKey}); err != nil {
 			return err
 		}
+		if err := db.CreateIndex("computeplan~id", []string{"computeplan", tuple.ComputePlanID}); err != nil {
+			return err
+		}
 	}
 	if tuple.Tag != "" {
 		err := db.CreateIndex("aggregatetuple~tag~key", []string{"aggregatetuple", tuple.Tag, aggregatetupleKey})

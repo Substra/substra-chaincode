@@ -83,35 +83,38 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	db := NewLedgerDB(mockStub)
 
 	tag := []string{"compositeTraintuple1", "compositeTraintuple2", "aggregatetuple1", "aggregatetuple2"}
-	// Simply test method and return values
-	inCP := defaultComputePlan
-	inCP.CompositeTraintuples = []inputComputePlanCompositeTraintuple{
-		{
-			DataManagerKey: dataManagerOpenerHash,
-			DataSampleKeys: []string{trainDataSampleHash1},
-			AlgoKey:        compositeAlgoHash,
-			ID:             tag[0],
+
+	inCP := inputComputePlan{
+		ObjectiveKey: objectiveDescriptionHash,
+		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
+			{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        compositeAlgoHash,
+				ID:             tag[0],
+			},
+			{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        compositeAlgoHash,
+				ID:             tag[1],
+				InTrunkModelID: tag[0],
+				InHeadModelID:  tag[0],
+			},
 		},
-		{
-			DataManagerKey: dataManagerOpenerHash,
-			DataSampleKeys: []string{trainDataSampleHash1},
-			AlgoKey:        compositeAlgoHash,
-			ID:             tag[1],
-			InTrunkModelID: tag[0],
-			InHeadModelID:  tag[0],
+		Aggregatetuples: []inputComputePlanAggregatetuple{
+			{
+				AlgoKey: aggregateAlgoHash,
+				ID:      tag[2],
+			},
+			{
+				AlgoKey:     aggregateAlgoHash,
+				ID:          tag[3],
+				InModelsIDs: []string{tag[2]},
+			},
 		},
 	}
-	inCP.Aggregatetuples = []inputComputePlanAggregatetuple{
-		{
-			AlgoKey: aggregateAlgoHash,
-			ID:      tag[2],
-		},
-		{
-			AlgoKey:     aggregateAlgoHash,
-			ID:          tag[3],
-			InModelsIDs: []string{tag[2]},
-		},
-	}
+
 	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
 
@@ -135,6 +138,13 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	assert.NotNil(t, cp)
 	assert.Equal(t, 2, len(cp.CompositeTraintupleKeys))
 	assert.Equal(t, 2, len(cp.AggregatetupleKeys))
+
+	// Query compute plans
+	cps, err := queryComputePlans(db, []string{})
+	assert.NoError(t, err, "calling queryComputePlans should succeed")
+	assert.Len(t, cps, 1, "queryComputePlans should return one compute plan")
+	assert.Equal(t, 2, len(cps[0].CompositeTraintupleKeys))
+	assert.Equal(t, 2, len(cps[0].AggregatetupleKeys))
 }
 
 func TestCreateComputePlan(t *testing.T) {
