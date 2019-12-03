@@ -100,6 +100,7 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db LedgerDB, traintuple A
 	}
 
 	outputAggregatetuple.Worker = traintuple.Worker
+	outputAggregatetuple.Permissions.Fill(traintuple.Permissions)
 
 	return
 }
