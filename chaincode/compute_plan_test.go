@@ -142,7 +142,7 @@ func TestCreateComputePlan(t *testing.T) {
 	inCP := defaultComputePlan
 	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
-	validateComputePlan(t, outCP, defaultComputePlan)
+	validateDefaultComputePlan(t, outCP, defaultComputePlan)
 
 	// Check the traintuples
 	traintuples, err := queryTraintuples(db, []string{})
@@ -202,7 +202,7 @@ func TestQueryComputePlan(t *testing.T) {
 	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
 	assert.NotNil(t, cp)
-	validateComputePlan(t, cp, defaultComputePlan)
+	validateDefaultComputePlan(t, cp, defaultComputePlan)
 }
 
 func TestQueryComputePlans(t *testing.T) {
@@ -223,7 +223,23 @@ func TestQueryComputePlans(t *testing.T) {
 	cps, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Len(t, cps, 1, "queryComputePlans should return one compute plan")
-	validateComputePlan(t, cps[0], defaultComputePlan)
+	validateDefaultComputePlan(t, cps[0], defaultComputePlan)
+}
+
+func validateDefaultComputePlan(t *testing.T, cp outputComputePlan, in inputComputePlan) {
+	assert.Len(t, cp.TraintupleKeys, 2)
+	cpID := cp.TraintupleKeys[0]
+
+	assert.Equal(t, in.ObjectiveKey, cp.ObjectiveKey)
+
+	assert.Equal(t, cpID, cp.ComputePlanID)
+	assert.Equal(t, in.ObjectiveKey, cp.ObjectiveKey)
+
+	assert.NotEmpty(t, cp.TraintupleKeys[0])
+	assert.NotEmpty(t, cp.TraintupleKeys[1])
+
+	require.Len(t, cp.TesttupleKeys, 1)
+	assert.NotEmpty(t, cp.TesttupleKeys[0])
 }
 
 func TestComputePlanEmptyTesttuples(t *testing.T) {
@@ -282,20 +298,4 @@ func TestQueryComputePlanEmpty(t *testing.T) {
 	cps, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Equal(t, []outputComputePlan{}, cps)
-}
-
-func validateComputePlan(t *testing.T, cp outputComputePlan, in inputComputePlan) {
-	assert.Len(t, cp.TraintupleKeys, 2)
-	cpID := cp.TraintupleKeys[0]
-
-	assert.Equal(t, in.ObjectiveKey, cp.ObjectiveKey)
-
-	assert.Equal(t, cpID, cp.ComputePlanID)
-	assert.Equal(t, in.ObjectiveKey, cp.ObjectiveKey)
-
-	assert.NotEmpty(t, cp.TraintupleKeys[0])
-	assert.NotEmpty(t, cp.TraintupleKeys[1])
-
-	require.Len(t, cp.TesttupleKeys, 1)
-	assert.NotEmpty(t, cp.TesttupleKeys[0])
 }
