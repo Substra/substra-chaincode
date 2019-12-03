@@ -150,6 +150,7 @@ type inputQueryFilter struct {
 type inputComputePlan struct {
 	ObjectiveKey         string                                `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
 	Traintuples          []inputComputePlanTraintuple          `validate:"omitempty" json:"traintuples"`
+	Aggregatetuples      []inputComputePlanAggregatetuple      `validate:"omitempty" json:"aggregatetuples"`
 	CompositeTraintuples []inputComputePlanCompositeTraintuple `validate:"omitempty" json:"compositeTraintuples"`
 	Testtuples           []inputComputePlanTesttuple           `validate:"omitempty" json:"testtuples"`
 }
@@ -161,6 +162,13 @@ type inputComputePlanTraintuple struct {
 	ID             string   `validate:"required,lte=64" json:"id"`
 	InModelsIDs    []string `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
 	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
+}
+
+type inputComputePlanAggregatetuple struct {
+	AlgoKey     string   `validate:"required,len=64,hexadecimal" json:"algoKey"`
+	ID          string   `validate:"required,lte=64" json:"id"`
+	InModelsIDs []string `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
+	Tag         string   `validate:"omitempty,lte=64" json:"tag"`
 }
 
 type inputComputePlanCompositeTraintuple struct {

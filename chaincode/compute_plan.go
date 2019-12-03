@@ -27,7 +27,7 @@ func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, tra
 	inpTraintuple.AlgoKey = inpCP.AlgoKey
 	inpTraintuple.Tag = inpCP.Tag
 
-	// Set the inModels by matching the id to traintuples key previously
+	// Set the inModels by matching the id to tuples key previously
 	// encontered in this compute plan
 	for _, InModelID := range inpCP.InModelsIDs {
 		inModelKey, ok := traintupleKeysByID[InModelID]
@@ -35,6 +35,23 @@ func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, tra
 			return fmt.Errorf("model ID %s not found", InModelID)
 		}
 		inpTraintuple.InModels = append(inpTraintuple.InModels, inModelKey)
+	}
+
+	return nil
+
+}
+func (inpAggregatetuple *inputAggregatetuple) Fill(inpCP inputComputePlanAggregatetuple, aggregatetupleKeysByID map[string]string) error {
+	inpAggregatetuple.AlgoKey = inpCP.AlgoKey
+	inpAggregatetuple.Tag = inpCP.Tag
+
+	// Set the inModels by matching the id to tuples key previously
+	// encontered in this compute plan
+	for _, InModelID := range inpCP.InModelsIDs {
+		inModelKey, ok := aggregatetupleKeysByID[InModelID]
+		if !ok {
+			return fmt.Errorf("model ID %s not found", InModelID)
+		}
+		inpAggregatetuple.InModels = append(inpAggregatetuple.InModels, inModelKey)
 	}
 
 	return nil
@@ -151,6 +168,31 @@ func createComputePlanInternal(db LedgerDB, inp inputComputePlan) (resp outputCo
 
 			traintupleKeysByID[computeCompositeTraintuple.ID] = compositeTraintupleKey
 			resp.CompositeTraintupleKeys = append(resp.CompositeTraintupleKeys, compositeTraintupleKey)
+		case AggregatetupleType:
+			computeAggregatetuple := inp.Aggregatetuples[task.InputIndex]
+			inpAggregatetuple := inputAggregatetuple{
+				Rank:         strconv.Itoa(i),
+				ObjectiveKey: inp.ObjectiveKey,
+			}
+			if i != 0 {
+				inpAggregatetuple.ComputePlanID = resp.ComputePlanID
+			}
+			err = inpAggregatetuple.Fill(computeAggregatetuple, traintupleKeysByID)
+			if err != nil {
+				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeAggregatetuple.ID)
+			}
+			_ = computeAggregatetuple
+			aggregatetupleKey, err := createAggregatetupleInternal(db, inpAggregatetuple)
+			if err != nil {
+				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeAggregatetuple.ID)
+			}
+
+			if i == 0 {
+				resp.ComputePlanID = aggregatetupleKey
+			}
+
+			traintupleKeysByID[computeAggregatetuple.ID] = aggregatetupleKey
+			resp.AggregatetupleKeys = append(resp.AggregatetupleKeys, aggregatetupleKey)
 		}
 
 	}

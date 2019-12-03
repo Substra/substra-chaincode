@@ -321,6 +321,7 @@ type outputComputePlan struct {
 	ComputePlanID           string   `json:"computePlanID"`
 	ObjectiveKey            string   `json:"objectiveKey"`
 	TraintupleKeys          []string `json:"traintupleKeys"`
+	AggregatetupleKeys      []string `json:"aggregatetupleKeys"`
 	CompositeTraintupleKeys []string `json:"compositeTraintupleKeys"`
 	TesttupleKeys           []string `json:"testtupleKeys"`
 }

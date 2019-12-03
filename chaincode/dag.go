@@ -33,6 +33,15 @@ func createComputeDAG(cp inputComputePlan) (ComputeDAG, error) {
 		}
 		DAG.OrderTasks = append(DAG.OrderTasks, task)
 	}
+	for i, traintuple := range cp.Aggregatetuples {
+		task := TrainingTask{
+			ID:          traintuple.ID,
+			InModelsIDs: traintuple.InModelsIDs,
+			InputIndex:  i,
+			TaskType:    AggregatetupleType,
+		}
+		DAG.OrderTasks = append(DAG.OrderTasks, task)
+	}
 	err := DAG.sort()
 	if err != nil {
 		return DAG, err

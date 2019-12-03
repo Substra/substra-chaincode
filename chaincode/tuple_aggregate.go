@@ -204,7 +204,7 @@ func (tuple *Aggregatetuple) Save(db LedgerDB, aggregatetupleKey string) error {
 		}
 	}
 	if tuple.ComputePlanID != "" {
-		if err := db.CreateIndex("computePlan~computeplanid~worker~rank~key", []string{"computePlan", tuple.ComputePlanID, tuple.Worker, strconv.Itoa(tuple.Rank), aggregateTupleKey}); err != nil {
+		if err := db.CreateIndex("computePlan~computeplanid~worker~rank~key", []string{"computePlan", tuple.ComputePlanID, tuple.Worker, strconv.Itoa(tuple.Rank), aggregatetupleKey}); err != nil {
 			return err
 		}
 	}
@@ -220,8 +220,7 @@ func (tuple *Aggregatetuple) Save(db LedgerDB, aggregatetupleKey string) error {
 // -------------------------------------------------------------------------------------------
 // Smart contracts related to aggregate tuples
 // -------------------------------------------------------------------------------------------
-
-// createAggregatetuple adds a Aggregatetuple in the ledger
+// createAggregatetuple is the wrapper for the substra smartcontract createAggregatetuple
 func createAggregatetuple(db LedgerDB, args []string) (map[string]string, error) {
 	inp := inputAggregatetuple{}
 	err := AssetFromJSON(args, &inp)
@@ -229,47 +228,58 @@ func createAggregatetuple(db LedgerDB, args []string) (map[string]string, error)
 		return nil, err
 	}
 
-	aggregatetuple := Aggregatetuple{}
-	err = aggregatetuple.SetFromInput(db, inp)
+	key, err := createAggregatetupleInternal(db, inp)
 	if err != nil {
 		return nil, err
 	}
+
+	return map[string]string{"key": key}, nil
+}
+
+// createAggregatetupleInternal adds a Aggregatetuple in the ledger
+func createAggregatetupleInternal(db LedgerDB, inp inputAggregatetuple) (string, error) {
+
+	aggregatetuple := Aggregatetuple{}
+	err := aggregatetuple.SetFromInput(db, inp)
+	if err != nil {
+		return "", err
+	}
 	err = aggregatetuple.SetFromParents(db, inp.InModels)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	aggregatetupleKey := aggregatetuple.GetKey()
 	// Test if the key (ergo the aggregatetuple) already exists
 	tupleExists, err := db.KeyExists(aggregatetupleKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	if tupleExists {
-		return nil, errors.Conflict("aggregatetuple already exists").WithKey(aggregatetupleKey)
+		return "", errors.Conflict("aggregatetuple already exists").WithKey(aggregatetupleKey)
 	}
 	err = aggregatetuple.AddToComputePlan(db, inp, aggregatetupleKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	err = aggregatetuple.Save(db, aggregatetupleKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	out := outputAggregatetuple{}
 	err = out.Fill(db, aggregatetuple, aggregatetupleKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	event := TuplesEvent{}
 	event.SetAggregatetuples(out)
 	err = SendTuplesEvent(db.cc, event)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return map[string]string{"key": aggregatetupleKey}, nil
+	return aggregatetupleKey, nil
 }
 
 // logStartAggregateTrain modifies a aggregatetuple by changing its status from todo to doing
