@@ -1612,8 +1612,8 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"432fcf
 ##### Command output:
 ```json
 {
- "aggregatetupleKeys": null,
- "compositeTraintupleKeys": null,
+ "aggregatetupleKeys": [],
+ "compositeTraintupleKeys": [],
  "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
  "objectiveKey": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
  "testtupleKeys": [
@@ -1633,8 +1633,8 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
 ```json
 [
  {
-  "aggregatetupleKeys": null,
-  "compositeTraintupleKeys": null,
+  "aggregatetupleKeys": [],
+  "compositeTraintupleKeys": [],
   "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
   "objectiveKey": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
   "testtupleKeys": [

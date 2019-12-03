@@ -128,6 +128,13 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	require.Len(t, aggtuples, 2)
 	require.Contains(t, outCP.AggregatetupleKeys, aggtuples[0].Key)
 	require.Contains(t, outCP.AggregatetupleKeys, aggtuples[1].Key)
+
+	// Query the compute plan
+	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
+	assert.NoError(t, err, "calling queryComputePlan should succeed")
+	assert.NotNil(t, cp)
+	assert.Equal(t, 2, len(cp.CompositeTraintupleKeys))
+	assert.Equal(t, 2, len(cp.AggregatetupleKeys))
 }
 
 func TestCreateComputePlan(t *testing.T) {

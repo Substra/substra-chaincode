@@ -250,51 +250,74 @@ func queryComputePlans(db LedgerDB, args []string) (resp []outputComputePlan, er
 }
 
 // getComputePlan returns details for a compute plan id.
-// Traintuples are ordered by ascending rank.
+// Traintuples, CompositeTraintuples and Aggregatetuples are ordered by ascending rank.
 func getComputePlan(db LedgerDB, key string) (resp outputComputePlan, err error) {
-	// 1. Get Traintuples and sort them by ascending rank
-	var firstTt *Traintuple
-	ttKeys, err := db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", key})
+
+	// 1. Get tuples (regular, composite, aggregate)
+	tupleKeys, err := db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", key})
 	if err != nil {
 		return
 	}
-	if len(ttKeys) == 0 {
+	if len(tupleKeys) == 0 {
 		err = errors.E("No traintuple found for compute plan %s", key)
 		return
 	}
-	tts := map[string]Traintuple{}
-	for _, ttKey := range ttKeys {
-		var tt Traintuple
-		tt, err = db.GetTraintuple(ttKey)
+	objectiveKey := ""
+	tuples := map[string]GenericTuple{}
+	for _, tupleKey := range tupleKeys {
+		var tuple GenericTuple
+		tuple, err = db.GetGenericTuple(tupleKey)
 		if err != nil {
 			return
 		}
-		if firstTt == nil {
-			firstTt = &tt
+		if objectiveKey == "" {
+			objectiveKey = tuple.ObjectiveKey
 		}
-		tts[ttKey] = tt
+		tuples[tupleKey] = tuple
 	}
-	sort.SliceStable(ttKeys, func(i, j int) bool {
-		return tts[ttKeys[i]].Rank < tts[ttKeys[j]].Rank
+
+	// 2. Sort tuples by ascending rank
+	sort.SliceStable(tupleKeys, func(i, j int) bool {
+		return tuples[tupleKeys[i]].Rank < tuples[tupleKeys[j]].Rank
 	})
 
-	// 2. Get Testtuples associated with each Traintuple
-	tstKeys := []string{}
-	for _, traintupleKey := range ttKeys {
+	// 3. Get Testtuples associated with each tuple
+	testtupleKeys := []string{}
+	for _, tupleKey := range tupleKeys {
 		var toAdd []string
-		toAdd, err = db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey})
+		toAdd, err = db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", tupleKey})
 		if err != nil {
 			return
 		}
-		tstKeys = append(tstKeys, toAdd...)
+		testtupleKeys = append(testtupleKeys, toAdd...)
 	}
 
-	// 3. Create response
+	// 4. Split tuple keys depending on their type
+	traintupleKeys := []string{}
+	compositeTraintupleKeys := []string{}
+	aggregatetupleKeys := []string{}
+	for _, tupleKey := range tupleKeys { // iterate over keys (sorted by rank) so that each output array is also sorted by rank
+		tuple := tuples[tupleKey]
+		switch tuple.AssetType {
+		case TraintupleType:
+			traintupleKeys = append(traintupleKeys, tupleKey)
+		case CompositeTraintupleType:
+			compositeTraintupleKeys = append(compositeTraintupleKeys, tupleKey)
+		case AggregatetupleType:
+			aggregatetupleKeys = append(aggregatetupleKeys, tupleKey)
+		default:
+			err = fmt.Errorf("Unknown tuple type: %v", tuple.AssetType)
+			return
+		}
+	}
+
 	resp = outputComputePlan{
-		ComputePlanID:  key,
-		ObjectiveKey:   (*firstTt).ObjectiveKey,
-		TraintupleKeys: ttKeys,
-		TesttupleKeys:  tstKeys,
+		ComputePlanID:           key,
+		ObjectiveKey:            objectiveKey,
+		TraintupleKeys:          traintupleKeys,
+		CompositeTraintupleKeys: compositeTraintupleKeys,
+		AggregatetupleKeys:      aggregatetupleKeys,
+		TesttupleKeys:           testtupleKeys,
 	}
 	return
 }
