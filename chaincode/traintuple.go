@@ -148,14 +148,14 @@ func (traintuple *Traintuple) AddToComputePlan(db LedgerDB, inp inputTraintuple,
 		return nil
 	}
 	var ttKeys []string
-	ttKeys, err = db.GetIndexKeys("traintuple~computeplanid~worker~rank~key", []string{"traintuple", inp.ComputePlanID})
+	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID})
 	if err != nil {
 		return err
 	}
 	if len(ttKeys) == 0 {
 		return errors.BadRequest("cannot find the ComputePlanID %s", inp.ComputePlanID)
 	}
-	ttKeys, err = db.GetIndexKeys("traintuple~computeplanid~worker~rank~key", []string{"traintuple", inp.ComputePlanID, traintuple.Dataset.Worker, inp.Rank})
+	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID, traintuple.Dataset.Worker, inp.Rank})
 	if err != nil {
 		return err
 	} else if len(ttKeys) > 0 {
@@ -190,7 +190,7 @@ func (traintuple *Traintuple) Save(db LedgerDB, traintupleKey string) error {
 		}
 	}
 	if traintuple.ComputePlanID != "" {
-		if err := db.CreateIndex("traintuple~computeplanid~worker~rank~key", []string{"traintuple", traintuple.ComputePlanID, traintuple.Dataset.Worker, strconv.Itoa(traintuple.Rank), traintupleKey}); err != nil {
+		if err := db.CreateIndex("computePlan~computeplanid~worker~rank~key", []string{"computePlan", traintuple.ComputePlanID, traintuple.Dataset.Worker, strconv.Itoa(traintuple.Rank), traintupleKey}); err != nil {
 			return err
 		}
 		if err := db.CreateIndex("computeplan~id", []string{"computeplan", traintuple.ComputePlanID}); err != nil {

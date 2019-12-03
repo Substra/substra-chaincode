@@ -32,11 +32,37 @@ func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, tra
 	for _, InModelID := range inpCP.InModelsIDs {
 		inModelKey, ok := traintupleKeysByID[InModelID]
 		if !ok {
-			return fmt.Errorf("model ID %s not found, check traintuple list order", InModelID)
+			return fmt.Errorf("model ID %s not found", InModelID)
 		}
 		inpTraintuple.InModels = append(inpTraintuple.InModels, inModelKey)
 	}
 
+	return nil
+
+}
+func (inpCompositeTraintuple *inputCompositeTraintuple) Fill(inpCP inputComputePlanCompositeTraintuple, traintupleKeysByID map[string]string) error {
+	inpCompositeTraintuple.DataManagerKey = inpCP.DataManagerKey
+	inpCompositeTraintuple.DataSampleKeys = inpCP.DataSampleKeys
+	inpCompositeTraintuple.AlgoKey = inpCP.AlgoKey
+	inpCompositeTraintuple.Tag = inpCP.Tag
+	inpCompositeTraintuple.OutTrunkModelPermissions = inpCP.OutTrunkModelPermissions
+
+	// Set the inModels by matching the id to traintuples key previously
+	// encontered in this compute plan
+	if inpCP.InHeadModelID != "" {
+		var ok bool
+		inpCompositeTraintuple.InHeadModelKey, ok = traintupleKeysByID[inpCP.InHeadModelID]
+		if !ok {
+			return fmt.Errorf("head model ID %s not found", inpCP.InHeadModelID)
+		}
+	}
+	if inpCP.InTrunkModelID != "" {
+		var ok bool
+		inpCompositeTraintuple.InTrunkModelKey, ok = traintupleKeysByID[inpCP.InTrunkModelID]
+		if !ok {
+			return fmt.Errorf("trunk model ID %s not found", inpCP.InTrunkModelID)
+		}
+	}
 	return nil
 }
 
@@ -100,7 +126,33 @@ func createComputePlanInternal(db LedgerDB, inp inputComputePlan) (resp outputCo
 
 			traintupleKeysByID[computeTraintuple.ID] = traintupleKey
 			resp.TraintupleKeys = append(resp.TraintupleKeys, traintupleKey)
+		case CompositeTraintupleType:
+			computeCompositeTraintuple := inp.CompositeTraintuples[task.InputIndex]
+			inpCompositeTraintuple := inputCompositeTraintuple{
+				Rank:         strconv.Itoa(i),
+				ObjectiveKey: inp.ObjectiveKey,
+			}
+			if i != 0 {
+				inpCompositeTraintuple.ComputePlanID = resp.ComputePlanID
+			}
+			err = inpCompositeTraintuple.Fill(computeCompositeTraintuple, traintupleKeysByID)
+			if err != nil {
+				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeCompositeTraintuple.ID)
+			}
+			_ = computeCompositeTraintuple
+			compositeTraintupleKey, err := createCompositeTraintupleInternal(db, inpCompositeTraintuple)
+			if err != nil {
+				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeCompositeTraintuple.ID)
+			}
+
+			if i == 0 {
+				resp.ComputePlanID = compositeTraintupleKey
+			}
+
+			traintupleKeysByID[computeCompositeTraintuple.ID] = compositeTraintupleKey
+			resp.CompositeTraintupleKeys = append(resp.CompositeTraintupleKeys, compositeTraintupleKey)
 		}
+
 	}
 
 	resp.TesttupleKeys = []string{}
@@ -160,7 +212,7 @@ func queryComputePlans(db LedgerDB, args []string) (resp []outputComputePlan, er
 func getComputePlan(db LedgerDB, key string) (resp outputComputePlan, err error) {
 	// 1. Get Traintuples and sort them by ascending rank
 	var firstTt *Traintuple
-	ttKeys, err := db.GetIndexKeys("traintuple~computeplanid~worker~rank~key", []string{"traintuple", key})
+	ttKeys, err := db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", key})
 	if err != nil {
 		return
 	}

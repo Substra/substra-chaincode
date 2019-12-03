@@ -239,24 +239,6 @@ func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
-	ttkey := res["key"]
-	// Add new algo to check all ComputePlan algo consistency
-	newAlgoHash := strings.Replace(compositeAlgoHash, "a", "b", 1)
-	inpAlgo := inputCompositeAlgo{inputAlgo{Hash: newAlgoHash}}
-	args = inpAlgo.createDefault()
-	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status)
-
-	inpTraintuple = inputCompositeTraintuple{
-		AlgoKey:         newAlgoHash,
-		InHeadModelKey:  ttkey,
-		InTrunkModelKey: ttkey,
-		Rank:            "2",
-		ComputePlanID:   key}
-	args = inpTraintuple.createDefault()
-	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 400, resp.Status, resp.Message, "should fail for it doesn't have the same composite algo key")
-	assert.Contains(t, resp.Message, "does not have the same algo key")
 }
 
 func TestTraintupleComposite(t *testing.T) {

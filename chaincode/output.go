@@ -318,10 +318,11 @@ func (te *TuplesEvent) AddTesttuple(out outputTesttuple) {
 }
 
 type outputComputePlan struct {
-	ComputePlanID  string   `json:"computePlanID"`
-	ObjectiveKey   string   `json:"objectiveKey"`
-	TraintupleKeys []string `json:"traintupleKeys"`
-	TesttupleKeys  []string `json:"testtupleKeys"`
+	ComputePlanID           string   `json:"computePlanID"`
+	ObjectiveKey            string   `json:"objectiveKey"`
+	TraintupleKeys          []string `json:"traintupleKeys"`
+	CompositeTraintupleKeys []string `json:"compositeTraintupleKeys"`
+	TesttupleKeys           []string `json:"testtupleKeys"`
 }
 
 type outputPermissions struct {

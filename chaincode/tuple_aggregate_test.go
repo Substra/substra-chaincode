@@ -208,23 +208,6 @@ func TestTraintupleMultipleCommputePlanCreationsAggregate(t *testing.T) {
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
-	ttkey := res["key"]
-	// Add new algo to check all ComputePlan algo consistency
-	newAlgoHash := strings.Replace(aggregateAlgoHash, "a", "b", 1)
-	inpAlgo := inputAggregateAlgo{inputAlgo{Hash: newAlgoHash}}
-	args = inpAlgo.createDefault()
-	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status)
-
-	inpTraintuple = inputAggregatetuple{
-		AlgoKey:       newAlgoHash,
-		InModels:      []string{ttkey},
-		Rank:          "2",
-		ComputePlanID: key}
-	args = inpTraintuple.createDefault()
-	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 400, resp.Status, resp.Message, "should fail for it doesn't have the same aggregate algo key")
-	assert.Contains(t, resp.Message, "does not have the same algo key")
 }
 
 func TestTraintupleAggregate(t *testing.T) {

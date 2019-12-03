@@ -177,24 +177,15 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db LedgerDB, inp inputCo
 		return nil
 	}
 	var ttKeys []string
-	ttKeys, err = db.GetIndexKeys("compositeTraintuple~computeplanid~worker~rank~key", []string{"compositeTraintuple", inp.ComputePlanID})
+	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID})
 	if err != nil {
 		return err
 	}
 	if len(ttKeys) == 0 {
 		return errors.BadRequest("cannot find the ComputePlanID %s", inp.ComputePlanID)
 	}
-	for _, ttKey := range ttKeys {
-		FLTraintuple, err := db.GetCompositeTraintuple(ttKey)
-		if err != nil {
-			return err
-		}
-		if FLTraintuple.AlgoKey != inp.AlgoKey {
-			return errors.BadRequest("previous traintuple for ComputePlanID %s does not have the same algo key %s", inp.ComputePlanID, inp.AlgoKey)
-		}
-	}
 
-	ttKeys, err = db.GetIndexKeys("compositeTraintuple~computeplanid~worker~rank~key", []string{"compositeTraintuple", inp.ComputePlanID, traintuple.Dataset.Worker, inp.Rank})
+	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID, traintuple.Dataset.Worker, inp.Rank})
 	if err != nil {
 		return err
 	} else if len(ttKeys) > 0 {
@@ -232,7 +223,7 @@ func (traintuple *CompositeTraintuple) Save(db LedgerDB, traintupleKey string) e
 		return err
 	}
 	if traintuple.ComputePlanID != "" {
-		if err := db.CreateIndex("compositeTraintuple~computeplanid~worker~rank~key", []string{"compositeTraintuple", traintuple.ComputePlanID, traintuple.Dataset.Worker, strconv.Itoa(traintuple.Rank), traintupleKey}); err != nil {
+		if err := db.CreateIndex("computePlan~computeplanid~worker~rank~key", []string{"computePlan", traintuple.ComputePlanID, traintuple.Dataset.Worker, strconv.Itoa(traintuple.Rank), traintupleKey}); err != nil {
 			return err
 		}
 	}
@@ -249,7 +240,7 @@ func (traintuple *CompositeTraintuple) Save(db LedgerDB, traintupleKey string) e
 // Smart contracts related to composite traintuples
 // -------------------------------------------------
 
-// createCompositeTraintuple adds a CompositeTraintuple in the ledger
+// createCompositeTraintuple is the wrapper for the substra smartcontract createCompositeTraintuple
 func createCompositeTraintuple(db LedgerDB, args []string) (map[string]string, error) {
 	inp := inputCompositeTraintuple{}
 	err := AssetFromJSON(args, &inp)
@@ -257,47 +248,57 @@ func createCompositeTraintuple(db LedgerDB, args []string) (map[string]string, e
 		return nil, err
 	}
 
-	traintuple := CompositeTraintuple{}
-	err = traintuple.SetFromInput(db, inp)
+	key, err := createCompositeTraintupleInternal(db, inp)
 	if err != nil {
 		return nil, err
 	}
+
+	return map[string]string{"key": key}, nil
+}
+
+// createCompositeTraintupleInternal adds a CompositeTraintuple in the ledger
+func createCompositeTraintupleInternal(db LedgerDB, inp inputCompositeTraintuple) (string, error) {
+	traintuple := CompositeTraintuple{}
+	err := traintuple.SetFromInput(db, inp)
+	if err != nil {
+		return "", err
+	}
 	err = traintuple.SetFromParents(db, inp)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	traintupleKey := traintuple.GetKey()
 	// Test if the key (ergo the traintuple) already exists
 	tupleExists, err := db.KeyExists(traintupleKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	if tupleExists {
-		return nil, errors.Conflict("traintuple already exists").WithKey(traintupleKey)
+		return "", errors.Conflict("traintuple already exists").WithKey(traintupleKey)
 	}
 	err = traintuple.AddToComputePlan(db, inp, traintupleKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	err = traintuple.Save(db, traintupleKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	out := outputCompositeTraintuple{}
 	err = out.Fill(db, traintuple, traintupleKey)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	event := TuplesEvent{}
 	event.SetCompositeTraintuples(out)
 	err = SendTuplesEvent(db.cc, event)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return map[string]string{"key": traintupleKey}, nil
+	return traintupleKey, nil
 }
 
 // logStartCompositeTrain modifies a traintuple by changing its status from todo to doing

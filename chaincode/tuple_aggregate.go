@@ -161,24 +161,15 @@ func (tuple *Aggregatetuple) AddToComputePlan(db LedgerDB, inp inputAggregatetup
 		return nil
 	}
 	var ttKeys []string
-	ttKeys, err = db.GetIndexKeys("aggregatetuple~computeplanid~worker~rank~key", []string{"aggregatetuple", inp.ComputePlanID})
+	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID})
 	if err != nil {
 		return err
 	}
 	if len(ttKeys) == 0 {
 		return errors.BadRequest("cannot find the ComputePlanID %s", inp.ComputePlanID)
 	}
-	for _, ttKey := range ttKeys {
-		FLTraintuple, err := db.GetAggregatetuple(ttKey)
-		if err != nil {
-			return err
-		}
-		if FLTraintuple.AlgoKey != inp.AlgoKey {
-			return errors.BadRequest("previous traintuple for ComputePlanID %s does not have the same algo key %s", inp.ComputePlanID, inp.AlgoKey)
-		}
-	}
 
-	ttKeys, err = db.GetIndexKeys("aggregatetuple~computeplanid~worker~rank~key", []string{"aggregatetuple", inp.ComputePlanID, tuple.Worker, inp.Rank})
+	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID, tuple.Worker, inp.Rank})
 	if err != nil {
 		return err
 	} else if len(ttKeys) > 0 {
@@ -213,7 +204,7 @@ func (tuple *Aggregatetuple) Save(db LedgerDB, aggregatetupleKey string) error {
 		}
 	}
 	if tuple.ComputePlanID != "" {
-		if err := db.CreateIndex("aggregatetuple~computeplanid~worker~rank~key", []string{"aggregatetuple", tuple.ComputePlanID, tuple.Worker, strconv.Itoa(tuple.Rank), aggregatetupleKey}); err != nil {
+		if err := db.CreateIndex("computePlan~computeplanid~worker~rank~key", []string{"computePlan", tuple.ComputePlanID, tuple.Worker, strconv.Itoa(tuple.Rank), aggregateTupleKey}); err != nil {
 			return err
 		}
 	}

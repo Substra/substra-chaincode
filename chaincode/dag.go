@@ -24,6 +24,15 @@ func createComputeDAG(cp inputComputePlan) (ComputeDAG, error) {
 		}
 		DAG.OrderTasks = append(DAG.OrderTasks, task)
 	}
+	for i, traintuple := range cp.CompositeTraintuples {
+		task := TrainingTask{
+			ID:          traintuple.ID,
+			InModelsIDs: []string{traintuple.InHeadModelID, traintuple.InTrunkModelID},
+			InputIndex:  i,
+			TaskType:    CompositeTraintupleType,
+		}
+		DAG.OrderTasks = append(DAG.OrderTasks, task)
+	}
 	err := DAG.sort()
 	if err != nil {
 		return DAG, err
@@ -40,6 +49,9 @@ func (dag *ComputeDAG) sort() error {
 	for i := 0; len(current) != 0; {
 		ready := true
 		for _, ID := range current[i].InModelsIDs {
+			if ID == "" {
+				continue
+			}
 			_, ok := IDPresents[ID]
 			ready = ready && ok
 		}

@@ -296,7 +296,7 @@ func (db *LedgerDB) GetCompositeTraintuple(key string) (CompositeTraintuple, err
 		return traintuple, err
 	}
 	if traintuple.AssetType != CompositeTraintupleType {
-		return traintuple, errors.NotFound("traintuple %s not found", key)
+		return traintuple, errors.NotFound("composite traintuple %s not found", key)
 	}
 	return traintuple, nil
 }
