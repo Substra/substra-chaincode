@@ -192,17 +192,14 @@ func (db *LedgerDB) GetAssetType(key string) (AssetType, error) {
 	return asset.AssetType, nil
 }
 
-// GetGenericTraintuple fetches a regular/composite/aggregate tuple in the chaincode db and returns
-// its common properties.
-func (db *LedgerDB) GetGenericTraintuple(key string) (assetType AssetType, status string, err error) {
-	asset := struct {
-		Status    string    `json:"status"`
-		AssetType AssetType `json:"assetType"`
-	}{}
+// GetGenericTuple fetches a GenericTuple (Traintuple, CompositeTraintuple or AggregateTuple)
+// from the chaincode db
+func (db *LedgerDB) GetGenericTuple(key string) (GenericTuple, error) {
+	asset := GenericTuple{}
 	if err := db.Get(key, &asset); err != nil {
-		return asset.AssetType, asset.Status, err
+		return asset, err
 	}
-	return asset.AssetType, asset.Status, nil
+	return asset, nil
 }
 
 // GetAlgo fetches an Algo from the ledger using its unique key

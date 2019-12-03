@@ -88,57 +88,72 @@ type AggregateAlgo struct {
 	Algo
 }
 
+// GenericTuple is a structure that contains the fields
+// that are common to Traintuple, CompositeTraintuple and
+// AggregateTuple
+type GenericTuple struct {
+	AssetType     AssetType `json:"assetType"`
+	ObjectiveKey  string    `json:"objectiveKey"`
+	AlgoKey       string    `json:"algoKey"`
+	ComputePlanID string    `json:"computePlanID"`
+	Creator       string    `json:"creator"`
+	Log           string    `json:"log"`
+	Rank          int       `json:"rank"`
+	Status        string    `json:"status"`
+	Tag           string    `json:"tag"`
+}
+
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
 	AssetType     AssetType   `json:"assetType"`
-	AlgoKey       string      `json:"algoKey"`
-	Creator       string      `json:"creator"`
-	Dataset       *Dataset    `json:"dataset"`
-	ComputePlanID string      `json:"computePlanID"`
-	InModelKeys   []string    `json:"inModels"`
-	Log           string      `json:"log"`
 	ObjectiveKey  string      `json:"objectiveKey"`
-	OutModel      *HashDress  `json:"outModel"`
-	Perf          float32     `json:"perf"`
-	Permissions   Permissions `json:"permissions"`
+	AlgoKey       string      `json:"algoKey"`
+	ComputePlanID string      `json:"computePlanID"`
+	Creator       string      `json:"creator"`
+	Log           string      `json:"log"`
 	Rank          int         `json:"rank"`
 	Status        string      `json:"status"`
 	Tag           string      `json:"tag"`
+	Dataset       *Dataset    `json:"dataset"`
+	InModelKeys   []string    `json:"inModels"`
+	OutModel      *HashDress  `json:"outModel"`
+	Perf          float32     `json:"perf"`
+	Permissions   Permissions `json:"permissions"`
 }
 
 // CompositeTraintuple is like a traintuple, but for composite model composition
 type CompositeTraintuple struct {
-	AlgoKey       string                      `json:"algoKey"`
 	AssetType     AssetType                   `json:"assetType"`
+	ObjectiveKey  string                      `json:"objectiveKey"`
+	AlgoKey       string                      `json:"algoKey"`
 	ComputePlanID string                      `json:"computePlanID"`
 	Creator       string                      `json:"creator"`
-	Dataset       *Dataset                    `json:"dataset"`
-	InHeadModel   string                      `json:"inHeadModel"`
-	InTrunkModel  string                      `json:"inTrunkModel"`
 	Log           string                      `json:"log"`
-	ObjectiveKey  string                      `json:"objectiveKey"`
-	OutHeadModel  CompositeTraintupleOutModel `json:"outHeadModel"`
-	OutTrunkModel CompositeTraintupleOutModel `json:"outTrunkModel"`
-	Perf          float32                     `json:"perf"`
 	Rank          int                         `json:"rank"`
 	Status        string                      `json:"status"`
 	Tag           string                      `json:"tag"`
+	Dataset       *Dataset                    `json:"dataset"`
+	InHeadModel   string                      `json:"inHeadModel"`
+	InTrunkModel  string                      `json:"inTrunkModel"`
+	OutHeadModel  CompositeTraintupleOutModel `json:"outHeadModel"`
+	OutTrunkModel CompositeTraintupleOutModel `json:"outTrunkModel"`
+	Perf          float32                     `json:"perf"`
 }
 
 // Aggregatetuple is like a traintuple, but for aggregate model composition
 type Aggregatetuple struct {
-	AlgoKey       string      `json:"algoKey"`
 	AssetType     AssetType   `json:"assetType"`
+	ObjectiveKey  string      `json:"objectiveKey"`
+	AlgoKey       string      `json:"algoKey"`
 	ComputePlanID string      `json:"computePlanID"`
 	Creator       string      `json:"creator"`
-	InModelKeys   []string    `json:"inModels"`
 	Log           string      `json:"log"`
-	ObjectiveKey  string      `json:"objectiveKey"`
-	OutModel      *HashDress  `json:"outModel"`
-	Permissions   Permissions `json:"permissions"` // TODO (aggregate): what do permissions mean here?
 	Rank          int         `json:"rank"`
 	Status        string      `json:"status"`
 	Tag           string      `json:"tag"`
+	InModelKeys   []string    `json:"inModels"`
+	OutModel      *HashDress  `json:"outModel"`
+	Permissions   Permissions `json:"permissions"` // TODO (aggregate): what do permissions mean here?
 	Worker        string      `json:"worker"`
 }
 

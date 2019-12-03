@@ -486,21 +486,23 @@ func UpdateTraintupleChildren(db LedgerDB, traintupleKey string, traintupleStatu
 	allChildKeys := append(append(childTraintupleKeys, childCompositeTraintupleKeys...), childAggregatetupleKeys...)
 
 	for _, childTraintupleKey := range allChildKeys {
-		childTraintupleType, childTraintupleStatus, err := db.GetGenericTraintuple(childTraintupleKey)
+		child, err := db.GetGenericTuple(childTraintupleKey)
 		if err != nil {
 			return err
 		}
 
-		if childTraintupleStatus == StatusFailed {
+		if child.Status == StatusFailed {
 			// traintuple is already failed, don't update it
 			continue
 		}
-		if childTraintupleStatus != StatusWaiting {
-			return fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", childTraintupleKey, childTraintupleStatus)
+		if child.Status != StatusWaiting {
+			return fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", childTraintupleKey, child.Status)
 		}
 
+		childTraintupleStatus := child.Status
+
 		// Update the child traintuple and get its new status
-		switch childTraintupleType {
+		switch child.AssetType {
 		case TraintupleType:
 			childTraintupleStatus, err = UpdateTraintupleChild(db, traintupleKey, childTraintupleKey, traintupleStatus, event)
 			if err != nil {
@@ -517,7 +519,7 @@ func UpdateTraintupleChildren(db LedgerDB, traintupleKey string, traintupleStatu
 				return err
 			}
 		default:
-			return fmt.Errorf("Unknown child traintuple type: %s", childTraintupleType)
+			return fmt.Errorf("Unknown child traintuple type: %s", child.AssetType)
 		}
 
 		// Recursively call for an update on this child's children
@@ -593,11 +595,11 @@ func IsReady(db LedgerDB, inModelKeys []string, newDoneTraintupleKey string) (re
 		if key == newDoneTraintupleKey {
 			continue
 		}
-		_, status, err := db.GetGenericTraintuple(key)
+		tuple, err := db.GetGenericTuple(key)
 		if err != nil {
 			return false, err
 		}
-		if status != StatusDone {
+		if tuple.Status != StatusDone {
 			return false, nil
 		}
 	}

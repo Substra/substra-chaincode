@@ -119,8 +119,9 @@ func TestModelComposition(t *testing.T) {
 				}
 
 				// check state of child traintuple/testtuple
-				_, trainChildStatus, err := db.GetGenericTraintuple(childKey)
+				tuple, err := db.GetGenericTuple(childKey)
 				assert.NoError(t, err)
+				trainChildStatus := tuple.Status
 
 				outChildTesttuple, err := db.GetTesttuple(childTesttupleKey)
 				assert.NoError(t, err)
