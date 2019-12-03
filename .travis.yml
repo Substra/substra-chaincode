@@ -10,6 +10,11 @@ branches:
   only:
     - master
 
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $HOME/gopath/pkg/mod   
+
 install: skip
 
 before_script:
@@ -21,4 +26,3 @@ script:
   - golint_stdout="`go list ./... | grep -v /vendor/ | xargs golint`"
   - go build -v  
   - test -z "$golint_stdout" || (echo -e "FAIL:" "golint error(s):\n$golint_stdout" && exit 1)
-

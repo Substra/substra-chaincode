@@ -278,6 +278,12 @@ func TestTraintupleAggregate(t *testing.T) {
 			},
 		},
 		Status: StatusTodo,
+		Permissions: outputPermissions{
+			Process: Permission{
+				Public:        true,
+				AuthorizedIDs: []string{},
+			},
+		},
 	}
 	assert.Exactly(t, expected, out, "the aggregate tuple queried from the ledger differ from expected")
 
@@ -438,35 +444,66 @@ func TestInsertTraintupleTwiceAggregate(t *testing.T) {
 func TestAggregatetuplePermissions(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	registerItem(t, *mockStub, "trainDataset")
+	registerItem(t, *mockStub, "aggregateAlgo")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash}
-	inpObjective.createDefault()
-	inpObjective.TestDataset = inputDataset{}
-	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
+	// register nodes
+	registerNode := func(nodeName string) {
+		initialCreator := mockStub.Creator
+		mockStub.Creator = nodeName
+		mockStub.MockInvoke("42", [][]byte{[]byte("registerNode")})
+		mockStub.Creator = initialCreator
+	}
+	registerNode("nodeA")
+	registerNode("nodeB")
+	registerNode("nodeC")
+	registerNode("nodeD")
 
-	inpAlgo := inputAggregateAlgo{}
-	args := inpAlgo.createDefault()
+	// register 3 algos
+	algo1, err := registerRandomCompositeAlgo(mockStub)
+	assert.Nil(t, err)
+	algo2, err := registerRandomCompositeAlgo(mockStub)
+	assert.Nil(t, err)
+	algo3, err := registerRandomCompositeAlgo(mockStub)
+	assert.Nil(t, err)
+
+	// register 3 composite traintuples, with various permissions
+	registerCompositeTraintuple := func(algoKey string, authorizedIds []string) string {
+		inp := inputCompositeTraintuple{AlgoKey: algoKey}
+		inp.fillDefaults()
+		inp.OutTrunkModelPermissions.Process.Public = false
+		inp.OutTrunkModelPermissions.Process.AuthorizedIDs = authorizedIds
+		resp := mockStub.MockInvoke("42", inp.getArgs())
+		assert.EqualValues(t, 200, resp.Status, resp.Message)
+		var _key struct{ Key string }
+		json.Unmarshal(resp.Payload, &_key)
+		return _key.Key
+	}
+	traintuple1 := registerCompositeTraintuple(algo1, []string{"nodeA", "nodeC"})
+	traintuple2 := registerCompositeTraintuple(algo2, []string{"nodeB", "nodeC"})
+	traintuple3 := registerCompositeTraintuple(algo3, []string{"nodeA", "nodeC", "nodeD"})
+
+	// create an aggregate tuple with the 3 composite as in-models
+	inpAgg := inputAggregatetuple{}
+	inpAgg.fillDefaults()
+	inpAgg.InModels = []string{traintuple1, traintuple2, traintuple3}
+	resp := mockStub.MockInvoke("42", inpAgg.getArgs())
+	assert.EqualValues(t, 200, resp.Status, resp.Message)
+	var _key struct{ Key string }
+	json.Unmarshal(resp.Payload, &_key)
+	aggrKey := _key.Key
+
+	// fetch the aggregate tuple back
+	aggr := outputAggregatetuple{}
+	args := [][]byte{[]byte("queryAggregatetuple"), keyToJSON(aggrKey)}
 	resp = mockStub.MockInvoke("42", args)
+	aggr = outputAggregatetuple{}
+	json.Unmarshal(resp.Payload, &aggr)
 
-	inpTraintuple := inputAggregatetuple{ObjectiveKey: objHash}
-	inpTraintuple.fillDefaults()
-	args = inpTraintuple.getArgs()
-	resp = mockStub.MockInvoke("42", args)
-
-	traintuple := outputAggregatetuple{}
-	json.Unmarshal(resp.Payload, &traintuple)
-	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(traintuple.Key)}
-	resp = mockStub.MockInvoke("42", args)
-	traintuple = outputAggregatetuple{}
-	json.Unmarshal(resp.Payload, &traintuple)
-
-	// TODO (aggregate): check permissions
-	// assert.EqualValues(t, false, traintuple.OutHeadModel.Permissions.Process.Public,
-	// 	"the head model should not be public")
-	// assert.EqualValues(t, []string{worker}, traintuple.OutHeadModel.Permissions.Process.AuthorizedIDs,
-	// 	"the head model should only be processable by creator")
+	// verify permissions
+	assert.EqualValues(t, false, aggr.Permissions.Process.Public,
+		"the aggregate tuple should not be public")
+	assert.EqualValues(t, []string{worker, "nodeC"}, aggr.Permissions.Process.AuthorizedIDs,
+		"the aggregate tuple permissions should be the intersect of the in-model permissions")
 }
 
 func TestAggregatetupleLogSuccessFail(t *testing.T) {
