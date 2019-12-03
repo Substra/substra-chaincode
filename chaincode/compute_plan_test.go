@@ -22,31 +22,6 @@ import (
 )
 
 var (
-
-	// Default compute plan:
-	//
-	//     ø     ø             ø      ø
-	//     |     |             |      |
-	//     hd    tr            tr     hd
-	//   -----------         -----------
-	//  | Composite |       | Composite |
-	//   -----------         -----------
-	//     hd    tr            tr     hd
-	//     |      \            /      |
-	//     |       \          /       |
-	//     |        -----------       |
-	//     |       | Aggregate |      |
-	//     |        -----------       |
-	//     |            |             |
-	//     |     ,_____/ \_____       |
-	//     |     |             |      |
-	//     hd    tr            tr     hd
-	//   -----------         -----------
-	//  | Composite |       | Composite |
-	//   -----------         -----------
-	//     hd    tr            tr     hd
-	//
-	//
 	defaultComputePlan = inputComputePlan{
 		ObjectiveKey: objectiveDescriptionHash,
 		Traintuples: []inputComputePlanTraintuple{
@@ -72,7 +47,119 @@ var (
 			},
 		},
 	}
+
+	// Model-composition compute plan:
+	//
+	//   ,========,                ,========,
+	//   | NODE A |                | NODE B |
+	//   *========*                *========*
+	//
+	//     ø     ø                  ø      ø
+	//     |     |                  |      |
+	//     hd    tr                 tr     hd
+	//   -----------              -----------
+	//  | Composite |            | Composite |      STEP 1
+	//   -----------              -----------
+	//     hd    tr                 tr     hd
+	//     |      \   ,========,   /      |
+	//     |       \  | NODE C |  /       |
+	//     |        \ *========* /        |
+	//     |       ----------------       |
+	//     |      |    Aggregate   |      |         STEP 2
+	//     |       ----------------       |
+	//     |              |               |
+	//     |     ,_______/ \_______       |
+	//     |     |                 |      |
+	//     hd    tr                tr     hd
+	//   -----------             -----------
+	//  | Composite |           | Composite |       STEP 3
+	//   -----------             -----------
+	//     hd    tr                tr     hd
+	//
+	//
+	modelCompositionComputePlan = inputComputePlan{
+		ObjectiveKey: objectiveDescriptionHash,
+		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
+			{
+				ID:             "step_1_composite_A",
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        compositeAlgoHash,
+			},
+			{
+				ID:             "step_1_composite_B",
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash2},
+				AlgoKey:        compositeAlgoHash,
+			},
+			{
+				ID:             "step_3_composite_A",
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        compositeAlgoHash,
+				InHeadModelID:  "step_1_composite_A",
+				InTrunkModelID: "step_2_aggregate",
+			},
+			{
+				ID:             "step_3_composite_B",
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash2},
+				AlgoKey:        compositeAlgoHash,
+				InHeadModelID:  "step_1_composite_B",
+				InTrunkModelID: "step_2_aggregate",
+			},
+		},
+		Aggregatetuples: []inputComputePlanAggregatetuple{
+			{
+				ID:      "step_2_aggregate",
+				AlgoKey: aggregateAlgoHash,
+				InModelsIDs: []string{
+					"step_1_composite_A",
+					"step_1_composite_B",
+				},
+			},
+		},
+		Testtuples: []inputComputePlanTesttuple{
+			inputComputePlanTesttuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				TraintupleID:   "step_1_composite_A",
+			},
+			inputComputePlanTesttuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				TraintupleID:   "step_1_composite_B",
+			},
+			inputComputePlanTesttuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				TraintupleID:   "step_2_aggregate",
+			},
+			inputComputePlanTesttuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				TraintupleID:   "step_3_composite_A",
+			},
+			inputComputePlanTesttuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				TraintupleID:   "step_3_composite_B",
+			},
+		},
+	}
 )
+
+func TestModelCompositionComputePlanWorkflow(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "aggregateAlgo")
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	_, err := createComputePlanInternal(db, modelCompositionComputePlan)
+	assert.NoError(t, err)
+}
 
 func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	scc := new(SubstraChaincode)
