@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSort(t *testing.T) {
+func TestDAGSort(t *testing.T) {
 	ts := []struct {
 		name        string
 		list        []TrainingTask
@@ -45,7 +45,7 @@ func TestSort(t *testing.T) {
 				{ID: "four", InModelsIDs: []string{"five"}},
 			},
 			expectError: true,
-			errorStr:    "compute plan error, either cyclic or missing dep among those IDs'inModels: [four]"},
+			errorStr:    "Compute plan error: Cyclic or missing dependency among inModels IDs: [four]"},
 		{name: "cyclic inModels",
 			list: []TrainingTask{
 				{ID: "one"},
@@ -55,7 +55,7 @@ func TestSort(t *testing.T) {
 				{ID: "five", InModelsIDs: []string{"four"}},
 			},
 			expectError: true,
-			errorStr:    "compute plan error, either cyclic or missing dep among those IDs'inModels: [two three four five]"},
+			errorStr:    "Compute plan error: Cyclic or missing dependency among inModels IDs: [two three four five]"},
 		{name: "Same ID twice",
 			list: []TrainingTask{
 				{ID: "one"},
@@ -64,7 +64,7 @@ func TestSort(t *testing.T) {
 				{ID: "one", InModelsIDs: []string{"three"}},
 			},
 			expectError: true,
-			errorStr:    `compute plan error, ID use twice: one`},
+			errorStr:    `Compute plan error: Duplicate training task ID: one`},
 	}
 	for _, tc := range ts {
 		t.Run(tc.name, func(t *testing.T) {

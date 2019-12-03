@@ -2,6 +2,8 @@ package main
 
 import "fmt"
 
+// TrainingTask is a node of a ComputeDAG. It represents a training task
+// (i.e. a Traintuple, a CompositeTraintuple or an Aggregatetuple)
 type TrainingTask struct {
 	ID          string
 	InModelsIDs []string
@@ -9,10 +11,13 @@ type TrainingTask struct {
 	TaskType    AssetType
 }
 
+// ComputeDAG is a Directed Acyclic Graph (DAG)
+// used for compute plans
 type ComputeDAG struct {
 	OrderTasks []TrainingTask
 }
 
+// Create a Directed Acyclic Graph (DAG) from a compute plan
 func createComputeDAG(cp inputComputePlan) (ComputeDAG, error) {
 	DAG := ComputeDAG{}
 	for i, traintuple := range cp.Traintuples {
@@ -49,8 +54,7 @@ func createComputeDAG(cp inputComputePlan) (ComputeDAG, error) {
 	return DAG, nil
 }
 
-// sort order the listed task of the dag or return an error if there is a cyclic
-// dependencies in the inModelIDs
+// Sort the DAG's task list, or return an error if there is a cyclic dependency in inModelIDs
 func (dag *ComputeDAG) sort() error {
 	current := dag.OrderTasks
 	var temp, final []TrainingTask
@@ -67,7 +71,7 @@ func (dag *ComputeDAG) sort() error {
 		if ready {
 			final = append(final, current[i])
 			if _, ok := IDPresents[current[i].ID]; ok {
-				return fmt.Errorf("compute plan error, ID use twice: %s", current[i].ID)
+				return fmt.Errorf("Compute plan error: Duplicate training task ID: %s", current[i].ID)
 			}
 			IDPresents[current[i].ID] = true
 		} else {
@@ -82,7 +86,7 @@ func (dag *ComputeDAG) sort() error {
 			for _, c := range current {
 				errorIDs = append(errorIDs, c.ID)
 			}
-			return fmt.Errorf("compute plan error, either cyclic or missing dep among those IDs'inModels: %v", errorIDs)
+			return fmt.Errorf("Compute plan error: Cyclic or missing dependency among inModels IDs: %v", errorIDs)
 		}
 		i = 0
 		current = temp
