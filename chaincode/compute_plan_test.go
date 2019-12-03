@@ -74,7 +74,7 @@ var (
 	}
 )
 
-func TestCreateComputePlanAggregate(t *testing.T) {
+func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "aggregateAlgo")
@@ -114,48 +114,20 @@ func TestCreateComputePlanAggregate(t *testing.T) {
 	}
 	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
-	// Check the composite traintuples
-	traintuples, err := queryAggregatetuples(db, []string{})
-	assert.NoError(t, err)
-	require.Len(t, traintuples, 2)
-	require.Contains(t, outCP.AggregatetupleKeys, traintuples[0].Key)
-	require.Contains(t, outCP.AggregatetupleKeys, traintuples[1].Key)
-}
-func TestCreateComputePlanComposite(t *testing.T) {
-	scc := new(SubstraChaincode)
-	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	registerItem(t, *mockStub, "compositeAlgo")
 
-	mockStub.MockTransactionStart("42")
-	db := NewLedgerDB(mockStub)
-
-	tag := []string{"compositeTraintuple1", "compositeTraintuple2"}
-	// Simply test method and return values
-	inCP := defaultComputePlan
-	inCP.CompositeTraintuples = []inputComputePlanCompositeTraintuple{
-		{
-			DataManagerKey: dataManagerOpenerHash,
-			DataSampleKeys: []string{trainDataSampleHash1},
-			AlgoKey:        compositeAlgoHash,
-			ID:             tag[0],
-		},
-		{
-			DataManagerKey: dataManagerOpenerHash,
-			DataSampleKeys: []string{trainDataSampleHash1},
-			AlgoKey:        compositeAlgoHash,
-			ID:             tag[1],
-			InTrunkModelID: tag[0],
-			InHeadModelID:  tag[0],
-		},
-	}
-	outCP, err := createComputePlanInternal(db, inCP)
-	assert.NoError(t, err)
 	// Check the composite traintuples
 	traintuples, err := queryCompositeTraintuples(db, []string{})
 	assert.NoError(t, err)
 	require.Len(t, traintuples, 2)
 	require.Contains(t, outCP.CompositeTraintupleKeys, traintuples[0].Key)
 	require.Contains(t, outCP.CompositeTraintupleKeys, traintuples[1].Key)
+
+	// Check the aggregate traintuples
+	aggtuples, err := queryAggregatetuples(db, []string{})
+	assert.NoError(t, err)
+	require.Len(t, aggtuples, 2)
+	require.Contains(t, outCP.AggregatetupleKeys, aggtuples[0].Key)
+	require.Contains(t, outCP.AggregatetupleKeys, aggtuples[1].Key)
 }
 
 func TestCreateComputePlan(t *testing.T) {
