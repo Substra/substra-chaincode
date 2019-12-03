@@ -246,7 +246,7 @@ func TestCreateComputePlan(t *testing.T) {
 	inCP := defaultComputePlan
 	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
-	validateDefaultComputePlan(t, outCP, defaultComputePlan)
+	validateDefaultComputePlan(t, outCP)
 
 	// Check the traintuples
 	traintuples, err := queryTraintuples(db, []string{})
@@ -306,7 +306,7 @@ func TestQueryComputePlan(t *testing.T) {
 	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
 	assert.NotNil(t, cp)
-	validateDefaultComputePlan(t, cp, defaultComputePlan)
+	validateDefaultComputePlan(t, cp)
 }
 
 func TestQueryComputePlans(t *testing.T) {
@@ -327,10 +327,11 @@ func TestQueryComputePlans(t *testing.T) {
 	cps, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Len(t, cps, 1, "queryComputePlans should return one compute plan")
-	validateDefaultComputePlan(t, cps[0], defaultComputePlan)
+	validateDefaultComputePlan(t, cps[0])
 }
 
-func validateDefaultComputePlan(t *testing.T, cp outputComputePlan, in inputComputePlan) {
+func validateDefaultComputePlan(t *testing.T, cp outputComputePlan) {
+	in := defaultComputePlan
 	assert.Len(t, cp.TraintupleKeys, 2)
 	cpID := cp.TraintupleKeys[0]
 
