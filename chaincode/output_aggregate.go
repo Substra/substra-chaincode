@@ -104,13 +104,3 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db LedgerDB, traintuple A
 
 	return
 }
-
-// AddAggregatetuple adds one aggregate tuple to the event struct
-func (te *TuplesEvent) AddAggregatetuple(out outputAggregatetuple) {
-	te.Aggregatetuples = append(te.Aggregatetuples, out)
-}
-
-// SetAggregatetuples adds one or several tuples to the event struct
-func (te *TuplesEvent) SetAggregatetuples(otuples ...outputAggregatetuple) {
-	te.Aggregatetuples = otuples
-}

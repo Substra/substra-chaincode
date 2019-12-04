@@ -297,26 +297,6 @@ type TuplesEvent struct {
 	Aggregatetuples      []outputAggregatetuple      `json:"aggregatetuple"`
 }
 
-// SetTesttuples add one or several testtuples to the event struct
-func (te *TuplesEvent) SetTesttuples(otuples ...outputTesttuple) {
-	te.Testtuples = otuples
-}
-
-// SetTraintuples add one or several traintuples to the event struct
-func (te *TuplesEvent) SetTraintuples(otuples ...outputTraintuple) {
-	te.Traintuples = otuples
-}
-
-// AddTraintuple add one traintuple to the event struct
-func (te *TuplesEvent) AddTraintuple(out outputTraintuple) {
-	te.Traintuples = append(te.Traintuples, out)
-}
-
-// AddTesttuple add one testtuple to the event struct
-func (te *TuplesEvent) AddTesttuple(out outputTesttuple) {
-	te.Testtuples = append(te.Testtuples, out)
-}
-
 type outputComputePlan struct {
 	ComputePlanID           string   `json:"computePlanID"`
 	ObjectiveKey            string   `json:"objectiveKey"`

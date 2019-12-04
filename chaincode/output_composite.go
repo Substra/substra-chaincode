@@ -147,13 +147,3 @@ func getOutPermissions(in Permissions) (out outputPermissions) {
 func (out *outputCompositeAlgo) Fill(key string, in CompositeAlgo) {
 	out.outputAlgo.Fill(key, in.Algo)
 }
-
-// SetCompositeTraintuples adds one or several tuples to the event struct
-func (te *TuplesEvent) SetCompositeTraintuples(otuples ...outputCompositeTraintuple) {
-	te.CompositeTraintuples = otuples
-}
-
-// AddCompositeTraintuple add one traintuple to the event struct
-func (te *TuplesEvent) AddCompositeTraintuple(out outputCompositeTraintuple) {
-	te.CompositeTraintuples = append(te.CompositeTraintuples, out)
-}
