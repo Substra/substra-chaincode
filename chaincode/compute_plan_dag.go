@@ -71,7 +71,7 @@ func (dag *ComputeDAG) sort() error {
 		if ready {
 			final = append(final, current[i])
 			if _, ok := IDPresents[current[i].ID]; ok {
-				return fmt.Errorf("Compute plan error: Duplicate training task ID: %s", current[i].ID)
+				return fmt.Errorf("compute plan error: Duplicate training task ID: %s", current[i].ID)
 			}
 			IDPresents[current[i].ID] = true
 		} else {
@@ -86,7 +86,7 @@ func (dag *ComputeDAG) sort() error {
 			for _, c := range current {
 				errorIDs = append(errorIDs, c.ID)
 			}
-			return fmt.Errorf("Compute plan error: Cyclic or missing dependency among inModels IDs: %v", errorIDs)
+			return fmt.Errorf("compute plan error: Cyclic or missing dependency among inModels IDs: %v", errorIDs)
 		}
 		i = 0
 		current = temp

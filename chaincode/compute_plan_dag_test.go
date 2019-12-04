@@ -45,7 +45,7 @@ func TestDAGSort(t *testing.T) {
 				{ID: "four", InModelsIDs: []string{"five"}},
 			},
 			expectError: true,
-			errorStr:    "Compute plan error: Cyclic or missing dependency among inModels IDs: [four]"},
+			errorStr:    "compute plan error: Cyclic or missing dependency among inModels IDs: [four]"},
 		{name: "cyclic inModels",
 			list: []TrainingTask{
 				{ID: "one"},
@@ -55,7 +55,7 @@ func TestDAGSort(t *testing.T) {
 				{ID: "five", InModelsIDs: []string{"four"}},
 			},
 			expectError: true,
-			errorStr:    "Compute plan error: Cyclic or missing dependency among inModels IDs: [two three four five]"},
+			errorStr:    "compute plan error: Cyclic or missing dependency among inModels IDs: [two three four five]"},
 		{name: "Same ID twice",
 			list: []TrainingTask{
 				{ID: "one"},
@@ -64,7 +64,7 @@ func TestDAGSort(t *testing.T) {
 				{ID: "one", InModelsIDs: []string{"three"}},
 			},
 			expectError: true,
-			errorStr:    `Compute plan error: Duplicate training task ID: one`},
+			errorStr:    `compute plan error: Duplicate training task ID: one`},
 	}
 	for _, tc := range ts {
 		t.Run(tc.name, func(t *testing.T) {
