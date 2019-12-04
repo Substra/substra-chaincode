@@ -1492,6 +1492,7 @@ Smart contract: `createComputePlan`
    "id": string (required,lte=64),
    "inModelsIDs": [string] (omitempty,dive,lte=64),
    "tag": string (omitempty,lte=64),
+   "worker": string (required),
  }],
  "compositeTraintuples": (omitempty) [{
    "dataManagerKey": string (required,len=64,hexadecimal),

@@ -43,6 +43,7 @@ func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, tra
 func (inpAggregatetuple *inputAggregatetuple) Fill(inpCP inputComputePlanAggregatetuple, aggregatetupleKeysByID map[string]string) error {
 	inpAggregatetuple.AlgoKey = inpCP.AlgoKey
 	inpAggregatetuple.Tag = inpCP.Tag
+	inpAggregatetuple.Worker = inpCP.Worker
 
 	// Set the inModels by matching the id to tuples key previously
 	// encontered in this compute plan

@@ -117,6 +117,7 @@ var (
 					"step_1_composite_A",
 					"step_1_composite_B",
 				},
+				Worker: worker,
 			},
 		},
 		Testtuples: []inputComputePlanTesttuple{
@@ -157,10 +158,38 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	_, err := createComputePlanInternal(db, modelCompositionComputePlan)
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan)
 	assert.NoError(t, err)
 	assert.NotNil(t, db.tuplesEvent)
 	assert.Len(t, db.tuplesEvent.CompositeTraintuples, 2)
+
+	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[0]}))
+	assert.NoError(t, err)
+	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[1]}))
+	assert.NoError(t, err)
+
+	inpLogCompo := inputLogSuccessCompositeTrain{}
+	inpLogCompo.fillDefaults()
+	inpLogCompo.Key = out.CompositeTraintupleKeys[0]
+	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
+	assert.NoError(t, err)
+
+	db.tuplesEvent = &TuplesEvent{}
+	inpLogCompo.Key = out.CompositeTraintupleKeys[1]
+	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
+	assert.NoError(t, err)
+	require.Len(t, db.tuplesEvent.Aggregatetuples, 1)
+	assert.Equal(t, StatusTodo, db.tuplesEvent.Aggregatetuples[0].Status)
+
+	_, err = logStartAggregateTrain(db, assetToArgs(inputHash{out.AggregatetupleKeys[0]}))
+	assert.NoError(t, err)
+
+	inpLogAgg := inputLogSuccessTrain{}
+	inpLogAgg.fillDefaults()
+	inpLogAgg.Key = out.AggregatetupleKeys[0]
+	agg, err := logSuccessAggregateTrain(db, assetToArgs(inpLogAgg))
+	assert.NoError(t, err)
+	assert.Equal(t, StatusDone, agg.Status)
 }
 
 func TestCreateComputePlanCompositeAggregate(t *testing.T) {

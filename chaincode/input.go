@@ -169,6 +169,7 @@ type inputComputePlanAggregatetuple struct {
 	ID          string   `validate:"required,lte=64" json:"id"`
 	InModelsIDs []string `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
 	Tag         string   `validate:"omitempty,lte=64" json:"tag"`
+	Worker      string   `validate:"required" json:"worker"`
 }
 
 type inputComputePlanCompositeTraintuple struct {
