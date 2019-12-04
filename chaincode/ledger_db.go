@@ -408,6 +408,9 @@ func (db *LedgerDB) SendTuplesEvent() error {
 
 // AddTupleEvent add the output tuple matching the tupleKey to the event struct
 func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
+	// We take advantage of the fact that Testtuples have the fields "AssetType"
+	// and "Status": we use db.GetGenericTuple to get the value for these fields
+	// even though Testtuples aren't technically GenericTuples.
 	genericTuple, err := db.GetGenericTuple(tupleKey)
 	if err != nil {
 		return err
