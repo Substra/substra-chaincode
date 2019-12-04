@@ -282,8 +282,8 @@ func createAggregatetupleInternal(db *LedgerDB, inp inputAggregatetuple, checkCo
 	return aggregatetupleKey, nil
 }
 
-// logStartAggregateTrain modifies a aggregatetuple by changing its status from todo to doing
-func logStartAggregateTrain(db *LedgerDB, args []string) (outputAggregatetuple outputAggregatetuple, err error) {
+// logStartAggregate modifies a aggregatetuple by changing its status from todo to doing
+func logStartAggregate(db *LedgerDB, args []string) (outputAggregatetuple outputAggregatetuple, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -305,8 +305,8 @@ func logStartAggregateTrain(db *LedgerDB, args []string) (outputAggregatetuple o
 	return
 }
 
-// logFailAggregateTrain modifies a aggregatetuple by changing its status to fail and reports associated logs
-func logFailAggregateTrain(db *LedgerDB, args []string) (outputAggregatetuple outputAggregatetuple, err error) {
+// logFailAggregate modifies a aggregatetuple by changing its status to fail and reports associated logs
+func logFailAggregate(db *LedgerDB, args []string) (outputAggregatetuple outputAggregatetuple, err error) {
 	inp := inputLogFailTrain{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -343,9 +343,9 @@ func logFailAggregateTrain(db *LedgerDB, args []string) (outputAggregatetuple ou
 	return
 }
 
-// logSuccessAggregateTrain modifies an aggregateTupl by changing its status from doing to done
+// logSuccessAggregate modifies an aggregateTupl by changing its status from doing to done
 // reports logs and associated performances
-func logSuccessAggregateTrain(db *LedgerDB, args []string) (outputAggregatetuple outputAggregatetuple, err error) {
+func logSuccessAggregate(db *LedgerDB, args []string) (outputAggregatetuple outputAggregatetuple, err error) {
 	inp := inputLogSuccessTrain{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {

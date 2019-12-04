@@ -157,7 +157,7 @@ func trainStart(db *LedgerDB, tupleType AssetType, tupleKey string) (interface{}
 	case CompositeTraintupleType:
 		return logStartCompositeTrain(db, assetToArgs(inputHash{Key: tupleKey}))
 	case AggregatetupleType:
-		return logStartAggregateTrain(db, assetToArgs(inputHash{Key: tupleKey}))
+		return logStartAggregate(db, assetToArgs(inputHash{Key: tupleKey}))
 	default:
 		return nil, fmt.Errorf("unsupported test case %s", tupleType)
 	}
@@ -179,7 +179,7 @@ func trainSuccess(db *LedgerDB, tupleType AssetType, tupleKey string) (interface
 		successParent1 := inputLogSuccessTrain{}
 		successParent1.fillDefaults()
 		successParent1.Key = tupleKey
-		return logSuccessAggregateTrain(db, assetToArgs(successParent1))
+		return logSuccessAggregate(db, assetToArgs(successParent1))
 	default:
 		return nil, fmt.Errorf("unsupported test case %s", tupleType)
 	}
@@ -195,7 +195,7 @@ func trainFail(db *LedgerDB, tupleType AssetType, tupleKey string) (interface{},
 	case CompositeTraintupleType:
 		return logFailCompositeTrain(db, assetToArgs(in))
 	case AggregatetupleType:
-		return logFailAggregateTrain(db, assetToArgs(in))
+		return logFailAggregate(db, assetToArgs(in))
 	default:
 		return nil, fmt.Errorf("unsupported test case %s", tupleType)
 	}

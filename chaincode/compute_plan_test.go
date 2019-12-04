@@ -185,13 +185,13 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	require.Len(t, db.tuplesEvent.Aggregatetuples, 1)
 	assert.Equal(t, StatusTodo, db.tuplesEvent.Aggregatetuples[0].Status)
 
-	_, err = logStartAggregateTrain(db, assetToArgs(inputHash{out.AggregatetupleKeys[0]}))
+	_, err = logStartAggregate(db, assetToArgs(inputHash{out.AggregatetupleKeys[0]}))
 	assert.NoError(t, err)
 
 	inpLogAgg := inputLogSuccessTrain{}
 	inpLogAgg.fillDefaults()
 	inpLogAgg.Key = out.AggregatetupleKeys[0]
-	agg, err := logSuccessAggregateTrain(db, assetToArgs(inpLogAgg))
+	agg, err := logSuccessAggregate(db, assetToArgs(inpLogAgg))
 	assert.NoError(t, err)
 	assert.Equal(t, StatusDone, agg.Status)
 
