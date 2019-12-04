@@ -159,6 +159,8 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 
 	_, err := createComputePlanInternal(db, modelCompositionComputePlan)
 	assert.NoError(t, err)
+	assert.NotNil(t, db.tuplesEvent)
+	assert.Len(t, db.tuplesEvent.CompositeTraintuples, 2)
 }
 
 func TestCreateComputePlanCompositeAggregate(t *testing.T) {
