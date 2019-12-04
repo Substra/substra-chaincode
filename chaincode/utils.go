@@ -90,20 +90,6 @@ func AssetFromJSON(args []string, asset interface{}) error {
 	return nil
 }
 
-// SendTuplesEvent sends an event with updated traintuples and testtuples
-// Only one event can be sent per transaction
-func SendTuplesEvent(stub shim.ChaincodeStubInterface, event interface{}) error {
-	payload, err := json.Marshal(event)
-	if err != nil {
-		return err
-	}
-	err = stub.SetEvent("tuples-updated", payload)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 // GetTxCreator returns the transaction creator
 func GetTxCreator(stub shim.ChaincodeStubInterface) (string, error) {
 	creator, err := stub.GetCreator()
