@@ -150,7 +150,7 @@ func TestModelComposition(t *testing.T) {
 	}
 }
 
-func trainStart(db LedgerDB, tupleType AssetType, tupleKey string) (interface{}, error) {
+func trainStart(db *LedgerDB, tupleType AssetType, tupleKey string) (interface{}, error) {
 	switch tupleType {
 	case TraintupleType:
 		return logStartTrain(db, assetToArgs(inputHash{Key: tupleKey}))
@@ -163,7 +163,7 @@ func trainStart(db LedgerDB, tupleType AssetType, tupleKey string) (interface{},
 	}
 }
 
-func trainSuccess(db LedgerDB, tupleType AssetType, tupleKey string) (interface{}, error) {
+func trainSuccess(db *LedgerDB, tupleType AssetType, tupleKey string) (interface{}, error) {
 	switch tupleType {
 	case TraintupleType:
 		successParent1 := inputLogSuccessTrain{}
@@ -185,7 +185,7 @@ func trainSuccess(db LedgerDB, tupleType AssetType, tupleKey string) (interface{
 	}
 }
 
-func trainFail(db LedgerDB, tupleType AssetType, tupleKey string) (interface{}, error) {
+func trainFail(db *LedgerDB, tupleType AssetType, tupleKey string) (interface{}, error) {
 	in := inputLogFailTrain{}
 	in.Key = tupleKey
 	in.fillDefaults()

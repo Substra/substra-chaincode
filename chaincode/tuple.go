@@ -36,7 +36,7 @@ const (
 // ------------------------------------------------
 
 // queryModelDetails returns info about the testtuple and algo related to a traintuple
-func queryModelDetails(db LedgerDB, args []string) (outModelDetails outputModelDetails, err error) {
+func queryModelDetails(db *LedgerDB, args []string) (outModelDetails outputModelDetails, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -95,7 +95,7 @@ func queryModelDetails(db LedgerDB, args []string) (outModelDetails outputModelD
 }
 
 // queryModels returns all traintuples and associated testuples
-func queryModels(db LedgerDB, args []string) (outModels []outputModel, err error) {
+func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err error) {
 	outModels = []outputModel{}
 
 	if len(args) != 0 {
@@ -175,7 +175,7 @@ func checkLog(log string) (err error) {
 }
 */
 
-func validateTupleOwner(db LedgerDB, worker string) error {
+func validateTupleOwner(db *LedgerDB, worker string) error {
 	txCreator, err := GetTxCreator(db.cc)
 	if err != nil {
 		return err
@@ -187,7 +187,7 @@ func validateTupleOwner(db LedgerDB, worker string) error {
 }
 
 // check validity of traintuple update: consistent status and agent submitting the transaction
-func checkUpdateTuple(db LedgerDB, worker string, oldStatus string, newStatus string) error {
+func checkUpdateTuple(db *LedgerDB, worker string, oldStatus string, newStatus string) error {
 	statusPossibilities := map[string]string{
 		StatusWaiting: StatusTodo,
 		StatusTodo:    StatusDoing,
@@ -209,7 +209,7 @@ func HashForKey(objectType string, hashElements ...string) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func getCertifiedOutputTesttuple(db LedgerDB, traintupleKey string) (outputTesttuple, error) {
+func getCertifiedOutputTesttuple(db *LedgerDB, traintupleKey string) (outputTesttuple, error) {
 	var out outputTesttuple
 	// get associated testtuple
 	var testtupleKeys []string

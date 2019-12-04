@@ -34,7 +34,7 @@ import (
 //  - Tag
 //  - Dataset
 //  - Certified
-func (testtuple *Testtuple) SetFromInput(db LedgerDB, inp inputTesttuple) error {
+func (testtuple *Testtuple) SetFromInput(db *LedgerDB, inp inputTesttuple) error {
 	creator, err := GetTxCreator(db.cc)
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func (testtuple *Testtuple) SetFromInput(db LedgerDB, inp inputTesttuple) error 
 //  - ObjectiveKey
 //  - Model
 //  - Status
-func (testtuple *Testtuple) SetFromTraintuple(db LedgerDB, traintupleKey string) error {
+func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string) error {
 
 	var status, tupleCreator string
 	var permissions Permissions
@@ -179,7 +179,7 @@ func (testtuple *Testtuple) GetKey() string {
 
 // Save will put in the legder interface both the testtuple with its key
 // and all the associated composite keys
-func (testtuple *Testtuple) Save(db LedgerDB, testtupleKey string) error {
+func (testtuple *Testtuple) Save(db *LedgerDB, testtupleKey string) error {
 	var err error
 	if err = db.Add(testtupleKey, testtuple); err != nil {
 		return err
@@ -212,7 +212,7 @@ func (testtuple *Testtuple) Save(db LedgerDB, testtupleKey string) error {
 // -------------------------------------
 
 // createTesttuple adds a Testtuple in the ledger
-func createTesttuple(db LedgerDB, args []string) (map[string]string, error) {
+func createTesttuple(db *LedgerDB, args []string) (map[string]string, error) {
 
 	inp := inputTesttuple{}
 	err := AssetFromJSON(args, &inp)
@@ -227,7 +227,7 @@ func createTesttuple(db LedgerDB, args []string) (map[string]string, error) {
 	return map[string]string{"key": key}, nil
 }
 
-func createTesttupleInternal(db LedgerDB, inp inputTesttuple) (string, error) {
+func createTesttupleInternal(db *LedgerDB, inp inputTesttuple) (string, error) {
 	// check validity of input arg and set testtuple
 	testtuple := Testtuple{}
 	err := testtuple.SetFromTraintuple(db, inp.TraintupleKey)
@@ -252,7 +252,7 @@ func createTesttupleInternal(db LedgerDB, inp inputTesttuple) (string, error) {
 }
 
 // logStartTest modifies a testtuple by changing its status from todo to doing
-func logStartTest(db LedgerDB, args []string) (outputTesttuple outputTesttuple, err error) {
+func logStartTest(db *LedgerDB, args []string) (outputTesttuple outputTesttuple, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -278,7 +278,7 @@ func logStartTest(db LedgerDB, args []string) (outputTesttuple outputTesttuple, 
 }
 
 // logSuccessTest modifies a testtuple by changing its status to done, reports perf and logs
-func logSuccessTest(db LedgerDB, args []string) (outputTesttuple outputTesttuple, err error) {
+func logSuccessTest(db *LedgerDB, args []string) (outputTesttuple outputTesttuple, err error) {
 	inp := inputLogSuccessTest{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -304,7 +304,7 @@ func logSuccessTest(db LedgerDB, args []string) (outputTesttuple outputTesttuple
 }
 
 // logFailTest modifies a testtuple by changing its status to fail and reports associated logs
-func logFailTest(db LedgerDB, args []string) (outputTesttuple outputTesttuple, err error) {
+func logFailTest(db *LedgerDB, args []string) (outputTesttuple outputTesttuple, err error) {
 	inp := inputLogFailTest{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -330,7 +330,7 @@ func logFailTest(db LedgerDB, args []string) (outputTesttuple outputTesttuple, e
 }
 
 // queryTesttuple returns a testtuple of the ledger given its key
-func queryTesttuple(db LedgerDB, args []string) (out outputTesttuple, err error) {
+func queryTesttuple(db *LedgerDB, args []string) (out outputTesttuple, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -349,7 +349,7 @@ func queryTesttuple(db LedgerDB, args []string) (out outputTesttuple, err error)
 }
 
 // queryTesttuples returns all testtuples of the ledger
-func queryTesttuples(db LedgerDB, args []string) ([]outputTesttuple, error) {
+func queryTesttuples(db *LedgerDB, args []string) ([]outputTesttuple, error) {
 	outTesttuples := []outputTesttuple{}
 
 	if len(args) != 0 {
@@ -376,7 +376,7 @@ func queryTesttuples(db LedgerDB, args []string) ([]outputTesttuple, error) {
 // -----------------------------------------------
 
 // getOutputTesttuple takes as input a testtuple key and returns the outputTesttuple
-func getOutputTesttuple(db LedgerDB, testtupleKey string) (outTesttuple outputTesttuple, err error) {
+func getOutputTesttuple(db *LedgerDB, testtupleKey string) (outTesttuple outputTesttuple, err error) {
 	testtuple, err := db.GetTesttuple(testtupleKey)
 	if err != nil {
 		return
@@ -386,7 +386,7 @@ func getOutputTesttuple(db LedgerDB, testtupleKey string) (outTesttuple outputTe
 }
 
 // getOutputTesttuples takes as input a list of keys and returns a paylaod containing a list of associated retrieved elements
-func getOutputTesttuples(db LedgerDB, testtupleKeys []string) (outTesttuples []outputTesttuple, err error) {
+func getOutputTesttuples(db *LedgerDB, testtupleKeys []string) (outTesttuples []outputTesttuple, err error) {
 	for _, key := range testtupleKeys {
 		var outputTesttuple outputTesttuple
 		outputTesttuple, err = getOutputTesttuple(db, key)
@@ -399,13 +399,13 @@ func getOutputTesttuples(db LedgerDB, testtupleKeys []string) (outTesttuples []o
 }
 
 // validateNewStatus verifies that the new status is consistent with the tuple current status
-func (testtuple *Testtuple) validateNewStatus(db LedgerDB, status string) error {
+func (testtuple *Testtuple) validateNewStatus(db *LedgerDB, status string) error {
 	// check validity of worker and change of status
 	return checkUpdateTuple(db, testtuple.Dataset.Worker, testtuple.Status, status)
 }
 
 // commitStatusUpdate update the testtuple status in the ledger
-func (testtuple *Testtuple) commitStatusUpdate(db LedgerDB, testtupleKey string, newStatus string) error {
+func (testtuple *Testtuple) commitStatusUpdate(db *LedgerDB, testtupleKey string, newStatus string) error {
 	if err := testtuple.validateNewStatus(db, newStatus); err != nil {
 		return fmt.Errorf("update testtuple %s failed: %s", testtupleKey, err.Error())
 	}

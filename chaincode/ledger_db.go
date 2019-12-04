@@ -37,8 +37,8 @@ type LedgerDB struct {
 }
 
 // NewLedgerDB create a new db to access the chaincode during a SmartContract
-func NewLedgerDB(stub shim.ChaincodeStubInterface) LedgerDB {
-	return LedgerDB{
+func NewLedgerDB(stub shim.ChaincodeStubInterface) *LedgerDB {
+	return &LedgerDB{
 		cc: stub,
 		transactionState: State{
 			items: make(map[string]([]byte)),
@@ -425,7 +425,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 			return err
 		}
 		out := outputTraintuple{}
-		out.Fill(*db, tuple, tupleKey)
+		out.Fill(db, tuple, tupleKey)
 		db.tuplesEvent.Traintuples = append(db.tuplesEvent.Traintuples, out)
 	case CompositeTraintupleType:
 		tuple, err := db.GetCompositeTraintuple(tupleKey)
@@ -433,7 +433,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 			return err
 		}
 		out := outputCompositeTraintuple{}
-		out.Fill(*db, tuple, tupleKey)
+		out.Fill(db, tuple, tupleKey)
 		db.tuplesEvent.CompositeTraintuples = append(db.tuplesEvent.CompositeTraintuples, out)
 	case AggregatetupleType:
 		tuple, err := db.GetAggregatetuple(tupleKey)
@@ -441,7 +441,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 			return err
 		}
 		out := outputAggregatetuple{}
-		out.Fill(*db, tuple, tupleKey)
+		out.Fill(db, tuple, tupleKey)
 		db.tuplesEvent.Aggregatetuples = append(db.tuplesEvent.Aggregatetuples, out)
 	case TesttupleType:
 		tuple, err := db.GetTesttuple(tupleKey)
@@ -449,7 +449,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 			return err
 		}
 		out := outputTesttuple{}
-		out.Fill(*db, tupleKey, tuple)
+		out.Fill(db, tupleKey, tuple)
 		db.tuplesEvent.Testtuples = append(db.tuplesEvent.Testtuples, out)
 	}
 	return nil

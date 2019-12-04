@@ -14,7 +14,7 @@
 
 package main
 
-func registerNode(db LedgerDB, args []string) (Node, error) {
+func registerNode(db *LedgerDB, args []string) (Node, error) {
 	txCreator, err := GetTxCreator(db.cc)
 	if err != nil {
 		return Node{}, err
@@ -46,7 +46,7 @@ func registerNode(db LedgerDB, args []string) (Node, error) {
 	return node, nil
 }
 
-func queryNodes(db LedgerDB, args []string) (resp []Node, err error) {
+func queryNodes(db *LedgerDB, args []string) (resp []Node, err error) {
 	elementsKeys, err := db.GetIndexKeys("node~key", []string{"node"})
 	if err != nil {
 		return nil, err

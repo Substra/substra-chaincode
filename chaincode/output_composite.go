@@ -45,7 +45,7 @@ type outModelComposite struct {
 }
 
 //Fill is a method of the receiver outputCompositeTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
-func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db LedgerDB, traintuple CompositeTraintuple, traintupleKey string) (err error) {
+func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, traintuple CompositeTraintuple, traintupleKey string) (err error) {
 
 	outputCompositeTraintuple.Key = traintupleKey
 	outputCompositeTraintuple.Creator = traintuple.Creator

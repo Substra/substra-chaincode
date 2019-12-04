@@ -23,7 +23,7 @@ import (
 
 // Set is a method of the receiver DataManager. It uses inputDataManager fields to set the DataManager
 // Returns the dataManagerKey and associated objectiveKeys
-func (dataManager *DataManager) Set(db LedgerDB, inp inputDataManager) (string, string, error) {
+func (dataManager *DataManager) Set(db *LedgerDB, inp inputDataManager) (string, string, error) {
 	dataManagerKey := inp.OpenerHash
 	dataManager.ObjectiveKey = inp.ObjectiveKey
 	dataManager.AssetType = DataManagerType
@@ -51,7 +51,7 @@ func (dataManager *DataManager) Set(db LedgerDB, inp inputDataManager) (string, 
 
 // setDataSample is a method checking the validity of inputDataSample to be registered in the ledger
 // and returning corresponding dataSample hashes, associated dataManagers, testOnly and errors
-func setDataSample(db LedgerDB, inp inputDataSample) (dataSampleHashes []string, dataSample DataSample, err error) {
+func setDataSample(db *LedgerDB, inp inputDataSample) (dataSampleHashes []string, dataSample DataSample, err error) {
 	dataSampleHashes = inp.Hashes
 	if err = checkHashes(dataSampleHashes); err != nil {
 		err = errors.BadRequest(err)
@@ -90,7 +90,7 @@ func setDataSample(db LedgerDB, inp inputDataSample) (dataSampleHashes []string,
 
 // validateUpdateDataSample is a method checking the validity of elements sent to update
 // one or more dataSamplef
-func validateUpdateDataSample(db LedgerDB, inp inputUpdateDataSample) (dataSampleHashes []string, dataManagerKeys []string, err error) {
+func validateUpdateDataSample(db *LedgerDB, inp inputUpdateDataSample) (dataSampleHashes []string, dataManagerKeys []string, err error) {
 	// TODO return full dataSample
 	// check validity of dataSampleHashes
 	if err = checkHashes(inp.Hashes); err != nil {
@@ -109,7 +109,7 @@ func validateUpdateDataSample(db LedgerDB, inp inputUpdateDataSample) (dataSampl
 // -----------------------------------------------------------------
 
 // registerDataManager stores a new dataManager in the ledger.
-func registerDataManager(db LedgerDB, args []string) (resp map[string]string, err error) {
+func registerDataManager(db *LedgerDB, args []string) (resp map[string]string, err error) {
 	inp := inputDataManager{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -147,7 +147,7 @@ func registerDataManager(db LedgerDB, args []string) (resp map[string]string, er
 }
 
 // registerDataSample stores new dataSample in the ledger (one or more).
-func registerDataSample(db LedgerDB, args []string) (dataSampleKeys map[string][]string, err error) {
+func registerDataSample(db *LedgerDB, args []string) (dataSampleKeys map[string][]string, err error) {
 	// convert input strings args to input struct inputDataSample
 	inp := inputDataSample{}
 	err = AssetFromJSON(args, &inp)
@@ -182,7 +182,7 @@ func registerDataSample(db LedgerDB, args []string) (dataSampleKeys map[string][
 }
 
 // updateDataSample associates one or more dataManagerKeys to one or more dataSample
-func updateDataSample(db LedgerDB, args []string) (resp map[string]string, err error) {
+func updateDataSample(db *LedgerDB, args []string) (resp map[string]string, err error) {
 	inp := inputUpdateDataSample{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -232,7 +232,7 @@ func updateDataSample(db LedgerDB, args []string) (resp map[string]string, err e
 }
 
 // updateDataManager associates a objectiveKey to an existing dataManager
-func updateDataManager(db LedgerDB, args []string) (resp map[string]string, err error) {
+func updateDataManager(db *LedgerDB, args []string) (resp map[string]string, err error) {
 	inp := inputUpdateDataManager{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -247,7 +247,7 @@ func updateDataManager(db LedgerDB, args []string) (resp map[string]string, err 
 }
 
 // queryDataManager returns dataManager and its key
-func queryDataManager(db LedgerDB, args []string) (out outputDataManager, err error) {
+func queryDataManager(db *LedgerDB, args []string) (out outputDataManager, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -266,7 +266,7 @@ func queryDataManager(db LedgerDB, args []string) (out outputDataManager, err er
 }
 
 // queryDataManagers returns all DataManagers of the ledger
-func queryDataManagers(db LedgerDB, args []string) ([]outputDataManager, error) {
+func queryDataManagers(db *LedgerDB, args []string) ([]outputDataManager, error) {
 	var err error
 	outDataManagers := []outputDataManager{}
 	if len(args) != 0 {
@@ -291,7 +291,7 @@ func queryDataManagers(db LedgerDB, args []string) ([]outputDataManager, error) 
 }
 
 // queryDataset returns info about a dataManager and all related dataSample
-func queryDataset(db LedgerDB, args []string) (outputDataset, error) {
+func queryDataset(db *LedgerDB, args []string) (outputDataset, error) {
 	inp := inputHash{}
 	out := outputDataset{}
 	err := AssetFromJSON(args, &inp)
@@ -320,7 +320,7 @@ func queryDataset(db LedgerDB, args []string) (outputDataset, error) {
 	return out, nil
 }
 
-func queryDataSamples(db LedgerDB, args []string) ([]outputDataSample, error) {
+func queryDataSamples(db *LedgerDB, args []string) ([]outputDataSample, error) {
 	outDataSamples := []outputDataSample{}
 	if len(args) != 0 {
 		err := fmt.Errorf("incorrect number of arguments, expecting nothing")
@@ -351,7 +351,7 @@ func queryDataSamples(db LedgerDB, args []string) ([]outputDataSample, error) {
 
 // checkDataManagerOwner checks if the transaction requester is the owner of dataManager
 // specified by their keys in a slice
-func checkDataManagerOwner(db LedgerDB, dataManagerKeys []string) error {
+func checkDataManagerOwner(db *LedgerDB, dataManagerKeys []string) error {
 	// get transaction requester
 	txCreator, err := GetTxCreator(db.cc)
 	if err != nil {
@@ -371,7 +371,7 @@ func checkDataManagerOwner(db LedgerDB, dataManagerKeys []string) error {
 }
 
 //  checkDataSampleOwner checks if the transaction requester is the owner of the dataSample
-func checkDataSampleOwner(db LedgerDB, dataSample DataSample) error {
+func checkDataSampleOwner(db *LedgerDB, dataSample DataSample) error {
 	txRequester, err := GetTxCreator(db.cc)
 	if err != nil {
 		return err
@@ -384,7 +384,7 @@ func checkDataSampleOwner(db LedgerDB, dataSample DataSample) error {
 
 // checkSameDataManager checks if dataSample in a slice exist and are from the same dataManager.
 // If yes, returns two boolean indicating if dataSample are testOnly and trainOnly
-func checkSameDataManager(db LedgerDB, dataManagerKey string, dataSampleKeys []string) (bool, bool, error) {
+func checkSameDataManager(db *LedgerDB, dataManagerKey string, dataSampleKeys []string) (bool, bool, error) {
 	testOnly := true
 	trainOnly := true
 	for _, dataSampleKey := range dataSampleKeys {
@@ -403,7 +403,7 @@ func checkSameDataManager(db LedgerDB, dataManagerKey string, dataSampleKeys []s
 }
 
 // getDataset returns all dataSample keys associated to a dataManager
-func getDataset(db LedgerDB, dataManagerKey string, testOnly bool) ([]string, error) {
+func getDataset(db *LedgerDB, dataManagerKey string, testOnly bool) ([]string, error) {
 	indexName := "dataSample~dataManager~testOnly~key"
 	attributes := []string{"dataSample", dataManagerKey, strconv.FormatBool(testOnly)}
 	dataSampleKeys, err := db.GetIndexKeys(indexName, attributes)
@@ -414,7 +414,7 @@ func getDataset(db LedgerDB, dataManagerKey string, testOnly bool) ([]string, er
 }
 
 // getDataManagerOwner returns the owner of a dataManager given its key
-func getDataManagerOwner(db LedgerDB, dataManagerKey string) (string, error) {
+func getDataManagerOwner(db *LedgerDB, dataManagerKey string) (string, error) {
 	dataManager, err := db.GetDataManager(dataManagerKey)
 	if err != nil {
 		return "", errors.BadRequest(err, "dataManager %s not found", dataManagerKey)
@@ -424,7 +424,7 @@ func getDataManagerOwner(db LedgerDB, dataManagerKey string) (string, error) {
 
 // checkDataSamplesExist checks if keys in a slice correspond to existing elements in the ledger
 // returns the slice of already existing elements
-func checkDataSamplesExist(db LedgerDB, keys []string) (existingKeys []string) {
+func checkDataSamplesExist(db *LedgerDB, keys []string) (existingKeys []string) {
 	for _, key := range keys {
 		if _, err := db.GetDataSample(key); err == nil {
 			existingKeys = append(existingKeys, key)

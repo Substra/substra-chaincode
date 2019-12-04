@@ -97,7 +97,7 @@ func (inpTesttuple *inputTesttuple) Fill(inpCP inputComputePlanTesttuple, traint
 }
 
 // createComputePlan is the wrapper for the substra smartcontract CreateComputePlan
-func createComputePlan(db LedgerDB, args []string) (resp outputComputePlan, err error) {
+func createComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
 	inp := inputComputePlan{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -106,7 +106,7 @@ func createComputePlan(db LedgerDB, args []string) (resp outputComputePlan, err 
 	return createComputePlanInternal(db, inp)
 }
 
-func createComputePlanInternal(db LedgerDB, inp inputComputePlan) (resp outputComputePlan, err error) {
+func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputComputePlan, err error) {
 	traintupleKeysByID := map[string]string{}
 
 	resp.ObjectiveKey = inp.ObjectiveKey
@@ -216,7 +216,7 @@ func createComputePlanInternal(db LedgerDB, inp inputComputePlan) (resp outputCo
 	return resp, err
 }
 
-func queryComputePlan(db LedgerDB, args []string) (resp outputComputePlan, err error) {
+func queryComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -225,7 +225,7 @@ func queryComputePlan(db LedgerDB, args []string) (resp outputComputePlan, err e
 	return getComputePlan(db, inp.Key)
 }
 
-func queryComputePlans(db LedgerDB, args []string) (resp []outputComputePlan, err error) {
+func queryComputePlans(db *LedgerDB, args []string) (resp []outputComputePlan, err error) {
 	resp = []outputComputePlan{}
 	computePlanIDs, err := db.GetIndexKeys("computeplan~id", []string{"computeplan"})
 	if err != nil {
@@ -244,7 +244,7 @@ func queryComputePlans(db LedgerDB, args []string) (resp []outputComputePlan, er
 
 // getComputePlan returns details for a compute plan id.
 // Traintuples, CompositeTraintuples and Aggregatetuples are ordered by ascending rank.
-func getComputePlan(db LedgerDB, key string) (resp outputComputePlan, err error) {
+func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error) {
 
 	// 1. Get tuples (regular, composite, aggregate)
 	tupleKeys, err := db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", key})

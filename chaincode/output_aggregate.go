@@ -41,7 +41,7 @@ func (out *outputAggregateAlgo) Fill(key string, in AggregateAlgo) {
 }
 
 // Fill is a method of the receiver outputAggregatetuple. It returns all elements necessary to do a training task from an aggregate trainuple stored in the ledger
-func (outputAggregatetuple *outputAggregatetuple) Fill(db LedgerDB, traintuple Aggregatetuple, traintupleKey string) (err error) {
+func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple Aggregatetuple, traintupleKey string) (err error) {
 	outputAggregatetuple.Key = traintupleKey
 	outputAggregatetuple.Creator = traintuple.Creator
 	outputAggregatetuple.Log = traintuple.Log
