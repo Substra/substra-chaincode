@@ -243,15 +243,7 @@ func createTesttupleInternal(db LedgerDB, inp inputTesttuple) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	out := outputTesttuple{}
-	err = out.Fill(db, testtupleKey, testtuple)
-	if err != nil {
-		return "", err
-	}
-
-	event := TuplesEvent{}
-	event.SetTesttuples(out)
-	err = SendTuplesEvent(db.cc, event)
+	err = db.AddTupleEvent(testtupleKey)
 	if err != nil {
 		return "", err
 	}

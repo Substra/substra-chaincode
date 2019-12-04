@@ -213,13 +213,6 @@ func createComputePlanInternal(db LedgerDB, inp inputComputePlan) (resp outputCo
 		resp.TesttupleKeys = append(resp.TesttupleKeys, testtupleKey)
 	}
 
-	// event := TuplesEvent{}
-	//	event.SetTraintuples(traintuplesTodo...)
-	// err = SendTuplesEvent(db.cc, event)
-	// if err != nil {
-	// return resp, err
-	// }
-
 	return resp, err
 }
 

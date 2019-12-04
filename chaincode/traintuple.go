@@ -258,15 +258,7 @@ func createTraintupleInternal(db LedgerDB, inp inputTraintuple, fromComputePlan 
 		return "", err
 	}
 
-	out := outputTraintuple{}
-	err = out.Fill(db, traintuple, traintupleKey)
-	if err != nil {
-		return "", err
-	}
-
-	event := TuplesEvent{}
-	event.SetTraintuples(out)
-	err = SendTuplesEvent(db.cc, event)
+	err = db.AddTupleEvent(traintupleKey)
 	if err != nil {
 		return "", err
 	}
@@ -326,23 +318,17 @@ func logSuccessTrain(db LedgerDB, args []string) (outputTraintuple outputTraintu
 	}
 
 	// update depending tuples
-	event := TuplesEvent{}
-	err = UpdateTraintupleChildren(db, traintupleKey, traintuple.Status, &event)
+	err = UpdateTraintupleChildren(db, traintupleKey, traintuple.Status)
 	if err != nil {
 		return
 	}
 
-	err = UpdateTesttupleChildren(db, traintupleKey, traintuple.Status, &event)
+	err = UpdateTesttupleChildren(db, traintupleKey, traintuple.Status)
 	if err != nil {
 		return
 	}
 
 	err = outputTraintuple.Fill(db, traintuple, inp.Key)
-	if err != nil {
-		return
-	}
-
-	err = SendTuplesEvent(db.cc, event)
 	if err != nil {
 		return
 	}
@@ -377,22 +363,12 @@ func logFailTrain(db LedgerDB, args []string) (outputTraintuple outputTraintuple
 	}
 
 	// update depending tuples
-	event := TuplesEvent{}
-	err = UpdateTesttupleChildren(db, inp.Key, traintuple.Status, &event)
+	err = UpdateTesttupleChildren(db, inp.Key, traintuple.Status)
 	if err != nil {
 		return
 	}
 
-	err = UpdateTraintupleChildren(db, inp.Key, traintuple.Status, &event)
-	if err != nil {
-		return
-	}
-
-	err = SendTuplesEvent(db.cc, event)
-	if err != nil {
-		return
-	}
-
+	err = UpdateTraintupleChildren(db, inp.Key, traintuple.Status)
 	return
 }
 
@@ -471,7 +447,7 @@ func (traintuple *Traintuple) validateNewStatus(db LedgerDB, status string) erro
 }
 
 // UpdateTraintupleChildren updates the status of waiting trainuples  InModels of traintuples once they have been trained (succesfully or failed)
-func UpdateTraintupleChildren(db LedgerDB, traintupleKey string, traintupleStatus string, event *TuplesEvent) error {
+func UpdateTraintupleChildren(db LedgerDB, traintupleKey string, traintupleStatus string) error {
 	// get traintuples having as inModels the input traintuple
 	childTraintupleKeys, err := db.GetIndexKeys("traintuple~inModel~key", []string{"traintuple", traintupleKey})
 	if err != nil {
@@ -507,17 +483,17 @@ func UpdateTraintupleChildren(db LedgerDB, traintupleKey string, traintupleStatu
 		// Update the child traintuple and get its new status
 		switch child.AssetType {
 		case TraintupleType:
-			childTraintupleStatus, err = UpdateTraintupleChild(db, traintupleKey, childTraintupleKey, traintupleStatus, event)
+			childTraintupleStatus, err = UpdateTraintupleChild(db, traintupleKey, childTraintupleKey, traintupleStatus)
 			if err != nil {
 				return err
 			}
 		case CompositeTraintupleType:
-			childTraintupleStatus, err = UpdateCompositeTraintupleChild(db, traintupleKey, childTraintupleKey, traintupleStatus, event)
+			childTraintupleStatus, err = UpdateCompositeTraintupleChild(db, traintupleKey, childTraintupleKey, traintupleStatus)
 			if err != nil {
 				return err
 			}
 		case AggregatetupleType:
-			childTraintupleStatus, err = UpdateAggregatetupleChild(db, traintupleKey, childTraintupleKey, traintupleStatus, event)
+			childTraintupleStatus, err = UpdateAggregatetupleChild(db, traintupleKey, childTraintupleKey, traintupleStatus)
 			if err != nil {
 				return err
 			}
@@ -526,12 +502,12 @@ func UpdateTraintupleChildren(db LedgerDB, traintupleKey string, traintupleStatu
 		}
 
 		// Recursively call for an update on this child's children
-		err = UpdateTesttupleChildren(db, childTraintupleKey, childTraintupleStatus, event)
+		err = UpdateTesttupleChildren(db, childTraintupleKey, childTraintupleStatus)
 		if err != nil {
 			return err
 		}
 
-		err = UpdateTraintupleChildren(db, childTraintupleKey, childTraintupleStatus, event)
+		err = UpdateTraintupleChildren(db, childTraintupleKey, childTraintupleStatus)
 		if err != nil {
 			return err
 		}
@@ -540,7 +516,7 @@ func UpdateTraintupleChildren(db LedgerDB, traintupleKey string, traintupleStatu
 }
 
 // UpdateTraintupleChild updates the status of a waiting trainuple, given the new parent traintuple status
-func UpdateTraintupleChild(db LedgerDB, parentTraintupleKey string, childTraintupleKey string, traintupleStatus string, event *TuplesEvent) (childStatus string, err error) {
+func UpdateTraintupleChild(db LedgerDB, parentTraintupleKey string, childTraintupleKey string, traintupleStatus string) (childStatus string, err error) {
 	// get and update traintuple
 	childTraintuple, err := db.GetTraintuple(childTraintupleKey)
 	if err != nil {
@@ -575,14 +551,7 @@ func UpdateTraintupleChild(db LedgerDB, parentTraintupleKey string, childTraintu
 	// update return value after status update
 	childStatus = childTraintuple.Status
 
-	if newStatus == StatusTodo {
-		out := outputTraintuple{}
-		err = out.Fill(db, childTraintuple, childTraintupleKey)
-		if err != nil {
-			return
-		}
-		event.AddTraintuple(out)
-	}
+	err = db.AddTupleEvent(childTraintupleKey)
 
 	return
 }
@@ -637,7 +606,7 @@ func (traintuple *Traintuple) commitStatusUpdate(db LedgerDB, traintupleKey stri
 }
 
 // UpdateTesttupleChildren update testtuples status associated with a done or failed traintuple
-func UpdateTesttupleChildren(db LedgerDB, traintupleKey string, traintupleStatus string, event *TuplesEvent) error {
+func UpdateTesttupleChildren(db LedgerDB, traintupleKey string, traintupleStatus string) error {
 	var newStatus string
 	switch {
 	case traintupleStatus == StatusFailed:
@@ -666,13 +635,9 @@ func UpdateTesttupleChildren(db LedgerDB, traintupleKey string, traintupleStatus
 			return err
 		}
 
-		if newStatus == StatusTodo {
-			out := outputTesttuple{}
-			err = out.Fill(db, testtupleKey, testtuple)
-			if err != nil {
-				return err
-			}
-			event.AddTesttuple(out)
+		err = db.AddTupleEvent(testtupleKey)
+		if err != nil {
+			return err
 		}
 	}
 	return nil

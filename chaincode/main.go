@@ -170,6 +170,12 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	if err != nil {
 		return formatErrorResponse(err)
 	}
+	// Send event if there is any. It's done in one batch since we can only send
+	// one event per call
+	err = db.SendTuplesEvent()
+	if err != nil {
+		return formatErrorResponse(fmt.Errorf("could not send event for unknown reason"))
+	}
 	// Marshal to json the smartcontract result
 	resp, err := json.Marshal(result)
 	if err != nil {
