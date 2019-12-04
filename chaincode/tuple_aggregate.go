@@ -139,7 +139,7 @@ func (tuple *Aggregatetuple) GetKey() string {
 //  - If neither ComputePlanID nor rank is set it returns immediately
 //  - If rank is 0 and ComputePlanID empty, it's start a new one using this traintuple key
 //  - If rank and ComputePlanID are set, it checks if there are coherent with previous ones and set it.
-func (tuple *Aggregatetuple) AddToComputePlan(db LedgerDB, inp inputAggregatetuple, traintupleKey string) error {
+func (tuple *Aggregatetuple) AddToComputePlan(db LedgerDB, inp inputAggregatetuple, traintupleKey string, fromComputePlan bool) error {
 	// check ComputePlanID and Rank and set it when required
 	var err error
 	if inp.Rank == "" {
@@ -160,6 +160,11 @@ func (tuple *Aggregatetuple) AddToComputePlan(db LedgerDB, inp inputAggregatetup
 		tuple.ComputePlanID = traintupleKey
 		return nil
 	}
+	tuple.ComputePlanID = inp.ComputePlanID
+	if fromComputePlan {
+		return nil
+	}
+
 	var ttKeys []string
 	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID})
 	if err != nil {
@@ -176,8 +181,6 @@ func (tuple *Aggregatetuple) AddToComputePlan(db LedgerDB, inp inputAggregatetup
 		err = errors.BadRequest("ComputePlanID %s with worker %s rank %d already exists", inp.ComputePlanID, tuple.Worker, tuple.Rank)
 		return err
 	}
-
-	tuple.ComputePlanID = inp.ComputePlanID
 
 	return nil
 }
@@ -231,7 +234,7 @@ func createAggregatetuple(db LedgerDB, args []string) (map[string]string, error)
 		return nil, err
 	}
 
-	key, err := createAggregatetupleInternal(db, inp)
+	key, err := createAggregatetupleInternal(db, inp, false)
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +243,7 @@ func createAggregatetuple(db LedgerDB, args []string) (map[string]string, error)
 }
 
 // createAggregatetupleInternal adds a Aggregatetuple in the ledger
-func createAggregatetupleInternal(db LedgerDB, inp inputAggregatetuple) (string, error) {
+func createAggregatetupleInternal(db LedgerDB, inp inputAggregatetuple, fromComputePlan bool) (string, error) {
 
 	aggregatetuple := Aggregatetuple{}
 	err := aggregatetuple.SetFromInput(db, inp)
@@ -261,7 +264,7 @@ func createAggregatetupleInternal(db LedgerDB, inp inputAggregatetuple) (string,
 	if tupleExists {
 		return "", errors.Conflict("aggregatetuple already exists").WithKey(aggregatetupleKey)
 	}
-	err = aggregatetuple.AddToComputePlan(db, inp, aggregatetupleKey)
+	err = aggregatetuple.AddToComputePlan(db, inp, aggregatetupleKey, fromComputePlan)
 	if err != nil {
 		return "", err
 	}

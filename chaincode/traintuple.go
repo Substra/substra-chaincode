@@ -126,7 +126,7 @@ func (traintuple *Traintuple) GetKey() string {
 //  - If neither ComputePlanID nor rank is set it returns immediately
 //  - If rank is 0 and ComputePlanID empty, it's start a new one using this traintuple key
 //  - If rank and ComputePlanID are set, it checks if there are coherent with previous ones and set it.
-func (traintuple *Traintuple) AddToComputePlan(db LedgerDB, inp inputTraintuple, traintupleKey string) error {
+func (traintuple *Traintuple) AddToComputePlan(db LedgerDB, inp inputTraintuple, traintupleKey string, fromComputePlan bool) error {
 	// check ComputePlanID and Rank and set it when required
 	var err error
 	if inp.Rank == "" {
@@ -147,6 +147,10 @@ func (traintuple *Traintuple) AddToComputePlan(db LedgerDB, inp inputTraintuple,
 		traintuple.ComputePlanID = traintupleKey
 		return nil
 	}
+	traintuple.ComputePlanID = inp.ComputePlanID
+	if fromComputePlan {
+		return nil
+	}
 	var ttKeys []string
 	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID})
 	if err != nil {
@@ -162,8 +166,6 @@ func (traintuple *Traintuple) AddToComputePlan(db LedgerDB, inp inputTraintuple,
 		err = errors.BadRequest("ComputePlanID %s with worker %s rank %d already exists", inp.ComputePlanID, traintuple.Dataset.Worker, traintuple.Rank)
 		return err
 	}
-
-	traintuple.ComputePlanID = inp.ComputePlanID
 
 	return nil
 }
@@ -218,7 +220,7 @@ func createTraintuple(db LedgerDB, args []string) (map[string]string, error) {
 		return nil, err
 	}
 
-	key, err := createTraintupleInternal(db, inp)
+	key, err := createTraintupleInternal(db, inp, false)
 
 	if err != nil {
 		return nil, err
@@ -227,7 +229,7 @@ func createTraintuple(db LedgerDB, args []string) (map[string]string, error) {
 	return map[string]string{"key": key}, nil
 }
 
-func createTraintupleInternal(db LedgerDB, inp inputTraintuple) (string, error) {
+func createTraintupleInternal(db LedgerDB, inp inputTraintuple, fromComputePlan bool) (string, error) {
 	traintuple := Traintuple{}
 	err := traintuple.SetFromInput(db, inp)
 	if err != nil {
@@ -246,10 +248,11 @@ func createTraintupleInternal(db LedgerDB, inp inputTraintuple) (string, error) 
 	if tupleExists {
 		return "", errors.Conflict("traintuple already exists").WithKey(traintupleKey)
 	}
-	err = traintuple.AddToComputePlan(db, inp, traintupleKey)
+	err = traintuple.AddToComputePlan(db, inp, traintupleKey, fromComputePlan)
 	if err != nil {
 		return "", err
 	}
+
 	err = traintuple.Save(db, traintupleKey)
 	if err != nil {
 		return "", err

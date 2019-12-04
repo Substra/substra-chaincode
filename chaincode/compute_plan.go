@@ -132,7 +132,7 @@ func createComputePlanInternal(db LedgerDB, inp inputComputePlan) (resp outputCo
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeTraintuple.ID)
 			}
 
-			traintupleKey, err := createTraintupleInternal(db, inpTraintuple)
+			traintupleKey, err := createTraintupleInternal(db, inpTraintuple, true)
 			if err != nil {
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeTraintuple.ID)
 			}
@@ -157,7 +157,7 @@ func createComputePlanInternal(db LedgerDB, inp inputComputePlan) (resp outputCo
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeCompositeTraintuple.ID)
 			}
 			_ = computeCompositeTraintuple
-			compositeTraintupleKey, err := createCompositeTraintupleInternal(db, inpCompositeTraintuple)
+			compositeTraintupleKey, err := createCompositeTraintupleInternal(db, inpCompositeTraintuple, true)
 			if err != nil {
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeCompositeTraintuple.ID)
 			}
@@ -182,7 +182,7 @@ func createComputePlanInternal(db LedgerDB, inp inputComputePlan) (resp outputCo
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeAggregatetuple.ID)
 			}
 			_ = computeAggregatetuple
-			aggregatetupleKey, err := createAggregatetupleInternal(db, inpAggregatetuple)
+			aggregatetupleKey, err := createAggregatetupleInternal(db, inpAggregatetuple, true)
 			if err != nil {
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeAggregatetuple.ID)
 			}
