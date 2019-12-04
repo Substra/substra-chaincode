@@ -126,7 +126,8 @@ func (traintuple *Traintuple) GetKey() string {
 //  - If neither ComputePlanID nor rank is set it returns immediately
 //  - If rank is 0 and ComputePlanID empty, it's start a new one using this traintuple key
 //  - If rank and ComputePlanID are set, it checks if there are coherent with previous ones and set it.
-func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple, traintupleKey string, fromComputePlan bool) error {
+// Use checkComputePlanAvailability to ensure the compute plan exists and no other tuple is registered with the same worker/rank
+func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple, traintupleKey string, checkComputePlanAvailability bool) error {
 	// check ComputePlanID and Rank and set it when required
 	var err error
 	if inp.Rank == "" {
@@ -148,7 +149,7 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 		return nil
 	}
 	traintuple.ComputePlanID = inp.ComputePlanID
-	if fromComputePlan {
+	if !checkComputePlanAvailability {
 		return nil
 	}
 	var ttKeys []string
@@ -220,7 +221,7 @@ func createTraintuple(db *LedgerDB, args []string) (map[string]string, error) {
 		return nil, err
 	}
 
-	key, err := createTraintupleInternal(db, inp, false)
+	key, err := createTraintupleInternal(db, inp, true)
 
 	if err != nil {
 		return nil, err
@@ -229,7 +230,7 @@ func createTraintuple(db *LedgerDB, args []string) (map[string]string, error) {
 	return map[string]string{"key": key}, nil
 }
 
-func createTraintupleInternal(db *LedgerDB, inp inputTraintuple, fromComputePlan bool) (string, error) {
+func createTraintupleInternal(db *LedgerDB, inp inputTraintuple, checkComputePlanAvailability bool) (string, error) {
 	traintuple := Traintuple{}
 	err := traintuple.SetFromInput(db, inp)
 	if err != nil {
@@ -248,7 +249,7 @@ func createTraintupleInternal(db *LedgerDB, inp inputTraintuple, fromComputePlan
 	if tupleExists {
 		return "", errors.Conflict("traintuple already exists").WithKey(traintupleKey)
 	}
-	err = traintuple.AddToComputePlan(db, inp, traintupleKey, fromComputePlan)
+	err = traintuple.AddToComputePlan(db, inp, traintupleKey, checkComputePlanAvailability)
 	if err != nil {
 		return "", err
 	}

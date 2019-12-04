@@ -155,7 +155,8 @@ func (traintuple *CompositeTraintuple) GetKey() string {
 //  - If neither ComputePlanID nor rank is set it returns immediately
 //  - If rank is 0 and ComputePlanID empty, it's start a new one using this traintuple key
 //  - If rank and ComputePlanID are set, it checks if there are coherent with previous ones and set it.
-func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputCompositeTraintuple, traintupleKey string, fromComputePlan bool) error {
+// Use checkComputePlanAvailability to ensure the compute plan exists and no other tuple is registered with the same worker/rank
+func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputCompositeTraintuple, traintupleKey string, checkComputePlanAvailability bool) error {
 	// check ComputePlanID and Rank and set it when required
 	var err error
 	if inp.Rank == "" {
@@ -177,7 +178,7 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 		return nil
 	}
 	traintuple.ComputePlanID = inp.ComputePlanID
-	if fromComputePlan {
+	if !checkComputePlanAvailability {
 		return nil
 	}
 	var ttKeys []string
@@ -253,7 +254,7 @@ func createCompositeTraintuple(db *LedgerDB, args []string) (map[string]string, 
 		return nil, err
 	}
 
-	key, err := createCompositeTraintupleInternal(db, inp, false)
+	key, err := createCompositeTraintupleInternal(db, inp, true)
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +263,7 @@ func createCompositeTraintuple(db *LedgerDB, args []string) (map[string]string, 
 }
 
 // createCompositeTraintupleInternal adds a CompositeTraintuple in the ledger
-func createCompositeTraintupleInternal(db *LedgerDB, inp inputCompositeTraintuple, fromComputePlan bool) (string, error) {
+func createCompositeTraintupleInternal(db *LedgerDB, inp inputCompositeTraintuple, checkComputePlanAvailability bool) (string, error) {
 	traintuple := CompositeTraintuple{}
 	err := traintuple.SetFromInput(db, inp)
 	if err != nil {
@@ -283,7 +284,7 @@ func createCompositeTraintupleInternal(db *LedgerDB, inp inputCompositeTraintupl
 		return "", errors.Conflict("traintuple already exists").WithKey(traintupleKey)
 	}
 
-	err = traintuple.AddToComputePlan(db, inp, traintupleKey, fromComputePlan)
+	err = traintuple.AddToComputePlan(db, inp, traintupleKey, checkComputePlanAvailability)
 	if err != nil {
 		return "", err
 	}

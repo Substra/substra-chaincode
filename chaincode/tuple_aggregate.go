@@ -139,7 +139,8 @@ func (tuple *Aggregatetuple) GetKey() string {
 //  - If neither ComputePlanID nor rank is set it returns immediately
 //  - If rank is 0 and ComputePlanID empty, it's start a new one using this traintuple key
 //  - If rank and ComputePlanID are set, it checks if there are coherent with previous ones and set it.
-func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetuple, traintupleKey string, fromComputePlan bool) error {
+// Use checkComputePlanAvailability to ensure the compute plan exists and no other tuple is registered with the same worker/rank
+func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetuple, traintupleKey string, checkComputePlanAvailability bool) error {
 	// check ComputePlanID and Rank and set it when required
 	var err error
 	if inp.Rank == "" {
@@ -161,7 +162,7 @@ func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetu
 		return nil
 	}
 	tuple.ComputePlanID = inp.ComputePlanID
-	if fromComputePlan {
+	if !checkComputePlanAvailability {
 		return nil
 	}
 
@@ -234,7 +235,7 @@ func createAggregatetuple(db *LedgerDB, args []string) (map[string]string, error
 		return nil, err
 	}
 
-	key, err := createAggregatetupleInternal(db, inp, false)
+	key, err := createAggregatetupleInternal(db, inp, true)
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +244,7 @@ func createAggregatetuple(db *LedgerDB, args []string) (map[string]string, error
 }
 
 // createAggregatetupleInternal adds a Aggregatetuple in the ledger
-func createAggregatetupleInternal(db *LedgerDB, inp inputAggregatetuple, fromComputePlan bool) (string, error) {
+func createAggregatetupleInternal(db *LedgerDB, inp inputAggregatetuple, checkComputePlanAvailability bool) (string, error) {
 
 	aggregatetuple := Aggregatetuple{}
 	err := aggregatetuple.SetFromInput(db, inp)
@@ -264,7 +265,7 @@ func createAggregatetupleInternal(db *LedgerDB, inp inputAggregatetuple, fromCom
 	if tupleExists {
 		return "", errors.Conflict("aggregatetuple already exists").WithKey(aggregatetupleKey)
 	}
-	err = aggregatetuple.AddToComputePlan(db, inp, aggregatetupleKey, fromComputePlan)
+	err = aggregatetuple.AddToComputePlan(db, inp, aggregatetupleKey, checkComputePlanAvailability)
 	if err != nil {
 		return "", err
 	}

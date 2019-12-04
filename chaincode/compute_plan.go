@@ -133,7 +133,9 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeTraintuple.ID)
 			}
 
-			traintupleKey, err := createTraintupleInternal(db, inpTraintuple, true)
+			// Intentionally skip the compute plan availability check: since the transaction hasn't been
+			// committed yet, the index changes haven't been commited, so the check would always fail.
+			traintupleKey, err := createTraintupleInternal(db, inpTraintuple, false)
 			if err != nil {
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeTraintuple.ID)
 			}
@@ -158,7 +160,9 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeCompositeTraintuple.ID)
 			}
 			_ = computeCompositeTraintuple
-			compositeTraintupleKey, err := createCompositeTraintupleInternal(db, inpCompositeTraintuple, true)
+			// Intentionally skip the compute plan availability check: since the transaction hasn't been
+			// committed yet, the index changes haven't been commited, so the check would always fail.
+			compositeTraintupleKey, err := createCompositeTraintupleInternal(db, inpCompositeTraintuple, false)
 			if err != nil {
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeCompositeTraintuple.ID)
 			}
@@ -183,7 +187,9 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeAggregatetuple.ID)
 			}
 			_ = computeAggregatetuple
-			aggregatetupleKey, err := createAggregatetupleInternal(db, inpAggregatetuple, true)
+			// Intentionally skip the compute plan availability check: since the transaction hasn't been
+			// committed yet, the index changes haven't been commited, so the check would always fail.
+			aggregatetupleKey, err := createAggregatetupleInternal(db, inpAggregatetuple, false)
 			if err != nil {
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeAggregatetuple.ID)
 			}
