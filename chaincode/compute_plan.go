@@ -122,7 +122,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 		case TraintupleType:
 			computeTraintuple := inp.Traintuples[task.InputIndex]
 			inpTraintuple := inputTraintuple{
-				Rank: strconv.Itoa(i),
+				Rank: strconv.Itoa(task.Depth),
 			}
 			if i != 0 {
 				inpTraintuple.ComputePlanID = resp.ComputePlanID
@@ -148,7 +148,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 		case CompositeTraintupleType:
 			computeCompositeTraintuple := inp.CompositeTraintuples[task.InputIndex]
 			inpCompositeTraintuple := inputCompositeTraintuple{
-				Rank: strconv.Itoa(i),
+				Rank: strconv.Itoa(task.Depth),
 			}
 			if i != 0 {
 				inpCompositeTraintuple.ComputePlanID = resp.ComputePlanID
@@ -174,7 +174,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 		case AggregatetupleType:
 			computeAggregatetuple := inp.Aggregatetuples[task.InputIndex]
 			inpAggregatetuple := inputAggregatetuple{
-				Rank: strconv.Itoa(i),
+				Rank: strconv.Itoa(task.Depth),
 			}
 			if i != 0 {
 				inpAggregatetuple.ComputePlanID = resp.ComputePlanID

@@ -59,17 +59,17 @@ func createComputeDAG(cp inputComputePlan) (ComputeDAG, error) {
 func (dag *ComputeDAG) sort() error {
 	current := dag.OrderTasks
 	var temp, final []TrainingTask
-	var depth int
 	IDPresents := map[string]int{}
 	for i := 0; len(current) != 0; {
+		depth := 0
 		ready := true
 		for _, ID := range current[i].InModelsIDs {
 			if ID == "" {
 				continue
 			}
-			nextDepth, ok := IDPresents[ID]
+			parentDepth, ok := IDPresents[ID]
 			ready = ready && ok
-			depth = max(depth, nextDepth)
+			depth = max(depth, parentDepth+1)
 		}
 		if ready {
 			current[i].Depth = depth
@@ -77,7 +77,7 @@ func (dag *ComputeDAG) sort() error {
 			if _, ok := IDPresents[current[i].ID]; ok {
 				return fmt.Errorf("compute plan error: Duplicate training task ID: %s", current[i].ID)
 			}
-			IDPresents[current[i].ID] = current[i].Depth + 1
+			IDPresents[current[i].ID] = current[i].Depth
 		} else {
 			temp = append(temp, current[i])
 		}
