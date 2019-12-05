@@ -259,16 +259,12 @@ func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error
 		err = errors.E("No traintuple found for compute plan %s", key)
 		return
 	}
-	objectiveKey := ""
 	tuples := map[string]GenericTuple{}
 	for _, tupleKey := range tupleKeys {
 		var tuple GenericTuple
 		tuple, err = db.GetGenericTuple(tupleKey)
 		if err != nil {
 			return
-		}
-		if objectiveKey == "" {
-			objectiveKey = tuple.ObjectiveKey
 		}
 		tuples[tupleKey] = tuple
 	}

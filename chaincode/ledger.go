@@ -93,7 +93,6 @@ type AggregateAlgo struct {
 // AggregateTuple
 type GenericTuple struct {
 	AssetType     AssetType `json:"assetType"`
-	ObjectiveKey  string    `json:"objectiveKey"`
 	AlgoKey       string    `json:"algoKey"`
 	ComputePlanID string    `json:"computePlanID"`
 	Creator       string    `json:"creator"`
