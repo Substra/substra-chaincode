@@ -22,6 +22,7 @@ before_script:
 
 script:
   - cd chaincode
-  - golint
   - go test -v ./...
-  - go build -v
+  - golint_stdout="`go list ./... | grep -v /vendor/ | xargs golint`"
+  - go build -v  
+  - test -z "$golint_stdout" || (echo -e "FAIL:" "golint error(s):\n$golint_stdout" && exit 1)
