@@ -321,3 +321,52 @@ func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error
 	}
 	return
 }
+
+type getGenericTupleStatus func(string) (string, error)
+
+func getComputePlanStatus(db *LedgerDB, cpID string) (status string, err error) {
+
+	genericTupleKeys, err := db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", cpID})
+	if err != nil {
+		return "", err
+	}
+
+	getGenericTupleStatusFunc := func(key string) (string, error) {
+		tuple, err := db.GetGenericTuple(key)
+		if err != nil {
+			return "", err
+		}
+		return tuple.Status, nil
+	}
+
+	return getComputePlanStatusInternal(genericTupleKeys, getGenericTupleStatusFunc)
+}
+
+// getComputePlanStatusInternal returns the status for a compute plan defined
+// by its list of generic tuples
+func getComputePlanStatusInternal(genericTupleKeys []string, getGenericTupleStatusFunc getGenericTupleStatus) (string, error) {
+	anyDoing := false
+	anyTodo := false
+	for _, key := range genericTupleKeys {
+		tupleStatus, err := getGenericTupleStatusFunc(key)
+		if err != nil {
+			return "", err
+		}
+		if tupleStatus == StatusFailed {
+			return StatusFailed, nil
+		}
+		if tupleStatus == StatusDoing && !anyDoing {
+			anyDoing = true
+		}
+		if tupleStatus == StatusTodo && !anyTodo {
+			anyTodo = true
+		}
+	}
+	if anyDoing {
+		return StatusDoing, nil
+	}
+	if anyTodo {
+		return StatusTodo, nil
+	}
+	return StatusWaiting, nil
+}

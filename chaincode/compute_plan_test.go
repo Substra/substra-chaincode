@@ -15,6 +15,9 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -155,16 +158,31 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "aggregateAlgo")
 
+	args := [][]byte{[]byte("createComputePlan"), assetToJSON(modelCompositionComputePlan)}
+	resp := mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, 200, resp.Status, "Compute plan creation should succeed")
+	out := outputComputePlan{}
+	err := json.Unmarshal(resp.Payload, &out)
+	assert.NoError(t, err)
+
+	cpID := out.CompositeTraintupleKeys[0]
+
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan)
-	assert.NoError(t, err)
-	assert.NotNil(t, db.tuplesEvent)
-	assert.Len(t, db.tuplesEvent.CompositeTraintuples, 2)
+	validateCPStatus := func(expected string) {
+		status, err := getComputePlanStatus(db, cpID)
+		assert.NoError(t, err)
+		assert.Equal(t, expected, status)
+	}
+
+	validateCPStatus(StatusTodo)
 
 	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[0]}))
 	assert.NoError(t, err)
+
+	validateCPStatus(StatusDoing)
+
 	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[1]}))
 	assert.NoError(t, err)
 
@@ -174,6 +192,8 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	inpLogCompo.Key = out.CompositeTraintupleKeys[0]
 	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
 	assert.NoError(t, err)
+
+	validateCPStatus(StatusDoing)
 
 	inpLogCompo.Key = out.CompositeTraintupleKeys[1]
 	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
@@ -185,8 +205,12 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	require.Len(t, db.tuplesEvent.Aggregatetuples, 1)
 	assert.Equal(t, StatusTodo, db.tuplesEvent.Aggregatetuples[0].Status)
 
+	validateCPStatus(StatusTodo)
+
 	_, err = logStartAggregate(db, assetToArgs(inputHash{out.AggregatetupleKeys[0]}))
 	assert.NoError(t, err)
+
+	validateCPStatus(StatusDoing)
 
 	inpLogAgg := inputLogSuccessTrain{}
 	inpLogAgg.fillDefaults()
@@ -195,10 +219,14 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, StatusDone, agg.Status)
 
+	validateCPStatus(StatusTodo)
+
 	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[2]}))
 	assert.NoError(t, err)
 	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[3]}))
 	assert.NoError(t, err)
+
+	validateCPStatus(StatusDoing)
 
 	db.tuplesEvent = &TuplesEvent{}
 	inpLogCompo.Key = out.CompositeTraintupleKeys[2]
@@ -208,10 +236,13 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	inpLogCompo.Key = out.CompositeTraintupleKeys[3]
 	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
 	assert.NoError(t, err)
+
 	assert.Len(t, db.tuplesEvent.Testtuples, 2)
 	for _, test := range db.tuplesEvent.Testtuples {
 		assert.Equalf(t, StatusTodo, test.Status, "blame it on %+v", test)
 	}
+
+	validateCPStatus(StatusWaiting) // TODO: We don't have a "done" status yet !
 }
 
 func TestCreateComputePlanCompositeAggregate(t *testing.T) {
@@ -257,6 +288,9 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 
 	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
+	assert.NotNil(t, db.tuplesEvent)
+	assert.Len(t, db.tuplesEvent.CompositeTraintuples, 1, "There should be 1 composite traintuple \"Todo\"")
+	assert.Len(t, db.tuplesEvent.Aggregatetuples, 1, "There should be 1 aggregate tuple \"Todo\"")
 
 	// Check the composite traintuples
 	traintuples, err := queryCompositeTraintuples(db, []string{})
@@ -456,4 +490,69 @@ func TestQueryComputePlanEmpty(t *testing.T) {
 	cps, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Equal(t, []outputComputePlan{}, cps)
+}
+
+func TestGetComputePlanStatus(t *testing.T) {
+	testTable := []struct {
+		tupleKeys []string
+		expected  string
+	}{
+		{
+			tupleKeys: []string{"1-waiting"},
+			expected:  StatusWaiting,
+		},
+		{
+			tupleKeys: []string{"1-todo"},
+			expected:  StatusTodo,
+		},
+		{
+			tupleKeys: []string{"1-doing"},
+			expected:  StatusDoing,
+		},
+		{
+			tupleKeys: []string{"1-failed"},
+			expected:  StatusFailed,
+		},
+		{
+			tupleKeys: []string{"1-todo", "2-waiting"},
+			expected:  StatusTodo,
+		},
+		{
+			tupleKeys: []string{"1-todo", "2-doing"},
+			expected:  StatusDoing,
+		},
+		{
+			tupleKeys: []string{"1-doing", "2-todo"},
+			expected:  StatusDoing,
+		},
+		{
+			tupleKeys: []string{"1-todo", "2-failed"},
+			expected:  StatusFailed,
+		},
+		{
+			tupleKeys: []string{"1-failed", "2-todo"},
+			expected:  StatusFailed,
+		},
+		{
+			tupleKeys: []string{"1-doing", "2-failed"},
+			expected:  StatusFailed,
+		},
+		{
+			tupleKeys: []string{"1-failed", "2-doing"},
+			expected:  StatusFailed,
+		},
+	}
+
+	getGenericTupleStatus := func(key string) (string, error) {
+		parts := strings.Split(key, "-")
+		return parts[1], nil
+	}
+
+	for _, tt := range testTable {
+		t.Run(fmt.Sprintf("GetComputePlanStatus_%s", tt.tupleKeys), func(t *testing.T) {
+			actual, err := getComputePlanStatusInternal(tt.tupleKeys, getGenericTupleStatus)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, actual)
+		})
+	}
 }
