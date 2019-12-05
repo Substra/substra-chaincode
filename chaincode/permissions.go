@@ -18,17 +18,6 @@ import (
 	"fmt"
 )
 
-/* Unused
-// Action is the the type of an action
-type Action string
-
-// Enum the different action types available
-const (
-	Process  Action = "process"
-	Download Action = "download"
-)
-*/
-
 // Permission represents one permission based on an action type
 type Permission struct {
 	// Public is true if this permission is given to the asset's owner only and

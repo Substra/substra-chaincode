@@ -164,17 +164,6 @@ func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err erro
 // Utils for smartcontracts related to  multiple tuple types
 // ----------------------------------------------------------
 
-/* Unused
-// checkLog checks the validity of logs
-func checkLog(log string) (err error) {
-	maxLength := 200
-	if length := len(log); length > maxLength {
-		err = fmt.Errorf("too long log, is %d and should be %d ", length, maxLength)
-	}
-	return
-}
-*/
-
 func validateTupleOwner(db *LedgerDB, worker string) error {
 	txCreator, err := GetTxCreator(db.cc)
 	if err != nil {
