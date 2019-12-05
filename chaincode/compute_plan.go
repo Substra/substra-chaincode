@@ -93,6 +93,7 @@ func (inpTesttuple *inputTesttuple) Fill(inpCP inputComputePlanTesttuple, traint
 	inpTesttuple.DataManagerKey = inpCP.DataManagerKey
 	inpTesttuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpTesttuple.Tag = inpCP.Tag
+	inpTesttuple.ObjectiveKey = inpCP.ObjectiveKey
 
 	return nil
 }
@@ -110,7 +111,6 @@ func createComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputComputePlan, err error) {
 	traintupleKeysByID := map[string]string{}
 
-	resp.ObjectiveKey = inp.ObjectiveKey
 	resp.TraintupleKeys = []string{}
 
 	DAG, err := createComputeDAG(inp)
@@ -122,8 +122,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 		case TraintupleType:
 			computeTraintuple := inp.Traintuples[task.InputIndex]
 			inpTraintuple := inputTraintuple{
-				Rank:         strconv.Itoa(i),
-				ObjectiveKey: inp.ObjectiveKey,
+				Rank: strconv.Itoa(i),
 			}
 			if i != 0 {
 				inpTraintuple.ComputePlanID = resp.ComputePlanID
@@ -149,8 +148,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 		case CompositeTraintupleType:
 			computeCompositeTraintuple := inp.CompositeTraintuples[task.InputIndex]
 			inpCompositeTraintuple := inputCompositeTraintuple{
-				Rank:         strconv.Itoa(i),
-				ObjectiveKey: inp.ObjectiveKey,
+				Rank: strconv.Itoa(i),
 			}
 			if i != 0 {
 				inpCompositeTraintuple.ComputePlanID = resp.ComputePlanID
@@ -176,8 +174,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 		case AggregatetupleType:
 			computeAggregatetuple := inp.Aggregatetuples[task.InputIndex]
 			inpAggregatetuple := inputAggregatetuple{
-				Rank:         strconv.Itoa(i),
-				ObjectiveKey: inp.ObjectiveKey,
+				Rank: strconv.Itoa(i),
 			}
 			if i != 0 {
 				inpAggregatetuple.ComputePlanID = resp.ComputePlanID
@@ -313,7 +310,6 @@ func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error
 
 	resp = outputComputePlan{
 		ComputePlanID:           key,
-		ObjectiveKey:            objectiveKey,
 		TraintupleKeys:          traintupleKeys,
 		CompositeTraintupleKeys: compositeTraintupleKeys,
 		AggregatetupleKeys:      aggregatetupleKeys,

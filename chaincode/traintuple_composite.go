@@ -50,16 +50,6 @@ func (traintuple *CompositeTraintuple) SetFromInput(db *LedgerDB, inp inputCompo
 	}
 	traintuple.AlgoKey = inp.AlgoKey
 
-	// check objective exists
-	objective, err := db.GetObjective(inp.ObjectiveKey)
-	if err != nil {
-		return errors.BadRequest(err, "could not retrieve objective with key %s", inp.ObjectiveKey)
-	}
-	if !objective.Permissions.CanProcess(objective.Owner, creator) {
-		return errors.Forbidden("not authorized to process objective %s", inp.ObjectiveKey)
-	}
-	traintuple.ObjectiveKey = inp.ObjectiveKey
-
 	// check if DataSampleKeys are from the same dataManager and if they are not test only dataSample
 	_, trainOnly, err := checkSameDataManager(db, inp.DataManagerKey, inp.DataSampleKeys)
 	if err != nil {

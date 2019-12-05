@@ -44,10 +44,11 @@ func (testtuple *Testtuple) SetFromInput(db *LedgerDB, inp inputTesttuple) error
 	testtuple.AssetType = TesttupleType
 
 	// Get test dataset from objective
-	objective, err := db.GetObjective(testtuple.ObjectiveKey)
+	objective, err := db.GetObjective(inp.ObjectiveKey)
 	if err != nil {
-		return errors.BadRequest(err, "could not retrieve objective with key %s", testtuple.ObjectiveKey)
+		return errors.BadRequest(err, "could not retrieve objective with key %s", inp.ObjectiveKey)
 	}
+	testtuple.ObjectiveKey = inp.ObjectiveKey
 	var objectiveDataManagerKey string
 	var objectiveDataSampleKeys []string
 	if objective.TestDataset != nil {
@@ -123,7 +124,6 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 		permissions = traintuple.Permissions
 		tupleCreator = traintuple.Creator
 		status = traintuple.Status
-		testtuple.ObjectiveKey = traintuple.ObjectiveKey
 		testtuple.AlgoKey = traintuple.AlgoKey
 	case CompositeTraintupleType:
 		compositeTraintuple, err := db.GetCompositeTraintuple(traintupleKey)
@@ -133,7 +133,6 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 		permissions = compositeTraintuple.OutHeadModel.Permissions
 		tupleCreator = compositeTraintuple.Creator
 		status = compositeTraintuple.Status
-		testtuple.ObjectiveKey = compositeTraintuple.ObjectiveKey
 		testtuple.AlgoKey = compositeTraintuple.AlgoKey
 	case AggregatetupleType:
 		tuple, err := db.GetAggregatetuple(traintupleKey)
@@ -143,7 +142,6 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 		permissions = tuple.Permissions
 		tupleCreator = tuple.Creator
 		status = tuple.Status
-		testtuple.ObjectiveKey = tuple.ObjectiveKey
 		testtuple.AlgoKey = tuple.AlgoKey
 	default:
 		return errors.BadRequest("key %s is not a valid traintuple", traintupleKey)

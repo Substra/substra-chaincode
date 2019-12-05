@@ -48,7 +48,7 @@ func TestTraintupleWithNoTestDatasetAggregate(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding aggregate algo it should work: ", resp.Message)
 
-	inpTraintuple := inputAggregatetuple{ObjectiveKey: objHash}
+	inpTraintuple := inputAggregatetuple{}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 
@@ -79,8 +79,7 @@ func TestTraintupleWithSingleDatasampleAggregate(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding aggregate algo it should work: ", resp.Message)
 
 	inpTraintuple := inputAggregatetuple{
-		ObjectiveKey: objHash,
-		AlgoKey:      aggregateAlgoHash,
+		AlgoKey: aggregateAlgoHash,
 	}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -253,14 +252,7 @@ func TestTraintupleAggregate(t *testing.T) {
 		},
 		Creator: worker,
 		Worker:  worker,
-		Objective: &TtObjective{
-			Key: objectiveDescriptionHash,
-			Metrics: &HashDress{
-				Hash:           objectiveMetricsHash,
-				StorageAddress: objectiveMetricsStorageAddress,
-			},
-		},
-		Status: StatusTodo,
+		Status:  StatusTodo,
 		Permissions: outputPermissions{
 			Process: Permission{
 				Public:        true,
@@ -564,7 +556,4 @@ func TestQueryAggregatetuple(t *testing.T) {
 	assert.Equal(t, in.AlgoKey, out.Algo.Hash)
 	assert.Equal(t, aggregateAlgoStorageAddress, out.Algo.StorageAddress)
 	assert.Equal(t, StatusWaiting, out.Status)
-	assert.Equal(t, objectiveDescriptionHash, out.Objective.Key)
-	assert.Equal(t, objectiveMetricsHash, out.Objective.Metrics.Hash)
-	assert.Equal(t, objectiveMetricsStorageAddress, out.Objective.Metrics.StorageAddress)
 }

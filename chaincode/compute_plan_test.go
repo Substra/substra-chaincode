@@ -23,7 +23,6 @@ import (
 
 var (
 	defaultComputePlan = inputComputePlan{
-		ObjectiveKey: objectiveDescriptionHash,
 		Traintuples: []inputComputePlanTraintuple{
 			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerOpenerHash,
@@ -43,6 +42,7 @@ var (
 			inputComputePlanTesttuple{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				ObjectiveKey:   objectiveDescriptionHash,
 				TraintupleID:   traintupleID2,
 			},
 		},
@@ -78,7 +78,6 @@ var (
 	//
 	//
 	modelCompositionComputePlan = inputComputePlan{
-		ObjectiveKey: objectiveDescriptionHash,
 		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
 			{
 				ID:             "step_1_composite_A",
@@ -124,26 +123,31 @@ var (
 			inputComputePlanTesttuple{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				ObjectiveKey:   objectiveDescriptionHash,
 				TraintupleID:   "step_1_composite_A",
 			},
 			inputComputePlanTesttuple{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				ObjectiveKey:   objectiveDescriptionHash,
 				TraintupleID:   "step_1_composite_B",
 			},
 			inputComputePlanTesttuple{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				ObjectiveKey:   objectiveDescriptionHash,
 				TraintupleID:   "step_2_aggregate",
 			},
 			inputComputePlanTesttuple{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				ObjectiveKey:   objectiveDescriptionHash,
 				TraintupleID:   "step_3_composite_A",
 			},
 			inputComputePlanTesttuple{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				ObjectiveKey:   objectiveDescriptionHash,
 				TraintupleID:   "step_3_composite_B",
 			},
 		},
@@ -225,7 +229,6 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	tag := []string{"compositeTraintuple1", "compositeTraintuple2", "aggregatetuple1", "aggregatetuple2"}
 
 	inCP := inputComputePlan{
-		ObjectiveKey: objectiveDescriptionHash,
 		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
 			{
 				DataManagerKey: dataManagerOpenerHash,
@@ -384,14 +387,10 @@ func TestQueryComputePlans(t *testing.T) {
 }
 
 func validateDefaultComputePlan(t *testing.T, cp outputComputePlan) {
-	in := defaultComputePlan
 	assert.Len(t, cp.TraintupleKeys, 2)
 	cpID := cp.TraintupleKeys[0]
 
-	assert.Equal(t, in.ObjectiveKey, cp.ObjectiveKey)
-
 	assert.Equal(t, cpID, cp.ComputePlanID)
-	assert.Equal(t, in.ObjectiveKey, cp.ObjectiveKey)
 
 	assert.NotEmpty(t, cp.TraintupleKeys[0])
 	assert.NotEmpty(t, cp.TraintupleKeys[1])
@@ -409,7 +408,6 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 	db := NewLedgerDB(mockStub)
 
 	inCP := inputComputePlan{
-		ObjectiveKey: objectiveDescriptionHash,
 		Traintuples: []inputComputePlanTraintuple{
 			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerOpenerHash,

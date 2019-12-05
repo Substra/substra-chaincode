@@ -165,9 +165,6 @@ func (traintuple *inputTraintuple) createDefault() [][]byte {
 	if traintuple.InModels == nil {
 		traintuple.InModels = []string{}
 	}
-	if traintuple.ObjectiveKey == "" {
-		traintuple.ObjectiveKey = objectiveDescriptionHash
-	}
 	if traintuple.DataManagerKey == "" {
 		traintuple.DataManagerKey = dataManagerOpenerHash
 	}
@@ -186,9 +183,6 @@ func (traintuple *inputCompositeTraintuple) createDefault() [][]byte {
 func (traintuple *inputCompositeTraintuple) fillDefaults() {
 	if traintuple.AlgoKey == "" {
 		traintuple.AlgoKey = compositeAlgoHash
-	}
-	if traintuple.ObjectiveKey == "" {
-		traintuple.ObjectiveKey = objectiveDescriptionHash
 	}
 	if traintuple.DataManagerKey == "" {
 		traintuple.DataManagerKey = dataManagerOpenerHash
@@ -212,9 +206,6 @@ func (aggregatetuple *inputAggregatetuple) createDefault() [][]byte {
 func (aggregatetuple *inputAggregatetuple) fillDefaults() {
 	if aggregatetuple.AlgoKey == "" {
 		aggregatetuple.AlgoKey = aggregateAlgoHash
-	}
-	if aggregatetuple.ObjectiveKey == "" {
-		aggregatetuple.ObjectiveKey = objectiveDescriptionHash
 	}
 	if aggregatetuple.Worker == "" {
 		aggregatetuple.Worker = worker
@@ -343,6 +334,9 @@ func (testtuple *inputTesttuple) createDefault() [][]byte {
 func (testtuple *inputTesttuple) fillDefaults() {
 	if testtuple.TraintupleKey == "" {
 		testtuple.TraintupleKey = traintupleKey
+	}
+	if testtuple.ObjectiveKey == "" {
+		testtuple.ObjectiveKey = objectiveDescriptionHash
 	}
 }
 

@@ -106,7 +106,6 @@ type GenericTuple struct {
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
 	AssetType     AssetType   `json:"assetType"`
-	ObjectiveKey  string      `json:"objectiveKey"`
 	AlgoKey       string      `json:"algoKey"`
 	ComputePlanID string      `json:"computePlanID"`
 	Creator       string      `json:"creator"`
@@ -124,7 +123,6 @@ type Traintuple struct {
 // CompositeTraintuple is like a traintuple, but for composite model composition
 type CompositeTraintuple struct {
 	AssetType     AssetType                   `json:"assetType"`
-	ObjectiveKey  string                      `json:"objectiveKey"`
 	AlgoKey       string                      `json:"algoKey"`
 	ComputePlanID string                      `json:"computePlanID"`
 	Creator       string                      `json:"creator"`
@@ -143,7 +141,6 @@ type CompositeTraintuple struct {
 // Aggregatetuple is like a traintuple, but for aggregate model composition
 type Aggregatetuple struct {
 	AssetType     AssetType   `json:"assetType"`
-	ObjectiveKey  string      `json:"objectiveKey"`
 	AlgoKey       string      `json:"algoKey"`
 	ComputePlanID string      `json:"computePlanID"`
 	Creator       string      `json:"creator"`

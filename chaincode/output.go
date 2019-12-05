@@ -118,7 +118,6 @@ type outputTraintuple struct {
 	ComputePlanID string            `json:"computePlanID"`
 	InModels      []*Model          `json:"inModels"`
 	Log           string            `json:"log"`
-	Objective     *TtObjective      `json:"objective"`
 	OutModel      *HashDress        `json:"outModel"`
 	Permissions   outputPermissions `json:"permissions"`
 	Rank          int               `json:"rank"`
@@ -148,25 +147,6 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 		Name:           algo.Name,
 		Hash:           traintuple.AlgoKey,
 		StorageAddress: algo.StorageAddress}
-
-	// fill objective
-	objective, err := db.GetObjective(traintuple.ObjectiveKey)
-	if err != nil {
-		err = fmt.Errorf("could not retrieve associated objective with key %s- %s", traintuple.ObjectiveKey, err.Error())
-		return
-	}
-	if objective.Metrics == nil {
-		err = fmt.Errorf("objective %s is missing metrics values", traintuple.ObjectiveKey)
-		return
-	}
-	metrics := HashDress{
-		Hash:           objective.Metrics.Hash,
-		StorageAddress: objective.Metrics.StorageAddress,
-	}
-	outputTraintuple.Objective = &TtObjective{
-		Key:     traintuple.ObjectiveKey,
-		Metrics: &metrics,
-	}
 
 	// fill inModels
 	for _, inModelKey := range traintuple.InModelKeys {
@@ -299,7 +279,6 @@ type TuplesEvent struct {
 
 type outputComputePlan struct {
 	ComputePlanID           string   `json:"computePlanID"`
-	ObjectiveKey            string   `json:"objectiveKey"`
 	TraintupleKeys          []string `json:"traintupleKeys"`
 	AggregatetupleKeys      []string `json:"aggregatetupleKeys"`
 	CompositeTraintupleKeys []string `json:"compositeTraintupleKeys"`

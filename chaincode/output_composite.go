@@ -31,7 +31,6 @@ type outputCompositeTraintuple struct {
 	InHeadModel   *Model            `json:"inHeadModel"`
 	InTrunkModel  *Model            `json:"inTrunkModel"`
 	Log           string            `json:"log"`
-	Objective     *TtObjective      `json:"objective"`
 	OutHeadModel  outModelComposite `json:"outHeadModel"`
 	OutTrunkModel outModelComposite `json:"outTrunkModel"`
 	Rank          int               `json:"rank"`
@@ -70,25 +69,6 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		Name:           algo.Name,
 		Hash:           traintuple.AlgoKey,
 		StorageAddress: algo.StorageAddress}
-
-	// fill objective
-	objective, err := db.GetObjective(traintuple.ObjectiveKey)
-	if err != nil {
-		err = fmt.Errorf("could not retrieve associated objective with key %s- %s", traintuple.ObjectiveKey, err.Error())
-		return
-	}
-	if objective.Metrics == nil {
-		err = fmt.Errorf("objective %s is missing metrics values", traintuple.ObjectiveKey)
-		return
-	}
-	metrics := HashDress{
-		Hash:           objective.Metrics.Hash,
-		StorageAddress: objective.Metrics.StorageAddress,
-	}
-	outputCompositeTraintuple.Objective = &TtObjective{
-		Key:     traintuple.ObjectiveKey,
-		Metrics: &metrics,
-	}
 
 	// fill in-model (head)
 	if traintuple.InHeadModel != "" {
