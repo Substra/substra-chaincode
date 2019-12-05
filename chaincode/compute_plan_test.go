@@ -15,6 +15,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -167,6 +168,13 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	assert.NotNil(t, db.tuplesEvent)
 	assert.Len(t, db.tuplesEvent.CompositeTraintuples, 2)
 
+	// ensure the returned ranks are correct
+	validateTupleRank(t, db, 0, out.CompositeTraintupleKeys[0], CompositeTraintupleType)
+	validateTupleRank(t, db, 0, out.CompositeTraintupleKeys[1], CompositeTraintupleType)
+	validateTupleRank(t, db, 1, out.AggregatetupleKeys[0], AggregatetupleType)
+	validateTupleRank(t, db, 2, out.CompositeTraintupleKeys[2], CompositeTraintupleType)
+	validateTupleRank(t, db, 2, out.CompositeTraintupleKeys[3], CompositeTraintupleType)
+
 	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[0]}))
 	assert.NoError(t, err)
 	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[1]}))
@@ -216,6 +224,24 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	for _, test := range db.tuplesEvent.Testtuples {
 		assert.Equalf(t, StatusTodo, test.Status, "blame it on %+v", test)
 	}
+}
+
+func validateTupleRank(t *testing.T, db *LedgerDB, expectedRank int, key string, assetType AssetType) {
+	inp := inputHash{Key: key}
+	rank := -42
+	switch assetType {
+	case CompositeTraintupleType:
+		tuple, err := queryCompositeTraintuple(db, assetToArgs(inp))
+		assert.NoError(t, err)
+		rank = tuple.Rank
+	case AggregatetupleType:
+		tuple, err := queryAggregatetuple(db, assetToArgs(inp))
+		assert.NoError(t, err)
+		rank = tuple.Rank
+	default:
+		assert.NoError(t, fmt.Errorf("not implemented: %v", assetType))
+	}
+	assert.Equal(t, expectedRank, rank, "Rank for tuple of type %v with key \"%s\" should be %d", assetType, key, expectedRank)
 }
 
 func TestCreateComputePlanCompositeAggregate(t *testing.T) {
