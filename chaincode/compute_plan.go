@@ -16,116 +16,214 @@ package main
 
 import (
 	"chaincode/errors"
+	"fmt"
 	"sort"
 	"strconv"
 )
 
+func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, traintupleKeysByID map[string]string) error {
+	inpTraintuple.DataManagerKey = inpCP.DataManagerKey
+	inpTraintuple.DataSampleKeys = inpCP.DataSampleKeys
+	inpTraintuple.AlgoKey = inpCP.AlgoKey
+	inpTraintuple.Tag = inpCP.Tag
+
+	// Set the inModels by matching the id to tuples key previously
+	// encontered in this compute plan
+	for _, InModelID := range inpCP.InModelsIDs {
+		inModelKey, ok := traintupleKeysByID[InModelID]
+		if !ok {
+			return fmt.Errorf("model ID %s not found", InModelID)
+		}
+		inpTraintuple.InModels = append(inpTraintuple.InModels, inModelKey)
+	}
+
+	return nil
+
+}
+func (inpAggregatetuple *inputAggregatetuple) Fill(inpCP inputComputePlanAggregatetuple, aggregatetupleKeysByID map[string]string) error {
+	inpAggregatetuple.AlgoKey = inpCP.AlgoKey
+	inpAggregatetuple.Tag = inpCP.Tag
+	inpAggregatetuple.Worker = inpCP.Worker
+
+	// Set the inModels by matching the id to tuples key previously
+	// encontered in this compute plan
+	for _, InModelID := range inpCP.InModelsIDs {
+		inModelKey, ok := aggregatetupleKeysByID[InModelID]
+		if !ok {
+			return fmt.Errorf("model ID %s not found", InModelID)
+		}
+		inpAggregatetuple.InModels = append(inpAggregatetuple.InModels, inModelKey)
+	}
+
+	return nil
+
+}
+func (inpCompositeTraintuple *inputCompositeTraintuple) Fill(inpCP inputComputePlanCompositeTraintuple, traintupleKeysByID map[string]string) error {
+	inpCompositeTraintuple.DataManagerKey = inpCP.DataManagerKey
+	inpCompositeTraintuple.DataSampleKeys = inpCP.DataSampleKeys
+	inpCompositeTraintuple.AlgoKey = inpCP.AlgoKey
+	inpCompositeTraintuple.Tag = inpCP.Tag
+	inpCompositeTraintuple.OutTrunkModelPermissions = inpCP.OutTrunkModelPermissions
+
+	// Set the inModels by matching the id to traintuples key previously
+	// encontered in this compute plan
+	if inpCP.InHeadModelID != "" {
+		var ok bool
+		inpCompositeTraintuple.InHeadModelKey, ok = traintupleKeysByID[inpCP.InHeadModelID]
+		if !ok {
+			return fmt.Errorf("head model ID %s not found", inpCP.InHeadModelID)
+		}
+	}
+	if inpCP.InTrunkModelID != "" {
+		var ok bool
+		inpCompositeTraintuple.InTrunkModelKey, ok = traintupleKeysByID[inpCP.InTrunkModelID]
+		if !ok {
+			return fmt.Errorf("trunk model ID %s not found", inpCP.InTrunkModelID)
+		}
+	}
+	return nil
+}
+
+func (inpTesttuple *inputTesttuple) Fill(inpCP inputComputePlanTesttuple, traintupleKeysByID map[string]string) error {
+	traintupleKey, ok := traintupleKeysByID[inpCP.TraintupleID]
+	if !ok {
+		return fmt.Errorf("traintuple ID %s not found", inpCP.TraintupleID)
+	}
+	inpTesttuple.TraintupleKey = traintupleKey
+	inpTesttuple.DataManagerKey = inpCP.DataManagerKey
+	inpTesttuple.DataSampleKeys = inpCP.DataSampleKeys
+	inpTesttuple.Tag = inpCP.Tag
+
+	return nil
+}
+
 // createComputePlan is the wrapper for the substra smartcontract CreateComputePlan
-func createComputePlan(db LedgerDB, args []string) (resp outputComputePlan, err error) {
+func createComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
 	inp := inputComputePlan{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
+	return createComputePlanInternal(db, inp)
+}
+
+func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputComputePlan, err error) {
 	traintupleKeysByID := map[string]string{}
+
+	resp.ObjectiveKey = inp.ObjectiveKey
 	resp.TraintupleKeys = []string{}
-	var traintuplesTodo []outputTraintuple
-	for i, computeTraintuple := range inp.Traintuples {
-		inpTraintuple := inputTraintuple{}
-		inpTraintuple.AlgoKey = inp.AlgoKey
-		inpTraintuple.ObjectiveKey = inp.ObjectiveKey
-		inpTraintuple.DataManagerKey = computeTraintuple.DataManagerKey
-		inpTraintuple.DataSampleKeys = computeTraintuple.DataSampleKeys
-		inpTraintuple.Tag = computeTraintuple.Tag
-		inpTraintuple.Rank = strconv.Itoa(i)
 
-		traintuple := Traintuple{}
-		err := traintuple.SetFromInput(db, inpTraintuple)
-		if err != nil {
-			return resp, err
-		}
-
-		// Set the inModels by matching the id to traintuples key previously
-		// encontered in this compute plan
-		for _, InModelID := range computeTraintuple.InModelsIDs {
-			inModelKey, ok := traintupleKeysByID[InModelID]
-			if !ok {
-				return resp, errors.BadRequest("traintuple ID %s: model ID %s not found, check traintuple list order", computeTraintuple.ID, InModelID)
+	DAG, err := createComputeDAG(inp)
+	if err != nil {
+		return resp, errors.BadRequest(err)
+	}
+	for i, task := range DAG.OrderTasks {
+		switch task.TaskType {
+		case TraintupleType:
+			computeTraintuple := inp.Traintuples[task.InputIndex]
+			inpTraintuple := inputTraintuple{
+				Rank:         strconv.Itoa(i),
+				ObjectiveKey: inp.ObjectiveKey,
 			}
-			traintuple.InModelKeys = append(traintuple.InModelKeys, inModelKey)
-		}
-
-		traintupleKey := traintuple.GetKey()
-
-		// Set the ComputePlanID
-		if i == 0 {
-			traintuple.ComputePlanID = traintupleKey
-			resp.ComputePlanID = traintuple.ComputePlanID
-		} else {
-			traintuple.ComputePlanID = resp.ComputePlanID
-		}
-
-		// Set status: if it has parents it's waiting
-		// if not it's todo and it has to be included in the event
-		if len(computeTraintuple.InModelsIDs) > 0 {
-			traintuple.Status = StatusWaiting
-		} else {
-			traintuple.Status = StatusTodo
-			out := outputTraintuple{}
-			err = out.Fill(db, traintuple, traintupleKey)
+			if i != 0 {
+				inpTraintuple.ComputePlanID = resp.ComputePlanID
+			}
+			err = inpTraintuple.Fill(computeTraintuple, traintupleKeysByID)
 			if err != nil {
-				return resp, err
+				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeTraintuple.ID)
 			}
-			traintuplesTodo = append(traintuplesTodo, out)
+
+			// Intentionally skip the compute plan availability check: since the transaction hasn't been
+			// committed yet, the index changes haven't been commited, so the check would always fail.
+			traintupleKey, err := createTraintupleInternal(db, inpTraintuple, false)
+			if err != nil {
+				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeTraintuple.ID)
+			}
+
+			if i == 0 {
+				resp.ComputePlanID = traintupleKey
+			}
+
+			traintupleKeysByID[computeTraintuple.ID] = traintupleKey
+			resp.TraintupleKeys = append(resp.TraintupleKeys, traintupleKey)
+		case CompositeTraintupleType:
+			computeCompositeTraintuple := inp.CompositeTraintuples[task.InputIndex]
+			inpCompositeTraintuple := inputCompositeTraintuple{
+				Rank:         strconv.Itoa(i),
+				ObjectiveKey: inp.ObjectiveKey,
+			}
+			if i != 0 {
+				inpCompositeTraintuple.ComputePlanID = resp.ComputePlanID
+			}
+			err = inpCompositeTraintuple.Fill(computeCompositeTraintuple, traintupleKeysByID)
+			if err != nil {
+				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeCompositeTraintuple.ID)
+			}
+			_ = computeCompositeTraintuple
+			// Intentionally skip the compute plan availability check: since the transaction hasn't been
+			// committed yet, the index changes haven't been commited, so the check would always fail.
+			compositeTraintupleKey, err := createCompositeTraintupleInternal(db, inpCompositeTraintuple, false)
+			if err != nil {
+				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeCompositeTraintuple.ID)
+			}
+
+			if i == 0 {
+				resp.ComputePlanID = compositeTraintupleKey
+			}
+
+			traintupleKeysByID[computeCompositeTraintuple.ID] = compositeTraintupleKey
+			resp.CompositeTraintupleKeys = append(resp.CompositeTraintupleKeys, compositeTraintupleKey)
+		case AggregatetupleType:
+			computeAggregatetuple := inp.Aggregatetuples[task.InputIndex]
+			inpAggregatetuple := inputAggregatetuple{
+				Rank:         strconv.Itoa(i),
+				ObjectiveKey: inp.ObjectiveKey,
+			}
+			if i != 0 {
+				inpAggregatetuple.ComputePlanID = resp.ComputePlanID
+			}
+			err = inpAggregatetuple.Fill(computeAggregatetuple, traintupleKeysByID)
+			if err != nil {
+				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeAggregatetuple.ID)
+			}
+			_ = computeAggregatetuple
+			// Intentionally skip the compute plan availability check: since the transaction hasn't been
+			// committed yet, the index changes haven't been commited, so the check would always fail.
+			aggregatetupleKey, err := createAggregatetupleInternal(db, inpAggregatetuple, false)
+			if err != nil {
+				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeAggregatetuple.ID)
+			}
+
+			if i == 0 {
+				resp.ComputePlanID = aggregatetupleKey
+			}
+
+			traintupleKeysByID[computeAggregatetuple.ID] = aggregatetupleKey
+			resp.AggregatetupleKeys = append(resp.AggregatetupleKeys, aggregatetupleKey)
 		}
 
-		err = traintuple.Save(db, traintupleKey)
-		if err != nil {
-			return resp, err
-		}
-		traintupleKeysByID[computeTraintuple.ID] = traintupleKey
-		resp.TraintupleKeys = append(resp.TraintupleKeys, traintupleKey)
 	}
 
 	resp.TesttupleKeys = []string{}
 	for index, computeTesttuple := range inp.Testtuples {
-		traintupleKey, ok := traintupleKeysByID[computeTesttuple.TraintupleID]
-		if !ok {
-			return resp, errors.BadRequest("testtuple index %s: traintuple ID %s not found", index, computeTesttuple.TraintupleID)
+		inpTesttuple := inputTesttuple{}
+		err = inpTesttuple.Fill(computeTesttuple, traintupleKeysByID)
+		if err != nil {
+			return resp, errors.BadRequest("testtuple at index %s: "+err.Error(), index)
 		}
-		testtuple := Testtuple{}
-		testtuple.TraintupleKey = traintupleKey
-		testtuple.ObjectiveKey = inp.ObjectiveKey
-		testtuple.AlgoKey = inp.AlgoKey
 
-		inputTesttuple := inputTesttuple{}
-		inputTesttuple.DataManagerKey = computeTesttuple.DataManagerKey
-		inputTesttuple.DataSampleKeys = computeTesttuple.DataSampleKeys
-		inputTesttuple.Tag = computeTesttuple.Tag
-		err = testtuple.SetFromInput(db, inputTesttuple)
+		testtupleKey, err := createTesttupleInternal(db, inpTesttuple)
 		if err != nil {
-			return resp, err
+			return resp, errors.BadRequest("testtuple at index %s: "+err.Error(), index)
 		}
-		testtuple.Status = StatusWaiting
-		testtupleKey := testtuple.GetKey()
-		err = testtuple.Save(db, testtupleKey)
-		if err != nil {
-			return resp, err
-		}
+
 		resp.TesttupleKeys = append(resp.TesttupleKeys, testtupleKey)
-	}
-
-	event := TuplesEvent{}
-	event.SetTraintuples(traintuplesTodo...)
-	err = SendTuplesEvent(db.cc, event)
-	if err != nil {
-		return resp, err
 	}
 
 	return resp, err
 }
 
-func queryComputePlan(db LedgerDB, args []string) (resp outputComputePlanDetails, err error) {
+func queryComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -134,13 +232,14 @@ func queryComputePlan(db LedgerDB, args []string) (resp outputComputePlanDetails
 	return getComputePlan(db, inp.Key)
 }
 
-func queryComputePlans(db LedgerDB, args []string) (resp []outputComputePlanDetails, err error) {
+func queryComputePlans(db *LedgerDB, args []string) (resp []outputComputePlan, err error) {
+	resp = []outputComputePlan{}
 	computePlanIDs, err := db.GetIndexKeys("computeplan~id", []string{"computeplan"})
 	if err != nil {
 		return
 	}
 	for _, key := range computePlanIDs {
-		var computePlan outputComputePlanDetails
+		var computePlan outputComputePlan
 		computePlan, err = getComputePlan(db, key)
 		if err != nil {
 			return
@@ -151,52 +250,74 @@ func queryComputePlans(db LedgerDB, args []string) (resp []outputComputePlanDeta
 }
 
 // getComputePlan returns details for a compute plan id.
-// Traintuples are ordered by ascending rank.
-func getComputePlan(db LedgerDB, key string) (resp outputComputePlanDetails, err error) {
-	// 1. Get Traintuples and sort them by ascending rank
-	var firstTt *Traintuple
-	ttKeys, err := db.GetIndexKeys("traintuple~computeplanid~worker~rank~key", []string{"traintuple", key})
+// Traintuples, CompositeTraintuples and Aggregatetuples are ordered by ascending rank.
+func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error) {
+
+	// 1. Get tuples (regular, composite, aggregate)
+	tupleKeys, err := db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", key})
 	if err != nil {
 		return
 	}
-	if len(ttKeys) == 0 {
+	if len(tupleKeys) == 0 {
 		err = errors.E("No traintuple found for compute plan %s", key)
 		return
 	}
-	tts := map[string]Traintuple{}
-	for _, ttKey := range ttKeys {
-		var tt Traintuple
-		tt, err = db.GetTraintuple(ttKey)
+	objectiveKey := ""
+	tuples := map[string]GenericTuple{}
+	for _, tupleKey := range tupleKeys {
+		var tuple GenericTuple
+		tuple, err = db.GetGenericTuple(tupleKey)
 		if err != nil {
 			return
 		}
-		if firstTt == nil {
-			firstTt = &tt
+		if objectiveKey == "" {
+			objectiveKey = tuple.ObjectiveKey
 		}
-		tts[ttKey] = tt
+		tuples[tupleKey] = tuple
 	}
-	sort.SliceStable(ttKeys, func(i, j int) bool {
-		return tts[ttKeys[i]].Rank < tts[ttKeys[j]].Rank
+
+	// 2. Sort tuples by ascending rank
+	sort.SliceStable(tupleKeys, func(i, j int) bool {
+		return tuples[tupleKeys[i]].Rank < tuples[tupleKeys[j]].Rank
 	})
 
-	// 2. Get Testtuples associated with each Traintuple
-	var tstKeys []string
-	for _, traintupleKey := range ttKeys {
+	// 3. Get Testtuples associated with each tuple
+	testtupleKeys := []string{}
+	for _, tupleKey := range tupleKeys {
 		var toAdd []string
-		toAdd, err = db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey})
+		toAdd, err = db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", tupleKey})
 		if err != nil {
 			return
 		}
-		tstKeys = append(tstKeys, toAdd...)
+		testtupleKeys = append(testtupleKeys, toAdd...)
 	}
 
-	// 3. Create response
-	resp = outputComputePlanDetails{
-		ComputePlanID: key,
-		AlgoKey:       (*firstTt).AlgoKey,
-		ObjectiveKey:  (*firstTt).ObjectiveKey,
-		Traintuples:   ttKeys,
-		Testtuples:    tstKeys,
+	// 4. Split tuple keys depending on their type
+	traintupleKeys := []string{}
+	compositeTraintupleKeys := []string{}
+	aggregatetupleKeys := []string{}
+	for _, tupleKey := range tupleKeys { // iterate over keys (sorted by rank) so that each output array is also sorted by rank
+		tuple := tuples[tupleKey]
+		switch tuple.AssetType {
+		case TraintupleType:
+			traintupleKeys = append(traintupleKeys, tupleKey)
+		case CompositeTraintupleType:
+			compositeTraintupleKeys = append(compositeTraintupleKeys, tupleKey)
+		case AggregatetupleType:
+			aggregatetupleKeys = append(aggregatetupleKeys, tupleKey)
+		default:
+			err = fmt.Errorf("Unknown tuple type: %v", tuple.AssetType)
+			return
+		}
+	}
+
+	resp = outputComputePlan{
+		ComputePlanID:           key,
+		ObjectiveKey:            objectiveKey,
+		TraintupleKeys:          traintupleKeys,
+		CompositeTraintupleKeys: compositeTraintupleKeys,
+		AggregatetupleKeys:      aggregatetupleKeys,
+		TesttupleKeys:           testtupleKeys,
 	}
 	return
 }

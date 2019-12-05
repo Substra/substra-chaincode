@@ -31,13 +31,14 @@ type State struct {
 // LedgerDB to access the chaincode database during the lifetime of a SmartContract
 type LedgerDB struct {
 	cc               shim.ChaincodeStubInterface
+	tuplesEvent      *TuplesEvent
 	transactionState State
 	mutex            *sync.RWMutex
 }
 
 // NewLedgerDB create a new db to access the chaincode during a SmartContract
-func NewLedgerDB(stub shim.ChaincodeStubInterface) LedgerDB {
-	return LedgerDB{
+func NewLedgerDB(stub shim.ChaincodeStubInterface) *LedgerDB {
+	return &LedgerDB{
 		cc: stub,
 		transactionState: State{
 			items: make(map[string]([]byte)),
@@ -192,17 +193,14 @@ func (db *LedgerDB) GetAssetType(key string) (AssetType, error) {
 	return asset.AssetType, nil
 }
 
-// GetGenericTraintuple fetches a regular/composite/aggregate tuple in the chaincode db and returns
-// its common properties.
-func (db *LedgerDB) GetGenericTraintuple(key string) (assetType AssetType, status string, err error) {
-	asset := struct {
-		Status    string    `json:"status"`
-		AssetType AssetType `json:"assetType"`
-	}{}
+// GetGenericTuple fetches a GenericTuple (Traintuple, CompositeTraintuple or AggregateTuple)
+// from the chaincode db
+func (db *LedgerDB) GetGenericTuple(key string) (GenericTuple, error) {
+	asset := GenericTuple{}
 	if err := db.Get(key, &asset); err != nil {
-		return asset.AssetType, asset.Status, err
+		return asset, err
 	}
-	return asset.AssetType, asset.Status, nil
+	return asset, nil
 }
 
 // GetAlgo fetches an Algo from the ledger using its unique key
@@ -296,7 +294,7 @@ func (db *LedgerDB) GetCompositeTraintuple(key string) (CompositeTraintuple, err
 		return traintuple, err
 	}
 	if traintuple.AssetType != CompositeTraintupleType {
-		return traintuple, errors.NotFound("traintuple %s not found", key)
+		return traintuple, errors.NotFound("composite traintuple %s not found", key)
 	}
 	return traintuple, nil
 }
@@ -385,4 +383,77 @@ func (db *LedgerDB) GetNode(key string) (Node, error) {
 	}
 
 	return node, nil
+}
+
+// ----------------------------------------------
+// High-level functions for events
+// ----------------------------------------------
+
+// SendTuplesEvent sends an event with updated tuples if there is any
+// Only one event can be sent per transaction
+func (db *LedgerDB) SendTuplesEvent() error {
+	if db.tuplesEvent == nil {
+		return nil
+	}
+	payload, err := json.Marshal(*(db.tuplesEvent))
+	if err != nil {
+		return err
+	}
+	err = db.cc.SetEvent("tuples-updated", payload)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// AddTupleEvent add the output tuple matching the tupleKey to the event struct
+func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
+	// We take advantage of the fact that Testtuples have the fields "AssetType"
+	// and "Status": we use db.GetGenericTuple to get the value for these fields
+	// even though Testtuples aren't technically GenericTuples.
+	genericTuple, err := db.GetGenericTuple(tupleKey)
+	if err != nil {
+		return err
+	}
+	if genericTuple.Status != StatusTodo {
+		return nil
+	}
+	if db.tuplesEvent == nil {
+		db.tuplesEvent = &TuplesEvent{}
+	}
+	switch genericTuple.AssetType {
+	case TraintupleType:
+		tuple, err := db.GetTraintuple(tupleKey)
+		if err != nil {
+			return err
+		}
+		out := outputTraintuple{}
+		out.Fill(db, tuple, tupleKey)
+		db.tuplesEvent.Traintuples = append(db.tuplesEvent.Traintuples, out)
+	case CompositeTraintupleType:
+		tuple, err := db.GetCompositeTraintuple(tupleKey)
+		if err != nil {
+			return err
+		}
+		out := outputCompositeTraintuple{}
+		out.Fill(db, tuple, tupleKey)
+		db.tuplesEvent.CompositeTraintuples = append(db.tuplesEvent.CompositeTraintuples, out)
+	case AggregatetupleType:
+		tuple, err := db.GetAggregatetuple(tupleKey)
+		if err != nil {
+			return err
+		}
+		out := outputAggregatetuple{}
+		out.Fill(db, tuple, tupleKey)
+		db.tuplesEvent.Aggregatetuples = append(db.tuplesEvent.Aggregatetuples, out)
+	case TesttupleType:
+		tuple, err := db.GetTesttuple(tupleKey)
+		if err != nil {
+			return err
+		}
+		out := outputTesttuple{}
+		out.Fill(db, tupleKey, tuple)
+		db.tuplesEvent.Testtuples = append(db.tuplesEvent.Testtuples, out)
+	}
+	return nil
 }

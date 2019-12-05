@@ -20,7 +20,7 @@ import (
 
 // Set is a method of the receiver CompositeAlgo. It uses inputCompositeAlgo fields to set the CompositeAlgo
 // Returns the compositeAlgoKey
-func (algo *CompositeAlgo) Set(db LedgerDB, inp inputCompositeAlgo) (algoKey string, err error) {
+func (algo *CompositeAlgo) Set(db *LedgerDB, inp inputCompositeAlgo) (algoKey string, err error) {
 	algoKey = inp.Hash
 	// find associated owner
 	owner, err := GetTxCreator(db.cc)
@@ -50,7 +50,7 @@ func (algo *CompositeAlgo) Set(db LedgerDB, inp inputCompositeAlgo) (algoKey str
 // -------------------------------------------------------------------------------------------
 // registerCompositeAlgo stores a new algo in the ledger.
 // If the key exists, it will override the value with the new one
-func registerCompositeAlgo(db LedgerDB, args []string) (resp map[string]string, err error) {
+func registerCompositeAlgo(db *LedgerDB, args []string) (resp map[string]string, err error) {
 	inp := inputCompositeAlgo{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -76,7 +76,7 @@ func registerCompositeAlgo(db LedgerDB, args []string) (resp map[string]string, 
 }
 
 // queryCompositeAlgo returns an algo of the ledger given its key
-func queryCompositeAlgo(db LedgerDB, args []string) (out outputCompositeAlgo, err error) {
+func queryCompositeAlgo(db *LedgerDB, args []string) (out outputCompositeAlgo, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -91,7 +91,7 @@ func queryCompositeAlgo(db LedgerDB, args []string) (out outputCompositeAlgo, er
 }
 
 // queryCompositeAlgos returns all algos of the ledger
-func queryCompositeAlgos(db LedgerDB, args []string) (outAlgos []outputCompositeAlgo, err error) {
+func queryCompositeAlgos(db *LedgerDB, args []string) (outAlgos []outputCompositeAlgo, err error) {
 	outAlgos = []outputCompositeAlgo{}
 	if len(args) != 0 {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")

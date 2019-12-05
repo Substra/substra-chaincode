@@ -144,23 +144,43 @@ type inputQueryFilter struct {
 }
 
 // inputConputePlan represent a coherent set of tuples uploaded together.
-// They share the same Algo and Objective represented by their respective keys.
-// Traintuples is the list of all the traintuples planed by the compute plan
+// They share the same Objective represented by its key.
 // Beware, it's order sensitive since the `InModelsIDs` can only be interpreted
-// if the traintuples matching those IDs have already been created.
+// if the training tasks matching those IDs have already been created.
 type inputComputePlan struct {
-	AlgoKey      string                       `validate:"required,len=64,hexadecimal" json:"algoKey"`
-	ObjectiveKey string                       `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
-	Traintuples  []inputComputePlanTraintuple `validate:"required,gt=0" json:"traintuples"`
-	Testtuples   []inputComputePlanTesttuple  `validate:"omitempty" json:"testtuples"`
+	ObjectiveKey         string                                `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
+	Traintuples          []inputComputePlanTraintuple          `validate:"omitempty" json:"traintuples"`
+	Aggregatetuples      []inputComputePlanAggregatetuple      `validate:"omitempty" json:"aggregatetuples"`
+	CompositeTraintuples []inputComputePlanCompositeTraintuple `validate:"omitempty" json:"compositeTraintuples"`
+	Testtuples           []inputComputePlanTesttuple           `validate:"omitempty" json:"testtuples"`
 }
 
 type inputComputePlanTraintuple struct {
 	DataManagerKey string   `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
 	DataSampleKeys []string `validate:"required,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	AlgoKey        string   `validate:"required,len=64,hexadecimal" json:"algoKey"`
 	ID             string   `validate:"required,lte=64" json:"id"`
 	InModelsIDs    []string `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
 	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
+}
+
+type inputComputePlanAggregatetuple struct {
+	AlgoKey     string   `validate:"required,len=64,hexadecimal" json:"algoKey"`
+	ID          string   `validate:"required,lte=64" json:"id"`
+	InModelsIDs []string `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
+	Tag         string   `validate:"omitempty,lte=64" json:"tag"`
+	Worker      string   `validate:"required" json:"worker"`
+}
+
+type inputComputePlanCompositeTraintuple struct {
+	DataManagerKey           string           `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys           []string         `validate:"required,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	AlgoKey                  string           `validate:"required,len=64,hexadecimal" json:"algoKey"`
+	ID                       string           `validate:"required,lte=64" json:"id"`
+	InHeadModelID            string           `validate:"required_with=InTrunkModelID,omitempty,len=64,hexadecimal" json:"inHeadModelID"`
+	InTrunkModelID           string           `validate:"required_with=InHeadModelID,omitempty,len=64,hexadecimal" json:"inTrunkModelID"`
+	OutTrunkModelPermissions inputPermissions `validate:"required" json:"OutTrunkModelPermissions"`
+	Tag                      string           `validate:"omitempty,lte=64" json:"tag"`
 }
 
 type inputComputePlanTesttuple struct {

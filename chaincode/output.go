@@ -127,7 +127,7 @@ type outputTraintuple struct {
 }
 
 //Fill is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
-func (outputTraintuple *outputTraintuple) Fill(db LedgerDB, traintuple Traintuple, traintupleKey string) (err error) {
+func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintuple, traintupleKey string) (err error) {
 
 	outputTraintuple.Key = traintupleKey
 	outputTraintuple.Creator = traintuple.Creator
@@ -212,7 +212,7 @@ type outputTesttuple struct {
 	Tag            string         `json:"tag"`
 }
 
-func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
+func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
 	out.Key = key
 	out.Certified = in.Certified
 	out.Creator = in.Creator
@@ -297,30 +297,13 @@ type TuplesEvent struct {
 	Aggregatetuples      []outputAggregatetuple      `json:"aggregatetuple"`
 }
 
-// SetTesttuples add one or several testtuples to the event struct
-func (te *TuplesEvent) SetTesttuples(otuples ...outputTesttuple) {
-	te.Testtuples = otuples
-}
-
-// SetTraintuples add one or several traintuples to the event struct
-func (te *TuplesEvent) SetTraintuples(otuples ...outputTraintuple) {
-	te.Traintuples = otuples
-}
-
-// AddTraintuple add one traintuple to the event struct
-func (te *TuplesEvent) AddTraintuple(out outputTraintuple) {
-	te.Traintuples = append(te.Traintuples, out)
-}
-
-// AddTesttuple add one testtuple to the event struct
-func (te *TuplesEvent) AddTesttuple(out outputTesttuple) {
-	te.Testtuples = append(te.Testtuples, out)
-}
-
 type outputComputePlan struct {
-	ComputePlanID  string   `json:"computePlanID"`
-	TraintupleKeys []string `json:"traintupleKeys"`
-	TesttupleKeys  []string `json:"testtupleKeys"`
+	ComputePlanID           string   `json:"computePlanID"`
+	ObjectiveKey            string   `json:"objectiveKey"`
+	TraintupleKeys          []string `json:"traintupleKeys"`
+	AggregatetupleKeys      []string `json:"aggregatetupleKeys"`
+	CompositeTraintupleKeys []string `json:"compositeTraintupleKeys"`
+	TesttupleKeys           []string `json:"testtupleKeys"`
 }
 
 type outputPermissions struct {
@@ -363,7 +346,7 @@ type outputBoardTuple struct {
 	Tag           string         `json:"tag"`
 }
 
-func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string) error {
+func (out *outputBoardTuple) Fill(db *LedgerDB, in Testtuple, testtupleKey string) error {
 	out.Key = testtupleKey
 	out.Creator = in.Creator
 	algo, err := db.GetAlgo(in.AlgoKey)
@@ -380,12 +363,4 @@ func (out *outputBoardTuple) Fill(db LedgerDB, in Testtuple, testtupleKey string
 	out.Tag = in.Tag
 
 	return nil
-}
-
-type outputComputePlanDetails struct {
-	ComputePlanID string   `json:"computePlanID"`
-	AlgoKey       string   `json:"algoKey"`
-	ObjectiveKey  string   `json:"objectiveKey"`
-	Traintuples   []string `json:"traintuples"`
-	Testtuples    []string `json:"testtuples"`
 }

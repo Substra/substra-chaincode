@@ -20,7 +20,7 @@ import (
 
 // Set is a method of the receiver Algo. It uses inputAlgo fields to set the Algo
 // Returns the algoKey
-func (algo *Algo) Set(db LedgerDB, inp inputAlgo) (algoKey string, err error) {
+func (algo *Algo) Set(db *LedgerDB, inp inputAlgo) (algoKey string, err error) {
 	algoKey = inp.Hash
 	// find associated owner
 	owner, err := GetTxCreator(db.cc)
@@ -50,7 +50,7 @@ func (algo *Algo) Set(db LedgerDB, inp inputAlgo) (algoKey string, err error) {
 // -------------------------------------------------------------------------------------------
 // registerAlgo stores a new algo in the ledger.
 // If the key exists, it will override the value with the new one
-func registerAlgo(db LedgerDB, args []string) (resp map[string]string, err error) {
+func registerAlgo(db *LedgerDB, args []string) (resp map[string]string, err error) {
 	inp := inputAlgo{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -76,7 +76,7 @@ func registerAlgo(db LedgerDB, args []string) (resp map[string]string, err error
 }
 
 // queryAlgo returns an algo of the ledger given its key
-func queryAlgo(db LedgerDB, args []string) (out outputAlgo, err error) {
+func queryAlgo(db *LedgerDB, args []string) (out outputAlgo, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -91,7 +91,7 @@ func queryAlgo(db LedgerDB, args []string) (out outputAlgo, err error) {
 }
 
 // queryAlgos returns all algos of the ledger
-func queryAlgos(db LedgerDB, args []string) (outAlgos []outputAlgo, err error) {
+func queryAlgos(db *LedgerDB, args []string) (outAlgos []outputAlgo, err error) {
 	outAlgos = []outputAlgo{}
 	if len(args) != 0 {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")

@@ -21,27 +21,288 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var (
+	defaultComputePlan = inputComputePlan{
+		ObjectiveKey: objectiveDescriptionHash,
+		Traintuples: []inputComputePlanTraintuple{
+			inputComputePlanTraintuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        algoHash,
+				ID:             traintupleID1,
+			},
+			inputComputePlanTraintuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash2},
+				ID:             traintupleID2,
+				AlgoKey:        algoHash,
+				InModelsIDs:    []string{traintupleID1},
+			},
+		},
+		Testtuples: []inputComputePlanTesttuple{
+			inputComputePlanTesttuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				TraintupleID:   traintupleID2,
+			},
+		},
+	}
+
+	// Model-composition compute plan:
+	//
+	//   ,========,                ,========,
+	//   | NODE A |                | NODE B |
+	//   *========*                *========*
+	//
+	//     ø     ø                  ø      ø
+	//     |     |                  |      |
+	//     hd    tr                 tr     hd
+	//   -----------              -----------
+	//  | Composite |            | Composite |      STEP 1
+	//   -----------              -----------
+	//     hd    tr                 tr     hd
+	//     |      \   ,========,   /      |
+	//     |       \  | NODE C |  /       |
+	//     |        \ *========* /        |
+	//     |       ----------------       |
+	//     |      |    Aggregate   |      |         STEP 2
+	//     |       ----------------       |
+	//     |              |               |
+	//     |     ,_______/ \_______       |
+	//     |     |                 |      |
+	//     hd    tr                tr     hd
+	//   -----------             -----------
+	//  | Composite |           | Composite |       STEP 3
+	//   -----------             -----------
+	//     hd    tr                tr     hd
+	//
+	//
+	modelCompositionComputePlan = inputComputePlan{
+		ObjectiveKey: objectiveDescriptionHash,
+		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
+			{
+				ID:             "step_1_composite_A",
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        compositeAlgoHash,
+			},
+			{
+				ID:             "step_1_composite_B",
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash2},
+				AlgoKey:        compositeAlgoHash,
+			},
+			{
+				ID:             "step_3_composite_A",
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        compositeAlgoHash,
+				InHeadModelID:  "step_1_composite_A",
+				InTrunkModelID: "step_2_aggregate",
+			},
+			{
+				ID:             "step_3_composite_B",
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash2},
+				AlgoKey:        compositeAlgoHash,
+				InHeadModelID:  "step_1_composite_B",
+				InTrunkModelID: "step_2_aggregate",
+			},
+		},
+		Aggregatetuples: []inputComputePlanAggregatetuple{
+			{
+				ID:      "step_2_aggregate",
+				AlgoKey: aggregateAlgoHash,
+				InModelsIDs: []string{
+					"step_1_composite_A",
+					"step_1_composite_B",
+				},
+				Worker: worker,
+			},
+		},
+		Testtuples: []inputComputePlanTesttuple{
+			inputComputePlanTesttuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				TraintupleID:   "step_1_composite_A",
+			},
+			inputComputePlanTesttuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				TraintupleID:   "step_1_composite_B",
+			},
+			inputComputePlanTesttuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				TraintupleID:   "step_2_aggregate",
+			},
+			inputComputePlanTesttuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				TraintupleID:   "step_3_composite_A",
+			},
+			inputComputePlanTesttuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+				TraintupleID:   "step_3_composite_B",
+			},
+		},
+	}
+)
+
+func TestModelCompositionComputePlanWorkflow(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "aggregateAlgo")
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan)
+	assert.NoError(t, err)
+	assert.NotNil(t, db.tuplesEvent)
+	assert.Len(t, db.tuplesEvent.CompositeTraintuples, 2)
+
+	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[0]}))
+	assert.NoError(t, err)
+	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[1]}))
+	assert.NoError(t, err)
+
+	db.tuplesEvent = &TuplesEvent{}
+	inpLogCompo := inputLogSuccessCompositeTrain{}
+	inpLogCompo.fillDefaults()
+	inpLogCompo.Key = out.CompositeTraintupleKeys[0]
+	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
+	assert.NoError(t, err)
+
+	inpLogCompo.Key = out.CompositeTraintupleKeys[1]
+	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
+	assert.NoError(t, err)
+	assert.Len(t, db.tuplesEvent.Testtuples, 2)
+	for _, test := range db.tuplesEvent.Testtuples {
+		assert.Equalf(t, StatusTodo, test.Status, "blame it on %+v", test)
+	}
+	require.Len(t, db.tuplesEvent.Aggregatetuples, 1)
+	assert.Equal(t, StatusTodo, db.tuplesEvent.Aggregatetuples[0].Status)
+
+	_, err = logStartAggregate(db, assetToArgs(inputHash{out.AggregatetupleKeys[0]}))
+	assert.NoError(t, err)
+
+	inpLogAgg := inputLogSuccessTrain{}
+	inpLogAgg.fillDefaults()
+	inpLogAgg.Key = out.AggregatetupleKeys[0]
+	agg, err := logSuccessAggregate(db, assetToArgs(inpLogAgg))
+	assert.NoError(t, err)
+	assert.Equal(t, StatusDone, agg.Status)
+
+	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[2]}))
+	assert.NoError(t, err)
+	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[3]}))
+	assert.NoError(t, err)
+
+	db.tuplesEvent = &TuplesEvent{}
+	inpLogCompo.Key = out.CompositeTraintupleKeys[2]
+	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
+	assert.NoError(t, err)
+
+	inpLogCompo.Key = out.CompositeTraintupleKeys[3]
+	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
+	assert.NoError(t, err)
+	assert.Len(t, db.tuplesEvent.Testtuples, 2)
+	for _, test := range db.tuplesEvent.Testtuples {
+		assert.Equalf(t, StatusTodo, test.Status, "blame it on %+v", test)
+	}
+}
+
+func TestCreateComputePlanCompositeAggregate(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "aggregateAlgo")
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	tag := []string{"compositeTraintuple1", "compositeTraintuple2", "aggregatetuple1", "aggregatetuple2"}
+
+	inCP := inputComputePlan{
+		ObjectiveKey: objectiveDescriptionHash,
+		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
+			{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        compositeAlgoHash,
+				ID:             tag[0],
+			},
+			{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        compositeAlgoHash,
+				ID:             tag[1],
+				InTrunkModelID: tag[0],
+				InHeadModelID:  tag[0],
+			},
+		},
+		Aggregatetuples: []inputComputePlanAggregatetuple{
+			{
+				AlgoKey: aggregateAlgoHash,
+				ID:      tag[2],
+			},
+			{
+				AlgoKey:     aggregateAlgoHash,
+				ID:          tag[3],
+				InModelsIDs: []string{tag[2]},
+			},
+		},
+	}
+
+	outCP, err := createComputePlanInternal(db, inCP)
+	assert.NoError(t, err)
+
+	// Check the composite traintuples
+	traintuples, err := queryCompositeTraintuples(db, []string{})
+	assert.NoError(t, err)
+	require.Len(t, traintuples, 2)
+	require.Contains(t, outCP.CompositeTraintupleKeys, traintuples[0].Key)
+	require.Contains(t, outCP.CompositeTraintupleKeys, traintuples[1].Key)
+
+	// Check the aggregate traintuples
+	aggtuples, err := queryAggregatetuples(db, []string{})
+	assert.NoError(t, err)
+	require.Len(t, aggtuples, 2)
+	require.Contains(t, outCP.AggregatetupleKeys, aggtuples[0].Key)
+	require.Contains(t, outCP.AggregatetupleKeys, aggtuples[1].Key)
+
+	// Query the compute plan
+	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
+	assert.NoError(t, err, "calling queryComputePlan should succeed")
+	assert.NotNil(t, cp)
+	assert.Equal(t, 2, len(cp.CompositeTraintupleKeys))
+	assert.Equal(t, 2, len(cp.AggregatetupleKeys))
+
+	// Query compute plans
+	cps, err := queryComputePlans(db, []string{})
+	assert.NoError(t, err, "calling queryComputePlans should succeed")
+	assert.Len(t, cps, 1, "queryComputePlans should return one compute plan")
+	assert.Equal(t, 2, len(cps[0].CompositeTraintupleKeys))
+	assert.Equal(t, 2, len(cps[0].AggregatetupleKeys))
+}
+
 func TestCreateComputePlan(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	myStub := myMockStub{MockStub: mockStub}
-	myStub.saveWhenWriting = true
 	registerItem(t, *mockStub, "algo")
-	myStub.MockTransactionStart("42")
-	myStub.saveWhenWriting = false
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlan(NewLedgerDB(&myStub), assetToArgs(inCP))
+	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
-	assert.NotNil(t, outCP)
-	assert.EqualValues(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
-
-	// Save all that was written in the mocked ledger
-	myStub.saveWrittenState(t)
+	validateDefaultComputePlan(t, outCP)
 
 	// Check the traintuples
-	traintuples, err := queryTraintuples(NewLedgerDB(&myStub), []string{})
+	traintuples, err := queryTraintuples(db, []string{})
 	assert.NoError(t, err)
 	assert.Len(t, traintuples, 2)
 	require.Contains(t, outCP.TraintupleKeys, traintuples[0].Key)
@@ -55,17 +316,23 @@ func TestCreateComputePlan(t *testing.T) {
 			second = el
 		}
 	}
+
+	// check first traintuple
 	assert.NotZero(t, first)
-	assert.NotZero(t, second)
 	assert.EqualValues(t, first.Key, first.ComputePlanID)
+	assert.Equal(t, inCP.Traintuples[0].AlgoKey, first.Algo.Hash)
+	assert.Equal(t, StatusTodo, first.Status)
+
+	// check second traintuple
+	assert.NotZero(t, second)
+	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
 	assert.EqualValues(t, first.ComputePlanID, second.ComputePlanID)
 	assert.Len(t, second.InModels, 1)
-	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
-	assert.Equal(t, first.Status, StatusTodo)
-	assert.Equal(t, second.Status, StatusWaiting)
+	assert.Equal(t, inCP.Traintuples[1].AlgoKey, second.Algo.Hash)
+	assert.Equal(t, StatusWaiting, second.Status)
 
 	// Check the testtuples
-	testtuples, err := queryTesttuples(NewLedgerDB(&myStub), []string{})
+	testtuples, err := queryTesttuples(db, []string{})
 	assert.NoError(t, err)
 	require.Len(t, testtuples, 1)
 	testtuple := testtuples[0]
@@ -77,64 +344,116 @@ func TestCreateComputePlan(t *testing.T) {
 func TestQueryComputePlan(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	myStub := myMockStub{MockStub: mockStub}
-	myStub.saveWhenWriting = true
 	registerItem(t, *mockStub, "algo")
-	myStub.MockTransactionStart("42")
-	myStub.saveWhenWriting = false
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlan(NewLedgerDB(&myStub), assetToArgs(inCP))
+	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 	assert.Equal(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
 
-	// Save all that was written in the mocked ledger
-	myStub.saveWrittenState(t)
-
-	cp, err := queryComputePlan(NewLedgerDB(&myStub), assetToArgs(inputHash{Key: outCP.ComputePlanID}))
+	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
 	assert.NotNil(t, cp)
-	validateComputePlan(t, cp, defaultComputePlan)
+	validateDefaultComputePlan(t, cp)
 }
 
 func TestQueryComputePlans(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	myStub := myMockStub{MockStub: mockStub}
-	myStub.saveWhenWriting = true
 	registerItem(t, *mockStub, "algo")
-	myStub.MockTransactionStart("42")
-	myStub.saveWhenWriting = false
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlan(NewLedgerDB(&myStub), assetToArgs(inCP))
+	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 	assert.Equal(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
 
-	// Save all that was written in the mocked ledger
-	myStub.saveWrittenState(t)
-
-	cps, err := queryComputePlans(NewLedgerDB(&myStub), []string{})
+	cps, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Len(t, cps, 1, "queryComputePlans should return one compute plan")
-	validateComputePlan(t, cps[0], defaultComputePlan)
+	validateDefaultComputePlan(t, cps[0])
 }
 
-func validateComputePlan(t *testing.T, cp outputComputePlanDetails, in inputComputePlan) {
-	assert.Len(t, cp.Traintuples, 2)
-	cpID := cp.Traintuples[0]
+func validateDefaultComputePlan(t *testing.T, cp outputComputePlan) {
+	in := defaultComputePlan
+	assert.Len(t, cp.TraintupleKeys, 2)
+	cpID := cp.TraintupleKeys[0]
 
-	assert.Equal(t, cpID, cp.ComputePlanID)
-	assert.Equal(t, in.AlgoKey, cp.AlgoKey)
 	assert.Equal(t, in.ObjectiveKey, cp.ObjectiveKey)
 
-	assert.NotEmpty(t, cp.Traintuples[0])
-	assert.NotEmpty(t, cp.Traintuples[1])
+	assert.Equal(t, cpID, cp.ComputePlanID)
+	assert.Equal(t, in.ObjectiveKey, cp.ObjectiveKey)
 
-	require.Len(t, cp.Testtuples, 1)
-	assert.NotEmpty(t, cp.Testtuples[0])
+	assert.NotEmpty(t, cp.TraintupleKeys[0])
+	assert.NotEmpty(t, cp.TraintupleKeys[1])
+
+	require.Len(t, cp.TesttupleKeys, 1)
+	assert.NotEmpty(t, cp.TesttupleKeys[0])
+}
+
+func TestComputePlanEmptyTesttuples(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "algo")
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	inCP := inputComputePlan{
+		ObjectiveKey: objectiveDescriptionHash,
+		Traintuples: []inputComputePlanTraintuple{
+			inputComputePlanTraintuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        algoHash,
+				ID:             traintupleID1,
+			},
+			inputComputePlanTraintuple{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash2},
+				ID:             traintupleID2,
+				AlgoKey:        algoHash,
+				InModelsIDs:    []string{traintupleID1},
+			},
+		},
+		Testtuples: []inputComputePlanTesttuple{},
+	}
+
+	outCP, err := createComputePlanInternal(db, inCP)
+	assert.NoError(t, err)
+	assert.NotNil(t, outCP)
+	assert.Equal(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
+	assert.Equal(t, []string{}, outCP.TesttupleKeys)
+
+	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
+	assert.NoError(t, err, "calling queryComputePlan should succeed")
+	assert.NotNil(t, cp)
+	assert.Equal(t, []string{}, outCP.TesttupleKeys)
+
+	cps, err := queryComputePlans(db, []string{})
+	assert.NoError(t, err, "calling queryComputePlans should succeed")
+	assert.Len(t, cps, 1, "queryComputePlans should return one compute plan")
+	assert.Equal(t, []string{}, cps[0].TesttupleKeys)
+}
+
+func TestQueryComputePlanEmpty(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "algo")
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	cps, err := queryComputePlans(db, []string{})
+	assert.NoError(t, err, "calling queryComputePlans should succeed")
+	assert.Equal(t, []outputComputePlan{}, cps)
 }

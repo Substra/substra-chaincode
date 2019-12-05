@@ -22,7 +22,7 @@ import (
 
 // Set is a method of the receiver Objective. It checks the validity of inputObjective and uses its fields to set the Objective.
 // Returns the objectiveKey and the dataManagerKey associated to test dataSample
-func (objective *Objective) Set(db LedgerDB, inp inputObjective) (objectiveKey string, dataManagerKey string, err error) {
+func (objective *Objective) Set(db *LedgerDB, inp inputObjective) (objectiveKey string, dataManagerKey string, err error) {
 	dataManagerKey = inp.TestDataset.DataManagerKey
 	if dataManagerKey != "" {
 		var testOnly bool
@@ -70,7 +70,7 @@ func (objective *Objective) Set(db LedgerDB, inp inputObjective) (objectiveKey s
 
 // registerObjective stores a new objective in the ledger.
 // If the key exists, it will override the value with the new one
-func registerObjective(db LedgerDB, args []string) (resp map[string]string, err error) {
+func registerObjective(db *LedgerDB, args []string) (resp map[string]string, err error) {
 	// convert input strings args to input struct inputObjective
 	inp := inputObjective{}
 	err = AssetFromJSON(args, &inp)
@@ -98,7 +98,7 @@ func registerObjective(db LedgerDB, args []string) (resp map[string]string, err 
 }
 
 // queryObjective returns a objective of the ledger given its key
-func queryObjective(db LedgerDB, args []string) (out outputObjective, err error) {
+func queryObjective(db *LedgerDB, args []string) (out outputObjective, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -113,7 +113,7 @@ func queryObjective(db LedgerDB, args []string) (out outputObjective, err error)
 }
 
 // queryObjectives returns all objectives of the ledger
-func queryObjectives(db LedgerDB, args []string) (outObjectives []outputObjective, err error) {
+func queryObjectives(db *LedgerDB, args []string) (outObjectives []outputObjective, err error) {
 	outObjectives = []outputObjective{}
 	if len(args) != 0 {
 		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
@@ -137,7 +137,7 @@ func queryObjectives(db LedgerDB, args []string) (outObjectives []outputObjectiv
 
 // getObjectiveLeaderboard returns for an objective, all its certified testtuples with a done status, ordered by their perf
 // It can be an ascending sort or not depending on the ascendingOrder value.
-func queryObjectiveLeaderboard(db LedgerDB, args []string) (outputLeaderboard, error) {
+func queryObjectiveLeaderboard(db *LedgerDB, args []string) (outputLeaderboard, error) {
 	inp := inputLeaderboard{}
 	err := AssetFromJSON(args, &inp)
 	if err != nil {
@@ -186,7 +186,7 @@ func queryObjectiveLeaderboard(db LedgerDB, args []string) (outputLeaderboard, e
 // -------------------------------------------------------------------------------------------
 
 // addObjectiveDataManager associates a objective to a dataManager, more precisely, it adds the objective key to the dataManager
-func addObjectiveDataManager(db LedgerDB, dataManagerKey string, objectiveKey string) error {
+func addObjectiveDataManager(db *LedgerDB, dataManagerKey string, objectiveKey string) error {
 	dataManager, err := db.GetDataManager(dataManagerKey)
 	if err != nil {
 		return nil

@@ -73,7 +73,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	case "logFailCompositeTrain":
 		result, err = logFailCompositeTrain(db, args)
 	case "logFailAggregate":
-		result, err = logFailAggregateTrain(db, args)
+		result, err = logFailAggregate(db, args)
 	case "logStartTest":
 		result, err = logStartTest(db, args)
 	case "logStartTrain":
@@ -81,7 +81,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	case "logStartCompositeTrain":
 		result, err = logStartCompositeTrain(db, args)
 	case "logStartAggregate":
-		result, err = logStartAggregateTrain(db, args)
+		result, err = logStartAggregate(db, args)
 	case "logSuccessTest":
 		result, err = logSuccessTest(db, args)
 	case "logSuccessTrain":
@@ -89,7 +89,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	case "logSuccessCompositeTrain":
 		result, err = logSuccessCompositeTrain(db, args)
 	case "logSuccessAggregate":
-		result, err = logSuccessAggregateTrain(db, args)
+		result, err = logSuccessAggregate(db, args)
 	case "queryAlgo":
 		result, err = queryAlgo(db, args)
 	case "queryAlgos":
@@ -170,10 +170,16 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	if err != nil {
 		return formatErrorResponse(err)
 	}
+	// Send event if there is any. It's done in one batch since we can only send
+	// one event per call
+	err = db.SendTuplesEvent()
+	if err != nil {
+		return formatErrorResponse(fmt.Errorf("could not send event: %s", err.Error()))
+	}
 	// Marshal to json the smartcontract result
 	resp, err := json.Marshal(result)
 	if err != nil {
-		return formatErrorResponse(fmt.Errorf("could not format response for unknown reason"))
+		return formatErrorResponse(fmt.Errorf("could not format response: %s", err.Error()))
 	}
 
 	return shim.Success(resp)
