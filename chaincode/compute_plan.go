@@ -315,10 +315,16 @@ func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error
 }
 
 func getComputePlanStatus(db *LedgerDB, args []string) (status string, err error) {
+	inp := struct {
+		ComputePlanID string `validate:"required,lte=64" json:"computePlanID"`
+	}{}
 
-	AssetFromJSON(args)
+	err = AssetFromJSON(args, &inp)
+	if err != nil {
+		return
+	}
 
-	computePlan, err := getComputePlan(db, key)
+	computePlan, err := getComputePlan(db, inp.ComputePlanID)
 	if err != nil {
 		return "", err
 	}
