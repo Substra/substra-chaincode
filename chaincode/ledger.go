@@ -161,17 +161,19 @@ type CompositeTraintupleOutModel struct {
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Testtuple struct {
-	AssetType     AssetType   `json:"assetType"`
 	AlgoKey       string      `json:"algo"`
+	AssetType     AssetType   `json:"assetType"`
 	Certified     bool        `json:"certified"`
+	ComputePlanID string      `json:"computePlanID"`
 	Creator       string      `json:"creator"`
 	Dataset       *TtDataset  `json:"dataset"`
 	Log           string      `json:"log"`
-	TraintupleKey string      `json:"traintupleKey"`
 	ObjectiveKey  string      `json:"objective"`
 	Permissions   Permissions `json:"permissions"`
+	Rank          int         `json:"rank"`
 	Status        string      `json:"status"`
 	Tag           string      `json:"tag"`
+	TraintupleKey string      `json:"traintupleKey"`
 }
 
 // ---------------------------------------------------------------------------------

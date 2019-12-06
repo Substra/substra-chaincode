@@ -125,6 +125,8 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 		tupleCreator = traintuple.Creator
 		status = traintuple.Status
 		testtuple.AlgoKey = traintuple.AlgoKey
+		testtuple.ComputePlanID = traintuple.ComputePlanID
+		testtuple.Rank = traintuple.Rank
 	case CompositeTraintupleType:
 		compositeTraintuple, err := db.GetCompositeTraintuple(traintupleKey)
 		if err != nil {
@@ -134,6 +136,8 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 		tupleCreator = compositeTraintuple.Creator
 		status = compositeTraintuple.Status
 		testtuple.AlgoKey = compositeTraintuple.AlgoKey
+		testtuple.ComputePlanID = compositeTraintuple.ComputePlanID
+		testtuple.Rank = compositeTraintuple.Rank
 	case AggregatetupleType:
 		tuple, err := db.GetAggregatetuple(traintupleKey)
 		if err != nil {
@@ -143,6 +147,8 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 		tupleCreator = tuple.Creator
 		status = tuple.Status
 		testtuple.AlgoKey = tuple.AlgoKey
+		testtuple.ComputePlanID = tuple.ComputePlanID
+		testtuple.Rank = tuple.Rank
 	default:
 		return errors.BadRequest("key %s is not a valid traintuple", traintupleKey)
 	}

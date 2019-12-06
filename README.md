@@ -739,6 +739,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
    "storageAddress": "https://toto/algo/222/algo"
   },
   "certified": true,
+  "computePlanID": "",
   "creator": "SampleOrg",
   "dataset": {
    "keys": [
@@ -758,6 +759,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
+  "rank": 0,
   "status": "todo",
   "tag": "",
   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
@@ -770,6 +772,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
    "storageAddress": "https://toto/algo/222/algo"
   },
   "certified": false,
+  "computePlanID": "",
   "creator": "SampleOrg",
   "dataset": {
    "keys": [
@@ -789,6 +792,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
+  "rank": 0,
   "status": "todo",
   "tag": "",
   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
@@ -818,6 +822,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"5ae68332a1
   "storageAddress": "https://toto/algo/222/algo"
  },
  "certified": true,
+ "computePlanID": "",
  "creator": "SampleOrg",
  "dataset": {
   "keys": [
@@ -837,6 +842,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"5ae68332a1
    "storageAddress": "https://toto/objective/222/metrics"
   }
  },
+ "rank": 0,
  "status": "doing",
  "tag": "",
  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
@@ -867,6 +873,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"5ae68332
   "storageAddress": "https://toto/algo/222/algo"
  },
  "certified": true,
+ "computePlanID": "",
  "creator": "SampleOrg",
  "dataset": {
   "keys": [
@@ -886,6 +893,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"5ae68332
    "storageAddress": "https://toto/objective/222/metrics"
   }
  },
+ "rank": 0,
  "status": "done",
  "tag": "",
  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
@@ -914,6 +922,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"5ae68332a
   "storageAddress": "https://toto/algo/222/algo"
  },
  "certified": true,
+ "computePlanID": "",
  "creator": "SampleOrg",
  "dataset": {
   "keys": [
@@ -933,6 +942,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"5ae68332a
    "storageAddress": "https://toto/objective/222/metrics"
   }
  },
+ "rank": 0,
  "status": "done",
  "tag": "",
  "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
@@ -954,6 +964,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    "storageAddress": "https://toto/algo/222/algo"
   },
   "certified": true,
+  "computePlanID": "",
   "creator": "SampleOrg",
   "dataset": {
    "keys": [
@@ -973,6 +984,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
+  "rank": 0,
   "status": "waiting",
   "tag": "",
   "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab",
@@ -985,6 +997,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    "storageAddress": "https://toto/algo/222/algo"
   },
   "certified": false,
+  "computePlanID": "",
   "creator": "SampleOrg",
   "dataset": {
    "keys": [
@@ -1004,6 +1017,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
+  "rank": 0,
   "status": "todo",
   "tag": "",
   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
@@ -1016,6 +1030,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    "storageAddress": "https://toto/algo/222/algo"
   },
   "certified": true,
+  "computePlanID": "",
   "creator": "SampleOrg",
   "dataset": {
    "keys": [
@@ -1035,6 +1050,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
+  "rank": 0,
   "status": "done",
   "tag": "",
   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
@@ -1066,6 +1082,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
     "storageAddress": "https://toto/algo/222/algo"
    },
    "certified": false,
+   "computePlanID": "",
    "creator": "SampleOrg",
    "dataset": {
     "keys": [
@@ -1085,6 +1102,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
      "storageAddress": "https://toto/objective/222/metrics"
     }
    },
+   "rank": 0,
    "status": "todo",
    "tag": "",
    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
@@ -1098,6 +1116,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
    "storageAddress": "https://toto/algo/222/algo"
   },
   "certified": true,
+  "computePlanID": "",
   "creator": "SampleOrg",
   "dataset": {
    "keys": [
@@ -1117,6 +1136,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
     "storageAddress": "https://toto/objective/222/metrics"
    }
   },
+  "rank": 0,
   "status": "done",
   "tag": "",
   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
@@ -1174,6 +1194,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     "storageAddress": "https://toto/algo/222/algo"
    },
    "certified": true,
+   "computePlanID": "",
    "creator": "SampleOrg",
    "dataset": {
     "keys": [
@@ -1193,6 +1214,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
      "storageAddress": "https://toto/objective/222/metrics"
     }
    },
+   "rank": 0,
    "status": "waiting",
    "tag": "",
    "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab",
@@ -1244,6 +1266,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
     "storageAddress": "https://toto/algo/222/algo"
    },
    "certified": true,
+   "computePlanID": "",
    "creator": "SampleOrg",
    "dataset": {
     "keys": [
@@ -1263,6 +1286,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
      "storageAddress": "https://toto/objective/222/metrics"
     }
    },
+   "rank": 0,
    "status": "done",
    "tag": "",
    "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",

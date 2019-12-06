@@ -179,28 +179,32 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 }
 
 type outputTesttuple struct {
-	Key            string         `json:"key"`
 	Algo           *HashDressName `json:"algo"`
 	Certified      bool           `json:"certified"`
+	ComputePlanID  string         `json:"computePlanID"`
 	Creator        string         `json:"creator"`
 	Dataset        *TtDataset     `json:"dataset"`
+	Key            string         `json:"key"`
 	Log            string         `json:"log"`
-	TraintupleType string         `json:"traintupleType"`
-	TraintupleKey  string         `json:"traintupleKey"`
 	Objective      *TtObjective   `json:"objective"`
+	Rank           int            `json:"rank"`
 	Status         string         `json:"status"`
 	Tag            string         `json:"tag"`
+	TraintupleKey  string         `json:"traintupleKey"`
+	TraintupleType string         `json:"traintupleType"`
 }
 
 func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
-	out.Key = key
 	out.Certified = in.Certified
+	out.ComputePlanID = in.ComputePlanID
 	out.Creator = in.Creator
 	out.Dataset = in.Dataset
+	out.Key = key
 	out.Log = in.Log
-	out.TraintupleKey = in.TraintupleKey
+	out.Rank = in.Rank
 	out.Status = in.Status
 	out.Tag = in.Tag
+	out.TraintupleKey = in.TraintupleKey
 
 	// fill type
 	traintupleType, err := db.GetAssetType(in.TraintupleKey)
