@@ -455,3 +455,22 @@ func TestQueryComputePlanEmpty(t *testing.T) {
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Equal(t, []outputComputePlan{}, cps)
 }
+
+func TestDetermineComputePlanStatus(t *testing.T) {
+	statusTests := []struct {
+		input    []string
+		expected string
+	}{
+		{[]string{StatusCanceled, StatusTodo, StatusFailed}, StatusCanceled},
+		{[]string{StatusWaiting, StatusTodo, StatusFailed, StatusDone}, StatusFailed},
+		{[]string{StatusTodo, StatusDoing, StatusTodo, StatusDone, StatusWaiting}, StatusDoing},
+		{[]string{StatusTodo, StatusTodo, StatusDone, StatusWaiting}, StatusTodo},
+		{[]string{StatusWaiting, StatusDone, StatusDone, StatusWaiting}, StatusWaiting},
+		{[]string{StatusDone, StatusDone, StatusDone, StatusDone}, StatusDone},
+	}
+
+	for _, st := range statusTests {
+		result, _ := determineComputePlanStatus(st.input)
+		assert.Equal(t, st.expected, result)
+	}
+}

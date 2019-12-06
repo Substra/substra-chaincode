@@ -313,3 +313,57 @@ func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error
 	}
 	return
 }
+
+func getComputePlanStatus(db *LedgerDB, args []string) (status string, err error) {
+
+	AssetFromJSON(args)
+
+	computePlan, err := getComputePlan(db, key)
+	if err != nil {
+		return "", err
+	}
+
+	// get all tuples like status in one slice
+	statusCollection := []string{}
+
+	for _, aggregatetupleKey := range computePlan.AggregatetupleKeys {
+		aggregatetuple, err := getOutputAggregatetuple(db, aggregatetupleKey)
+		if err != nil {
+			return "", err
+		}
+
+		statusCollection = append(statusCollection, aggregatetuple.Status)
+	}
+
+	for _, traintupleKey := range computePlan.TraintupleKeys {
+		traintuple, err := getOutputTraintuple(db, traintupleKey)
+		if err != nil {
+			return "", err
+		}
+
+		statusCollection = append(statusCollection, traintuple.Status)
+	}
+
+	for _, compositeTraintupleKey := range computePlan.CompositeTraintupleKeys {
+		compositeTraintuple, err := getOutputCompositeTraintuple(db, compositeTraintupleKey)
+		if err != nil {
+			return "", err
+		}
+
+		statusCollection = append(statusCollection, compositeTraintuple.Status)
+	}
+
+	return determineComputePlanStatus(statusCollection)
+}
+
+func determineComputePlanStatus(statusCollection []string) (status string, err error) {
+	// this status order matters
+	sts := []string{StatusCanceled, StatusFailed, StatusDoing, StatusTodo, StatusWaiting, StatusDone}
+	for _, s := range sts {
+		if stringInSlice(s, statusCollection) {
+			return s, nil
+		}
+	}
+
+	return "", fmt.Errorf("unknown compute plan status")
+}
