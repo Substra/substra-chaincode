@@ -304,8 +304,10 @@ func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error
 		}
 	}
 
-
-	status, _ := getComputePlanStatus(db, tupleKeys)
+	status, err := getComputePlanStatus(db, tupleKeys)
+	if err != nil {
+		return
+	}
 
 	resp = outputComputePlan{
 		ComputePlanID:           key,
