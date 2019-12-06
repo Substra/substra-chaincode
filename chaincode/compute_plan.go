@@ -383,5 +383,26 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp bool, err error) {
 		}
 	}
 
+	testtupleKeys := []string{}
+	for _, key := range tupleKeys {
+		keys, err := db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", key})
+		if err != nil {
+			return false, err
+		}
+
+		testtupleKeys = append(testtupleKeys, keys...)
+	}
+
+	for _, key := range testtupleKeys {
+		tuple, err := db.GetTesttuple(key)
+		if err != nil {
+			return false, err
+		}
+		err = tuple.commitStatusUpdate(db, key, StatusCanceled)
+		if err != nil {
+			return false, err
+		}
+	}
+
 	return true, nil
 }

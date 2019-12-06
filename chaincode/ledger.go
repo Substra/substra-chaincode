@@ -172,12 +172,13 @@ type Testtuple struct {
 	Creator       string      `json:"creator"`
 	Dataset       *TtDataset  `json:"dataset"`
 	Log           string      `json:"log"`
+	TraintupleKey string      `json:"traintupleKey"`
 	ObjectiveKey  string      `json:"objective"`
 	Permissions   Permissions `json:"permissions"`
 	Rank          int         `json:"rank"`
 	Status        string      `json:"status"`
 	Tag           string      `json:"tag"`
-	TraintupleKey string      `json:"traintupleKey"`
+	StatusUpdater
 }
 
 // ---------------------------------------------------------------------------------
