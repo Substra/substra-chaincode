@@ -474,7 +474,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"train
     "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
    ],
    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-   "perf": 0,
    "worker": "SampleOrg"
   },
   "inModels": null,
@@ -522,7 +521,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"9da043ddc
    "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
   ],
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-  "perf": 0,
   "worker": "SampleOrg"
  },
  "inModels": null,
@@ -552,12 +550,11 @@ Smart contract: `logSuccessTrain`
    "hash": string (required,len=64,hexadecimal),
    "storageAddress": string (required),
  },
- "perf": float32 (omitempty),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3\",\"log\":\"no error, ah ah ah\",\"outModel\":{\"hash\":\"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed\",\"storageAddress\":\"https://substrabac/model/toto\"},\"perf\":0.9}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3\",\"log\":\"no error, ah ah ah\",\"outModel\":{\"hash\":\"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed\",\"storageAddress\":\"https://substrabac/model/toto\"}}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -575,7 +572,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"9da043d
    "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
   ],
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-  "perf": 0.9,
   "worker": "SampleOrg"
  },
  "inModels": null,
@@ -625,7 +621,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"9da043d
    "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
   ],
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-  "perf": 0.9,
   "worker": "SampleOrg"
  },
  "inModels": null,
@@ -1156,7 +1151,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
     "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
    ],
    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-   "perf": 0.9,
    "worker": "SampleOrg"
   },
   "inModels": null,
@@ -1234,7 +1228,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
      "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
     ],
     "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "perf": 0,
     "worker": "SampleOrg"
    },
    "inModels": [
@@ -1306,7 +1299,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
      "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
     ],
     "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "perf": 0.9,
     "worker": "SampleOrg"
    },
    "inModels": null,

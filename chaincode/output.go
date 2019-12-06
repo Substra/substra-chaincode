@@ -108,13 +108,20 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 	out.Permissions.Fill(in.Permissions)
 }
 
+// outputTtDataset is the representation of a Traintuple Dataset
+type outputTtDataset struct {
+	Worker         string   `json:"worker"`
+	DataSampleKeys []string `json:"keys"`
+	OpenerHash     string   `json:"openerHash"`
+}
+
 // outputTraintuple is the representation of one the element type stored in the
 // ledger. It describes a training task occuring on the platform
 type outputTraintuple struct {
 	Key           string            `json:"key"`
 	Algo          *HashDressName    `json:"algo"`
 	Creator       string            `json:"creator"`
-	Dataset       *TtDataset        `json:"dataset"`
+	Dataset       *outputTtDataset  `json:"dataset"`
 	ComputePlanID string            `json:"computePlanID"`
 	InModels      []*Model          `json:"inModels"`
 	Log           string            `json:"log"`
@@ -168,11 +175,10 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 	}
 
 	// fill dataset
-	outputTraintuple.Dataset = &TtDataset{
+	outputTraintuple.Dataset = &outputTtDataset{
 		Worker:         traintuple.Dataset.Worker,
 		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
 		OpenerHash:     traintuple.Dataset.DataManagerKey,
-		Perf:           traintuple.Perf,
 	}
 
 	return

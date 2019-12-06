@@ -229,9 +229,6 @@ func (success *inputLogSuccessTrain) fillDefaults() {
 	if success.Log == "" {
 		success.Log = "no error, ah ah ah"
 	}
-	if success.Perf == 0 {
-		success.Perf = 0.9
-	}
 	if success.OutModel.Hash == "" {
 		success.OutModel.Hash = modelHash
 	}
@@ -255,9 +252,6 @@ func (success *inputLogSuccessCompositeTrain) fillDefaults() {
 	}
 	if success.Log == "" {
 		success.Log = "no error, ah ah ah"
-	}
-	if success.Perf == 0 {
-		success.Perf = 0.9
 	}
 	if success.OutHeadModel.Hash == "" {
 		success.OutHeadModel.Hash = headModelHash

@@ -26,7 +26,7 @@ type outputCompositeTraintuple struct {
 	Key           string            `json:"key"`
 	Algo          *HashDressName    `json:"algo"`
 	Creator       string            `json:"creator"`
-	Dataset       *TtDataset        `json:"dataset"`
+	Dataset       *outputTtDataset  `json:"dataset"`
 	ComputePlanID string            `json:"computePlanID"`
 	InHeadModel   *Model            `json:"inHeadModel"`
 	InTrunkModel  *Model            `json:"inTrunkModel"`
@@ -108,11 +108,10 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 	}
 
 	// fill dataset
-	outputCompositeTraintuple.Dataset = &TtDataset{
+	outputCompositeTraintuple.Dataset = &outputTtDataset{
 		Worker:         traintuple.Dataset.Worker,
 		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
 		OpenerHash:     traintuple.Dataset.DataManagerKey,
-		Perf:           traintuple.Perf,
 	}
 
 	return

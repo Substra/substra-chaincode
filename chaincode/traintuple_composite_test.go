@@ -281,10 +281,9 @@ func TestTraintupleComposite(t *testing.T) {
 			StorageAddress: compositeAlgoStorageAddress,
 		},
 		Creator: worker,
-		Dataset: &TtDataset{
+		Dataset: &outputTtDataset{
 			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 			OpenerHash:     dataManagerOpenerHash,
-			Perf:           0.0,
 			Worker:         worker,
 		},
 		OutHeadModel: outModelComposite{
@@ -365,7 +364,6 @@ func TestTraintupleComposite(t *testing.T) {
 	assert.EqualValuesf(t, 200, resp.Status, "when querying composite traintuple with status %d and message %s", resp.Status, resp.Message)
 	endTraintuple := outputCompositeTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
-	expected.Dataset.Perf = success.Perf
 	expected.Log = success.Log
 	expected.OutHeadModel.OutModel = &HashDress{
 		Hash:           headModelHash,

@@ -282,10 +282,9 @@ func TestTraintuple(t *testing.T) {
 			StorageAddress: algoStorageAddress,
 		},
 		Creator: worker,
-		Dataset: &TtDataset{
+		Dataset: &outputTtDataset{
 			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 			OpenerHash:     dataManagerOpenerHash,
-			Perf:           0.0,
 			Worker:         worker,
 		},
 		Permissions: outputPermissions{
@@ -359,7 +358,6 @@ func TestTraintuple(t *testing.T) {
 	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple with status %d and message %s", resp.Status, resp.Message)
 	endTraintuple := outputTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
-	expected.Dataset.Perf = success.Perf
 	expected.Log = success.Log
 	expected.OutModel = &HashDress{
 		Hash:           modelHash,

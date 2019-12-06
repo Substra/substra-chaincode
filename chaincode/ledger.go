@@ -115,7 +115,6 @@ type Traintuple struct {
 	Dataset       *Dataset    `json:"dataset"`
 	InModelKeys   []string    `json:"inModels"`
 	OutModel      *HashDress  `json:"outModel"`
-	Perf          float32     `json:"perf"`
 	Permissions   Permissions `json:"permissions"`
 }
 
@@ -134,7 +133,6 @@ type CompositeTraintuple struct {
 	InTrunkModel  string                      `json:"inTrunkModel"`
 	OutHeadModel  CompositeTraintupleOutModel `json:"outHeadModel"`
 	OutTrunkModel CompositeTraintupleOutModel `json:"outTrunkModel"`
-	Perf          float32                     `json:"perf"`
 }
 
 // Aggregatetuple is like a traintuple, but for aggregate model composition
