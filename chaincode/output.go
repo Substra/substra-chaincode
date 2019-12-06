@@ -293,7 +293,7 @@ type outputComputePlan struct {
 	AggregatetupleKeys      []string `json:"aggregatetupleKeys"`
 	CompositeTraintupleKeys []string `json:"compositeTraintupleKeys"`
 	TesttupleKeys           []string `json:"testtupleKeys"`
-	Status                  string   `json:status`
+	Status                  string   `json:"status"`
 }
 
 type outputPermissions struct {

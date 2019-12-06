@@ -304,7 +304,8 @@ func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error
 		}
 	}
 
-	status, _ := getComputePlanStatus(db, aggregatetupleKeys, traintupleKeys, compositeTraintupleKeys)
+
+	status, _ := getComputePlanStatus(db, tupleKeys)
 
 	resp = outputComputePlan{
 		ComputePlanID:           key,
@@ -317,35 +318,17 @@ func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error
 	return
 }
 
-func getComputePlanStatus(db *LedgerDB, aggregatetupleKeys, traintupleKeys, compositeTraintupleKeys []string) (status string, err error) {
+func getComputePlanStatus(db *LedgerDB, keys []string) (status string, err error) {
 	// get all tuples like status in one slice
 	statusCollection := []string{}
 
-	for _, aggregatetupleKey := range aggregatetupleKeys {
-		aggregatetuple, err := getOutputAggregatetuple(db, aggregatetupleKey)
+	for _, key := range keys {
+		tuple, err := db.GetGenericTuple(key)
 		if err != nil {
 			return "", err
 		}
 
-		statusCollection = append(statusCollection, aggregatetuple.Status)
-	}
-
-	for _, traintupleKey := range traintupleKeys {
-		traintuple, err := getOutputTraintuple(db, traintupleKey)
-		if err != nil {
-			return "", err
-		}
-
-		statusCollection = append(statusCollection, traintuple.Status)
-	}
-
-	for _, compositeTraintupleKey := range compositeTraintupleKeys {
-		compositeTraintuple, err := getOutputCompositeTraintuple(db, compositeTraintupleKey)
-		if err != nil {
-			return "", err
-		}
-
-		statusCollection = append(statusCollection, compositeTraintuple.Status)
+		statusCollection = append(statusCollection, tuple.Status)
 	}
 
 	return determineComputePlanStatus(statusCollection)
