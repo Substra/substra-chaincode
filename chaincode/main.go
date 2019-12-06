@@ -66,6 +66,8 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = createCompositeTraintuple(db, args)
 	case "createAggregatetuple":
 		result, err = createAggregatetuple(db, args)
+	case "cancelComputePlan":
+		result, err = cancelComputePlan(db, args)
 	case "logFailTest":
 		result, err = logFailTest(db, args)
 	case "logFailTrain":

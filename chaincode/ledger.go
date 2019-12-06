@@ -37,6 +37,11 @@ const (
 	// the String() function in utils.go
 )
 
+// StatusUpdater is exported
+type StatusUpdater interface {
+	commitStatusUpdate(db *LedgerDB, key string, status string) error
+}
+
 // Objective is the representation of one of the element type stored in the ledger
 type Objective struct {
 	Name                      string         `json:"name"`
@@ -100,6 +105,7 @@ type GenericTuple struct {
 	Rank          int       `json:"rank"`
 	Status        string    `json:"status"`
 	Tag           string    `json:"tag"`
+	StatusUpdater
 }
 
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform

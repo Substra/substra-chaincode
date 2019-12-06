@@ -356,3 +356,32 @@ func determineComputePlanStatus(statusCollection []string) (status string, err e
 
 	return "", fmt.Errorf("unknown compute plan status")
 }
+
+func cancelComputePlan(db *LedgerDB, args []string) (resp bool, err error) {
+	computeplan, err := queryComputePlan(db, args)
+	if err != nil {
+		return
+	}
+
+	tupleKeys, err := db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", computeplan.ComputePlanID})
+	if err != nil {
+		return
+	}
+	if len(tupleKeys) == 0 {
+		err = errors.E("no task found for compute plan %s", computeplan.ComputePlanID)
+		return
+	}
+
+	for _, key := range tupleKeys {
+		tuple, err := db.GetGenericTuple(key)
+		if err != nil {
+			return false, err
+		}
+		err = tuple.commitStatusUpdate(db, key, StatusCanceled)
+		if err != nil {
+			return false, err
+		}
+	}
+
+	return true, nil
+}
