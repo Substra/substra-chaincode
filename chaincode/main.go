@@ -58,8 +58,6 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	switch fn {
 	case "createComputePlan":
 		result, err = createComputePlan(db, args)
-	case "getComputePlanStatus":
-		result, err = getComputePlanStatus(db, args)
 	case "createTesttuple":
 		result, err = createTesttuple(db, args)
 	case "createTraintuple":

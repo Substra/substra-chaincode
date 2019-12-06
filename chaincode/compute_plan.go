@@ -304,35 +304,24 @@ func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error
 		}
 	}
 
+	status, _ := getComputePlanStatus(db, aggregatetupleKeys, traintupleKeys, compositeTraintupleKeys)
+
 	resp = outputComputePlan{
 		ComputePlanID:           key,
 		TraintupleKeys:          traintupleKeys,
 		CompositeTraintupleKeys: compositeTraintupleKeys,
 		AggregatetupleKeys:      aggregatetupleKeys,
 		TesttupleKeys:           testtupleKeys,
+		Status:                  status,
 	}
 	return
 }
 
-func getComputePlanStatus(db *LedgerDB, args []string) (status string, err error) {
-	inp := struct {
-		ComputePlanID string `validate:"required,lte=64" json:"computePlanID"`
-	}{}
-
-	err = AssetFromJSON(args, &inp)
-	if err != nil {
-		return
-	}
-
-	computePlan, err := getComputePlan(db, inp.ComputePlanID)
-	if err != nil {
-		return "", err
-	}
-
+func getComputePlanStatus(db *LedgerDB, aggregatetupleKeys, traintupleKeys, compositeTraintupleKeys []string) (status string, err error) {
 	// get all tuples like status in one slice
 	statusCollection := []string{}
 
-	for _, aggregatetupleKey := range computePlan.AggregatetupleKeys {
+	for _, aggregatetupleKey := range aggregatetupleKeys {
 		aggregatetuple, err := getOutputAggregatetuple(db, aggregatetupleKey)
 		if err != nil {
 			return "", err
@@ -341,7 +330,7 @@ func getComputePlanStatus(db *LedgerDB, args []string) (status string, err error
 		statusCollection = append(statusCollection, aggregatetuple.Status)
 	}
 
-	for _, traintupleKey := range computePlan.TraintupleKeys {
+	for _, traintupleKey := range traintupleKeys {
 		traintuple, err := getOutputTraintuple(db, traintupleKey)
 		if err != nil {
 			return "", err
@@ -350,7 +339,7 @@ func getComputePlanStatus(db *LedgerDB, args []string) (status string, err error
 		statusCollection = append(statusCollection, traintuple.Status)
 	}
 
-	for _, compositeTraintupleKey := range computePlan.CompositeTraintupleKeys {
+	for _, compositeTraintupleKey := range compositeTraintupleKeys {
 		compositeTraintuple, err := getOutputCompositeTraintuple(db, compositeTraintupleKey)
 		if err != nil {
 			return "", err
