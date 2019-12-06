@@ -109,6 +109,7 @@ func createComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 }
 
 func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputComputePlan, err error) {
+	tuplesKeys := []string{}
 	traintupleKeysByID := map[string]string{}
 
 	resp.TraintupleKeys = []string{}
@@ -143,6 +144,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 				resp.ComputePlanID = traintupleKey
 			}
 
+			tuplesKeys = append(tuplesKeys, traintupleKey)
 			traintupleKeysByID[computeTraintuple.ID] = traintupleKey
 			resp.TraintupleKeys = append(resp.TraintupleKeys, traintupleKey)
 		case CompositeTraintupleType:
@@ -169,6 +171,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 				resp.ComputePlanID = compositeTraintupleKey
 			}
 
+			tuplesKeys = append(tuplesKeys, compositeTraintupleKey)
 			traintupleKeysByID[computeCompositeTraintuple.ID] = compositeTraintupleKey
 			resp.CompositeTraintupleKeys = append(resp.CompositeTraintupleKeys, compositeTraintupleKey)
 		case AggregatetupleType:
@@ -195,6 +198,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 				resp.ComputePlanID = aggregatetupleKey
 			}
 
+			tuplesKeys = append(tuplesKeys, aggregatetupleKey)
 			traintupleKeysByID[computeAggregatetuple.ID] = aggregatetupleKey
 			resp.AggregatetupleKeys = append(resp.AggregatetupleKeys, aggregatetupleKey)
 		}
@@ -217,6 +221,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 		resp.TesttupleKeys = append(resp.TesttupleKeys, testtupleKey)
 	}
 
+	resp.Status, err = getComputePlanStatus(db, tuplesKeys)
 	return resp, err
 }
 
