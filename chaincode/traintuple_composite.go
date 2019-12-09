@@ -291,75 +291,93 @@ func createCompositeTraintupleInternal(db *LedgerDB, inp inputCompositeTraintupl
 }
 
 // logStartCompositeTrain modifies a traintuple by changing its status from todo to doing
-func logStartCompositeTrain(db *LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
+func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraintuple, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
 
-	// get traintuple, check validity of the update
-	traintuple, err := db.GetCompositeTraintuple(inp.Key)
+	// get compositeTraintuple, check validity of the update
+	compositeTraintuple, err := db.GetCompositeTraintuple(inp.Key)
 	if err != nil {
 		return
 	}
-	if err = validateTupleOwner(db, traintuple.Dataset.Worker); err != nil {
+
+	// cancel compositeTraintuple if compute plan is canceled
+	if compositeTraintuple.ComputePlanID != "" {
+		err := cancelIfComputePlanIsCanceled(db, inp.Key, compositeTraintuple.ComputePlanID, &compositeTraintuple)
+		if err != nil {
+			return outputCompositeTraintuple{}, err
+		}
+	}
+
+	if err = validateTupleOwner(db, compositeTraintuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = traintuple.commitStatusUpdate(db, inp.Key, StatusDoing); err != nil {
+	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, StatusDoing); err != nil {
 		return
 	}
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	o.Fill(db, compositeTraintuple, inp.Key)
 	return
 }
 
 // logSuccessCompositeTrain modifies a traintuple by changing its status from doing to done
 // reports logs and associated performances
-func logSuccessCompositeTrain(db *LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
+func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraintuple, err error) {
 	inp := inputLogSuccessCompositeTrain{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
-	traintupleKey := inp.Key
+	compositeTraintupleKey := inp.Key
 
 	// get, update and commit traintuple
-	traintuple, err := db.GetCompositeTraintuple(traintupleKey)
+	compositeTraintuple, err := db.GetCompositeTraintuple(compositeTraintupleKey)
 	if err != nil {
 		return
 	}
-	traintuple.OutHeadModel.OutModel = &HashDress{
+
+	// cancel compositeTraintuple if compute plan is canceled
+	if compositeTraintuple.ComputePlanID != "" {
+		err := cancelIfComputePlanIsCanceled(db, inp.Key, compositeTraintuple.ComputePlanID, &compositeTraintuple)
+		if err != nil {
+			return outputCompositeTraintuple{}, err
+		}
+	}
+
+	compositeTraintuple.OutHeadModel.OutModel = &HashDress{
 		Hash:           inp.OutHeadModel.Hash,
 		StorageAddress: inp.OutHeadModel.StorageAddress}
-	traintuple.OutTrunkModel.OutModel = &HashDress{
+	compositeTraintuple.OutTrunkModel.OutModel = &HashDress{
 		Hash:           inp.OutTrunkModel.Hash,
 		StorageAddress: inp.OutTrunkModel.StorageAddress}
-	traintuple.Log += inp.Log
+	compositeTraintuple.Log += inp.Log
 
-	if err = validateTupleOwner(db, traintuple.Dataset.Worker); err != nil {
+	if err = validateTupleOwner(db, compositeTraintuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = traintuple.commitStatusUpdate(db, traintupleKey, StatusDone); err != nil {
+	if err = compositeTraintuple.commitStatusUpdate(db, compositeTraintupleKey, StatusDone); err != nil {
 		return
 	}
 
-	err = UpdateTraintupleChildren(db, traintupleKey, traintuple.Status)
+	err = UpdateTraintupleChildren(db, compositeTraintupleKey, compositeTraintuple.Status)
 	if err != nil {
 		return
 	}
 
-	err = UpdateTesttupleChildren(db, traintupleKey, traintuple.Status)
+	err = UpdateTesttupleChildren(db, compositeTraintupleKey, compositeTraintuple.Status)
 	if err != nil {
 		return
 	}
 
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	o.Fill(db, compositeTraintuple, inp.Key)
 
 	return
 }
 
 // logFailCompositeTrain modifies a traintuple by changing its status to fail and reports associated logs
-func logFailCompositeTrain(db *LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
+func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraintuple, err error) {
 	inp := inputLogFailTrain{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -367,28 +385,37 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (outputTraintuple output
 	}
 
 	// get, update and commit traintuple
-	traintuple, err := db.GetCompositeTraintuple(inp.Key)
+	compositeTraintuple, err := db.GetCompositeTraintuple(inp.Key)
 	if err != nil {
 		return
 	}
-	traintuple.Log += inp.Log
 
-	if err = validateTupleOwner(db, traintuple.Dataset.Worker); err != nil {
+	// cancel compositeTraintuple if compute plan is canceled
+	if compositeTraintuple.ComputePlanID != "" {
+		err := cancelIfComputePlanIsCanceled(db, inp.Key, compositeTraintuple.ComputePlanID, &compositeTraintuple)
+		if err != nil {
+			return outputCompositeTraintuple{}, err
+		}
+	}
+
+	compositeTraintuple.Log += inp.Log
+
+	if err = validateTupleOwner(db, compositeTraintuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = traintuple.commitStatusUpdate(db, inp.Key, StatusFailed); err != nil {
+	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, StatusFailed); err != nil {
 		return
 	}
 
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	o.Fill(db, compositeTraintuple, inp.Key)
 
 	// update depending tuples
-	err = UpdateTesttupleChildren(db, inp.Key, traintuple.Status)
+	err = UpdateTesttupleChildren(db, inp.Key, compositeTraintuple.Status)
 	if err != nil {
 		return
 	}
 
-	err = UpdateTraintupleChildren(db, inp.Key, traintuple.Status)
+	err = UpdateTraintupleChildren(db, inp.Key, compositeTraintuple.Status)
 	if err != nil {
 		return
 	}

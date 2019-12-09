@@ -329,6 +329,21 @@ func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error
 	return
 }
 
+func getComputePlanStatusByComputePlanID(db *LedgerDB, computePlanID string) (status string, err error) {
+	computePlan, err := getComputePlan(db, computePlanID)
+	if err != nil {
+		return "", err
+	}
+
+	keys := []string{}
+	keys = append(keys, computePlan.TraintupleKeys...)
+	keys = append(keys, computePlan.CompositeTraintupleKeys...)
+	keys = append(keys, computePlan.AggregatetupleKeys...)
+	keys = append(keys, computePlan.TesttupleKeys...)
+
+	return getComputePlanStatus(db, keys)
+}
+
 func getComputePlanStatus(db *LedgerDB, keys []string) (status string, err error) {
 	// get all tuples like status in one slice
 	statusCollection := []string{}
@@ -394,11 +409,11 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp bool, err error) {
 	}
 
 	for _, key := range testtupleKeys {
-		tuple, err := db.GetTesttuple(key)
+		testtuple, err := db.GetTesttuple(key)
 		if err != nil {
 			return false, err
 		}
-		err = tuple.commitStatusUpdate(db, key, StatusCanceled)
+		err = testtuple.commitStatusUpdate(db, key, StatusCanceled)
 		if err != nil {
 			return false, err
 		}

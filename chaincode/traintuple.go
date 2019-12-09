@@ -258,7 +258,7 @@ func createTraintupleInternal(db *LedgerDB, inp inputTraintuple, checkComputePla
 }
 
 // logStartTrain modifies a traintuple by changing its status from todo to doing
-func logStartTrain(db *LedgerDB, args []string) (outputTraintuple outputTraintuple, err error) {
+func logStartTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -270,19 +270,28 @@ func logStartTrain(db *LedgerDB, args []string) (outputTraintuple outputTraintup
 	if err != nil {
 		return
 	}
+
+	// cancel traintuple if compute plan is canceled
+	if traintuple.ComputePlanID != "" {
+		err := cancelIfComputePlanIsCanceled(db, inp.Key, traintuple.ComputePlanID, &traintuple)
+		if err != nil {
+			return outputTraintuple{}, err
+		}
+	}
+
 	if err = validateTupleOwner(db, traintuple.Dataset.Worker); err != nil {
 		return
 	}
 	if err = traintuple.commitStatusUpdate(db, inp.Key, StatusDoing); err != nil {
 		return
 	}
-	err = outputTraintuple.Fill(db, traintuple, inp.Key)
+	err = o.Fill(db, traintuple, inp.Key)
 	return
 }
 
 // logSuccessTrain modifies a traintuple by changing its status from doing to done
 // reports logs and associated performances
-func logSuccessTrain(db *LedgerDB, args []string) (outputTraintuple outputTraintuple, err error) {
+func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 	inp := inputLogSuccessTrain{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -295,6 +304,15 @@ func logSuccessTrain(db *LedgerDB, args []string) (outputTraintuple outputTraint
 	if err != nil {
 		return
 	}
+	// cancel traintuple if compute plan is canceled
+	if traintuple.ComputePlanID != "" {
+		err := cancelIfComputePlanIsCanceled(db, inp.Key, traintuple.ComputePlanID, &traintuple)
+		if err != nil {
+			return outputTraintuple{}, err
+		}
+	}
+
+	traintuple.Perf = inp.Perf
 	traintuple.OutModel = &HashDress{
 		Hash:           inp.OutModel.Hash,
 		StorageAddress: inp.OutModel.StorageAddress}
@@ -318,7 +336,7 @@ func logSuccessTrain(db *LedgerDB, args []string) (outputTraintuple outputTraint
 		return
 	}
 
-	err = outputTraintuple.Fill(db, traintuple, inp.Key)
+	err = o.Fill(db, traintuple, inp.Key)
 	if err != nil {
 		return
 	}
@@ -327,7 +345,7 @@ func logSuccessTrain(db *LedgerDB, args []string) (outputTraintuple outputTraint
 }
 
 // logFailTrain modifies a traintuple by changing its status to fail and reports associated logs
-func logFailTrain(db *LedgerDB, args []string) (outputTraintuple outputTraintuple, err error) {
+func logFailTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 	inp := inputLogFailTrain{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -339,6 +357,14 @@ func logFailTrain(db *LedgerDB, args []string) (outputTraintuple outputTraintupl
 	if err != nil {
 		return
 	}
+	// cancel traintuple if compute plan is canceled
+	if traintuple.ComputePlanID != "" {
+		err := cancelIfComputePlanIsCanceled(db, inp.Key, traintuple.ComputePlanID, &traintuple)
+		if err != nil {
+			return outputTraintuple{}, err
+		}
+	}
+
 	traintuple.Log += inp.Log
 
 	if err = validateTupleOwner(db, traintuple.Dataset.Worker); err != nil {
@@ -348,7 +374,7 @@ func logFailTrain(db *LedgerDB, args []string) (outputTraintuple outputTraintupl
 		return
 	}
 
-	if err = outputTraintuple.Fill(db, traintuple, inp.Key); err != nil {
+	if err = o.Fill(db, traintuple, inp.Key); err != nil {
 		return
 	}
 

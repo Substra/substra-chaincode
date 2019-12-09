@@ -264,7 +264,7 @@ func createAggregatetupleInternal(db *LedgerDB, inp inputAggregatetuple, checkCo
 }
 
 // logStartAggregate modifies a aggregatetuple by changing its status from todo to doing
-func logStartAggregate(db *LedgerDB, args []string) (outputAggregatetuple outputAggregatetuple, err error) {
+func logStartAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -276,18 +276,27 @@ func logStartAggregate(db *LedgerDB, args []string) (outputAggregatetuple output
 	if err != nil {
 		return
 	}
+
+	// cancel aggregatetuple if compute plan is canceled
+	if aggregatetuple.ComputePlanID != "" {
+		err := cancelIfComputePlanIsCanceled(db, inp.Key, aggregatetuple.ComputePlanID, &aggregatetuple)
+		if err != nil {
+			return outputAggregatetuple{}, err
+		}
+	}
+
 	if err = validateTupleOwner(db, aggregatetuple.Worker); err != nil {
 		return
 	}
 	if err = aggregatetuple.commitStatusUpdate(db, inp.Key, StatusDoing); err != nil {
 		return
 	}
-	outputAggregatetuple.Fill(db, aggregatetuple, inp.Key)
+	o.Fill(db, aggregatetuple, inp.Key)
 	return
 }
 
 // logFailAggregate modifies a aggregatetuple by changing its status to fail and reports associated logs
-func logFailAggregate(db *LedgerDB, args []string) (outputAggregatetuple outputAggregatetuple, err error) {
+func logFailAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err error) {
 	inp := inputLogFailTrain{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -299,6 +308,15 @@ func logFailAggregate(db *LedgerDB, args []string) (outputAggregatetuple outputA
 	if err != nil {
 		return
 	}
+
+	// cancel aggregatetuple if compute plan is canceled
+	if aggregatetuple.ComputePlanID != "" {
+		err := cancelIfComputePlanIsCanceled(db, inp.Key, aggregatetuple.ComputePlanID, &aggregatetuple)
+		if err != nil {
+			return outputAggregatetuple{}, err
+		}
+	}
+
 	aggregatetuple.Log += inp.Log
 
 	if err = validateTupleOwner(db, aggregatetuple.Worker); err != nil {
@@ -308,7 +326,7 @@ func logFailAggregate(db *LedgerDB, args []string) (outputAggregatetuple outputA
 		return
 	}
 
-	outputAggregatetuple.Fill(db, aggregatetuple, inp.Key)
+	o.Fill(db, aggregatetuple, inp.Key)
 
 	// update depending tuples
 	err = UpdateTesttupleChildren(db, inp.Key, aggregatetuple.Status)
@@ -316,7 +334,7 @@ func logFailAggregate(db *LedgerDB, args []string) (outputAggregatetuple outputA
 		return
 	}
 
-	err = UpdateTraintupleChildren(db, inp.Key, outputAggregatetuple.Status)
+	err = UpdateTraintupleChildren(db, inp.Key, o.Status)
 	if err != nil {
 		return
 	}
@@ -326,7 +344,7 @@ func logFailAggregate(db *LedgerDB, args []string) (outputAggregatetuple outputA
 
 // logSuccessAggregate modifies an aggregateTupl by changing its status from doing to done
 // reports logs and associated performances
-func logSuccessAggregate(db *LedgerDB, args []string) (outputAggregatetuple outputAggregatetuple, err error) {
+func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err error) {
 	inp := inputLogSuccessTrain{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -339,6 +357,15 @@ func logSuccessAggregate(db *LedgerDB, args []string) (outputAggregatetuple outp
 	if err != nil {
 		return
 	}
+
+	// cancel aggregatetuple if compute plan is canceled
+	if aggregatetuple.ComputePlanID != "" {
+		err := cancelIfComputePlanIsCanceled(db, inp.Key, aggregatetuple.ComputePlanID, &aggregatetuple)
+		if err != nil {
+			return outputAggregatetuple{}, err
+		}
+	}
+
 	aggregatetuple.OutModel = &HashDress{
 		Hash:           inp.OutModel.Hash,
 		StorageAddress: inp.OutModel.StorageAddress}
@@ -361,7 +388,7 @@ func logSuccessAggregate(db *LedgerDB, args []string) (outputAggregatetuple outp
 		return
 	}
 
-	outputAggregatetuple.Fill(db, aggregatetuple, inp.Key)
+	o.Fill(db, aggregatetuple, inp.Key)
 	return
 }
 
