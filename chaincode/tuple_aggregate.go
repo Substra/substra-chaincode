@@ -81,6 +81,7 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 		}
 
 		var parentOutModel *HashDress
+		var parentStatus string
 		parentPermissions := Permissions{}
 
 		// get out-model and permissions from parent
@@ -91,18 +92,21 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 				// if the parent is composite, always take the "trunk" out-model
 				parentOutModel = tuple.OutTrunkModel.OutModel
 				parentPermissions = tuple.OutTrunkModel.Permissions
+				parentStatus = tuple.Status
 			}
 		case TraintupleType:
 			tuple, err := db.GetTraintuple(parentTraintupleKey)
 			if err == nil {
 				parentOutModel = tuple.OutModel
 				parentPermissions = tuple.Permissions
+				parentStatus = tuple.Status
 			}
 		case AggregatetupleType:
 			tuple, err := db.GetAggregatetuple(parentTraintupleKey)
 			if err == nil {
 				parentOutModel = tuple.OutModel
 				parentPermissions = tuple.Permissions
+				parentStatus = tuple.Status
 			}
 		default:
 			return fmt.Errorf("aggregate.SetFromParents: Unsupported parent type %s", parentType)
@@ -113,9 +117,13 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 		}
 
 		// update child properties based on parent
-		if parentOutModel == nil {
+		switch {
+		case parentStatus == StatusFailed:
+			status = parentStatus
+		case parentOutModel == nil:
 			status = StatusWaiting
 		}
+
 		inModelKeys = append(inModelKeys, parentTraintupleKey)
 		permissions = MergePermissions(permissions, parentPermissions)
 	}
