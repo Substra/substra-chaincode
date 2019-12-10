@@ -218,3 +218,16 @@ func getCertifiedOutputTesttuple(db *LedgerDB, traintupleKey string) (outputTest
 
 	return out, nil
 }
+
+func determineStatusFromInModels(statuses []string) string {
+	// TODO: Add the canceled case when it's ready
+	if stringInSlice(StatusFailed, statuses) {
+		return StatusFailed
+	}
+	for _, s := range statuses {
+		if s != StatusDone {
+			return StatusWaiting
+		}
+	}
+	return StatusTodo
+}

@@ -568,3 +568,27 @@ func TestQueryAggregatetuple(t *testing.T) {
 	assert.Equal(t, objectiveMetricsHash, out.Objective.Metrics.Hash)
 	assert.Equal(t, objectiveMetricsStorageAddress, out.Objective.Metrics.StorageAddress)
 }
+
+func TestCreateFailedAggregate(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "compositeTraintuple")
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	_, err := logStartCompositeTrain(db, assetToArgs(inputHash{Key: compositeTraintupleKey}))
+	assert.NoError(t, err)
+
+	_, err = logFailCompositeTrain(db, assetToArgs(inputLogFailTrain{inputLog{Key: compositeTraintupleKey}}))
+	assert.NoError(t, err)
+
+	in := inputAggregatetuple{}
+	in.fillDefaults()
+	in.InModels = []string{compositeTraintupleKey, traintupleKey}
+	key, err := createAggregatetupleInternal(db, in, true)
+	assert.NoError(t, err)
+
+	out, err := queryAggregatetuple(db, assetToArgs(inputHash{Key: key}))
+	assert.NoError(t, err)
+	assert.Equal(t, StatusFailed, out.Status)
+}
