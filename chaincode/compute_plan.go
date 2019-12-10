@@ -364,29 +364,29 @@ func determineComputePlanStatus(statusCollection []string) (status string, err e
 	return "", fmt.Errorf("unknown compute plan status")
 }
 
-func cancelComputePlan(db *LedgerDB, args []string) (resp bool, err error) {
+func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
 	computeplan, err := queryComputePlan(db, args)
 	if err != nil {
-		return
+		return outputComputePlan{}, err
 	}
 
 	tupleKeys, err := db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", computeplan.ComputePlanID})
 	if err != nil {
-		return
+		return outputComputePlan{}, err
 	}
 	if len(tupleKeys) == 0 {
 		err = errors.E("no task found for compute plan %s", computeplan.ComputePlanID)
-		return
+		return outputComputePlan{}, err
 	}
 
 	for _, key := range tupleKeys {
 		tuple, err := db.GetGenericTuple(key)
 		if err != nil {
-			return false, err
+			return outputComputePlan{}, err
 		}
 		err = tuple.commitStatusUpdate(db, key, StatusCanceled)
 		if err != nil {
-			return false, err
+			return outputComputePlan{}, err
 		}
 	}
 
@@ -394,7 +394,7 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp bool, err error) {
 	for _, key := range tupleKeys {
 		keys, err := db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", key})
 		if err != nil {
-			return false, err
+			return outputComputePlan{}, err
 		}
 
 		testtupleKeys = append(testtupleKeys, keys...)
@@ -403,13 +403,15 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp bool, err error) {
 	for _, key := range testtupleKeys {
 		testtuple, err := db.GetTesttuple(key)
 		if err != nil {
-			return false, err
+			return outputComputePlan{}, err
 		}
 		err = testtuple.commitStatusUpdate(db, key, StatusCanceled)
 		if err != nil {
-			return false, err
+			return outputComputePlan{}, err
 		}
 	}
 
-	return true, nil
+	computeplan.Status = StatusCanceled
+
+	return computeplan, nil
 }
