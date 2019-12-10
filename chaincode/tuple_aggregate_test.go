@@ -584,7 +584,7 @@ func TestCreateFailedAggregate(t *testing.T) {
 
 	in := inputAggregatetuple{}
 	in.fillDefaults()
-	in.InModels = []string{compositeTraintupleKey}
+	in.InModels = []string{compositeTraintupleKey, traintupleKey}
 	key, err := createAggregatetupleInternal(db, in, true)
 	assert.NoError(t, err)
 

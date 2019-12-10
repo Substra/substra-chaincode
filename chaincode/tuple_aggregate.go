@@ -67,7 +67,7 @@ func (tuple *Aggregatetuple) SetFromInput(db *LedgerDB, inp inputAggregatetuple)
 // i.e. the traintuples from which it received the outModels as inModels.
 // Also it's InModelKeys are set.
 func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) error {
-	status := StatusTodo
+	var parentStatuses []string
 	inModelKeys := tuple.InModelKeys
 	permissions, err := NewPermissions(db, OpenPermissions)
 	if err != nil {
@@ -80,8 +80,6 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 			return fmt.Errorf("could not retrieve traintuple type with key %s - %s", parentTraintupleKey, err.Error())
 		}
 
-		var parentOutModel *HashDress
-		var parentStatus string
 		parentPermissions := Permissions{}
 
 		// get out-model and permissions from parent
@@ -90,23 +88,20 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 			tuple, err := db.GetCompositeTraintuple(parentTraintupleKey)
 			if err == nil {
 				// if the parent is composite, always take the "trunk" out-model
-				parentOutModel = tuple.OutTrunkModel.OutModel
 				parentPermissions = tuple.OutTrunkModel.Permissions
-				parentStatus = tuple.Status
+				parentStatuses = append(parentStatuses, tuple.Status)
 			}
 		case TraintupleType:
 			tuple, err := db.GetTraintuple(parentTraintupleKey)
 			if err == nil {
-				parentOutModel = tuple.OutModel
 				parentPermissions = tuple.Permissions
-				parentStatus = tuple.Status
+				parentStatuses = append(parentStatuses, tuple.Status)
 			}
 		case AggregatetupleType:
 			tuple, err := db.GetAggregatetuple(parentTraintupleKey)
 			if err == nil {
-				parentOutModel = tuple.OutModel
 				parentPermissions = tuple.Permissions
-				parentStatus = tuple.Status
+				parentStatuses = append(parentStatuses, tuple.Status)
 			}
 		default:
 			return fmt.Errorf("aggregate.SetFromParents: Unsupported parent type %s", parentType)
@@ -116,22 +111,12 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 			return fmt.Errorf("could not retrieve traintuple type with key %s - %s", parentTraintupleKey, err.Error())
 		}
 
-		// update child properties based on parent
-		switch {
-		case parentStatus == StatusFailed:
-			status = parentStatus
-		case parentOutModel == nil:
-			status = StatusWaiting
-		}
-
 		inModelKeys = append(inModelKeys, parentTraintupleKey)
 		permissions = MergePermissions(permissions, parentPermissions)
 	}
-
+	tuple.Status = determineStatusFromInModels(parentStatuses)
 	tuple.InModelKeys = inModelKeys
 	tuple.Permissions = permissions
-	tuple.Status = status
-
 	return nil
 }
 
