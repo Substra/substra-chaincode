@@ -259,6 +259,7 @@ func createTesttupleInternal(db *LedgerDB, inp inputTesttuple) (string, error) {
 
 // logStartTest modifies a testtuple by changing its status from todo to doing
 func logStartTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
+	status := StatusDoing
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -278,16 +279,19 @@ func logStartTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 
 	// cancel testtuple if compute plan is canceled
 	if tuple.ComputePlanID != "" {
-		err := cancelIfComputePlanIsCanceled(db, inp.Key, tuple.ComputePlanID, &testtuple)
+		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, tuple.ComputePlanID, &testtuple)
 		if err != nil {
 			return outputTesttuple{}, err
+		}
+		if canceled {
+			status = StatusCanceled
 		}
 	}
 
 	if err = validateTupleOwner(db, testtuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = testtuple.commitStatusUpdate(db, inp.Key, StatusDoing); err != nil {
+	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
 	err = o.Fill(db, inp.Key, testtuple)
@@ -299,6 +303,7 @@ func logStartTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 
 // logSuccessTest modifies a testtuple by changing its status to done, reports perf and logs
 func logSuccessTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
+	status := StatusDone
 	inp := inputLogSuccessTest{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -317,9 +322,12 @@ func logSuccessTest(db *LedgerDB, args []string) (o outputTesttuple, err error) 
 
 	// cancel testtuple if compute plan is canceled
 	if tuple.ComputePlanID != "" {
-		err := cancelIfComputePlanIsCanceled(db, inp.Key, tuple.ComputePlanID, &testtuple)
+		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, tuple.ComputePlanID, &testtuple)
 		if err != nil {
 			return outputTesttuple{}, err
+		}
+		if canceled {
+			status = StatusCanceled
 		}
 	}
 
@@ -329,7 +337,7 @@ func logSuccessTest(db *LedgerDB, args []string) (o outputTesttuple, err error) 
 	if err = validateTupleOwner(db, testtuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = testtuple.commitStatusUpdate(db, inp.Key, StatusDone); err != nil {
+	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
 	err = o.Fill(db, inp.Key, testtuple)
@@ -338,6 +346,7 @@ func logSuccessTest(db *LedgerDB, args []string) (o outputTesttuple, err error) 
 
 // logFailTest modifies a testtuple by changing its status to fail and reports associated logs
 func logFailTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
+	status := StatusFailed
 	inp := inputLogFailTest{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -357,9 +366,12 @@ func logFailTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 
 	// cancel testtuple if compute plan is canceled
 	if tuple.ComputePlanID != "" {
-		err := cancelIfComputePlanIsCanceled(db, inp.Key, tuple.ComputePlanID, &testtuple)
+		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, tuple.ComputePlanID, &testtuple)
 		if err != nil {
 			return outputTesttuple{}, err
+		}
+		if canceled {
+			status = StatusCanceled
 		}
 	}
 
@@ -368,7 +380,7 @@ func logFailTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 	if err = validateTupleOwner(db, testtuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = testtuple.commitStatusUpdate(db, inp.Key, StatusFailed); err != nil {
+	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
 	err = o.Fill(db, inp.Key, testtuple)

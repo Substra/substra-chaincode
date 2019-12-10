@@ -292,6 +292,7 @@ func createCompositeTraintupleInternal(db *LedgerDB, inp inputCompositeTraintupl
 
 // logStartCompositeTrain modifies a traintuple by changing its status from todo to doing
 func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraintuple, err error) {
+	status := StatusDoing
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -306,16 +307,19 @@ func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTrain
 
 	// cancel compositeTraintuple if compute plan is canceled
 	if compositeTraintuple.ComputePlanID != "" {
-		err := cancelIfComputePlanIsCanceled(db, inp.Key, compositeTraintuple.ComputePlanID, &compositeTraintuple)
+		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, compositeTraintuple.ComputePlanID, &compositeTraintuple)
 		if err != nil {
 			return outputCompositeTraintuple{}, err
+		}
+		if canceled {
+			status = StatusCanceled
 		}
 	}
 
 	if err = validateTupleOwner(db, compositeTraintuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, StatusDoing); err != nil {
+	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
 	o.Fill(db, compositeTraintuple, inp.Key)
@@ -325,6 +329,7 @@ func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTrain
 // logSuccessCompositeTrain modifies a traintuple by changing its status from doing to done
 // reports logs and associated performances
 func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraintuple, err error) {
+	status := StatusDone
 	inp := inputLogSuccessCompositeTrain{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -340,9 +345,12 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 
 	// cancel compositeTraintuple if compute plan is canceled
 	if compositeTraintuple.ComputePlanID != "" {
-		err := cancelIfComputePlanIsCanceled(db, inp.Key, compositeTraintuple.ComputePlanID, &compositeTraintuple)
+		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, compositeTraintuple.ComputePlanID, &compositeTraintuple)
 		if err != nil {
 			return outputCompositeTraintuple{}, err
+		}
+		if canceled {
+			status = StatusCanceled
 		}
 	}
 
@@ -357,7 +365,7 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 	if err = validateTupleOwner(db, compositeTraintuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = compositeTraintuple.commitStatusUpdate(db, compositeTraintupleKey, StatusDone); err != nil {
+	if err = compositeTraintuple.commitStatusUpdate(db, compositeTraintupleKey, status); err != nil {
 		return
 	}
 
@@ -378,6 +386,7 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 
 // logFailCompositeTrain modifies a traintuple by changing its status to fail and reports associated logs
 func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraintuple, err error) {
+	status := StatusFailed
 	inp := inputLogFailTrain{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -392,9 +401,12 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 
 	// cancel compositeTraintuple if compute plan is canceled
 	if compositeTraintuple.ComputePlanID != "" {
-		err := cancelIfComputePlanIsCanceled(db, inp.Key, compositeTraintuple.ComputePlanID, &compositeTraintuple)
+		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, compositeTraintuple.ComputePlanID, &compositeTraintuple)
 		if err != nil {
 			return outputCompositeTraintuple{}, err
+		}
+		if canceled {
+			status = StatusCanceled
 		}
 	}
 
@@ -403,7 +415,7 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 	if err = validateTupleOwner(db, compositeTraintuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, StatusFailed); err != nil {
+	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
 
