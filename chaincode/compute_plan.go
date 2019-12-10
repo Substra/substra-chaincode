@@ -109,7 +109,6 @@ func createComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 }
 
 func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputComputePlan, err error) {
-	tuplesKeys := []string{}
 	traintupleKeysByID := map[string]string{}
 
 	resp.TraintupleKeys = []string{}
@@ -144,7 +143,6 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 				resp.ComputePlanID = traintupleKey
 			}
 
-			tuplesKeys = append(tuplesKeys, traintupleKey)
 			traintupleKeysByID[computeTraintuple.ID] = traintupleKey
 			resp.TraintupleKeys = append(resp.TraintupleKeys, traintupleKey)
 		case CompositeTraintupleType:
@@ -171,7 +169,6 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 				resp.ComputePlanID = compositeTraintupleKey
 			}
 
-			tuplesKeys = append(tuplesKeys, compositeTraintupleKey)
 			traintupleKeysByID[computeCompositeTraintuple.ID] = compositeTraintupleKey
 			resp.CompositeTraintupleKeys = append(resp.CompositeTraintupleKeys, compositeTraintupleKey)
 		case AggregatetupleType:
@@ -198,7 +195,6 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 				resp.ComputePlanID = aggregatetupleKey
 			}
 
-			tuplesKeys = append(tuplesKeys, aggregatetupleKey)
 			traintupleKeysByID[computeAggregatetuple.ID] = aggregatetupleKey
 			resp.AggregatetupleKeys = append(resp.AggregatetupleKeys, aggregatetupleKey)
 		}
@@ -221,7 +217,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 		resp.TesttupleKeys = append(resp.TesttupleKeys, testtupleKey)
 	}
 
-	resp.Status, err = getComputePlanStatus(db, tuplesKeys)
+	resp.Status, err = getComputePlanStatus(db, resp)
 	return resp, err
 }
 
@@ -309,23 +305,19 @@ func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error
 		}
 	}
 
-	keys := []string{}
-	keys = append(keys, tupleKeys...)
-	keys = append(keys, testtupleKeys...)
-
-	status, err := getComputePlanStatus(db, keys)
-	if err != nil {
-		return
-	}
-
 	resp = outputComputePlan{
 		ComputePlanID:           key,
 		TraintupleKeys:          traintupleKeys,
 		CompositeTraintupleKeys: compositeTraintupleKeys,
 		AggregatetupleKeys:      aggregatetupleKeys,
 		TesttupleKeys:           testtupleKeys,
-		Status:                  status,
 	}
+
+	resp.Status, err = getComputePlanStatus(db, resp)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
@@ -335,18 +327,18 @@ func getComputePlanStatusByComputePlanID(db *LedgerDB, computePlanID string) (st
 		return "", err
 	}
 
+	return getComputePlanStatus(db, computePlan)
+}
+
+func getComputePlanStatus(db *LedgerDB, computePlan outputComputePlan) (status string, err error) {
+	// get all tuples like status in one slice
+	statusCollection := []string{}
+
 	keys := []string{}
 	keys = append(keys, computePlan.TraintupleKeys...)
 	keys = append(keys, computePlan.CompositeTraintupleKeys...)
 	keys = append(keys, computePlan.AggregatetupleKeys...)
 	keys = append(keys, computePlan.TesttupleKeys...)
-
-	return getComputePlanStatus(db, keys)
-}
-
-func getComputePlanStatus(db *LedgerDB, keys []string) (status string, err error) {
-	// get all tuples like status in one slice
-	statusCollection := []string{}
 
 	for _, key := range keys {
 		tuple, err := db.GetGenericTuple(key)
