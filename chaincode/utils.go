@@ -38,6 +38,16 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
+// typeInSlice check if an AssetType is in a slice
+func typeInSlice(a AssetType, list []AssetType) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
 // inputStructToBytes converts fields of a struct (with string fields only, such as input struct defined in ledger.go) to a [][]byte
 func inputStructToBytes(v interface{}) (sb [][]byte, err error) {
 

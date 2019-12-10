@@ -631,7 +631,7 @@ func testCompositeTraintupleInModelTypes(t *testing.T, headType AssetType, trunk
 	resp := mockStub.MockInvoke("42", args)
 
 	if !shouldSucceed {
-		assert.EqualValues(t, 404, resp.Status, "It should NOT be possible to register a traintuple with a %s head and a %s trunk: %s", headType, trunkType, resp.Message)
+		assert.EqualValues(t, http.StatusBadRequest, resp.Status, "It should NOT be possible to register a traintuple with a %s head and a %s trunk: %s", headType, trunkType, resp.Message)
 		return
 	}
 
