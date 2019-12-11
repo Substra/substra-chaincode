@@ -380,7 +380,8 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	}
 
 	for _, key := range tupleKeys {
-		tuple, err := db.GetGenericTuple(key)
+
+		tuple, err := db.GetStatusUpdater(key)
 		if err != nil {
 			return outputComputePlan{}, err
 		}

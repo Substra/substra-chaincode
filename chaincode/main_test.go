@@ -569,6 +569,8 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "queryComputePlan", inputHash{outCp.ComputePlanID})
 	callAssertAndPrint("invoke", "queryComputePlans", nil)
 
+	callAssertAndPrint("invoke", "cancelComputePlan", inputHash{outCp.ComputePlanID})
+
 	// Use the output to check the README file and if asked update it
 	doc := out.String()
 	fromFile, err := ioutil.ReadFile(*readme)

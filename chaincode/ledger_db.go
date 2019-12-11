@@ -203,6 +203,37 @@ func (db *LedgerDB) GetGenericTuple(key string) (GenericTuple, error) {
 	return asset, nil
 }
 
+// GetStatusUpdater fetches a GenericTuple (Traintuple, CompositeTraintuple or AggregateTuple)
+// from the chaincode db
+func (db *LedgerDB) GetStatusUpdater(key string) (StatusUpdater, error) {
+	tType, err := db.GetAssetType(key)
+	if err != nil {
+		return nil, err
+	}
+	var asset StatusUpdater
+	switch tType {
+	case TraintupleType:
+		t, err := db.GetTraintuple(key)
+		if err != nil {
+			return nil, err
+		}
+		asset = &t
+	case CompositeTraintupleType:
+		t, err := db.GetCompositeTraintuple(key)
+		if err != nil {
+			return nil, err
+		}
+		asset = &t
+	case AggregatetupleType:
+		t, err := db.GetAggregatetuple(key)
+		if err != nil {
+			return nil, err
+		}
+		asset = &t
+	}
+	return asset, nil
+}
+
 // GetAlgo fetches an Algo from the ledger using its unique key
 func (db *LedgerDB) GetAlgo(key string) (Algo, error) {
 	algo := Algo{}

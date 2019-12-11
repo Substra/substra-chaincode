@@ -105,7 +105,6 @@ type GenericTuple struct {
 	Rank          int       `json:"rank"`
 	Status        string    `json:"status"`
 	Tag           string    `json:"tag"`
-	StatusUpdater
 }
 
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
@@ -122,8 +121,6 @@ type Traintuple struct {
 	InModelKeys   []string    `json:"inModels"`
 	OutModel      *HashDress  `json:"outModel"`
 	Permissions   Permissions `json:"permissions"`
-
-	StatusUpdater
 }
 
 // CompositeTraintuple is like a traintuple, but for composite model composition
@@ -142,7 +139,6 @@ type CompositeTraintuple struct {
 	OutHeadModel  CompositeTraintupleOutModel `json:"outHeadModel"`
 	OutTrunkModel CompositeTraintupleOutModel `json:"outTrunkModel"`
 	Perf          float32                     `json:"perf"`
-	StatusUpdater
 }
 
 // Aggregatetuple is like a traintuple, but for aggregate model composition
@@ -159,7 +155,6 @@ type Aggregatetuple struct {
 	OutModel      *HashDress  `json:"outModel"`
 	Permissions   Permissions `json:"permissions"` // TODO (aggregate): what do permissions mean here?
 	Worker        string      `json:"worker"`
-	StatusUpdater
 }
 
 // CompositeTraintupleOutModel is the out-model of a CompositeTraintuple
@@ -183,7 +178,6 @@ type Testtuple struct {
 	Rank          int         `json:"rank"`
 	Status        string      `json:"status"`
 	Tag           string      `json:"tag"`
-	StatusUpdater
 }
 
 // ---------------------------------------------------------------------------------
