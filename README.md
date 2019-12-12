@@ -1495,7 +1495,6 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"traintuples\"
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
  "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
- "objectiveKey": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
  "status": "todo",
  "testtupleKeys": [
   "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96"
@@ -1585,7 +1584,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"432fcf
  "aggregatetupleKeys": [],
  "compositeTraintupleKeys": [],
  "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
- "objectiveKey": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
  "status": "todo",
  "testtupleKeys": [
   "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96"
@@ -1607,7 +1605,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
   "aggregatetupleKeys": [],
   "compositeTraintupleKeys": [],
   "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
-  "objectiveKey": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
   "status": "todo",
   "testtupleKeys": [
    "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96"
@@ -1637,7 +1634,6 @@ peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"432fc
  "aggregatetupleKeys": [],
  "compositeTraintupleKeys": [],
  "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
- "objectiveKey": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
  "status": "canceled",
  "testtupleKeys": [
   "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96"

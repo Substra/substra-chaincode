@@ -320,7 +320,6 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 		}
 	}
 
-	traintuple.Perf = inp.Perf
 	traintuple.OutModel = &HashDress{
 		Hash:           inp.OutModel.Hash,
 		StorageAddress: inp.OutModel.StorageAddress}
