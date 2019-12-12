@@ -26,12 +26,11 @@ type outputCompositeTraintuple struct {
 	Key           string            `json:"key"`
 	Algo          *HashDressName    `json:"algo"`
 	Creator       string            `json:"creator"`
-	Dataset       *TtDataset        `json:"dataset"`
+	Dataset       *outputTtDataset  `json:"dataset"`
 	ComputePlanID string            `json:"computePlanID"`
 	InHeadModel   *Model            `json:"inHeadModel"`
 	InTrunkModel  *Model            `json:"inTrunkModel"`
 	Log           string            `json:"log"`
-	Objective     *TtObjective      `json:"objective"`
 	OutHeadModel  outModelComposite `json:"outHeadModel"`
 	OutTrunkModel outModelComposite `json:"outTrunkModel"`
 	Rank          int               `json:"rank"`
@@ -71,25 +70,6 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		Hash:           traintuple.AlgoKey,
 		StorageAddress: algo.StorageAddress}
 
-	// fill objective
-	objective, err := db.GetObjective(traintuple.ObjectiveKey)
-	if err != nil {
-		err = fmt.Errorf("could not retrieve associated objective with key %s- %s", traintuple.ObjectiveKey, err.Error())
-		return
-	}
-	if objective.Metrics == nil {
-		err = fmt.Errorf("objective %s is missing metrics values", traintuple.ObjectiveKey)
-		return
-	}
-	metrics := HashDress{
-		Hash:           objective.Metrics.Hash,
-		StorageAddress: objective.Metrics.StorageAddress,
-	}
-	outputCompositeTraintuple.Objective = &TtObjective{
-		Key:     traintuple.ObjectiveKey,
-		Metrics: &metrics,
-	}
-
 	// fill in-model (head)
 	if traintuple.InHeadModel != "" {
 		// Head can only be a composite traintuple's head out model
@@ -128,11 +108,10 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 	}
 
 	// fill dataset
-	outputCompositeTraintuple.Dataset = &TtDataset{
+	outputCompositeTraintuple.Dataset = &outputTtDataset{
 		Worker:         traintuple.Dataset.Worker,
 		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
 		OpenerHash:     traintuple.Dataset.DataManagerKey,
-		Perf:           traintuple.Perf,
 	}
 
 	return

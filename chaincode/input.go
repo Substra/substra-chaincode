@@ -91,7 +91,6 @@ type inputUpdateDataSample struct {
 // inputTraintuple is the representation of input args to register a Traintuple
 type inputTraintuple struct {
 	AlgoKey        string   `validate:"required,len=64,hexadecimal" json:"algoKey"`
-	ObjectiveKey   string   `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
 	InModels       []string `validate:"omitempty,dive,len=64,hexadecimal" json:"inModels"`
 	DataManagerKey string   `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
 	DataSampleKeys []string `validate:"required,unique,gt=0,dive,len=64,hexadecimal" json:"dataSampleKeys"`
@@ -102,10 +101,11 @@ type inputTraintuple struct {
 
 // inputTestuple is the representation of input args to register a Testtuple
 type inputTesttuple struct {
-	TraintupleKey  string   `validate:"required,len=64,hexadecimal" json:"traintupleKey"`
 	DataManagerKey string   `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
 	DataSampleKeys []string `validate:"omitempty,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	ObjectiveKey   string   `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
 	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
+	TraintupleKey  string   `validate:"required,len=64,hexadecimal" json:"traintupleKey"`
 }
 
 type inputHash struct {
@@ -115,7 +115,6 @@ type inputHash struct {
 type inputLogSuccessTrain struct {
 	inputLog
 	OutModel inputHashDress `validate:"required" json:"outModel"`
-	Perf     float32        `validate:"omitempty" json:"perf"`
 }
 type inputLogSuccessTest struct {
 	inputLog
@@ -148,7 +147,6 @@ type inputQueryFilter struct {
 // Beware, it's order sensitive since the `InModelsIDs` can only be interpreted
 // if the training tasks matching those IDs have already been created.
 type inputComputePlan struct {
-	ObjectiveKey         string                                `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
 	Traintuples          []inputComputePlanTraintuple          `validate:"omitempty" json:"traintuples"`
 	Aggregatetuples      []inputComputePlanAggregatetuple      `validate:"omitempty" json:"aggregatetuples"`
 	CompositeTraintuples []inputComputePlanCompositeTraintuple `validate:"omitempty" json:"compositeTraintuples"`
@@ -186,6 +184,7 @@ type inputComputePlanCompositeTraintuple struct {
 type inputComputePlanTesttuple struct {
 	DataManagerKey string   `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
 	DataSampleKeys []string `validate:"omitempty,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	ObjectiveKey   string   `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
 	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
 	TraintupleID   string   `validate:"required,lte=64" json:"traintupleID"`
 }

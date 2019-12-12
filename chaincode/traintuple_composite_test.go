@@ -49,7 +49,7 @@ func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
-	inpTraintuple := inputCompositeTraintuple{ObjectiveKey: objHash}
+	inpTraintuple := inputCompositeTraintuple{}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 
@@ -80,7 +80,6 @@ func TestTraintupleWithSingleDatasampleComposite(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
 	inpTraintuple := inputCompositeTraintuple{
-		ObjectiveKey:   objHash,
 		AlgoKey:        compositeAlgoHash,
 		DataSampleKeys: []string{trainDataSampleHash1},
 	}
@@ -114,7 +113,6 @@ func TestTraintupleWithDuplicatedDatasamplesComposite(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding composite algo it should work: ", resp.Message)
 
 	inpTraintuple := inputCompositeTraintuple{
-		ObjectiveKey:   objHash,
 		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2, trainDataSampleHash1},
 	}
 	args = inpTraintuple.createDefault()
@@ -283,18 +281,10 @@ func TestTraintupleComposite(t *testing.T) {
 			StorageAddress: compositeAlgoStorageAddress,
 		},
 		Creator: worker,
-		Dataset: &TtDataset{
+		Dataset: &outputTtDataset{
 			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 			OpenerHash:     dataManagerOpenerHash,
-			Perf:           0.0,
 			Worker:         worker,
-		},
-		Objective: &TtObjective{
-			Key: objectiveDescriptionHash,
-			Metrics: &HashDress{
-				Hash:           objectiveMetricsHash,
-				StorageAddress: objectiveMetricsStorageAddress,
-			},
 		},
 		OutHeadModel: outModelComposite{
 			Permissions: outputPermissions{
@@ -374,7 +364,6 @@ func TestTraintupleComposite(t *testing.T) {
 	assert.EqualValuesf(t, 200, resp.Status, "when querying composite traintuple with status %d and message %s", resp.Status, resp.Message)
 	endTraintuple := outputCompositeTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
-	expected.Dataset.Perf = success.Perf
 	expected.Log = success.Log
 	expected.OutHeadModel.OutModel = &HashDress{
 		Hash:           headModelHash,
@@ -522,11 +511,11 @@ func TestCreateCompositeTraintupleInModels(t *testing.T) {
 			resp = mockStub.MockInvoke("42", args)
 			assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
-			inpTraintuple := inputCompositeTraintuple{ObjectiveKey: objHash}
+			inpTraintuple := inputCompositeTraintuple{}
 
 			if tt.withInHeadModel {
 				// create head traintuple
-				inpHeadTraintuple := inputCompositeTraintuple{ObjectiveKey: objHash}
+				inpHeadTraintuple := inputCompositeTraintuple{}
 				// make the traintuple unique so that it has a unique hash
 				inpHeadTraintuple.DataSampleKeys = []string{trainDataSampleHash1}
 				args = inpHeadTraintuple.createDefault()
@@ -540,7 +529,7 @@ func TestCreateCompositeTraintupleInModels(t *testing.T) {
 
 			if tt.withInTrunkModel {
 				// create trunk traintuple
-				inpTrunkTraintuple := inputCompositeTraintuple{ObjectiveKey: objHash}
+				inpTrunkTraintuple := inputCompositeTraintuple{}
 				// make the traintuple unique so that it has a unique hash
 				inpTrunkTraintuple.DataSampleKeys = []string{trainDataSampleHash2}
 				args = inpTrunkTraintuple.createDefault()
@@ -658,7 +647,7 @@ func TestCompositeTraintuplePermissions(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "compositeAlgo")
 
-	inpTraintuple := inputCompositeTraintuple{ObjectiveKey: objectiveDescriptionHash}
+	inpTraintuple := inputCompositeTraintuple{}
 	inpTraintuple.fillDefaults()
 	// Grant trunk model permissions to no-one
 	inpTraintuple.OutTrunkModelPermissions = inputPermissions{Process: inputPermission{Public: false, AuthorizedIDs: []string{}}}

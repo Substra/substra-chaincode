@@ -41,7 +41,7 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
-	inpTraintuple := inputTraintuple{ObjectiveKey: objHash}
+	inpTraintuple := inputTraintuple{}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding traintuple without test dataset it should work: ", resp.Message)
@@ -69,7 +69,6 @@ func TestTraintupleWithSingleDatasample(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
 	inpTraintuple := inputTraintuple{
-		ObjectiveKey:   objHash,
 		DataSampleKeys: []string{trainDataSampleHash1},
 	}
 	args = inpTraintuple.createDefault()
@@ -102,7 +101,6 @@ func TestTraintupleWithDuplicatedDatasamples(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
 	inpTraintuple := inputTraintuple{
-		ObjectiveKey:   objHash,
 		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2, trainDataSampleHash1},
 	}
 	args = inpTraintuple.createDefault()
@@ -284,18 +282,10 @@ func TestTraintuple(t *testing.T) {
 			StorageAddress: algoStorageAddress,
 		},
 		Creator: worker,
-		Dataset: &TtDataset{
+		Dataset: &outputTtDataset{
 			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 			OpenerHash:     dataManagerOpenerHash,
-			Perf:           0.0,
 			Worker:         worker,
-		},
-		Objective: &TtObjective{
-			Key: objectiveDescriptionHash,
-			Metrics: &HashDress{
-				Hash:           objectiveMetricsHash,
-				StorageAddress: objectiveMetricsStorageAddress,
-			},
 		},
 		Permissions: outputPermissions{
 			Process: Permission{Public: true, AuthorizedIDs: []string{}},
@@ -368,7 +358,6 @@ func TestTraintuple(t *testing.T) {
 	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple with status %d and message %s", resp.Status, resp.Message)
 	endTraintuple := outputTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
-	expected.Dataset.Perf = success.Perf
 	expected.Log = success.Log
 	expected.OutModel = &HashDress{
 		Hash:           modelHash,

@@ -32,6 +32,7 @@ func TestLeaderBoard(t *testing.T) {
 	// Add a certified testtuple
 	inputTest := inputTesttuple{
 		TraintupleKey: traintupleKey,
+		ObjectiveKey:  objectiveDescriptionHash,
 	}
 	keyMap, err := createTesttuple(db, assetToArgs(inputTest))
 	assert.NoError(t, err)

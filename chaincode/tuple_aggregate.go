@@ -47,19 +47,7 @@ func (tuple *Aggregatetuple) SetFromInput(db *LedgerDB, inp inputAggregatetuple)
 		return errors.Forbidden("not authorized to process algo %s", inp.AlgoKey)
 	}
 	tuple.AlgoKey = inp.AlgoKey
-
-	// check objective exists
-	objective, err := db.GetObjective(inp.ObjectiveKey)
-	if err != nil {
-		return errors.BadRequest(err, "could not retrieve objective with key %s", inp.ObjectiveKey)
-	}
-	if !objective.Permissions.CanProcess(objective.Owner, creator) {
-		return errors.Forbidden("not authorized to process objective %s", inp.ObjectiveKey)
-	}
-
-	tuple.ObjectiveKey = inp.ObjectiveKey
 	tuple.Worker = inp.Worker
-
 	return nil
 }
 

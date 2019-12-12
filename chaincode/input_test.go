@@ -165,9 +165,6 @@ func (traintuple *inputTraintuple) createDefault() [][]byte {
 	if traintuple.InModels == nil {
 		traintuple.InModels = []string{}
 	}
-	if traintuple.ObjectiveKey == "" {
-		traintuple.ObjectiveKey = objectiveDescriptionHash
-	}
 	if traintuple.DataManagerKey == "" {
 		traintuple.DataManagerKey = dataManagerOpenerHash
 	}
@@ -186,9 +183,6 @@ func (traintuple *inputCompositeTraintuple) createDefault() [][]byte {
 func (traintuple *inputCompositeTraintuple) fillDefaults() {
 	if traintuple.AlgoKey == "" {
 		traintuple.AlgoKey = compositeAlgoHash
-	}
-	if traintuple.ObjectiveKey == "" {
-		traintuple.ObjectiveKey = objectiveDescriptionHash
 	}
 	if traintuple.DataManagerKey == "" {
 		traintuple.DataManagerKey = dataManagerOpenerHash
@@ -213,9 +207,6 @@ func (aggregatetuple *inputAggregatetuple) fillDefaults() {
 	if aggregatetuple.AlgoKey == "" {
 		aggregatetuple.AlgoKey = aggregateAlgoHash
 	}
-	if aggregatetuple.ObjectiveKey == "" {
-		aggregatetuple.ObjectiveKey = objectiveDescriptionHash
-	}
 	if aggregatetuple.Worker == "" {
 		aggregatetuple.Worker = worker
 	}
@@ -237,9 +228,6 @@ func (success *inputLogSuccessTrain) fillDefaults() {
 	}
 	if success.Log == "" {
 		success.Log = "no error, ah ah ah"
-	}
-	if success.Perf == 0 {
-		success.Perf = 0.9
 	}
 	if success.OutModel.Hash == "" {
 		success.OutModel.Hash = modelHash
@@ -264,9 +252,6 @@ func (success *inputLogSuccessCompositeTrain) fillDefaults() {
 	}
 	if success.Log == "" {
 		success.Log = "no error, ah ah ah"
-	}
-	if success.Perf == 0 {
-		success.Perf = 0.9
 	}
 	if success.OutHeadModel.Hash == "" {
 		success.OutHeadModel.Hash = headModelHash
@@ -343,6 +328,9 @@ func (testtuple *inputTesttuple) createDefault() [][]byte {
 func (testtuple *inputTesttuple) fillDefaults() {
 	if testtuple.TraintupleKey == "" {
 		testtuple.TraintupleKey = traintupleKey
+	}
+	if testtuple.ObjectiveKey == "" {
+		testtuple.ObjectiveKey = objectiveDescriptionHash
 	}
 }
 

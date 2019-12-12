@@ -108,17 +108,23 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 	out.Permissions.Fill(in.Permissions)
 }
 
+// outputTtDataset is the representation of a Traintuple Dataset
+type outputTtDataset struct {
+	Worker         string   `json:"worker"`
+	DataSampleKeys []string `json:"keys"`
+	OpenerHash     string   `json:"openerHash"`
+}
+
 // outputTraintuple is the representation of one the element type stored in the
 // ledger. It describes a training task occuring on the platform
 type outputTraintuple struct {
 	Key           string            `json:"key"`
 	Algo          *HashDressName    `json:"algo"`
 	Creator       string            `json:"creator"`
-	Dataset       *TtDataset        `json:"dataset"`
+	Dataset       *outputTtDataset  `json:"dataset"`
 	ComputePlanID string            `json:"computePlanID"`
 	InModels      []*Model          `json:"inModels"`
 	Log           string            `json:"log"`
-	Objective     *TtObjective      `json:"objective"`
 	OutModel      *HashDress        `json:"outModel"`
 	Permissions   outputPermissions `json:"permissions"`
 	Rank          int               `json:"rank"`
@@ -149,25 +155,6 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 		Hash:           traintuple.AlgoKey,
 		StorageAddress: algo.StorageAddress}
 
-	// fill objective
-	objective, err := db.GetObjective(traintuple.ObjectiveKey)
-	if err != nil {
-		err = fmt.Errorf("could not retrieve associated objective with key %s- %s", traintuple.ObjectiveKey, err.Error())
-		return
-	}
-	if objective.Metrics == nil {
-		err = fmt.Errorf("objective %s is missing metrics values", traintuple.ObjectiveKey)
-		return
-	}
-	metrics := HashDress{
-		Hash:           objective.Metrics.Hash,
-		StorageAddress: objective.Metrics.StorageAddress,
-	}
-	outputTraintuple.Objective = &TtObjective{
-		Key:     traintuple.ObjectiveKey,
-		Metrics: &metrics,
-	}
-
 	// fill inModels
 	for _, inModelKey := range traintuple.InModelKeys {
 		if inModelKey == "" {
@@ -188,39 +175,42 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 	}
 
 	// fill dataset
-	outputTraintuple.Dataset = &TtDataset{
+	outputTraintuple.Dataset = &outputTtDataset{
 		Worker:         traintuple.Dataset.Worker,
 		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
 		OpenerHash:     traintuple.Dataset.DataManagerKey,
-		Perf:           traintuple.Perf,
 	}
 
 	return
 }
 
 type outputTesttuple struct {
-	Key            string         `json:"key"`
 	Algo           *HashDressName `json:"algo"`
 	Certified      bool           `json:"certified"`
+	ComputePlanID  string         `json:"computePlanID"`
 	Creator        string         `json:"creator"`
 	Dataset        *TtDataset     `json:"dataset"`
+	Key            string         `json:"key"`
 	Log            string         `json:"log"`
-	TraintupleType string         `json:"traintupleType"`
-	TraintupleKey  string         `json:"traintupleKey"`
 	Objective      *TtObjective   `json:"objective"`
+	Rank           int            `json:"rank"`
 	Status         string         `json:"status"`
 	Tag            string         `json:"tag"`
+	TraintupleKey  string         `json:"traintupleKey"`
+	TraintupleType string         `json:"traintupleType"`
 }
 
 func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
-	out.Key = key
 	out.Certified = in.Certified
+	out.ComputePlanID = in.ComputePlanID
 	out.Creator = in.Creator
 	out.Dataset = in.Dataset
+	out.Key = key
 	out.Log = in.Log
-	out.TraintupleKey = in.TraintupleKey
+	out.Rank = in.Rank
 	out.Status = in.Status
 	out.Tag = in.Tag
+	out.TraintupleKey = in.TraintupleKey
 
 	// fill type
 	traintupleType, err := db.GetAssetType(in.TraintupleKey)
@@ -299,7 +289,6 @@ type TuplesEvent struct {
 
 type outputComputePlan struct {
 	ComputePlanID           string   `json:"computePlanID"`
-	ObjectiveKey            string   `json:"objectiveKey"`
 	TraintupleKeys          []string `json:"traintupleKeys"`
 	AggregatetupleKeys      []string `json:"aggregatetupleKeys"`
 	CompositeTraintupleKeys []string `json:"compositeTraintupleKeys"`
