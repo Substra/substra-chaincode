@@ -474,3 +474,30 @@ func TestDetermineComputePlanStatus(t *testing.T) {
 		assert.Equal(t, st.expected, result)
 	}
 }
+
+func TestCancelComputePlan(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "aggregateAlgo")
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan)
+	assert.NoError(t, err)
+	assert.NotNil(t, db.tuplesEvent)
+	assert.Len(t, db.tuplesEvent.CompositeTraintuples, 2)
+
+	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[0]}))
+	assert.NoError(t, err)
+	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[1]}))
+	assert.NoError(t, err)
+	_, err = cancelComputePlan(db, assetToArgs(inputHash{Key: out.ComputePlanID}))
+	assert.NoError(t, err)
+
+	tuples, err := queryCompositeTraintuples(db, []string{})
+	assert.NoError(t, err)
+	for _, tuple := range tuples {
+		assert.Equal(t, StatusCanceled, tuple.Status)
+	}
+}

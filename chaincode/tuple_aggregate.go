@@ -519,7 +519,7 @@ func getOutputAggregatetuples(db *LedgerDB, aggregatetupleKeys []string) (outAgg
 // commitStatusUpdate update the aggregatetuple status in the ledger
 func (tuple *Aggregatetuple) commitStatusUpdate(db *LedgerDB, aggregatetupleKey string, newStatus string) error {
 	if tuple.Status == newStatus {
-		return fmt.Errorf("cannot update aggregatetuple %s - status already %s", aggregatetupleKey, newStatus)
+		return nil
 	}
 
 	if err := tuple.validateNewStatus(db, newStatus); err != nil {

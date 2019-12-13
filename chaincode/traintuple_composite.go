@@ -559,7 +559,7 @@ func (traintuple *CompositeTraintuple) isReady(db *LedgerDB, newDoneTraintupleKe
 // commitStatusUpdate update the traintuple status in the ledger
 func (traintuple *CompositeTraintuple) commitStatusUpdate(db *LedgerDB, traintupleKey string, newStatus string) error {
 	if traintuple.Status == newStatus {
-		return fmt.Errorf("cannot update traintuple %s - status already %s", traintupleKey, newStatus)
+		return nil
 	}
 
 	if err := traintuple.validateNewStatus(db, newStatus); err != nil {
