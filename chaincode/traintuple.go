@@ -497,10 +497,11 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 			return err
 		}
 
-		if child.Status == StatusFailed {
+		if stringInSlice(child.Status, []string{StatusFailed, StatusCanceled}) {
 			// traintuple is already failed, don't update it
 			continue
 		}
+
 		if child.Status != StatusWaiting {
 			return fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", childTraintupleKey, child.Status)
 		}
