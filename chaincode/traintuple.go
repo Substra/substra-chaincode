@@ -84,21 +84,22 @@ func (traintuple *Traintuple) SetFromInput(db *LedgerDB, inp inputTraintuple) er
 // i.e. the traintuples from which it received the outModels as inModels.
 // Also it's InModelKeys are set.
 func (traintuple *Traintuple) SetFromParents(db *LedgerDB, inModels []string) error {
-	status := StatusTodo
-	parentTraintupleKeys := inModels
-	for _, parentTraintupleKey := range parentTraintupleKeys {
-		parentTraintuple, err := db.GetTraintuple(parentTraintupleKey)
+	var parentStatuses []string
+	inModelKeys := traintuple.InModelKeys
+
+	for _, parentTraintupleKey := range inModels {
+		tuple, err := db.GetGenericTuple(parentTraintupleKey)
 		if err != nil {
-			err = errors.BadRequest(err, "could not retrieve parent traintuple with key %s %d", parentTraintupleKeys, len(parentTraintupleKeys))
-			return err
+			return errors.BadRequest(err, "could not retrieve parent traintuple with key %s", parentTraintupleKey)
 		}
-		// set traintuple to waiting if one of the parent traintuples is not done
-		if parentTraintuple.OutModel == nil {
-			status = StatusWaiting
+		if !typeInSlice(tuple.AssetType, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType}) {
+			return fmt.Errorf("aggregate.SetFromParents: Unsupported parent type %s", tuple.AssetType)
 		}
-		traintuple.InModelKeys = append(traintuple.InModelKeys, parentTraintupleKey)
+		parentStatuses = append(parentStatuses, tuple.Status)
+		inModelKeys = append(inModelKeys, parentTraintupleKey)
 	}
-	traintuple.Status = status
+	traintuple.Status = determineStatusFromInModels(parentStatuses)
+	traintuple.InModelKeys = inModelKeys
 	return nil
 }
 

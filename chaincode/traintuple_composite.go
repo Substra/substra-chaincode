@@ -102,29 +102,34 @@ func (traintuple *CompositeTraintuple) SetFromParents(db *LedgerDB, inp inputCom
 
 	// [Head]
 	// It can only be a composite traintuple's head out model
-	hashDress, err := db.GetOutModelHashDress(inp.InHeadModelKey, HeadType, []AssetType{CompositeTraintupleType})
+	traintuple.InHeadModel = inp.InHeadModelKey
+	head, err := db.GetGenericTuple(inp.InHeadModelKey)
 	if err != nil {
 		return err
 	}
-	if hashDress == nil {
-		traintuple.Status = StatusWaiting
+	if !typeInSlice(head.AssetType, []AssetType{CompositeTraintupleType}) {
+		return errors.BadRequest(
+			"tuple type %s from key %s is not supported as head InModel",
+			head.AssetType,
+			inp.InHeadModelKey)
 	}
-	traintuple.InHeadModel = inp.InHeadModelKey
-
 	// [Trunk]
 	// It can be either:
 	// - a traintuple's out model
-	// - a composite traintuple's head out model
+	// - a composite traintuple's trunk out model
 	// - an aggregate tuple's out model
-	hashDress, err = db.GetOutModelHashDress(inp.InTrunkModelKey, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
+	traintuple.InTrunkModel = inp.InTrunkModelKey
+	trunk, err := db.GetGenericTuple(inp.InTrunkModelKey)
 	if err != nil {
 		return err
 	}
-	if hashDress == nil {
-		traintuple.Status = StatusWaiting
+	if !typeInSlice(trunk.AssetType, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType}) {
+		return errors.BadRequest(
+			"tuple type %s from key %s is not supported as trunk InModel",
+			trunk.AssetType,
+			inp.InTrunkModelKey)
 	}
-	traintuple.InTrunkModel = inp.InTrunkModelKey
-
+	traintuple.Status = determineStatusFromInModels([]string{head.Status, trunk.Status})
 	return nil
 }
 
