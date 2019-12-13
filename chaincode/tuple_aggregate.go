@@ -528,6 +528,11 @@ func (tuple *Aggregatetuple) commitStatusUpdate(db *LedgerDB, aggregatetupleKey 
 
 	oldStatus := tuple.Status
 	tuple.Status = newStatus
+
+	if oldStatus == StatusCanceled {
+		return nil
+	}
+
 	if err := db.Put(aggregatetupleKey, tuple); err != nil {
 		return fmt.Errorf("failed to update aggregatetuple %s - %s", aggregatetupleKey, err.Error())
 	}

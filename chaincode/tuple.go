@@ -178,6 +178,10 @@ func validateTupleOwner(db *LedgerDB, worker string) error {
 
 // check validity of traintuple update: consistent status and agent submitting the transaction
 func checkUpdateTuple(db *LedgerDB, worker string, oldStatus string, newStatus string) error {
+	if oldStatus == StatusCanceled {
+		return nil
+	}
+
 	if StatusCanceled == newStatus {
 		return nil
 	}
@@ -189,6 +193,7 @@ func checkUpdateTuple(db *LedgerDB, worker string, oldStatus string, newStatus s
 	if statusPossibilities[oldStatus] != newStatus && newStatus != StatusFailed {
 		return errors.BadRequest("cannot change status from %s to %s", oldStatus, newStatus)
 	}
+
 	return nil
 }
 
@@ -225,10 +230,14 @@ func getCertifiedOutputTesttuple(db *LedgerDB, traintupleKey string) (outputTest
 }
 
 func determineStatusFromInModels(statuses []string) string {
-	// TODO: Add the canceled case when it's ready
 	if stringInSlice(StatusFailed, statuses) {
 		return StatusFailed
 	}
+
+	if stringInSlice(StatusCanceled, statuses) {
+		return StatusCanceled
+	}
+
 	for _, s := range statuses {
 		if s != StatusDone {
 			return StatusWaiting

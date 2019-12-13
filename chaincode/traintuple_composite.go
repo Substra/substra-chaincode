@@ -568,6 +568,11 @@ func (traintuple *CompositeTraintuple) commitStatusUpdate(db *LedgerDB, traintup
 
 	oldStatus := traintuple.Status
 	traintuple.Status = newStatus
+
+	if oldStatus == StatusCanceled {
+		return nil
+	}
+
 	if err := db.Put(traintupleKey, traintuple); err != nil {
 		return fmt.Errorf("failed to update traintuple %s - %s", traintupleKey, err.Error())
 	}

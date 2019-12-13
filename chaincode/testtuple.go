@@ -471,6 +471,10 @@ func (testtuple *Testtuple) commitStatusUpdate(db *LedgerDB, testtupleKey string
 	oldStatus := testtuple.Status
 	testtuple.Status = newStatus
 
+	if oldStatus == StatusCanceled {
+		return nil
+	}
+
 	if err := db.Put(testtupleKey, testtuple); err != nil {
 		return fmt.Errorf("failed to update testtuple status to %s with key %s", newStatus, testtupleKey)
 	}
