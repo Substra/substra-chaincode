@@ -230,6 +230,12 @@ func (db *LedgerDB) GetStatusUpdater(key string) (StatusUpdater, error) {
 			return nil, err
 		}
 		asset = &t
+	case TesttupleType:
+		t, err := db.GetTesttuple(key)
+		if err != nil {
+			return nil, err
+		}
+		asset = &t
 	}
 	return asset, nil
 }

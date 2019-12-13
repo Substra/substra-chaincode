@@ -500,4 +500,10 @@ func TestCancelComputePlan(t *testing.T) {
 	for _, tuple := range tuples {
 		assert.Equal(t, StatusCanceled, tuple.Status)
 	}
+
+	tests, err := queryTesttuples(db, []string{})
+	assert.NoError(t, err)
+	for _, test := range tests {
+		assert.Equal(t, StatusCanceled, test.Status)
+	}
 }
