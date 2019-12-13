@@ -8,6 +8,7 @@ type TrainingTask struct {
 	ID          string
 	InModelsIDs []string
 	InputIndex  int
+	Depth       int
 	TaskType    AssetType
 }
 
@@ -58,22 +59,25 @@ func createComputeDAG(cp inputComputePlan) (ComputeDAG, error) {
 func (dag *ComputeDAG) sort() error {
 	current := dag.OrderTasks
 	var temp, final []TrainingTask
-	IDPresents := map[string]bool{}
+	IDPresents := map[string]int{}
 	for i := 0; len(current) != 0; {
+		depth := 0
 		ready := true
 		for _, ID := range current[i].InModelsIDs {
 			if ID == "" {
 				continue
 			}
-			_, ok := IDPresents[ID]
+			parentDepth, ok := IDPresents[ID]
 			ready = ready && ok
+			depth = max(depth, parentDepth+1)
 		}
 		if ready {
+			current[i].Depth = depth
 			final = append(final, current[i])
 			if _, ok := IDPresents[current[i].ID]; ok {
 				return fmt.Errorf("compute plan error: Duplicate training task ID: %s", current[i].ID)
 			}
-			IDPresents[current[i].ID] = true
+			IDPresents[current[i].ID] = current[i].Depth
 		} else {
 			temp = append(temp, current[i])
 		}
@@ -94,4 +98,11 @@ func (dag *ComputeDAG) sort() error {
 	}
 	dag.OrderTasks = final
 	return nil
+}
+
+func max(x, y int) int {
+	if x < y {
+		return y
+	}
+	return x
 }

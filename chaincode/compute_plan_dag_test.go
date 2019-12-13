@@ -10,6 +10,7 @@ func TestDAGSort(t *testing.T) {
 	ts := []struct {
 		name        string
 		list        []TrainingTask
+		depths      []int
 		expectError bool
 		errorStr    string
 	}{
@@ -20,6 +21,7 @@ func TestDAGSort(t *testing.T) {
 				{ID: "three"},
 				{ID: "four"},
 			},
+			depths:      []int{0, 0, 0, 0},
 			expectError: false},
 		{name: "some inModels",
 			list: []TrainingTask{
@@ -28,6 +30,7 @@ func TestDAGSort(t *testing.T) {
 				{ID: "four", InModelsIDs: []string{"two", "three"}},
 				{ID: "two"},
 			},
+			depths:      []int{0, 0, 1, 2},
 			expectError: false},
 		{name: "all-inModels",
 			list: []TrainingTask{
@@ -36,6 +39,7 @@ func TestDAGSort(t *testing.T) {
 				{ID: "four", InModelsIDs: []string{"three", "one"}},
 				{ID: "two", InModelsIDs: []string{"one"}},
 			},
+			depths:      []int{0, 1, 2, 3},
 			expectError: false},
 		{name: "wrong ID inModels",
 			list: []TrainingTask{
@@ -78,6 +82,7 @@ func TestDAGSort(t *testing.T) {
 			assert.NoError(t, err)
 			for i, ID := range []string{"one", "two", "three", "four"} {
 				assert.Equal(t, ID, dag.OrderTasks[i].ID)
+				assert.Equal(t, tc.depths[i], dag.OrderTasks[i].Depth)
 			}
 		})
 	}
