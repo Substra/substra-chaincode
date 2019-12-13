@@ -163,6 +163,8 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 		return errors.BadRequest(
 			"could not register this testtuple, the traintuple %s has a failed status",
 			traintupleKey)
+	case StatusCanceled:
+		testtuple.Status = StatusCanceled
 	default:
 		testtuple.Status = StatusWaiting
 	}
@@ -256,7 +258,8 @@ func createTesttupleInternal(db *LedgerDB, inp inputTesttuple) (string, error) {
 }
 
 // logStartTest modifies a testtuple by changing its status from todo to doing
-func logStartTest(db *LedgerDB, args []string) (outputTesttuple outputTesttuple, err error) {
+func logStartTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
+	status := StatusDoing
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -268,13 +271,30 @@ func logStartTest(db *LedgerDB, args []string) (outputTesttuple outputTesttuple,
 	if err != nil {
 		return
 	}
+
+	tuple, err := db.GetGenericTuple(testtuple.TraintupleKey)
+	if err != nil {
+		return outputTesttuple{}, err
+	}
+
+	// cancel testtuple if compute plan is canceled
+	if tuple.ComputePlanID != "" {
+		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, tuple.ComputePlanID, &testtuple)
+		if err != nil {
+			return outputTesttuple{}, err
+		}
+		if canceled {
+			status = StatusCanceled
+		}
+	}
+
 	if err = validateTupleOwner(db, testtuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = testtuple.commitStatusUpdate(db, inp.Key, StatusDoing); err != nil {
+	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	err = outputTesttuple.Fill(db, inp.Key, testtuple)
+	err = o.Fill(db, inp.Key, testtuple)
 	if err != nil {
 		return
 	}
@@ -282,7 +302,8 @@ func logStartTest(db *LedgerDB, args []string) (outputTesttuple outputTesttuple,
 }
 
 // logSuccessTest modifies a testtuple by changing its status to done, reports perf and logs
-func logSuccessTest(db *LedgerDB, args []string) (outputTesttuple outputTesttuple, err error) {
+func logSuccessTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
+	status := StatusDone
 	inp := inputLogSuccessTest{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -294,21 +315,38 @@ func logSuccessTest(db *LedgerDB, args []string) (outputTesttuple outputTesttupl
 		return
 	}
 
+	tuple, err := db.GetGenericTuple(testtuple.TraintupleKey)
+	if err != nil {
+		return outputTesttuple{}, err
+	}
+
+	// cancel testtuple if compute plan is canceled
+	if tuple.ComputePlanID != "" {
+		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, tuple.ComputePlanID, &testtuple)
+		if err != nil {
+			return outputTesttuple{}, err
+		}
+		if canceled {
+			status = StatusCanceled
+		}
+	}
+
 	testtuple.Dataset.Perf = inp.Perf
 	testtuple.Log += inp.Log
 
 	if err = validateTupleOwner(db, testtuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = testtuple.commitStatusUpdate(db, inp.Key, StatusDone); err != nil {
+	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	err = outputTesttuple.Fill(db, inp.Key, testtuple)
+	err = o.Fill(db, inp.Key, testtuple)
 	return
 }
 
 // logFailTest modifies a testtuple by changing its status to fail and reports associated logs
-func logFailTest(db *LedgerDB, args []string) (outputTesttuple outputTesttuple, err error) {
+func logFailTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
+	status := StatusFailed
 	inp := inputLogFailTest{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -321,15 +359,31 @@ func logFailTest(db *LedgerDB, args []string) (outputTesttuple outputTesttuple, 
 		return
 	}
 
+	tuple, err := db.GetGenericTuple(testtuple.TraintupleKey)
+	if err != nil {
+		return outputTesttuple{}, err
+	}
+
+	// cancel testtuple if compute plan is canceled
+	if tuple.ComputePlanID != "" {
+		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, tuple.ComputePlanID, &testtuple)
+		if err != nil {
+			return outputTesttuple{}, err
+		}
+		if canceled {
+			status = StatusCanceled
+		}
+	}
+
 	testtuple.Log += inp.Log
 
 	if err = validateTupleOwner(db, testtuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = testtuple.commitStatusUpdate(db, inp.Key, StatusFailed); err != nil {
+	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	err = outputTesttuple.Fill(db, inp.Key, testtuple)
+	err = o.Fill(db, inp.Key, testtuple)
 	return
 }
 

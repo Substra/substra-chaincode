@@ -455,3 +455,49 @@ func TestQueryComputePlanEmpty(t *testing.T) {
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Equal(t, []outputComputePlan{}, cps)
 }
+
+func TestDetermineComputePlanStatus(t *testing.T) {
+	statusTests := []struct {
+		input    []string
+		expected string
+	}{
+		{[]string{StatusCanceled, StatusTodo, StatusFailed}, StatusCanceled},
+		{[]string{StatusWaiting, StatusTodo, StatusFailed, StatusDone}, StatusFailed},
+		{[]string{StatusTodo, StatusDoing, StatusTodo, StatusDone, StatusWaiting}, StatusDoing},
+		{[]string{StatusTodo, StatusTodo, StatusDone, StatusWaiting}, StatusTodo},
+		{[]string{StatusWaiting, StatusDone, StatusDone, StatusWaiting}, StatusWaiting},
+		{[]string{StatusDone, StatusDone, StatusDone, StatusDone}, StatusDone},
+	}
+
+	for _, st := range statusTests {
+		result, _ := determineComputePlanStatus(st.input)
+		assert.Equal(t, st.expected, result)
+	}
+}
+
+func TestCancelComputePlan(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "aggregateAlgo")
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan)
+	assert.NoError(t, err)
+	assert.NotNil(t, db.tuplesEvent)
+	assert.Len(t, db.tuplesEvent.CompositeTraintuples, 2)
+
+	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[0]}))
+	assert.NoError(t, err)
+	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[1]}))
+	assert.NoError(t, err)
+	_, err = cancelComputePlan(db, assetToArgs(inputHash{Key: out.ComputePlanID}))
+	assert.NoError(t, err)
+
+	tuples, err := queryCompositeTraintuples(db, []string{})
+	assert.NoError(t, err)
+	for _, tuple := range tuples {
+		assert.Equal(t, StatusCanceled, tuple.Status)
+	}
+}

@@ -24,11 +24,12 @@ import (
 
 // List of the possible tuple's status
 const (
-	StatusDoing   = "doing"
-	StatusTodo    = "todo"
-	StatusWaiting = "waiting"
-	StatusFailed  = "failed"
-	StatusDone    = "done"
+	StatusDoing    = "doing"
+	StatusTodo     = "todo"
+	StatusWaiting  = "waiting"
+	StatusFailed   = "failed"
+	StatusDone     = "done"
+	StatusCanceled = "canceled"
 )
 
 // ------------------------------------------------
@@ -177,6 +178,10 @@ func validateTupleOwner(db *LedgerDB, worker string) error {
 
 // check validity of traintuple update: consistent status and agent submitting the transaction
 func checkUpdateTuple(db *LedgerDB, worker string, oldStatus string, newStatus string) error {
+	if StatusCanceled == newStatus {
+		return nil
+	}
+
 	statusPossibilities := map[string]string{
 		StatusWaiting: StatusTodo,
 		StatusTodo:    StatusDoing,
@@ -230,4 +235,20 @@ func determineStatusFromInModels(statuses []string) string {
 		}
 	}
 	return StatusTodo
+}
+
+func cancelIfComputePlanIsCanceled(db *LedgerDB, key, computePlanID string, t StatusUpdater) (bool, error) {
+	status, err := getComputePlanStatusByComputePlanID(db, computePlanID)
+	if err != nil {
+		return false, err
+	}
+
+	if status == StatusCanceled {
+		if err = t.commitStatusUpdate(db, key, StatusCanceled); err != nil {
+			return false, err
+		}
+
+		return true, nil
+	}
+	return false, nil
 }

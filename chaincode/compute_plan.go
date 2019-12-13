@@ -217,6 +217,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 		resp.TesttupleKeys = append(resp.TesttupleKeys, testtupleKey)
 	}
 
+	resp.Status, err = getComputePlanStatus(db, resp)
 	return resp, err
 }
 
@@ -311,5 +312,107 @@ func getComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error
 		AggregatetupleKeys:      aggregatetupleKeys,
 		TesttupleKeys:           testtupleKeys,
 	}
+
+	resp.Status, err = getComputePlanStatus(db, resp)
+	if err != nil {
+		return
+	}
+
 	return
+}
+
+func getComputePlanStatusByComputePlanID(db *LedgerDB, computePlanID string) (status string, err error) {
+	computePlan, err := getComputePlan(db, computePlanID)
+	if err != nil {
+		return "", err
+	}
+
+	return getComputePlanStatus(db, computePlan)
+}
+
+func getComputePlanStatus(db *LedgerDB, computePlan outputComputePlan) (status string, err error) {
+	// get all tuples like status in one slice
+	statusCollection := []string{}
+
+	keys := []string{}
+	keys = append(keys, computePlan.TraintupleKeys...)
+	keys = append(keys, computePlan.CompositeTraintupleKeys...)
+	keys = append(keys, computePlan.AggregatetupleKeys...)
+	keys = append(keys, computePlan.TesttupleKeys...)
+
+	for _, key := range keys {
+		tuple, err := db.GetGenericTuple(key)
+		if err != nil {
+			return "", err
+		}
+
+		statusCollection = append(statusCollection, tuple.Status)
+	}
+
+	return determineComputePlanStatus(statusCollection)
+}
+
+func determineComputePlanStatus(statusCollection []string) (status string, err error) {
+	// this status order matters
+	sts := []string{StatusCanceled, StatusFailed, StatusDoing, StatusTodo, StatusWaiting, StatusDone}
+	for _, s := range sts {
+		if stringInSlice(s, statusCollection) {
+			return s, nil
+		}
+	}
+
+	return "", fmt.Errorf("unknown compute plan status")
+}
+
+func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
+	computeplan, err := queryComputePlan(db, args)
+	if err != nil {
+		return outputComputePlan{}, err
+	}
+
+	tupleKeys, err := db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", computeplan.ComputePlanID})
+	if err != nil {
+		return outputComputePlan{}, err
+	}
+	if len(tupleKeys) == 0 {
+		err = errors.E("no task found for compute plan %s", computeplan.ComputePlanID)
+		return outputComputePlan{}, err
+	}
+
+	for _, key := range tupleKeys {
+
+		tuple, err := db.GetStatusUpdater(key)
+		if err != nil {
+			return outputComputePlan{}, err
+		}
+		err = tuple.commitStatusUpdate(db, key, StatusCanceled)
+		if err != nil {
+			return outputComputePlan{}, err
+		}
+	}
+
+	testtupleKeys := []string{}
+	for _, key := range tupleKeys {
+		keys, err := db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", key})
+		if err != nil {
+			return outputComputePlan{}, err
+		}
+
+		testtupleKeys = append(testtupleKeys, keys...)
+	}
+
+	for _, key := range testtupleKeys {
+		testtuple, err := db.GetTesttuple(key)
+		if err != nil {
+			return outputComputePlan{}, err
+		}
+		err = testtuple.commitStatusUpdate(db, key, StatusCanceled)
+		if err != nil {
+			return outputComputePlan{}, err
+		}
+	}
+
+	computeplan.Status = StatusCanceled
+
+	return computeplan, nil
 }

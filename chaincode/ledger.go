@@ -37,6 +37,11 @@ const (
 	// the String() function in utils.go
 )
 
+// StatusUpdater is exported
+type StatusUpdater interface {
+	commitStatusUpdate(db *LedgerDB, key string, status string) error
+}
+
 // Objective is the representation of one of the element type stored in the ledger
 type Objective struct {
 	Name                      string         `json:"name"`
@@ -133,6 +138,7 @@ type CompositeTraintuple struct {
 	InTrunkModel  string                      `json:"inTrunkModel"`
 	OutHeadModel  CompositeTraintupleOutModel `json:"outHeadModel"`
 	OutTrunkModel CompositeTraintupleOutModel `json:"outTrunkModel"`
+	Perf          float32                     `json:"perf"`
 }
 
 // Aggregatetuple is like a traintuple, but for aggregate model composition
@@ -166,12 +172,12 @@ type Testtuple struct {
 	Creator       string      `json:"creator"`
 	Dataset       *TtDataset  `json:"dataset"`
 	Log           string      `json:"log"`
+	TraintupleKey string      `json:"traintupleKey"`
 	ObjectiveKey  string      `json:"objective"`
 	Permissions   Permissions `json:"permissions"`
 	Rank          int         `json:"rank"`
 	Status        string      `json:"status"`
 	Tag           string      `json:"tag"`
-	TraintupleKey string      `json:"traintupleKey"`
 }
 
 // ---------------------------------------------------------------------------------
