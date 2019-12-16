@@ -522,9 +522,19 @@ func TestCancelComputePlan(t *testing.T) {
 
 	tuples, err := queryCompositeTraintuples(db, []string{})
 	assert.NoError(t, err)
+
+	nbCanceled, nbTodo := 0, 0
 	for _, tuple := range tuples {
-		assert.Equal(t, StatusCanceled, tuple.Status)
+		if tuple.Status == StatusCanceled {
+			nbCanceled = nbCanceled + 1
+		}
+		if tuple.Status == StatusTodo {
+			nbTodo = nbTodo + 1
+		}
 	}
+
+	assert.Equal(t, nbCanceled, 2)
+	assert.Equal(t, nbTodo, 2)
 
 	tests, err := queryTesttuples(db, []string{})
 	assert.NoError(t, err)
