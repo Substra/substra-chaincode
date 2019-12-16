@@ -370,6 +370,10 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 		return outputComputePlan{}, err
 	}
 
+	if computeplan.Status == StatusCanceled {
+		return computeplan, nil
+	}
+
 	var tupleKeys []string
 	tupleKeys = append(tupleKeys, computeplan.TraintupleKeys...)
 	tupleKeys = append(tupleKeys, computeplan.CompositeTraintupleKeys...)
