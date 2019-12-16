@@ -273,17 +273,6 @@ func logStartTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) 
 		return
 	}
 
-	// cancel traintuple if compute plan is canceled
-	if traintuple.ComputePlanID != "" {
-		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, traintuple.ComputePlanID, &traintuple)
-		if err != nil {
-			return outputTraintuple{}, err
-		}
-		if canceled {
-			status = StatusCanceled
-		}
-	}
-
 	if err = validateTupleOwner(db, traintuple.Dataset.Worker); err != nil {
 		return
 	}
@@ -309,16 +298,6 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 	traintuple, err := db.GetTraintuple(traintupleKey)
 	if err != nil {
 		return
-	}
-	// cancel traintuple if compute plan is canceled
-	if traintuple.ComputePlanID != "" {
-		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, traintuple.ComputePlanID, &traintuple)
-		if err != nil {
-			return outputTraintuple{}, err
-		}
-		if canceled {
-			status = StatusCanceled
-		}
 	}
 
 	traintuple.OutModel = &HashDress{
@@ -365,16 +344,6 @@ func logFailTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 	traintuple, err := db.GetTraintuple(inp.Key)
 	if err != nil {
 		return
-	}
-	// cancel traintuple if compute plan is canceled
-	if traintuple.ComputePlanID != "" {
-		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, traintuple.ComputePlanID, &traintuple)
-		if err != nil {
-			return outputTraintuple{}, err
-		}
-		if canceled {
-			status = StatusCanceled
-		}
 	}
 
 	traintuple.Log += inp.Log

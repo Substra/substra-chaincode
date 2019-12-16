@@ -310,17 +310,6 @@ func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTrain
 		return
 	}
 
-	// cancel compositeTraintuple if compute plan is canceled
-	if compositeTraintuple.ComputePlanID != "" {
-		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, compositeTraintuple.ComputePlanID, &compositeTraintuple)
-		if err != nil {
-			return outputCompositeTraintuple{}, err
-		}
-		if canceled {
-			status = StatusCanceled
-		}
-	}
-
 	if err = validateTupleOwner(db, compositeTraintuple.Dataset.Worker); err != nil {
 		return
 	}
@@ -346,17 +335,6 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 	compositeTraintuple, err := db.GetCompositeTraintuple(compositeTraintupleKey)
 	if err != nil {
 		return
-	}
-
-	// cancel compositeTraintuple if compute plan is canceled
-	if compositeTraintuple.ComputePlanID != "" {
-		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, compositeTraintuple.ComputePlanID, &compositeTraintuple)
-		if err != nil {
-			return outputCompositeTraintuple{}, err
-		}
-		if canceled {
-			status = StatusCanceled
-		}
 	}
 
 	compositeTraintuple.OutHeadModel.OutModel = &HashDress{
@@ -402,17 +380,6 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 	compositeTraintuple, err := db.GetCompositeTraintuple(inp.Key)
 	if err != nil {
 		return
-	}
-
-	// cancel compositeTraintuple if compute plan is canceled
-	if compositeTraintuple.ComputePlanID != "" {
-		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, compositeTraintuple.ComputePlanID, &compositeTraintuple)
-		if err != nil {
-			return outputCompositeTraintuple{}, err
-		}
-		if canceled {
-			status = StatusCanceled
-		}
 	}
 
 	compositeTraintuple.Log += inp.Log

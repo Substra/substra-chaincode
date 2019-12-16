@@ -278,17 +278,6 @@ func logStartAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err
 		return
 	}
 
-	// cancel aggregatetuple if compute plan is canceled
-	if aggregatetuple.ComputePlanID != "" {
-		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, aggregatetuple.ComputePlanID, &aggregatetuple)
-		if err != nil {
-			return outputAggregatetuple{}, err
-		}
-		if canceled {
-			status = StatusCanceled
-		}
-	}
-
 	if err = validateTupleOwner(db, aggregatetuple.Worker); err != nil {
 		return
 	}
@@ -312,17 +301,6 @@ func logFailAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err 
 	aggregatetuple, err := db.GetAggregatetuple(inp.Key)
 	if err != nil {
 		return
-	}
-
-	// cancel aggregatetuple if compute plan is canceled
-	if aggregatetuple.ComputePlanID != "" {
-		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, aggregatetuple.ComputePlanID, &aggregatetuple)
-		if err != nil {
-			return outputAggregatetuple{}, err
-		}
-		if canceled {
-			status = StatusCanceled
-		}
 	}
 
 	aggregatetuple.Log += inp.Log
@@ -365,17 +343,6 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 	aggregatetuple, err := db.GetAggregatetuple(aggregatetupleKey)
 	if err != nil {
 		return
-	}
-
-	// cancel aggregatetuple if compute plan is canceled
-	if aggregatetuple.ComputePlanID != "" {
-		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, aggregatetuple.ComputePlanID, &aggregatetuple)
-		if err != nil {
-			return outputAggregatetuple{}, err
-		}
-		if canceled {
-			status = StatusCanceled
-		}
 	}
 
 	aggregatetuple.OutModel = &HashDress{

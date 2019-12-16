@@ -272,22 +272,6 @@ func logStartTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 		return
 	}
 
-	tuple, err := db.GetGenericTuple(testtuple.TraintupleKey)
-	if err != nil {
-		return outputTesttuple{}, err
-	}
-
-	// cancel testtuple if compute plan is canceled
-	if tuple.ComputePlanID != "" {
-		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, tuple.ComputePlanID, &testtuple)
-		if err != nil {
-			return outputTesttuple{}, err
-		}
-		if canceled {
-			status = StatusCanceled
-		}
-	}
-
 	if err = validateTupleOwner(db, testtuple.Dataset.Worker); err != nil {
 		return
 	}
@@ -313,22 +297,6 @@ func logSuccessTest(db *LedgerDB, args []string) (o outputTesttuple, err error) 
 	testtuple, err := db.GetTesttuple(inp.Key)
 	if err != nil {
 		return
-	}
-
-	tuple, err := db.GetGenericTuple(testtuple.TraintupleKey)
-	if err != nil {
-		return outputTesttuple{}, err
-	}
-
-	// cancel testtuple if compute plan is canceled
-	if tuple.ComputePlanID != "" {
-		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, tuple.ComputePlanID, &testtuple)
-		if err != nil {
-			return outputTesttuple{}, err
-		}
-		if canceled {
-			status = StatusCanceled
-		}
 	}
 
 	testtuple.Dataset.Perf = inp.Perf
@@ -357,22 +325,6 @@ func logFailTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 	testtuple, err := db.GetTesttuple(inp.Key)
 	if err != nil {
 		return
-	}
-
-	tuple, err := db.GetGenericTuple(testtuple.TraintupleKey)
-	if err != nil {
-		return outputTesttuple{}, err
-	}
-
-	// cancel testtuple if compute plan is canceled
-	if tuple.ComputePlanID != "" {
-		canceled, err := cancelIfComputePlanIsCanceled(db, inp.Key, tuple.ComputePlanID, &testtuple)
-		if err != nil {
-			return outputTesttuple{}, err
-		}
-		if canceled {
-			status = StatusCanceled
-		}
 	}
 
 	testtuple.Log += inp.Log
