@@ -613,6 +613,13 @@ func (traintuple *Traintuple) commitStatusUpdate(db *LedgerDB, traintupleKey str
 		return nil
 	}
 
+	// do not update if previous status is already Done, Failed or Doing
+	if StatusCanceled == newStatus {
+		if stringInSlice(traintuple.Status, []string{StatusDone, StatusFailed, StatusDoing}) {
+			return nil
+		}
+	}
+
 	if err := traintuple.validateNewStatus(db, newStatus); err != nil {
 		return fmt.Errorf("update traintuple %s failed: %s", traintupleKey, err.Error())
 	}

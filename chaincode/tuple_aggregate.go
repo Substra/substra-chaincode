@@ -522,6 +522,13 @@ func (tuple *Aggregatetuple) commitStatusUpdate(db *LedgerDB, aggregatetupleKey 
 		return nil
 	}
 
+	// do not update if previous status is already Done, Failed or Doing
+	if StatusCanceled == newStatus {
+		if stringInSlice(tuple.Status, []string{StatusDone, StatusFailed, StatusDoing}) {
+			return nil
+		}
+	}
+
 	if err := tuple.validateNewStatus(db, newStatus); err != nil {
 		return fmt.Errorf("update aggregatetuple %s failed: %s", aggregatetupleKey, err.Error())
 	}

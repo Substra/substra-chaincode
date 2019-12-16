@@ -514,12 +514,11 @@ func TestCancelComputePlan(t *testing.T) {
 	assert.NotNil(t, db.tuplesEvent)
 	assert.Len(t, db.tuplesEvent.CompositeTraintuples, 2)
 
-	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[0]}))
-	assert.NoError(t, err)
-	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[1]}))
-	assert.NoError(t, err)
 	_, err = cancelComputePlan(db, assetToArgs(inputHash{Key: out.ComputePlanID}))
 	assert.NoError(t, err)
+
+	computePlanStatus, err := getComputePlanStatus(db, out)
+	assert.Equal(t, StatusCanceled, computePlanStatus)
 
 	tuples, err := queryCompositeTraintuples(db, []string{})
 	assert.NoError(t, err)
@@ -531,5 +530,33 @@ func TestCancelComputePlan(t *testing.T) {
 	assert.NoError(t, err)
 	for _, test := range tests {
 		assert.Equal(t, StatusCanceled, test.Status)
+	}
+}
+
+func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "aggregateAlgo")
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan)
+	assert.NoError(t, err)
+
+	logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[0]}))
+	logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[1]}))
+	logFailCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[1]}))
+
+	_, err = cancelComputePlan(db, assetToArgs(inputHash{Key: out.ComputePlanID}))
+	assert.NoError(t, err)
+
+	computePlanStatus, err := getComputePlanStatus(db, out)
+	assert.Equal(t, StatusCanceled, computePlanStatus)
+
+	tuples, err := queryCompositeTraintuples(db, []string{})
+	assert.NoError(t, err)
+	for _, tuple := range tuples {
+		assert.NotEqual(t, StatusCanceled, tuple.Status)
 	}
 }

@@ -468,6 +468,13 @@ func (testtuple *Testtuple) commitStatusUpdate(db *LedgerDB, testtupleKey string
 		return fmt.Errorf("update testtuple %s failed: %s", testtupleKey, err.Error())
 	}
 
+	// do not update if previous status is already Done, Failed or Doing
+	if StatusCanceled == newStatus {
+		if stringInSlice(testtuple.Status, []string{StatusDone, StatusFailed, StatusDoing}) {
+			return nil
+		}
+	}
+
 	oldStatus := testtuple.Status
 	testtuple.Status = newStatus
 
