@@ -370,7 +370,7 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 		return outputComputePlan{}, err
 	}
 
-	if computeplan.Status == StatusCanceled {
+	if stringInSlice(computeplan.Status, []string{StatusCanceled, StatusDone}) {
 		return computeplan, nil
 	}
 
