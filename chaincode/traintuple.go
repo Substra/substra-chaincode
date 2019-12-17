@@ -448,15 +448,15 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 	// get traintuples having as inModels the input traintuple
 	childTraintupleKeys, err := db.GetIndexKeys("traintuple~inModel~key", []string{"traintuple", traintupleKey})
 	if err != nil {
-		return fmt.Errorf("error while getting associated traintuples to update their inModel")
+		return fmt.Errorf("error while getting associated traintuples to update their inModel, %s", err)
 	}
 	childCompositeTraintupleKeys, err := db.GetIndexKeys("compositeTraintuple~inModel~key", []string{"compositeTraintuple", traintupleKey})
 	if err != nil {
-		return fmt.Errorf("error while getting associated composite traintuples to update their inModel")
+		return fmt.Errorf("error while getting associated composite traintuples to update their inModel, %s", err)
 	}
 	childAggregatetupleKeys, err := db.GetIndexKeys("aggregatetuple~inModel~key", []string{"aggregatetuple", traintupleKey})
 	if err != nil {
-		return fmt.Errorf("error while getting associated aggregate tuples to update their inModel")
+		return fmt.Errorf("error while getting associated aggregate tuples to update their inModel, %s", err)
 	}
 
 	allChildKeys := append(append(childTraintupleKeys, childCompositeTraintupleKeys...), childAggregatetupleKeys...)
