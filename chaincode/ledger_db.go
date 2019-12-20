@@ -162,7 +162,12 @@ func (db *LedgerDB) GetIndexKeys(index string, attributes []string) ([]string, e
 	if err != nil {
 		return nil, fmt.Errorf("get index %s failed: %s", index, err.Error())
 	}
-	defer iterator.Close()
+	defer func() {
+		err = iterator.Close()
+		if err != nil {
+			logger.Errorf("Error in Close, %s", err)
+		}
+	}()
 	for iterator.HasNext() {
 		compositeKey, err := iterator.Next()
 		if err != nil {
