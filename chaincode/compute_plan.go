@@ -361,7 +361,7 @@ func determineComputePlanStatus(statusCollection []string) (status string, err e
 		}
 	}
 
-	return "", fmt.Errorf("unknown compute plan status")
+	return StatusUndefined, nil
 }
 
 func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {

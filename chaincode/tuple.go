@@ -24,12 +24,13 @@ import (
 
 // List of the possible tuple's status
 const (
-	StatusDoing    = "doing"
-	StatusTodo     = "todo"
-	StatusWaiting  = "waiting"
-	StatusFailed   = "failed"
-	StatusDone     = "done"
-	StatusCanceled = "canceled"
+	StatusDoing     = "doing"
+	StatusTodo      = "todo"
+	StatusWaiting   = "waiting"
+	StatusFailed    = "failed"
+	StatusDone      = "done"
+	StatusCanceled  = "canceled"
+	StatusUndefined = "undefined"
 )
 
 // ------------------------------------------------
