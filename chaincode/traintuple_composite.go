@@ -276,7 +276,7 @@ func createCompositeTraintupleInternal(db *LedgerDB, inp inputCompositeTraintupl
 		return "", err
 	}
 	if tupleExists {
-		return "", errors.Conflict("traintuple already exists").WithKey(traintupleKey)
+		return traintupleKey, nil
 	}
 
 	err = traintuple.AddToComputePlan(db, inp, traintupleKey, checkComputePlanAvailability)

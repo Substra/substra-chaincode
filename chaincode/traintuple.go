@@ -238,7 +238,7 @@ func createTraintupleInternal(db *LedgerDB, inp inputTraintuple, checkComputePla
 		return "", err
 	}
 	if tupleExists {
-		return "", errors.Conflict("traintuple already exists").WithKey(traintupleKey)
+		return traintupleKey, nil
 	}
 	err = traintuple.AddToComputePlan(db, inp, traintupleKey, checkComputePlanAvailability)
 	if err != nil {
@@ -448,7 +448,7 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 	// get traintuples having as inModels the input traintuple
 	childTraintupleKeys, err := db.GetIndexKeys("traintuple~inModel~key", []string{"traintuple", traintupleKey})
 	if err != nil {
-		return fmt.Errorf("error while getting associated traintuples to update their inModel")
+		return fmt.Errorf("error while getting associated tuples to update their inModel, traintupleKey=%s traintupleStatus=%s %s", traintupleKey, traintupleStatus, err)
 	}
 	childCompositeTraintupleKeys, err := db.GetIndexKeys("compositeTraintuple~inModel~key", []string{"compositeTraintuple", traintupleKey})
 	if err != nil {
@@ -501,11 +501,6 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 
 		// Recursively call for an update on this child's children
 		err = UpdateTesttupleChildren(db, childTraintupleKey, childTraintupleStatus)
-		if err != nil {
-			return err
-		}
-
-		err = UpdateTraintupleChildren(db, childTraintupleKey, childTraintupleStatus)
 		if err != nil {
 			return err
 		}
