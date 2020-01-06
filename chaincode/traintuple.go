@@ -499,10 +499,17 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 			return fmt.Errorf("Unknown child traintuple type: %s", child.AssetType)
 		}
 
-		// Recursively call for an update on this child's children
-		err = UpdateTesttupleChildren(db, childTraintupleKey, childTraintupleStatus)
-		if err != nil {
-			return err
+		if stringInSlice(traintupleStatus, []string{StatusFailed, StatusCanceled}) {
+			// Recursively call for an update on this child's children
+			err = UpdateTesttupleChildren(db, childTraintupleKey, childTraintupleStatus)
+			if err != nil {
+				return err
+			}
+
+			err = UpdateTraintupleChildren(db, childTraintupleKey, childTraintupleStatus)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
