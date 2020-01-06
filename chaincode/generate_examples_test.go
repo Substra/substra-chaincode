@@ -114,9 +114,9 @@ func TestPipeline(t *testing.T) {
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
 	traintupleKey := res["key"]
-	// check not possible to create same traintuple
+	// check possible to create same traintuple
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 409, resp.Status, "when adding same traintuple with status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 200, resp.Status, "when adding same traintuple with status %d and message %s", resp.Status, traintupleKey)
 	// Get owner of the traintuple
 	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
