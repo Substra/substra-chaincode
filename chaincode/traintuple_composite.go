@@ -352,7 +352,7 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 		return
 	}
 
-	err = UpdateTraintupleChildren(db, compositeTraintupleKey, compositeTraintuple.Status)
+	err = UpdateTraintupleChildren(db, compositeTraintupleKey, compositeTraintuple.Status, []string{})
 	if err != nil {
 		return
 	}
@@ -399,7 +399,7 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 		return
 	}
 
-	err = UpdateTraintupleChildren(db, inp.Key, compositeTraintuple.Status)
+	err = UpdateTraintupleChildren(db, inp.Key, compositeTraintuple.Status, []string{})
 	if err != nil {
 		return
 	}
