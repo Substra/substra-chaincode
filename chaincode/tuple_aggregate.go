@@ -244,7 +244,7 @@ func createAggregatetupleInternal(db *LedgerDB, inp inputAggregatetuple, checkCo
 		return "", err
 	}
 	if tupleExists {
-		return aggregatetupleKey, nil
+		return "", errors.Conflict("aggregatetuple already exists").WithKey(aggregatetupleKey)
 	}
 	err = aggregatetuple.AddToComputePlan(db, inp, aggregatetupleKey, checkComputePlanAvailability)
 	if err != nil {

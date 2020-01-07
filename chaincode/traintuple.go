@@ -238,7 +238,7 @@ func createTraintupleInternal(db *LedgerDB, inp inputTraintuple, checkComputePla
 		return "", err
 	}
 	if tupleExists {
-		return traintupleKey, nil
+		return "", errors.Conflict("traintuple already exists").WithKey(traintupleKey)
 	}
 	err = traintuple.AddToComputePlan(db, inp, traintupleKey, checkComputePlanAvailability)
 	if err != nil {
