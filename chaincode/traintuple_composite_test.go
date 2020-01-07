@@ -174,6 +174,19 @@ func TestTraintupleComputePlanCreationComposite(t *testing.T) {
 	assert.Contains(t, res, "key")
 	key := res["key"]
 	require.EqualValues(t, key, compositeTraintupleKey)
+
+	inpTraintuple = inputCompositeTraintuple{Rank: "0"}
+	args = inpTraintuple.createDefault()
+	resp = mockStub.MockInvoke("42", args)
+	require.EqualValues(t, 409, resp.Status, "should failed for existing ComputePlanID")
+	require.Contains(t, resp.Message, "already exists")
+
+	require.EqualValues(t, 409, resp.Status, "should failed for existing FLTask")
+	errorPayload := map[string]interface{}{}
+	err = json.Unmarshal(resp.Payload, &errorPayload)
+	assert.NoError(t, err, "should unmarshal without problem")
+	require.Contains(t, errorPayload, "key", "key should be available in payload")
+	assert.EqualValues(t, compositeTraintupleKey, errorPayload["key"], "key in error should be compositeTraintupleKey")
 }
 
 func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
@@ -431,6 +444,10 @@ func TestInsertTraintupleTwiceComposite(t *testing.T) {
 	inpTraintuple.InTrunkModelKey = _key.Key
 	resp = mockStub.MockInvoke("42", methodAndAssetToByte("createCompositeTraintuple", inpTraintuple))
 	assert.EqualValues(t, http.StatusOK, resp.Status)
+
+	// re-insert the same composite traintuple and expect a conflict error
+	resp = mockStub.MockInvoke("42", methodAndAssetToByte("createCompositeTraintuple", inpTraintuple))
+	assert.EqualValues(t, http.StatusConflict, resp.Status)
 }
 
 //////////////////////////////////////////////
