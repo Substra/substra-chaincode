@@ -320,7 +320,7 @@ func logFailAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err 
 		return
 	}
 
-	err = UpdateTraintupleChildren(db, inp.Key, o.Status)
+	err = UpdateTraintupleChildren(db, inp.Key, o.Status, []string{})
 	if err != nil {
 		return
 	}
@@ -357,7 +357,7 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 		return
 	}
 
-	err = UpdateTraintupleChildren(db, aggregatetupleKey, aggregatetuple.Status)
+	err = UpdateTraintupleChildren(db, aggregatetupleKey, aggregatetuple.Status, []string{})
 	if err != nil {
 		return
 	}

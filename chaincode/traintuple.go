@@ -313,7 +313,7 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 	}
 
 	// update depending tuples
-	err = UpdateTraintupleChildren(db, traintupleKey, traintuple.Status)
+	err = UpdateTraintupleChildren(db, traintupleKey, traintuple.Status, []string{})
 	if err != nil {
 		return
 	}
@@ -365,7 +365,7 @@ func logFailTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 		return
 	}
 
-	err = UpdateTraintupleChildren(db, inp.Key, traintuple.Status)
+	err = UpdateTraintupleChildren(db, inp.Key, traintuple.Status, []string{})
 	return
 }
 
@@ -444,11 +444,11 @@ func (traintuple *Traintuple) validateNewStatus(db *LedgerDB, status string) err
 }
 
 // UpdateTraintupleChildren updates the status of waiting trainuples  InModels of traintuples once they have been trained (succesfully or failed)
-func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStatus string) error {
+func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStatus string, alreadyUpdatedKeys []string) error {
 	// get traintuples having as inModels the input traintuple
 	childTraintupleKeys, err := db.GetIndexKeys("traintuple~inModel~key", []string{"traintuple", traintupleKey})
 	if err != nil {
-		return fmt.Errorf("error while getting associated traintuples to update their inModel")
+		return fmt.Errorf("error while getting associated tuples to update their inModel, traintupleKey=%s traintupleStatus=%s %s", traintupleKey, traintupleStatus, err)
 	}
 	childCompositeTraintupleKeys, err := db.GetIndexKeys("compositeTraintuple~inModel~key", []string{"compositeTraintuple", traintupleKey})
 	if err != nil {
@@ -462,6 +462,9 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 	allChildKeys := append(append(childTraintupleKeys, childCompositeTraintupleKeys...), childAggregatetupleKeys...)
 
 	for _, childTraintupleKey := range allChildKeys {
+		if stringInSlice(childTraintupleKey, alreadyUpdatedKeys) {
+			continue
+		}
 		child, err := db.GetGenericTuple(childTraintupleKey)
 		if err != nil {
 			return err
@@ -499,15 +502,18 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 			return fmt.Errorf("Unknown child traintuple type: %s", child.AssetType)
 		}
 
-		// Recursively call for an update on this child's children
-		err = UpdateTesttupleChildren(db, childTraintupleKey, childTraintupleStatus)
-		if err != nil {
-			return err
-		}
+		alreadyUpdatedKeys = append(alreadyUpdatedKeys, childTraintupleKey)
+		if stringInSlice(traintupleStatus, []string{StatusFailed, StatusCanceled}) {
+			// Recursively call for an update on this child's children
+			err = UpdateTesttupleChildren(db, childTraintupleKey, childTraintupleStatus)
+			if err != nil {
+				return err
+			}
 
-		err = UpdateTraintupleChildren(db, childTraintupleKey, childTraintupleStatus)
-		if err != nil {
-			return err
+			err = UpdateTraintupleChildren(db, childTraintupleKey, childTraintupleStatus, alreadyUpdatedKeys)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
