@@ -396,3 +396,17 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 
 	return computeplan, nil
 }
+
+func (cp *ComputePlan) Create(db *LedgerDB) (string, error) {
+	ID := GetRandomHash()
+	cp.AssetType = ComputePlanType
+	err := db.Add(ID, cp)
+	if err != nil {
+		return "", err
+	}
+	return ID, nil
+}
+
+func (cp *ComputePlan) Save() error {
+	return nil
+}

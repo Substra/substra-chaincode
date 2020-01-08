@@ -18,6 +18,7 @@ import (
 	"chaincode/errors"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"reflect"
 	"unicode"
 	"unicode/utf8"
@@ -166,4 +167,12 @@ func (modelType CompositeModelType) String() string {
 	default:
 		return fmt.Sprintf("(unknown model type: %d)", modelType)
 	}
+}
+
+func GetRandomHash() string {
+	b := make([]rune, 64)
+	for i := range b {
+		b[i] = characterRunes[rand.Intn(len(characterRunes))]
+	}
+	return string(b)
 }

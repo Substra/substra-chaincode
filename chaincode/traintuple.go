@@ -136,8 +136,14 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
 			return err
 		}
-		// TODO: That can't work anymore
-		traintuple.ComputePlanID = traintupleKey
+		// TODO: That can't work anymore we need a random hash or a salted
+		// version of the first tuple's key because the firs tuple allready use
+		// this key
+		computePlan := ComputePlan{Status: traintuple.Status, TraintupleKeys: []string{traintupleKey}}
+		traintuple.ComputePlanID, err = computePlan.Create(db)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 	traintuple.ComputePlanID = inp.ComputePlanID
@@ -145,7 +151,7 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 		return nil
 	}
 	var ttKeys []string
-	_, err = db.GetComputePlan(inp.ComputePlanID)
+	computePlan, err := db.GetComputePlan(inp.ComputePlanID)
 	if err != nil {
 		return err
 	}
@@ -156,8 +162,9 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 		err = errors.BadRequest("ComputePlanID %s with worker %s rank %d already exists", inp.ComputePlanID, traintuple.Dataset.Worker, traintuple.Rank)
 		return err
 	}
-
-	return nil
+	computePlan.TraintupleKeys = append(computePlan.TraintupleKeys, traintupleKey)
+	err = computePlan.Save()
+	return err
 }
 
 // Save will put in the legder interface both the traintuple with its key
@@ -183,9 +190,6 @@ func (traintuple *Traintuple) Save(db *LedgerDB, traintupleKey string) error {
 	}
 	if traintuple.ComputePlanID != "" {
 		if err := db.CreateIndex("computePlan~computeplanid~worker~rank~key", []string{"computePlan", traintuple.ComputePlanID, traintuple.Dataset.Worker, strconv.Itoa(traintuple.Rank), traintupleKey}); err != nil {
-			return err
-		}
-		if err := db.CreateIndex("computeplan~id", []string{"computeplan", traintuple.ComputePlanID}); err != nil {
 			return err
 		}
 	}

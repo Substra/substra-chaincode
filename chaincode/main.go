@@ -18,6 +18,8 @@ import (
 	"chaincode/errors"
 	"encoding/json"
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
@@ -213,6 +215,7 @@ func formatErrorResponse(err error) peer.Response {
 func main() {
 	// TODO use the same level as the shim or an env variable
 	logger.SetLevel(shim.LogDebug)
+	rand.Seed(time.Now().UTC().UnixNano())
 	if err := shim.Start(new(SubstraChaincode)); err != nil {
 		fmt.Printf("Error starting SubstraChaincode chaincode: %s", err)
 	}
