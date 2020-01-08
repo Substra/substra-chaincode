@@ -149,6 +149,8 @@ func (assetType AssetType) String() string {
 		return "Aggregatetuple"
 	case TesttupleType:
 		return "Testtuple"
+	case ComputePlanType:
+		return "ComputePlan"
 	default:
 		return fmt.Sprintf("(unknown asset type: %d)", assetType)
 	}
