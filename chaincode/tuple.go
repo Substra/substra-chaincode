@@ -30,6 +30,7 @@ const (
 	StatusFailed   = "failed"
 	StatusDone     = "done"
 	StatusCanceled = "canceled"
+	StatusAborded  = "aborded"
 )
 
 // ------------------------------------------------
@@ -241,18 +242,16 @@ func determineStatusFromInModels(statuses []string) string {
 	return StatusTodo
 }
 
-// func cancelIfComputePlanIsCanceled(db *LedgerDB, key, computePlanID string, t StatusUpdater) (bool, error) {
-// 	status, err := getComputePlanStatusByComputePlanID(db, computePlanID)
-// 	if err != nil {
-// 		return false, err
-// 	}
-
-// 	if status == StatusCanceled {
-// 		if err = t.commitStatusUpdate(db, key, StatusCanceled); err != nil {
-// 			return false, err
-// 		}
-
-// 		return true, nil
-// 	}
-// 	return false, nil
-// }
+func determineTupleStatus(db *LedgerDB, tupleStatus, computePlanID string) (string, error) {
+	if tupleStatus != StatusWaiting || computePlanID == "" {
+		return tupleStatus, nil
+	}
+	computePlan, err := db.GetComputePlan(computePlanID)
+	if err != nil {
+		return "", err
+	}
+	if stringInSlice(computePlan.Status, []string{StatusFailed, StatusCanceled}) {
+		return StatusAborded, nil
+	}
+	return tupleStatus, nil
+}

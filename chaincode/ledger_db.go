@@ -315,37 +315,43 @@ func (db *LedgerDB) GetDataSample(key string) (DataSample, error) {
 // GetTraintuple fetches a Traintuple from the ledger using its unique key
 func (db *LedgerDB) GetTraintuple(key string) (Traintuple, error) {
 	traintuple := Traintuple{}
-	if err := db.Get(key, &traintuple); err != nil {
+	err := db.Get(key, &traintuple)
+	if err != nil {
 		return traintuple, err
 	}
 	if traintuple.AssetType != TraintupleType {
 		return traintuple, errors.NotFound("traintuple %s not found", key)
 	}
-	return traintuple, nil
+	traintuple.Status, err = determineTupleStatus(db, traintuple.Status, traintuple.ComputePlanID)
+	return traintuple, err
 }
 
 // GetCompositeTraintuple fetches a CompositeTraintuple from the ledger using its unique key
 func (db *LedgerDB) GetCompositeTraintuple(key string) (CompositeTraintuple, error) {
 	traintuple := CompositeTraintuple{}
-	if err := db.Get(key, &traintuple); err != nil {
+	err := db.Get(key, &traintuple)
+	if err != nil {
 		return traintuple, err
 	}
 	if traintuple.AssetType != CompositeTraintupleType {
 		return traintuple, errors.NotFound("composite traintuple %s not found", key)
 	}
-	return traintuple, nil
+	traintuple.Status, err = determineTupleStatus(db, traintuple.Status, traintuple.ComputePlanID)
+	return traintuple, err
 }
 
 // GetAggregatetuple fetches a Aggregatetuple from the ledger using its unique key
 func (db *LedgerDB) GetAggregatetuple(key string) (Aggregatetuple, error) {
 	aggregatetuple := Aggregatetuple{}
-	if err := db.Get(key, &aggregatetuple); err != nil {
+	err := db.Get(key, &aggregatetuple)
+	if err != nil {
 		return aggregatetuple, err
 	}
 	if aggregatetuple.AssetType != AggregatetupleType {
 		return aggregatetuple, errors.NotFound("aggregatetuple %s not found", key)
 	}
-	return aggregatetuple, nil
+	aggregatetuple.Status, err = determineTupleStatus(db, aggregatetuple.Status, aggregatetuple.ComputePlanID)
+	return aggregatetuple, err
 }
 
 // GetComputePlan fetches a ComputePlan from the ledger using its unique ID
@@ -413,13 +419,15 @@ func (db *LedgerDB) GetOutModelHashDress(traintupleKey string, modelType Composi
 // GetTesttuple fetches a Testtuple from the ledger using its unique key
 func (db *LedgerDB) GetTesttuple(key string) (Testtuple, error) {
 	testtuple := Testtuple{}
-	if err := db.Get(key, &testtuple); err != nil {
+	err := db.Get(key, &testtuple)
+	if err != nil {
 		return testtuple, err
 	}
 	if testtuple.AssetType != TesttupleType {
 		return testtuple, errors.NotFound("testtuple %s not found", key)
 	}
-	return testtuple, nil
+	testtuple.Status, err = determineTupleStatus(db, testtuple.Status, testtuple.ComputePlanID)
+	return testtuple, err
 }
 
 // GetNode fetches a Node from the ledger based on its unique key
