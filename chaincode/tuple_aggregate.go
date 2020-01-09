@@ -192,7 +192,7 @@ func (tuple *Aggregatetuple) Save(db *LedgerDB, aggregatetupleKey string) error 
 		if err := db.CreateIndex("computePlan~computeplanid~worker~rank~key", []string{"computePlan", tuple.ComputePlanID, tuple.Worker, strconv.Itoa(tuple.Rank), aggregatetupleKey}); err != nil {
 			return err
 		}
-		if err := db.CreateIndex("computeplan~id", []string{"computeplan", tuple.ComputePlanID}); err != nil {
+		if err := db.CreateIndex("computePlan~id", []string{"computeplan", tuple.ComputePlanID}); err != nil {
 			return err
 		}
 	}

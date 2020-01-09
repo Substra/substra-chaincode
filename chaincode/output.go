@@ -296,6 +296,15 @@ type outputComputePlan struct {
 	Status                  string   `json:"status"`
 }
 
+func (out *outputComputePlan) Fill(key string, in ComputePlan) {
+	out.ComputePlanID = key
+	out.TraintupleKeys = in.TraintupleKeys
+	out.AggregatetupleKeys = in.AggregatetupleKeys
+	out.CompositeTraintupleKeys = in.CompositeTraintupleKeys
+	out.TesttupleKeys = in.TesttupleKeys
+	out.Status = in.Status
+}
+
 type outputPermissions struct {
 	Process Permission `validate:"required" json:"process"`
 }

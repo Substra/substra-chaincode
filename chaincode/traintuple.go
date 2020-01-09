@@ -147,13 +147,19 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 		return nil
 	}
 	traintuple.ComputePlanID = inp.ComputePlanID
-	if !checkComputePlanAvailability {
-		return nil
-	}
 	var ttKeys []string
 	computePlan, err := db.GetComputePlan(inp.ComputePlanID)
 	if err != nil {
 		return err
+	}
+	computePlan.TraintupleKeys = append(computePlan.TraintupleKeys, traintupleKey)
+	err = computePlan.Save(db, traintuple.ComputePlanID)
+	if err != nil {
+		return err
+	}
+
+	if !checkComputePlanAvailability {
+		return nil
 	}
 	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID, traintuple.Dataset.Worker, inp.Rank})
 	if err != nil {
@@ -162,9 +168,7 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 		err = errors.BadRequest("ComputePlanID %s with worker %s rank %d already exists", inp.ComputePlanID, traintuple.Dataset.Worker, traintuple.Rank)
 		return err
 	}
-	computePlan.TraintupleKeys = append(computePlan.TraintupleKeys, traintupleKey)
-	err = computePlan.Save()
-	return err
+	return nil
 }
 
 // Save will put in the legder interface both the traintuple with its key

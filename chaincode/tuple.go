@@ -241,18 +241,18 @@ func determineStatusFromInModels(statuses []string) string {
 	return StatusTodo
 }
 
-func cancelIfComputePlanIsCanceled(db *LedgerDB, key, computePlanID string, t StatusUpdater) (bool, error) {
-	status, err := getComputePlanStatusByComputePlanID(db, computePlanID)
-	if err != nil {
-		return false, err
-	}
+// func cancelIfComputePlanIsCanceled(db *LedgerDB, key, computePlanID string, t StatusUpdater) (bool, error) {
+// 	status, err := getComputePlanStatusByComputePlanID(db, computePlanID)
+// 	if err != nil {
+// 		return false, err
+// 	}
 
-	if status == StatusCanceled {
-		if err = t.commitStatusUpdate(db, key, StatusCanceled); err != nil {
-			return false, err
-		}
+// 	if status == StatusCanceled {
+// 		if err = t.commitStatusUpdate(db, key, StatusCanceled); err != nil {
+// 			return false, err
+// 		}
 
-		return true, nil
-	}
-	return false, nil
-}
+// 		return true, nil
+// 	}
+// 	return false, nil
+// }
