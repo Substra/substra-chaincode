@@ -136,9 +136,7 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
 			return err
 		}
-		// TODO: That can't work anymore we need a random hash or a salted
-		// version of the first tuple's key because the firs tuple allready use
-		// this key
+		// TODO: Creage a function to addle the status of a compute plan
 		computePlan := ComputePlan{Status: traintuple.Status, TraintupleKeys: []string{traintupleKey}}
 		traintuple.ComputePlanID, err = computePlan.Create(db)
 		if err != nil {
@@ -147,7 +145,6 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 		return nil
 	}
 	traintuple.ComputePlanID = inp.ComputePlanID
-	var ttKeys []string
 	computePlan, err := db.GetComputePlan(inp.ComputePlanID)
 	if err != nil {
 		return err
@@ -161,6 +158,7 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 	if !checkComputePlanAvailability {
 		return nil
 	}
+	var ttKeys []string
 	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID, traintuple.Dataset.Worker, inp.Rank})
 	if err != nil {
 		return err

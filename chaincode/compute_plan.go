@@ -308,6 +308,9 @@ func (cp *ComputePlan) Create(db *LedgerDB) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if err := db.CreateIndex("computePlan~id", []string{"computePlan", ID}); err != nil {
+		return "", err
+	}
 	return ID, nil
 }
 

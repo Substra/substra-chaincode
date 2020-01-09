@@ -139,23 +139,30 @@ func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetu
 			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
 			return err
 		}
-		tuple.ComputePlanID = traintupleKey
+		// TODO: Creage a function to addle the status of a compute plan
+		computePlan := ComputePlan{Status: tuple.Status, TraintupleKeys: []string{traintupleKey}}
+		tuple.ComputePlanID, err = computePlan.Create(db)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 	tuple.ComputePlanID = inp.ComputePlanID
-	if !checkComputePlanAvailability {
-		return nil
-	}
 
-	var ttKeys []string
-	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID})
+	computePlan, err := db.GetComputePlan(inp.ComputePlanID)
 	if err != nil {
 		return err
 	}
-	if len(ttKeys) == 0 {
-		return errors.BadRequest("cannot find the ComputePlanID %s", inp.ComputePlanID)
+	computePlan.TraintupleKeys = append(computePlan.TraintupleKeys, traintupleKey)
+	err = computePlan.Save(db, tuple.ComputePlanID)
+	if err != nil {
+		return err
 	}
 
+	if !checkComputePlanAvailability {
+		return nil
+	}
+	var ttKeys []string
 	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID, tuple.Worker, inp.Rank})
 	if err != nil {
 		return err
@@ -190,9 +197,6 @@ func (tuple *Aggregatetuple) Save(db *LedgerDB, aggregatetupleKey string) error 
 	}
 	if tuple.ComputePlanID != "" {
 		if err := db.CreateIndex("computePlan~computeplanid~worker~rank~key", []string{"computePlan", tuple.ComputePlanID, tuple.Worker, strconv.Itoa(tuple.Rank), aggregatetupleKey}); err != nil {
-			return err
-		}
-		if err := db.CreateIndex("computePlan~id", []string{"computeplan", tuple.ComputePlanID}); err != nil {
 			return err
 		}
 	}

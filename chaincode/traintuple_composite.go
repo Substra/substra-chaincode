@@ -169,22 +169,29 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
 			return err
 		}
-		traintuple.ComputePlanID = traintupleKey
+		// TODO: Creage a function to addle the status of a compute plan
+		computePlan := ComputePlan{Status: traintuple.Status, TraintupleKeys: []string{traintupleKey}}
+		traintuple.ComputePlanID, err = computePlan.Create(db)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 	traintuple.ComputePlanID = inp.ComputePlanID
+	computePlan, err := db.GetComputePlan(inp.ComputePlanID)
+	if err != nil {
+		return err
+	}
+	computePlan.TraintupleKeys = append(computePlan.TraintupleKeys, traintupleKey)
+	err = computePlan.Save(db, traintuple.ComputePlanID)
+	if err != nil {
+		return err
+	}
+
 	if !checkComputePlanAvailability {
 		return nil
 	}
 	var ttKeys []string
-	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID})
-	if err != nil {
-		return err
-	}
-	if len(ttKeys) == 0 {
-		return errors.BadRequest("cannot find the ComputePlanID %s", inp.ComputePlanID)
-	}
-
 	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID, traintuple.Dataset.Worker, inp.Rank})
 	if err != nil {
 		return err
@@ -192,7 +199,6 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 		err = errors.BadRequest("ComputePlanID %s with worker %s rank %d already exists", inp.ComputePlanID, traintuple.Dataset.Worker, traintuple.Rank)
 		return err
 	}
-
 	return nil
 }
 
