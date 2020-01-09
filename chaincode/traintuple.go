@@ -426,7 +426,8 @@ func getOutputTraintuple(db *LedgerDB, traintupleKey string) (outTraintuple outp
 
 // getOutputTraintuples takes as input a list of keys and returns a paylaod containing a list of associated retrieved elements
 func getOutputTraintuples(db *LedgerDB, traintupleKeys []string) (outTraintuples []outputTraintuple, err error) {
-	for _, key := range traintupleKeys {
+	nb := getLimitedNbSliceElements(traintupleKeys)
+	for _, key := range traintupleKeys[:nb] {
 		var outputTraintuple outputTraintuple
 		outputTraintuple, err = getOutputTraintuple(db, key)
 		if err != nil {

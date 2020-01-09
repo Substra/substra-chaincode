@@ -16,7 +16,11 @@ package main
 
 import (
 	"fmt"
+	"math"
 )
+
+// OutputAssetPaginationHardLimit is a used to avoid issues listing assets
+const OutputAssetPaginationHardLimit = 200
 
 // Struct use as output representation of ledger data
 
@@ -353,4 +357,8 @@ func (out *outputBoardTuple) Fill(db *LedgerDB, in Testtuple, testtupleKey strin
 	out.Tag = in.Tag
 
 	return nil
+}
+
+func getLimitedNbSliceElements(s []string) int {
+	return int(math.Min(float64(len(s)), OutputAssetPaginationHardLimit))
 }
