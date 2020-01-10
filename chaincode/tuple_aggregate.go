@@ -289,7 +289,11 @@ func logStartAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err
 	if err = aggregatetuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	o.Fill(db, aggregatetuple, inp.Key)
+	err = o.Fill(db, aggregatetuple, inp.Key)
+	if err != nil {
+		return
+	}
+	err = UpdateComputePlan(db, aggregatetuple.ComputePlanID, aggregatetuple.Status)
 	return
 }
 
@@ -318,7 +322,14 @@ func logFailAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err 
 	}
 
 	o.Fill(db, aggregatetuple, inp.Key)
-
+	err = UpdateComputePlan(db, aggregatetuple.ComputePlanID, aggregatetuple.Status)
+	if err != nil {
+		return
+	}
+	// Do not propagate failure if we are in a compute plan
+	if aggregatetuple.ComputePlanID != "" {
+		return
+	}
 	// update depending tuples
 	err = UpdateTesttupleChildren(db, inp.Key, aggregatetuple.Status)
 	if err != nil {
@@ -326,10 +337,6 @@ func logFailAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err 
 	}
 
 	err = UpdateTraintupleChildren(db, inp.Key, o.Status, []string{})
-	if err != nil {
-		return
-	}
-
 	return
 }
 
@@ -362,6 +369,10 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 		return
 	}
 
+	err = UpdateComputePlan(db, aggregatetuple.ComputePlanID, aggregatetuple.Status)
+	if err != nil {
+		return
+	}
 	err = UpdateTraintupleChildren(db, aggregatetupleKey, aggregatetuple.Status, []string{})
 	if err != nil {
 		return
@@ -372,7 +383,7 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 		return
 	}
 
-	o.Fill(db, aggregatetuple, inp.Key)
+	err = o.Fill(db, aggregatetuple, inp.Key)
 	return
 }
 

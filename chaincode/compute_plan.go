@@ -239,11 +239,11 @@ func getOutComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err er
 
 	computePlan, err := db.GetComputePlan(key)
 	if err != nil {
-		return
+		return resp, err
 	}
 
 	resp.Fill(key, computePlan)
-	return
+	return resp, err
 }
 
 func getComputePlanStatus(db *LedgerDB, computePlan outputComputePlan) (status string, err error) {
@@ -358,4 +358,18 @@ func (cp *ComputePlan) CheckNewTupleStatus(tupleStatus string) bool {
 		}
 	}
 	return false
+}
+
+func UpdateComputePlan(db *LedgerDB, ComputePlanID, tupleStatus string) error {
+	if ComputePlanID == "" {
+		return nil
+	}
+	cp, err := db.GetComputePlan(ComputePlanID)
+	if err != nil {
+		return err
+	}
+	if cp.CheckNewTupleStatus(tupleStatus) {
+		return cp.Save(db, ComputePlanID)
+	}
+	return nil
 }

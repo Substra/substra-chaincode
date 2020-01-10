@@ -320,7 +320,11 @@ func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTrain
 	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	o.Fill(db, compositeTraintuple, inp.Key)
+	err = o.Fill(db, compositeTraintuple, inp.Key)
+	if err != nil {
+		return
+	}
+	err = UpdateComputePlan(db, compositeTraintuple.ComputePlanID, compositeTraintuple.Status)
 	return
 }
 
@@ -366,8 +370,12 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 		return
 	}
 
-	o.Fill(db, compositeTraintuple, inp.Key)
+	err = o.Fill(db, compositeTraintuple, inp.Key)
+	if err != nil {
+		return
+	}
 
+	err = UpdateComputePlan(db, compositeTraintuple.ComputePlanID, compositeTraintuple.Status)
 	return
 }
 
@@ -395,8 +403,18 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 		return
 	}
 
-	o.Fill(db, compositeTraintuple, inp.Key)
-
+	err = o.Fill(db, compositeTraintuple, inp.Key)
+	if err != nil {
+		return
+	}
+	err = UpdateComputePlan(db, compositeTraintuple.ComputePlanID, compositeTraintuple.Status)
+	if err != nil {
+		return
+	}
+	// Do not propagate failure if we are in a compute plan
+	if compositeTraintuple.ComputePlanID != "" {
+		return
+	}
 	// update depending tuples
 	err = UpdateTesttupleChildren(db, inp.Key, compositeTraintuple.Status)
 	if err != nil {
@@ -404,10 +422,6 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 	}
 
 	err = UpdateTraintupleChildren(db, inp.Key, compositeTraintuple.Status, []string{})
-	if err != nil {
-		return
-	}
-
 	return
 }
 

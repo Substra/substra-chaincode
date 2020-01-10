@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -303,6 +304,7 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 
 	// Query the compute plan
 	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
+	spew.Dump(cp)
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
 	assert.NotNil(t, cp)
 	assert.Equal(t, 2, len(cp.CompositeTraintupleKeys))

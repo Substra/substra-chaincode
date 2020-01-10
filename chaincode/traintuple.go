@@ -285,6 +285,10 @@ func logStartTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) 
 		return
 	}
 	err = o.Fill(db, traintuple, inp.Key)
+	if err != nil {
+		return
+	}
+	err = UpdateComputePlan(db, traintuple.ComputePlanID, traintuple.Status)
 	return
 }
 
@@ -333,6 +337,11 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 		return
 	}
 
+	err = UpdateComputePlan(db, traintuple.ComputePlanID, traintuple.Status)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
@@ -364,6 +373,14 @@ func logFailTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 		return
 	}
 
+	err = UpdateComputePlan(db, traintuple.ComputePlanID, traintuple.Status)
+	if err != nil {
+		return
+	}
+	// Do not propagate failure if we are in a compute plan
+	if traintuple.ComputePlanID != "" {
+		return
+	}
 	// update depending tuples
 	err = UpdateTesttupleChildren(db, inp.Key, traintuple.Status)
 	if err != nil {
