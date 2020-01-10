@@ -321,3 +321,41 @@ func (cp *ComputePlan) Save(db *LedgerDB, ID string) error {
 	}
 	return nil
 }
+
+// CheckNewTupleStatus check the tuple status (from an updated tuple or a new one)
+// and, if required, it updates the compute plan' status and/or its doneCount.
+// It returns true if there is any change to the compute plan, false otherwise.
+func (cp *ComputePlan) CheckNewTupleStatus(tupleStatus string) bool {
+	switch cp.Status {
+	case StatusFailed, StatusCanceled:
+	case StatusDone:
+		// We might add tuples to a done compute plan
+		if stringInSlice(tupleStatus, []string{StatusWaiting, StatusTodo}) {
+			cp.Status = tupleStatus
+			return true
+		}
+	case StatusDoing:
+		switch tupleStatus {
+		case StatusFailed:
+			cp.Status = tupleStatus
+			return true
+		case StatusDone:
+			cp.DoneCount++
+			if cp.DoneCount == cp.TuplesCount {
+				cp.Status = tupleStatus
+			}
+			return true
+		}
+	case StatusTodo:
+		if tupleStatus == StatusDoing {
+			cp.Status = tupleStatus
+			return true
+		}
+	case StatusWaiting:
+		if tupleStatus == StatusTodo {
+			cp.Status = tupleStatus
+			return true
+		}
+	}
+	return false
+}

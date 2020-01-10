@@ -136,7 +136,6 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
 			return err
 		}
-		// TODO: Creage a function to addle the status of a compute plan
 		computePlan := ComputePlan{Status: traintuple.Status, TraintupleKeys: []string{traintupleKey}}
 		traintuple.ComputePlanID, err = computePlan.Create(db)
 		if err != nil {
@@ -150,6 +149,8 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 		return err
 	}
 	computePlan.TraintupleKeys = append(computePlan.TraintupleKeys, traintupleKey)
+	computePlan.TuplesCount++
+	computePlan.CheckNewTupleStatus(traintuple.Status)
 	err = computePlan.Save(db, traintuple.ComputePlanID)
 	if err != nil {
 		return err
