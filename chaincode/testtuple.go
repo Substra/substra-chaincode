@@ -159,12 +159,10 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 	switch status {
 	case StatusDone:
 		testtuple.Status = StatusTodo
-	case StatusFailed:
+	case StatusFailed, StatusAborted:
 		return errors.BadRequest(
-			"could not register this testtuple, the traintuple %s has a failed status",
-			traintupleKey)
-	case StatusCanceled:
-		testtuple.Status = StatusCanceled
+			"could not register this testtuple, the traintuple %s has a status %s",
+			traintupleKey, status)
 	default:
 		testtuple.Status = StatusWaiting
 	}
@@ -181,6 +179,25 @@ func (testtuple *Testtuple) GetKey() string {
 	}
 	hashKeys = append(hashKeys, testtuple.Dataset.DataSampleKeys...)
 	return HashForKey("testtuple", hashKeys...)
+}
+
+// AddToComputePlan add the testtuple to the compute plan of it's model
+func (testtuple *Testtuple) AddToComputePlan(db *LedgerDB, testtupleKey string) error {
+	if testtuple.ComputePlanID == "" {
+		return nil
+	}
+	computePlan, err := db.GetComputePlan(testtuple.ComputePlanID)
+	if err != nil {
+		return err
+	}
+	computePlan.TesttupleKeys = append(computePlan.TesttupleKeys, testtupleKey)
+	computePlan.TuplesCount++
+	computePlan.CheckNewTupleStatus(testtuple.Status)
+	err = computePlan.Save(db, testtuple.ComputePlanID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Save will put in the legder interface both the testtuple with its key
@@ -245,6 +262,10 @@ func createTesttupleInternal(db *LedgerDB, inp inputTesttuple) (string, error) {
 		return "", err
 	}
 	testtupleKey := testtuple.GetKey()
+	err = testtuple.AddToComputePlan(db, testtupleKey)
+	if err != nil {
+		return "", err
+	}
 	err = testtuple.Save(db, testtupleKey)
 	if err != nil {
 		return "", err
@@ -282,6 +303,7 @@ func logStartTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 	if err != nil {
 		return
 	}
+	err = UpdateComputePlan(db, testtuple.ComputePlanID, testtuple.Status)
 	return
 }
 
@@ -306,6 +328,10 @@ func logSuccessTest(db *LedgerDB, args []string) (o outputTesttuple, err error) 
 		return
 	}
 	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
+		return
+	}
+	err = UpdateComputePlan(db, testtuple.ComputePlanID, testtuple.Status)
+	if err != nil {
 		return
 	}
 	err = o.Fill(db, inp.Key, testtuple)
@@ -333,6 +359,10 @@ func logFailTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 		return
 	}
 	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
+		return
+	}
+	err = UpdateComputePlan(db, testtuple.ComputePlanID, testtuple.Status)
+	if err != nil {
 		return
 	}
 	err = o.Fill(db, inp.Key, testtuple)

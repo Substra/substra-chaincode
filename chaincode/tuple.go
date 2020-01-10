@@ -30,7 +30,7 @@ const (
 	StatusFailed   = "failed"
 	StatusDone     = "done"
 	StatusCanceled = "canceled"
-	StatusAborded  = "aborded"
+	StatusAborted  = "aborted"
 )
 
 // ------------------------------------------------
@@ -251,7 +251,7 @@ func determineTupleStatus(db *LedgerDB, tupleStatus, computePlanID string) (stri
 		return "", err
 	}
 	if stringInSlice(computePlan.Status, []string{StatusFailed, StatusCanceled}) {
-		return StatusAborded, nil
+		return StatusAborted, nil
 	}
 	return tupleStatus, nil
 }

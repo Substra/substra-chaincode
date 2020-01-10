@@ -246,40 +246,6 @@ func getOutComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err er
 	return resp, err
 }
 
-func getComputePlanStatus(db *LedgerDB, computePlan outputComputePlan) (status string, err error) {
-	// get all tuples like status in one slice
-	statusCollection := []string{}
-
-	keys := []string{}
-	keys = append(keys, computePlan.TraintupleKeys...)
-	keys = append(keys, computePlan.CompositeTraintupleKeys...)
-	keys = append(keys, computePlan.AggregatetupleKeys...)
-	keys = append(keys, computePlan.TesttupleKeys...)
-
-	for _, key := range keys {
-		tuple, err := db.GetGenericTuple(key)
-		if err != nil {
-			return "", err
-		}
-
-		statusCollection = append(statusCollection, tuple.Status)
-	}
-
-	return determineComputePlanStatus(statusCollection)
-}
-
-func determineComputePlanStatus(statusCollection []string) (status string, err error) {
-	// this status order matters
-	sts := []string{StatusCanceled, StatusFailed, StatusDoing, StatusTodo, StatusWaiting, StatusDone}
-	for _, s := range sts {
-		if stringInSlice(s, statusCollection) {
-			return s, nil
-		}
-	}
-
-	return "", fmt.Errorf("unknown compute plan status")
-}
-
 func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
 	inp := inputHash{}
 	err = AssetFromJSON(args, &inp)

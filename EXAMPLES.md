@@ -1404,7 +1404,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"traintuples\"
 {
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
- "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+ "computePlanID": "7072aa21867e47d753025df650a271b24b264f14e5cdba8b3f3a7205b0de6094",
  "status": "todo",
  "testtupleKeys": [
   "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96"
@@ -1486,14 +1486,14 @@ Smart contract: `queryComputePlan`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"7072aa21867e47d753025df650a271b24b264f14e5cdba8b3f3a7205b0de6094\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
- "aggregatetupleKeys": [],
- "compositeTraintupleKeys": [],
- "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+ "aggregatetupleKeys": null,
+ "compositeTraintupleKeys": null,
+ "computePlanID": "7072aa21867e47d753025df650a271b24b264f14e5cdba8b3f3a7205b0de6094",
  "status": "todo",
  "testtupleKeys": [
   "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96"
@@ -1512,9 +1512,9 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
 ```json
 [
  {
-  "aggregatetupleKeys": [],
-  "compositeTraintupleKeys": [],
-  "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+  "aggregatetupleKeys": null,
+  "compositeTraintupleKeys": null,
+  "computePlanID": "7072aa21867e47d753025df650a271b24b264f14e5cdba8b3f3a7205b0de6094",
   "status": "todo",
   "testtupleKeys": [
    "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96"
@@ -1536,14 +1536,14 @@ Smart contract: `cancelComputePlan`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"7072aa21867e47d753025df650a271b24b264f14e5cdba8b3f3a7205b0de6094\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
- "aggregatetupleKeys": [],
- "compositeTraintupleKeys": [],
- "computePlanID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+ "aggregatetupleKeys": null,
+ "compositeTraintupleKeys": null,
+ "computePlanID": "7072aa21867e47d753025df650a271b24b264f14e5cdba8b3f3a7205b0de6094",
  "status": "canceled",
  "testtupleKeys": [
   "1dbd49d84e00ad6f339f416af0decfaf2db8f14412786de65b597e49a6820f96"

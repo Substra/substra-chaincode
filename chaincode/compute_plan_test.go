@@ -459,7 +459,7 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 	cps, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Len(t, cps, 1, "queryComputePlans should return one compute plan")
-	assert.Equal(t, []string{}, cps[0].TesttupleKeys)
+	assert.Len(t, cps[0].TesttupleKeys, 0)
 }
 
 func TestQueryComputePlanEmpty(t *testing.T) {
@@ -473,25 +473,6 @@ func TestQueryComputePlanEmpty(t *testing.T) {
 	cps, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Equal(t, []outputComputePlan{}, cps)
-}
-
-func TestDetermineComputePlanStatus(t *testing.T) {
-	statusTests := []struct {
-		input    []string
-		expected string
-	}{
-		{[]string{StatusCanceled, StatusTodo, StatusFailed}, StatusCanceled},
-		{[]string{StatusWaiting, StatusTodo, StatusFailed, StatusDone}, StatusFailed},
-		{[]string{StatusTodo, StatusDoing, StatusTodo, StatusDone, StatusWaiting}, StatusDoing},
-		{[]string{StatusTodo, StatusTodo, StatusDone, StatusWaiting}, StatusTodo},
-		{[]string{StatusWaiting, StatusDone, StatusDone, StatusWaiting}, StatusWaiting},
-		{[]string{StatusDone, StatusDone, StatusDone, StatusDone}, StatusDone},
-	}
-
-	for _, st := range statusTests {
-		result, _ := determineComputePlanStatus(st.input)
-		assert.Equal(t, st.expected, result)
-	}
 }
 
 func TestCancelComputePlan(t *testing.T) {
@@ -510,29 +491,29 @@ func TestCancelComputePlan(t *testing.T) {
 	_, err = cancelComputePlan(db, assetToArgs(inputHash{Key: out.ComputePlanID}))
 	assert.NoError(t, err)
 
-	computePlanStatus, err := getComputePlanStatus(db, out)
-	assert.Equal(t, StatusCanceled, computePlanStatus)
+	computePlan, err := getOutComputePlan(db, out.ComputePlanID)
+	assert.Equal(t, StatusCanceled, computePlan.Status)
 
 	tuples, err := queryCompositeTraintuples(db, []string{})
 	assert.NoError(t, err)
 
-	nbCanceled, nbTodo := 0, 0
+	nbAborted, nbTodo := 0, 0
 	for _, tuple := range tuples {
-		if tuple.Status == StatusCanceled {
-			nbCanceled = nbCanceled + 1
+		if tuple.Status == StatusAborted {
+			nbAborted = nbAborted + 1
 		}
 		if tuple.Status == StatusTodo {
 			nbTodo = nbTodo + 1
 		}
 	}
 
-	assert.Equal(t, nbCanceled, 2)
+	assert.Equal(t, nbAborted, 2)
 	assert.Equal(t, nbTodo, 2)
 
 	tests, err := queryTesttuples(db, []string{})
 	assert.NoError(t, err)
 	for _, test := range tests {
-		assert.Equal(t, StatusCanceled, test.Status)
+		assert.Equal(t, StatusAborted, test.Status)
 	}
 }
 
@@ -554,8 +535,8 @@ func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
 	_, err = cancelComputePlan(db, assetToArgs(inputHash{Key: out.ComputePlanID}))
 	assert.NoError(t, err)
 
-	computePlanStatus, err := getComputePlanStatus(db, out)
-	assert.Equal(t, StatusCanceled, computePlanStatus)
+	computePlan, err := getOutComputePlan(db, out.ComputePlanID)
+	assert.Equal(t, StatusCanceled, computePlan.Status)
 
 	tuples, err := queryCompositeTraintuples(db, []string{})
 	assert.NoError(t, err)
