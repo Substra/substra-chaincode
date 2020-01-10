@@ -311,5 +311,3 @@ func TestQueryEmptyResponse(t *testing.T) {
 		})
 	}
 }
-
-var characterRunes = []rune("abcdef0123456789")
