@@ -267,6 +267,8 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	return resp, nil
 }
 
+// Create generate on ID for the compute plan, add it to the ledger
+// and register it in the compute plan index
 func (cp *ComputePlan) Create(db *LedgerDB) (string, error) {
 	ID := GetRandomHash()
 	cp.AssetType = ComputePlanType
@@ -280,6 +282,7 @@ func (cp *ComputePlan) Create(db *LedgerDB) (string, error) {
 	return ID, nil
 }
 
+// Save add or update the compute plan in the ledger
 func (cp *ComputePlan) Save(db *LedgerDB, ID string) error {
 	err := db.Put(ID, cp)
 	if err != nil {
@@ -326,6 +329,8 @@ func (cp *ComputePlan) CheckNewTupleStatus(tupleStatus string) bool {
 	return false
 }
 
+// UpdateComputePlan retreive the compute plan if the ID is not empty,
+// check if the updated status change anything and save it if it's the case
 func UpdateComputePlan(db *LedgerDB, ComputePlanID, tupleStatus string) error {
 	if ComputePlanID == "" {
 		return nil

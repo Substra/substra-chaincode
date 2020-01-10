@@ -171,6 +171,7 @@ func (modelType CompositeModelType) String() string {
 
 var characterRunes = []rune("abcdef0123456789")
 
+// GetRandomHash generate a random string of 64 character
 func GetRandomHash() string {
 	b := make([]rune, 64)
 	for i := range b {

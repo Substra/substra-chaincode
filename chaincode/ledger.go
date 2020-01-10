@@ -180,6 +180,7 @@ type Testtuple struct {
 	Tag           string      `json:"tag"`
 }
 
+// ComputePlan is the ledger's representation of a compute plan.
 type ComputePlan struct {
 	AggregatetupleKeys      []string  `json:"aggregatetupleKeys"`
 	AssetType               AssetType `json:"assetType"`
