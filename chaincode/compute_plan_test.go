@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -304,7 +303,6 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 
 	// Query the compute plan
 	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
-	spew.Dump(cp)
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
 	assert.NotNil(t, cp)
 	assert.Equal(t, 2, len(cp.CompositeTraintupleKeys))
@@ -350,7 +348,6 @@ func TestCreateComputePlan(t *testing.T) {
 
 	// check first traintuple
 	assert.NotZero(t, first)
-	assert.EqualValues(t, first.Key, first.ComputePlanID)
 	assert.Equal(t, inCP.Traintuples[0].AlgoKey, first.Algo.Hash)
 	assert.Equal(t, StatusTodo, first.Status)
 
@@ -385,7 +382,6 @@ func TestQueryComputePlan(t *testing.T) {
 	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	assert.Equal(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
 
 	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
@@ -406,7 +402,6 @@ func TestQueryComputePlans(t *testing.T) {
 	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	assert.Equal(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
 
 	cps, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
@@ -416,9 +411,6 @@ func TestQueryComputePlans(t *testing.T) {
 
 func validateDefaultComputePlan(t *testing.T, cp outputComputePlan) {
 	assert.Len(t, cp.TraintupleKeys, 2)
-	cpID := cp.TraintupleKeys[0]
-
-	assert.Equal(t, cpID, cp.ComputePlanID)
 
 	assert.NotEmpty(t, cp.TraintupleKeys[0])
 	assert.NotEmpty(t, cp.TraintupleKeys[1])
@@ -457,7 +449,6 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	assert.Equal(t, outCP.ComputePlanID, outCP.TraintupleKeys[0])
 	assert.Equal(t, []string{}, outCP.TesttupleKeys)
 
 	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))

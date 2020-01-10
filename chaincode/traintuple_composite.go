@@ -169,7 +169,7 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
 			return err
 		}
-		computePlan := ComputePlan{Status: traintuple.Status, TraintupleKeys: []string{traintupleKey}}
+		computePlan := ComputePlan{Status: traintuple.Status, CompositeTraintupleKeys: []string{traintupleKey}}
 		traintuple.ComputePlanID, err = computePlan.Create(db)
 		if err != nil {
 			return err
@@ -181,7 +181,7 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 	if err != nil {
 		return err
 	}
-	computePlan.TraintupleKeys = append(computePlan.TraintupleKeys, traintupleKey)
+	computePlan.CompositeTraintupleKeys = append(computePlan.CompositeTraintupleKeys, traintupleKey)
 	computePlan.TuplesCount++
 	computePlan.CheckNewTupleStatus(traintuple.Status)
 	err = computePlan.Save(db, traintuple.ComputePlanID)

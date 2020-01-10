@@ -139,7 +139,7 @@ func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetu
 			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
 			return err
 		}
-		computePlan := ComputePlan{Status: tuple.Status, TraintupleKeys: []string{traintupleKey}}
+		computePlan := ComputePlan{Status: tuple.Status, AggregatetupleKeys: []string{traintupleKey}}
 		tuple.ComputePlanID, err = computePlan.Create(db)
 		if err != nil {
 			return err
@@ -152,7 +152,7 @@ func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetu
 	if err != nil {
 		return err
 	}
-	computePlan.TraintupleKeys = append(computePlan.TraintupleKeys, traintupleKey)
+	computePlan.AggregatetupleKeys = append(computePlan.AggregatetupleKeys, traintupleKey)
 	computePlan.TuplesCount++
 	computePlan.CheckNewTupleStatus(tuple.Status)
 	err = computePlan.Save(db, tuple.ComputePlanID)

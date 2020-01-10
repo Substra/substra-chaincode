@@ -218,7 +218,7 @@ func queryComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err 
 
 func queryComputePlans(db *LedgerDB, args []string) (resp []outputComputePlan, err error) {
 	resp = []outputComputePlan{}
-	computePlanIDs, err := db.GetIndexKeys("computePlan~id", []string{"computeplan"})
+	computePlanIDs, err := db.GetIndexKeys("computePlan~id", []string{"computePlan"})
 	if err != nil {
 		return
 	}
