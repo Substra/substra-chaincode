@@ -370,7 +370,8 @@ func queryTesttuples(db *LedgerDB, args []string) ([]outputTesttuple, error) {
 	if err != nil {
 		return outTesttuples, err
 	}
-	for _, key := range elementsKeys {
+	nb := getLimitedNbSliceElements(elementsKeys)
+	for _, key := range elementsKeys[:nb] {
 		var out outputTesttuple
 		out, err = getOutputTesttuple(db, key)
 		if err != nil {

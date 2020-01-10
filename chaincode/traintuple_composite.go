@@ -438,7 +438,9 @@ func queryCompositeTraintuples(db *LedgerDB, args []string) ([]outputCompositeTr
 	if err != nil {
 		return outTraintuples, err
 	}
-	for _, key := range elementsKeys {
+
+	nb := getLimitedNbSliceElements(elementsKeys)
+	for _, key := range elementsKeys[:nb] {
 		outputTraintuple, err := getOutputCompositeTraintuple(db, key)
 		if err != nil {
 			return outTraintuples, err

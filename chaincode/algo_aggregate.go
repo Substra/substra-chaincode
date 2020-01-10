@@ -101,7 +101,8 @@ func queryAggregateAlgos(db *LedgerDB, args []string) (outAlgos []outputAggregat
 	if err != nil {
 		return
 	}
-	for _, key := range elementsKeys {
+	nb := getLimitedNbSliceElements(elementsKeys)
+	for _, key := range elementsKeys[:nb] {
 		algo, err := db.GetAggregateAlgo(key)
 		if err != nil {
 			return outAlgos, err

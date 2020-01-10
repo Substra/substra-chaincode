@@ -101,7 +101,8 @@ func queryCompositeAlgos(db *LedgerDB, args []string) (outAlgos []outputComposit
 	if err != nil {
 		return
 	}
-	for _, key := range elementsKeys {
+	nb := getLimitedNbSliceElements(elementsKeys)
+	for _, key := range elementsKeys[:nb] {
 		algo, err := db.GetCompositeAlgo(key)
 		if err != nil {
 			return outAlgos, err

@@ -402,7 +402,8 @@ func queryAggregatetuples(db *LedgerDB, args []string) ([]outputAggregatetuple, 
 	if err != nil {
 		return outputAggregatetuples, err
 	}
-	for _, key := range elementsKeys {
+	nb := getLimitedNbSliceElements(elementsKeys)
+	for _, key := range elementsKeys[:nb] {
 		outputAggregatetuple, err := getOutputAggregatetuple(db, key)
 		if err != nil {
 			return outputAggregatetuples, err
