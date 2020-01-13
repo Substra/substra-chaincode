@@ -449,12 +449,12 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 	outCP, err := createComputePlanInternal(db, inCP)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
-	assert.Equal(t, []string{}, outCP.TesttupleKeys)
+	assert.Len(t, outCP.TesttupleKeys, 0)
 
 	cp, err := queryComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
 	assert.NotNil(t, cp)
-	assert.Equal(t, []string{}, outCP.TesttupleKeys)
+	assert.Len(t, outCP.TesttupleKeys, 0)
 
 	cps, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")

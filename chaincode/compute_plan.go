@@ -110,7 +110,6 @@ func createComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputComputePlan, err error) {
 	var computePlanID, tupleKey string
 	traintupleKeysByID := map[string]string{}
-	computePlan := ComputePlan{}
 	DAG, err := createComputeDAG(inp)
 	if err != nil {
 		return resp, errors.BadRequest(err)
@@ -136,7 +135,6 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 			}
 
 			traintupleKeysByID[computeTraintuple.ID] = tupleKey
-			computePlan.TraintupleKeys = append(computePlan.TraintupleKeys, tupleKey)
 		case CompositeTraintupleType:
 			computeCompositeTraintuple := inp.CompositeTraintuples[task.InputIndex]
 			inpCompositeTraintuple := inputCompositeTraintuple{
@@ -155,7 +153,6 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 			}
 
 			traintupleKeysByID[computeCompositeTraintuple.ID] = tupleKey
-			computePlan.CompositeTraintupleKeys = append(computePlan.CompositeTraintupleKeys, tupleKey)
 		case AggregatetupleType:
 			computeAggregatetuple := inp.Aggregatetuples[task.InputIndex]
 			inpAggregatetuple := inputAggregatetuple{
@@ -174,7 +171,6 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 			}
 
 			traintupleKeysByID[computeAggregatetuple.ID] = tupleKey
-			computePlan.AggregatetupleKeys = append(computePlan.AggregatetupleKeys, tupleKey)
 		}
 		if i == 0 {
 			tuple, err := db.GetGenericTuple(tupleKey)
@@ -186,7 +182,6 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 
 	}
 
-	computePlan.TesttupleKeys = []string{}
 	for index, computeTesttuple := range inp.Testtuples {
 		inpTesttuple := inputTesttuple{}
 		err = inpTesttuple.Fill(computeTesttuple, traintupleKeysByID)
@@ -194,15 +189,17 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 			return resp, errors.BadRequest("testtuple at index %s: "+err.Error(), index)
 		}
 
-		testtupleKey, err := createTesttupleInternal(db, inpTesttuple)
+		_, err := createTesttupleInternal(db, inpTesttuple)
 		if err != nil {
 			return resp, errors.BadRequest("testtuple at index %s: "+err.Error(), index)
 		}
 
-		computePlan.TesttupleKeys = append(computePlan.TesttupleKeys, testtupleKey)
 	}
 
-	computePlan.Status = StatusTodo
+	computePlan, err := db.GetComputePlan(computePlanID)
+	if err != nil {
+		return resp, err
+	}
 	resp.Fill(computePlanID, computePlan)
 	return resp, err
 }
