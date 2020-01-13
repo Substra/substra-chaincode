@@ -497,10 +497,7 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 			continue
 		}
 
-		switch {
-		case child.Status == StatusAborted:
-			return nil
-		case child.Status != StatusWaiting:
+		if child.Status != StatusWaiting {
 			return fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", childTraintupleKey, child.Status)
 		}
 
@@ -663,6 +660,11 @@ func UpdateTesttupleChildren(db *LedgerDB, traintupleKey string, traintupleStatu
 		if err != nil {
 			return err
 		}
+
+		if testtuple.Status == StatusAborted {
+			continue
+		}
+
 		testtuple.TraintupleKey = traintupleKey
 
 		if err := testtuple.commitStatusUpdate(db, testtupleKey, newStatus); err != nil {

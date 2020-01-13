@@ -451,7 +451,7 @@ func (testtuple *Testtuple) commitStatusUpdate(db *LedgerDB, testtupleKey string
 	}
 
 	// do not update if previous status is already Done, Failed, Todo, Doing
-	if StatusCanceled == newStatus && testtuple.Status != StatusWaiting {
+	if StatusAborted == newStatus && testtuple.Status != StatusWaiting {
 		return nil
 	}
 

@@ -197,9 +197,11 @@ func (db *LedgerDB) GetAssetType(key string) (AssetType, error) {
 // from the chaincode db
 func (db *LedgerDB) GetGenericTuple(key string) (GenericTuple, error) {
 	asset := GenericTuple{}
-	if err := db.Get(key, &asset); err != nil {
+	err := db.Get(key, &asset)
+	if err != nil {
 		return asset, err
 	}
+	asset.Status, err = determineTupleStatus(db, asset.Status, asset.ComputePlanID)
 	return asset, nil
 }
 

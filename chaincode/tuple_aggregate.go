@@ -506,7 +506,7 @@ func (tuple *Aggregatetuple) commitStatusUpdate(db *LedgerDB, aggregatetupleKey 
 	}
 
 	// do not update if previous status is already Done, Failed, Todo, Doing
-	if StatusCanceled == newStatus && tuple.Status != StatusWaiting {
+	if StatusAborted == newStatus && tuple.Status != StatusWaiting {
 		return nil
 	}
 

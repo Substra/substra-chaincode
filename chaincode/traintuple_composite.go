@@ -553,7 +553,7 @@ func (traintuple *CompositeTraintuple) commitStatusUpdate(db *LedgerDB, traintup
 	}
 
 	// do not update if previous status is already Done, Failed, Todo, Doing
-	if StatusCanceled == newStatus && traintuple.Status != StatusWaiting {
+	if StatusAborted == newStatus && traintuple.Status != StatusWaiting {
 		return nil
 	}
 

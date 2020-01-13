@@ -548,3 +548,37 @@ func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
 		assert.Equal(t, StatusAborted, tuple.Status, tuple.Rank)
 	}
 }
+
+func TestLogSuccessAfterCancel(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "aggregateAlgo")
+
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan)
+	assert.NoError(t, err)
+
+	logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[0]}))
+	logStartCompositeTrain(db, assetToArgs(inputHash{out.CompositeTraintupleKeys[1]}))
+
+	_, err = cancelComputePlan(db, assetToArgs(inputHash{Key: out.ComputePlanID}))
+	assert.NoError(t, err)
+
+	inp := inputLogSuccessCompositeTrain{}
+	inp.fillDefaults()
+	inp.Key = out.CompositeTraintupleKeys[1]
+	_, err = logSuccessCompositeTrain(db, assetToArgs(inp))
+	assert.NoError(t, err)
+
+	computePlan, err := getOutComputePlan(db, out.ComputePlanID)
+	assert.Equal(t, StatusCanceled, computePlan.Status)
+
+	tuples, err := queryCompositeTraintuples(db, []string{})
+	assert.NoError(t, err)
+	expected := []string{StatusDone, StatusDoing, StatusAborted, StatusAborted}
+	for i, tuple := range tuples {
+		assert.Equal(t, expected[i], tuple.Status)
+	}
+}
