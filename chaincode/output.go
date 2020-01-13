@@ -293,6 +293,7 @@ type outputComputePlan struct {
 	AggregatetupleKeys      []string `json:"aggregatetupleKeys"`
 	CompositeTraintupleKeys []string `json:"compositeTraintupleKeys"`
 	TesttupleKeys           []string `json:"testtupleKeys"`
+	Tag                     string   `json:"tag"`
 	Status                  string   `json:"status"`
 }
 
@@ -303,6 +304,7 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan) {
 	out.CompositeTraintupleKeys = in.CompositeTraintupleKeys
 	out.TesttupleKeys = in.TesttupleKeys
 	out.Status = in.Status
+	out.Tag = in.Tag
 }
 
 type outputPermissions struct {

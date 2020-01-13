@@ -104,7 +104,23 @@ func createComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	if err != nil {
 		return
 	}
+	count := len(inp.Traintuples) + len(inp.Aggregatetuples) + len(inp.CompositeTraintuples)
+	if count == 0 {
+		return createEmptyComputePlan(db, inp)
+	}
 	return createComputePlanInternal(db, inp)
+}
+
+func createEmptyComputePlan(db *LedgerDB, inp inputComputePlan) (resp outputComputePlan, err error) {
+	var computePlan ComputePlan
+	computePlan.Status = StatusWaiting
+	computePlan.Tag = inp.Tag
+	ID, err := computePlan.Create(db)
+	if err != nil {
+		return resp, err
+	}
+	resp.Fill(ID, computePlan)
+	return resp, nil
 }
 
 func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputComputePlan, err error) {
@@ -199,6 +215,13 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 	computePlan, err := db.GetComputePlan(computePlanID)
 	if err != nil {
 		return resp, err
+	}
+	if inp.Tag != "" {
+		computePlan.Tag = inp.Tag
+		err = computePlan.Save(db, computePlanID)
+		if err != nil {
+			return resp, errors.BadRequest(err, "problem with tag %s: ", inp.Tag)
+		}
 	}
 	resp.Fill(computePlanID, computePlan)
 	return resp, err

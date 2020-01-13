@@ -24,6 +24,7 @@ import (
 
 var (
 	defaultComputePlan = inputComputePlan{
+		Tag: tag,
 		Traintuples: []inputComputePlanTraintuple{
 			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerOpenerHash,
@@ -410,6 +411,7 @@ func TestQueryComputePlans(t *testing.T) {
 }
 
 func validateDefaultComputePlan(t *testing.T, cp outputComputePlan) {
+	assert.Equal(t, tag, cp.Tag)
 	assert.Len(t, cp.TraintupleKeys, 2)
 
 	assert.NotEmpty(t, cp.TraintupleKeys[0])
@@ -581,4 +583,15 @@ func TestLogSuccessAfterCancel(t *testing.T) {
 	for i, tuple := range tuples {
 		assert.Equal(t, expected[i], tuple.Status)
 	}
+}
+
+func TestCreateTagedEmptyComputePlan(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	out, err := createComputePlan(db, assetToArgs(inputComputePlan{Tag: tag}))
+	assert.NoError(t, err)
+	assert.Equal(t, tag, out.Tag)
 }

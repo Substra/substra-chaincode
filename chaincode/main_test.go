@@ -56,6 +56,7 @@ const worker = "SampleOrg"
 const traintupleKey = "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
 const compositeTraintupleKey = "57104c72d50215d8cfa288059fdf47bcc5f808f6685a5f08fa08f792cd782c68"
 const aggregatetupleKey = "af689258ffecdb5172b285b04475ac44941b7e6acd88a0d076059ce520cb0a95"
+const tag = "a tag is simply a string"
 
 func TestInit(t *testing.T) {
 	scc := new(SubstraChaincode)

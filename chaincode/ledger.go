@@ -187,6 +187,7 @@ type ComputePlan struct {
 	CompositeTraintupleKeys []string  `json:"compositeTraintupleKeys"`
 	DoneCount               int       `json:"DoneCount"`
 	Status                  string    `json:"status"`
+	Tag                     string    `json:"tag"`
 	TesttupleKeys           []string  `json:"testtupleKeys"`
 	TraintupleKeys          []string  `json:"traintupleKeys"`
 	TuplesCount             int       `json:"tuplesCount"`
