@@ -492,12 +492,15 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 			return err
 		}
 
-		if stringInSlice(child.Status, []string{StatusFailed, StatusCanceled}) {
+		if stringInSlice(child.Status, []string{StatusFailed, StatusAborted}) {
 			// traintuple is already failed, don't update it
 			continue
 		}
 
-		if child.Status != StatusWaiting {
+		switch {
+		case child.Status == StatusAborted:
+			return nil
+		case child.Status != StatusWaiting:
 			return fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", childTraintupleKey, child.Status)
 		}
 
@@ -525,7 +528,7 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 		}
 
 		alreadyUpdatedKeys = append(alreadyUpdatedKeys, childTraintupleKey)
-		if stringInSlice(traintupleStatus, []string{StatusFailed, StatusCanceled}) {
+		if stringInSlice(traintupleStatus, []string{StatusFailed, StatusAborted}) {
 			// Recursively call for an update on this child's children
 			err = UpdateTesttupleChildren(db, childTraintupleKey, childTraintupleStatus)
 			if err != nil {
@@ -611,7 +614,7 @@ func (traintuple *Traintuple) commitStatusUpdate(db *LedgerDB, traintupleKey str
 	}
 
 	// do not update if previous status is already Done, Failed, Todo, Doing
-	if StatusCanceled == newStatus && traintuple.Status != StatusWaiting {
+	if StatusAborted == newStatus && traintuple.Status != StatusWaiting {
 		return nil
 	}
 

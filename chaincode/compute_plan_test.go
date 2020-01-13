@@ -541,6 +541,10 @@ func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
 	tuples, err := queryCompositeTraintuples(db, []string{})
 	assert.NoError(t, err)
 	for _, tuple := range tuples {
-		assert.NotEqual(t, StatusCanceled, tuple.Status)
+		if tuple.Rank == 0 {
+			assert.NotEqual(t, StatusAborted, tuple.Status, tuple.Rank)
+			continue
+		}
+		assert.Equal(t, StatusAborted, tuple.Status, tuple.Rank)
 	}
 }

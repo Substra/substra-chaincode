@@ -30,7 +30,7 @@ const (
 	StatusFailed   = "failed"
 	StatusDone     = "done"
 	StatusCanceled = "canceled"
-	StatusAborted  = "aborted"
+	StatusAborted  = "canceled"
 )
 
 // ------------------------------------------------
@@ -179,7 +179,7 @@ func validateTupleOwner(db *LedgerDB, worker string) error {
 
 // check validity of traintuple update: consistent status and agent submitting the transaction
 func checkUpdateTuple(db *LedgerDB, worker string, oldStatus string, newStatus string) error {
-	if StatusCanceled == newStatus {
+	if StatusAborted == newStatus {
 		return nil
 	}
 
@@ -230,8 +230,8 @@ func determineStatusFromInModels(statuses []string) string {
 		return StatusFailed
 	}
 
-	if stringInSlice(StatusCanceled, statuses) {
-		return StatusCanceled
+	if stringInSlice(StatusAborted, statuses) {
+		return StatusAborted
 	}
 
 	for _, s := range statuses {
