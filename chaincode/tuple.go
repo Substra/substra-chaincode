@@ -30,7 +30,7 @@ const (
 	StatusFailed   = "failed"
 	StatusDone     = "done"
 	StatusCanceled = "canceled"
-	// The status aborted is still under discussion so the logic is allready
+	// The status aborted is still under discussion so the logic is already
 	// implemented but it's value is the same as canceled for now.
 	StatusAborted = "canceled"
 )
