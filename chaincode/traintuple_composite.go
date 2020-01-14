@@ -169,22 +169,30 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
 			return err
 		}
-		traintuple.ComputePlanID = traintupleKey
+		computePlan := ComputePlan{Status: traintuple.Status, CompositeTraintupleKeys: []string{traintupleKey}}
+		traintuple.ComputePlanID, err = computePlan.Create(db)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 	traintuple.ComputePlanID = inp.ComputePlanID
+	computePlan, err := db.GetComputePlan(inp.ComputePlanID)
+	if err != nil {
+		return err
+	}
+	computePlan.CompositeTraintupleKeys = append(computePlan.CompositeTraintupleKeys, traintupleKey)
+	computePlan.TuplesCount++
+	computePlan.CheckNewTupleStatus(traintuple.Status)
+	err = computePlan.Save(db, traintuple.ComputePlanID)
+	if err != nil {
+		return err
+	}
+
 	if !checkComputePlanAvailability {
 		return nil
 	}
 	var ttKeys []string
-	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID})
-	if err != nil {
-		return err
-	}
-	if len(ttKeys) == 0 {
-		return errors.BadRequest("cannot find the ComputePlanID %s", inp.ComputePlanID)
-	}
-
 	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID, traintuple.Dataset.Worker, inp.Rank})
 	if err != nil {
 		return err
@@ -192,7 +200,6 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 		err = errors.BadRequest("ComputePlanID %s with worker %s rank %d already exists", inp.ComputePlanID, traintuple.Dataset.Worker, traintuple.Rank)
 		return err
 	}
-
 	return nil
 }
 
@@ -222,9 +229,6 @@ func (traintuple *CompositeTraintuple) Save(db *LedgerDB, traintupleKey string) 
 	}
 	if traintuple.ComputePlanID != "" {
 		if err := db.CreateIndex("computePlan~computeplanid~worker~rank~key", []string{"computePlan", traintuple.ComputePlanID, traintuple.Dataset.Worker, strconv.Itoa(traintuple.Rank), traintupleKey}); err != nil {
-			return err
-		}
-		if err := db.CreateIndex("computeplan~id", []string{"computeplan", traintuple.ComputePlanID}); err != nil {
 			return err
 		}
 	}
@@ -316,7 +320,11 @@ func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTrain
 	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	o.Fill(db, compositeTraintuple, inp.Key)
+	err = o.Fill(db, compositeTraintuple, inp.Key)
+	if err != nil {
+		return
+	}
+	err = UpdateComputePlan(db, compositeTraintuple.ComputePlanID, compositeTraintuple.Status)
 	return
 }
 
@@ -362,8 +370,12 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 		return
 	}
 
-	o.Fill(db, compositeTraintuple, inp.Key)
+	err = o.Fill(db, compositeTraintuple, inp.Key)
+	if err != nil {
+		return
+	}
 
+	err = UpdateComputePlan(db, compositeTraintuple.ComputePlanID, compositeTraintuple.Status)
 	return
 }
 
@@ -391,8 +403,18 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 		return
 	}
 
-	o.Fill(db, compositeTraintuple, inp.Key)
-
+	err = o.Fill(db, compositeTraintuple, inp.Key)
+	if err != nil {
+		return
+	}
+	err = UpdateComputePlan(db, compositeTraintuple.ComputePlanID, compositeTraintuple.Status)
+	if err != nil {
+		return
+	}
+	// Do not propagate failure if we are in a compute plan
+	if compositeTraintuple.ComputePlanID != "" {
+		return
+	}
 	// update depending tuples
 	err = UpdateTesttupleChildren(db, inp.Key, compositeTraintuple.Status)
 	if err != nil {
@@ -400,10 +422,6 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 	}
 
 	err = UpdateTraintupleChildren(db, inp.Key, compositeTraintuple.Status, []string{})
-	if err != nil {
-		return
-	}
-
 	return
 }
 
@@ -537,7 +555,7 @@ func (traintuple *CompositeTraintuple) commitStatusUpdate(db *LedgerDB, traintup
 	}
 
 	// do not update if previous status is already Done, Failed, Todo, Doing
-	if StatusCanceled == newStatus && traintuple.Status != StatusWaiting {
+	if StatusAborted == newStatus && traintuple.Status != StatusWaiting {
 		return nil
 	}
 

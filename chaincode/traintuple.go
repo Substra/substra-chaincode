@@ -136,21 +136,30 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
 			return err
 		}
-		traintuple.ComputePlanID = traintupleKey
+		computePlan := ComputePlan{Status: traintuple.Status, TraintupleKeys: []string{traintupleKey}}
+		traintuple.ComputePlanID, err = computePlan.Create(db)
+		if err != nil {
+			return err
+		}
 		return nil
 	}
 	traintuple.ComputePlanID = inp.ComputePlanID
+	computePlan, err := db.GetComputePlan(inp.ComputePlanID)
+	if err != nil {
+		return err
+	}
+	computePlan.TraintupleKeys = append(computePlan.TraintupleKeys, traintupleKey)
+	computePlan.TuplesCount++
+	computePlan.CheckNewTupleStatus(traintuple.Status)
+	err = computePlan.Save(db, traintuple.ComputePlanID)
+	if err != nil {
+		return err
+	}
+
 	if !checkComputePlanAvailability {
 		return nil
 	}
 	var ttKeys []string
-	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID})
-	if err != nil {
-		return err
-	}
-	if len(ttKeys) == 0 {
-		return errors.BadRequest("cannot find the ComputePlanID %s", inp.ComputePlanID)
-	}
 	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID, traintuple.Dataset.Worker, inp.Rank})
 	if err != nil {
 		return err
@@ -158,7 +167,6 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 		err = errors.BadRequest("ComputePlanID %s with worker %s rank %d already exists", inp.ComputePlanID, traintuple.Dataset.Worker, traintuple.Rank)
 		return err
 	}
-
 	return nil
 }
 
@@ -185,9 +193,6 @@ func (traintuple *Traintuple) Save(db *LedgerDB, traintupleKey string) error {
 	}
 	if traintuple.ComputePlanID != "" {
 		if err := db.CreateIndex("computePlan~computeplanid~worker~rank~key", []string{"computePlan", traintuple.ComputePlanID, traintuple.Dataset.Worker, strconv.Itoa(traintuple.Rank), traintupleKey}); err != nil {
-			return err
-		}
-		if err := db.CreateIndex("computeplan~id", []string{"computeplan", traintuple.ComputePlanID}); err != nil {
 			return err
 		}
 	}
@@ -280,6 +285,10 @@ func logStartTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) 
 		return
 	}
 	err = o.Fill(db, traintuple, inp.Key)
+	if err != nil {
+		return
+	}
+	err = UpdateComputePlan(db, traintuple.ComputePlanID, traintuple.Status)
 	return
 }
 
@@ -328,6 +337,11 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 		return
 	}
 
+	err = UpdateComputePlan(db, traintuple.ComputePlanID, traintuple.Status)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
@@ -359,6 +373,14 @@ func logFailTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 		return
 	}
 
+	err = UpdateComputePlan(db, traintuple.ComputePlanID, traintuple.Status)
+	if err != nil {
+		return
+	}
+	// Do not propagate failure if we are in a compute plan
+	if traintuple.ComputePlanID != "" {
+		return
+	}
 	// update depending tuples
 	err = UpdateTesttupleChildren(db, inp.Key, traintuple.Status)
 	if err != nil {
@@ -471,7 +493,7 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 			return err
 		}
 
-		if stringInSlice(child.Status, []string{StatusFailed, StatusCanceled}) {
+		if stringInSlice(child.Status, []string{StatusFailed, StatusAborted}) {
 			// traintuple is already failed, don't update it
 			continue
 		}
@@ -504,7 +526,7 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 		}
 
 		alreadyUpdatedKeys = append(alreadyUpdatedKeys, childTraintupleKey)
-		if stringInSlice(traintupleStatus, []string{StatusFailed, StatusCanceled}) {
+		if stringInSlice(traintupleStatus, []string{StatusFailed, StatusAborted}) {
 			// Recursively call for an update on this child's children
 			err = UpdateTesttupleChildren(db, childTraintupleKey, childTraintupleStatus)
 			if err != nil {
@@ -590,7 +612,7 @@ func (traintuple *Traintuple) commitStatusUpdate(db *LedgerDB, traintupleKey str
 	}
 
 	// do not update if previous status is already Done, Failed, Todo, Doing
-	if StatusCanceled == newStatus && traintuple.Status != StatusWaiting {
+	if StatusAborted == newStatus && traintuple.Status != StatusWaiting {
 		return nil
 	}
 
@@ -639,6 +661,11 @@ func UpdateTesttupleChildren(db *LedgerDB, traintupleKey string, traintupleStatu
 		if err != nil {
 			return err
 		}
+
+		if testtuple.Status == StatusAborted {
+			continue
+		}
+
 		testtuple.TraintupleKey = traintupleKey
 
 		if err := testtuple.commitStatusUpdate(db, testtupleKey, newStatus); err != nil {

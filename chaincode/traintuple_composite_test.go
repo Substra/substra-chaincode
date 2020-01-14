@@ -205,12 +205,15 @@ func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
 	key := res["key"]
+	db := NewLedgerDB(mockStub)
+	ct, err := db.GetCompositeTraintuple(key)
+	assert.NoError(t, err)
 	// Failed to add a traintuple with the same rank
 	inpTraintuple = inputCompositeTraintuple{
 		InHeadModelKey:  key,
 		InTrunkModelKey: key,
 		Rank:            "0",
-		ComputePlanID:   key}
+		ComputePlanID:   ct.ComputePlanID}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add a traintuple of the same rank")
@@ -223,14 +226,14 @@ func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
 		ComputePlanID:   "notarealone"}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting ComputePlanID")
+	assert.EqualValues(t, 404, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting ComputePlanID")
 
 	// Succesfully add a traintuple to the same ComputePlanID
 	inpTraintuple = inputCompositeTraintuple{
 		InHeadModelKey:  key,
 		InTrunkModelKey: key,
 		Rank:            "1",
-		ComputePlanID:   key}
+		ComputePlanID:   ct.ComputePlanID}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same ComputePlanID")
@@ -436,10 +439,12 @@ func TestInsertTraintupleTwiceComposite(t *testing.T) {
 	assert.EqualValues(t, http.StatusOK, resp.Status)
 	var _key struct{ Key string }
 	json.Unmarshal(resp.Payload, &_key)
-
+	db := NewLedgerDB(mockStub)
+	tuple, err := db.GetCompositeTraintuple(_key.Key)
+	assert.NoError(t, err)
 	// create a second composite traintuple in the same ComputePlan
 	inpTraintuple.Rank = "1"
-	inpTraintuple.ComputePlanID = _key.Key
+	inpTraintuple.ComputePlanID = tuple.ComputePlanID
 	inpTraintuple.InHeadModelKey = _key.Key
 	inpTraintuple.InTrunkModelKey = _key.Key
 	resp = mockStub.MockInvoke("42", methodAndAssetToByte("createCompositeTraintuple", inpTraintuple))

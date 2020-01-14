@@ -33,6 +33,7 @@ const (
 	CompositeTraintupleType
 	AggregatetupleType
 	TesttupleType
+	ComputePlanType
 	// when adding a new type here, don't forget to update
 	// the String() function in utils.go
 )
@@ -177,6 +178,19 @@ type Testtuple struct {
 	Rank          int         `json:"rank"`
 	Status        string      `json:"status"`
 	Tag           string      `json:"tag"`
+}
+
+// ComputePlan is the ledger's representation of a compute plan.
+type ComputePlan struct {
+	AggregatetupleKeys      []string  `json:"aggregatetupleKeys"`
+	AssetType               AssetType `json:"assetType"`
+	CompositeTraintupleKeys []string  `json:"compositeTraintupleKeys"`
+	DoneCount               int       `json:"DoneCount"`
+	Status                  string    `json:"status"`
+	Tag                     string    `json:"tag"`
+	TesttupleKeys           []string  `json:"testtupleKeys"`
+	TraintupleKeys          []string  `json:"traintupleKeys"`
+	TuplesCount             int       `json:"tuplesCount"`
 }
 
 // ---------------------------------------------------------------------------------

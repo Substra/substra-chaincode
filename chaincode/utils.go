@@ -18,6 +18,7 @@ import (
 	"chaincode/errors"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"reflect"
 	"unicode"
 	"unicode/utf8"
@@ -149,6 +150,8 @@ func (assetType AssetType) String() string {
 		return "Aggregatetuple"
 	case TesttupleType:
 		return "Testtuple"
+	case ComputePlanType:
+		return "ComputePlan"
 	default:
 		return fmt.Sprintf("(unknown asset type: %d)", assetType)
 	}
@@ -164,4 +167,15 @@ func (modelType CompositeModelType) String() string {
 	default:
 		return fmt.Sprintf("(unknown model type: %d)", modelType)
 	}
+}
+
+var characterRunes = []rune("abcdef0123456789")
+
+// GetRandomHash generate a random string of 64 character
+func GetRandomHash() string {
+	b := make([]rune, 64)
+	for i := range b {
+		b[i] = characterRunes[rand.Intn(len(characterRunes))]
+	}
+	return string(b)
 }

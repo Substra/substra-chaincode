@@ -147,6 +147,7 @@ type inputQueryFilter struct {
 // Beware, it's order sensitive since the `InModelsIDs` can only be interpreted
 // if the training tasks matching those IDs have already been created.
 type inputComputePlan struct {
+	Tag                  string                                `validate:"omitempty,lte=64" json:"tag"`
 	Traintuples          []inputComputePlanTraintuple          `validate:"omitempty" json:"traintuples"`
 	Aggregatetuples      []inputComputePlanAggregatetuple      `validate:"omitempty" json:"aggregatetuples"`
 	CompositeTraintuples []inputComputePlanCompositeTraintuple `validate:"omitempty" json:"compositeTraintuples"`

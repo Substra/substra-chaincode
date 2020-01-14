@@ -193,11 +193,14 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
 	key := res["key"]
+	db := NewLedgerDB(mockStub)
+	tuple, err := db.GetTraintuple(key)
+	assert.NoError(t, err)
 	// Failed to add a traintuple with the same rank
 	inpTraintuple = inputTraintuple{
 		InModels:      []string{key},
 		Rank:          "0",
-		ComputePlanID: key}
+		ComputePlanID: tuple.ComputePlanID}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add a traintuple of the same rank")
@@ -209,13 +212,13 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 		ComputePlanID: "notarealone"}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting ComputePlanID")
+	assert.EqualValues(t, 404, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting ComputePlanID")
 
 	// Succesfully add a traintuple to the same ComputePlanID
 	inpTraintuple = inputTraintuple{
 		InModels:      []string{key},
 		Rank:          "1",
-		ComputePlanID: key}
+		ComputePlanID: tuple.ComputePlanID}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same ComputePlanID")
@@ -234,7 +237,7 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 		AlgoKey:       newAlgoHash,
 		InModels:      []string{ttkey},
 		Rank:          "2",
-		ComputePlanID: key}
+		ComputePlanID: tuple.ComputePlanID}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able to create a traintuple with the same ComputePlanID and different algo keys")
@@ -414,9 +417,12 @@ func TestInsertTraintupleTwice(t *testing.T) {
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("createTraintuple", inpTraintuple))
 	assert.EqualValues(t, http.StatusOK, resp.Status)
 
+	db := NewLedgerDB(mockStub)
+	tuple, err := db.GetTraintuple(traintupleKey)
+	assert.NoError(t, err)
 	// create a second traintuple in the same ComputePlan
 	inpTraintuple.Rank = "1"
-	inpTraintuple.ComputePlanID = traintupleKey
+	inpTraintuple.ComputePlanID = tuple.ComputePlanID
 	inpTraintuple.InModels = []string{traintupleKey}
 	resp = mockStub.MockInvoke("42", methodAndAssetToByte("createTraintuple", inpTraintuple))
 	assert.EqualValues(t, http.StatusOK, resp.Status)

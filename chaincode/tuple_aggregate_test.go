@@ -178,11 +178,14 @@ func TestTraintupleMultipleCommputePlanCreationsAggregate(t *testing.T) {
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "key")
 	key := res["key"]
+	db := NewLedgerDB(mockStub)
+	tuple, err := db.GetAggregatetuple(key)
+	assert.NoError(t, err)
 	// Failed to add a traintuple with the same rank
 	inpTraintuple = inputAggregatetuple{
 		InModels:      []string{key},
 		Rank:          "0",
-		ComputePlanID: key}
+		ComputePlanID: tuple.ComputePlanID}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add an aggregate tuple of the same rank")
@@ -194,13 +197,13 @@ func TestTraintupleMultipleCommputePlanCreationsAggregate(t *testing.T) {
 		ComputePlanID: "notarealone"}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add an aggregate tuple to an unexisting ComputePlanID")
+	assert.EqualValues(t, 404, resp.Status, resp.Message, "should failed to add an aggregate tuple to an unexisting ComputePlanID")
 
 	// Succesfully add a traintuple to the same ComputePlanID
 	inpTraintuple = inputAggregatetuple{
 		InModels:      []string{key},
 		Rank:          "1",
-		ComputePlanID: key}
+		ComputePlanID: tuple.ComputePlanID}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create an aggregate tuple with the same ComputePlanID")
@@ -396,10 +399,12 @@ func TestInsertTraintupleTwiceAggregate(t *testing.T) {
 	assert.EqualValues(t, http.StatusOK, resp.Status)
 	var _key struct{ Key string }
 	json.Unmarshal(resp.Payload, &_key)
-
+	db := NewLedgerDB(mockStub)
+	tuple, err := db.GetAggregatetuple(_key.Key)
+	assert.NoError(t, err)
 	// create a second aggregate tuple in the same ComputePlan
 	inpTraintuple.Rank = "1"
-	inpTraintuple.ComputePlanID = _key.Key
+	inpTraintuple.ComputePlanID = tuple.ComputePlanID
 	inpTraintuple.InModels = []string{_key.Key}
 	resp = mockStub.MockInvoke("42", methodAndAssetToByte("createAggregatetuple", inpTraintuple))
 	assert.EqualValues(t, http.StatusOK, resp.Status)

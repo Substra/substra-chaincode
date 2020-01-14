@@ -30,6 +30,9 @@ const (
 	StatusFailed   = "failed"
 	StatusDone     = "done"
 	StatusCanceled = "canceled"
+	// The status aborted is still under discussion so the logic is already
+	// implemented but it's value is the same as canceled for now.
+	StatusAborted = "canceled"
 )
 
 // ------------------------------------------------
@@ -178,7 +181,7 @@ func validateTupleOwner(db *LedgerDB, worker string) error {
 
 // check validity of traintuple update: consistent status and agent submitting the transaction
 func checkUpdateTuple(db *LedgerDB, worker string, oldStatus string, newStatus string) error {
-	if StatusCanceled == newStatus {
+	if StatusAborted == newStatus {
 		return nil
 	}
 
@@ -229,8 +232,8 @@ func determineStatusFromInModels(statuses []string) string {
 		return StatusFailed
 	}
 
-	if stringInSlice(StatusCanceled, statuses) {
-		return StatusCanceled
+	if stringInSlice(StatusAborted, statuses) {
+		return StatusAborted
 	}
 
 	for _, s := range statuses {
@@ -241,18 +244,16 @@ func determineStatusFromInModels(statuses []string) string {
 	return StatusTodo
 }
 
-func cancelIfComputePlanIsCanceled(db *LedgerDB, key, computePlanID string, t StatusUpdater) (bool, error) {
-	status, err := getComputePlanStatusByComputePlanID(db, computePlanID)
+func determineTupleStatus(db *LedgerDB, tupleStatus, computePlanID string) (string, error) {
+	if tupleStatus != StatusWaiting || computePlanID == "" {
+		return tupleStatus, nil
+	}
+	computePlan, err := db.GetComputePlan(computePlanID)
 	if err != nil {
-		return false, err
+		return "", err
 	}
-
-	if status == StatusCanceled {
-		if err = t.commitStatusUpdate(db, key, StatusCanceled); err != nil {
-			return false, err
-		}
-
-		return true, nil
+	if stringInSlice(computePlan.Status, []string{StatusFailed, StatusCanceled}) {
+		return StatusAborted, nil
 	}
-	return false, nil
+	return tupleStatus, nil
 }
