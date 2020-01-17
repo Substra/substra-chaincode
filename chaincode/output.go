@@ -299,6 +299,8 @@ type outputComputePlan struct {
 	TesttupleKeys           []string `json:"testtupleKeys"`
 	Tag                     string   `json:"tag"`
 	Status                  string   `json:"status"`
+	TupleCount              int      `json:"tupleCount"`
+	DoneCount               int      `json:"doneCount"`
 }
 
 func (out *outputComputePlan) Fill(key string, in ComputePlan) {
@@ -309,6 +311,8 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan) {
 	out.TesttupleKeys = in.TesttupleKeys
 	out.Status = in.Status
 	out.Tag = in.Tag
+	out.TupleCount = in.TuplesCount
+	out.TupleCount = in.TuplesCount
 }
 
 type outputPermissions struct {

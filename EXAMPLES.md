@@ -1406,6 +1406,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"tag\":\"a tag
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
  "computePlanID": "8412c09c3ce47cc3f2f4b86d3cb96850bda82ca1c177fbd4f5d4919966db12cb",
+ "doneCount": 0,
  "status": "todo",
  "tag": "a tag is simply a string",
  "testtupleKeys": [
@@ -1414,7 +1415,8 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"tag\":\"a tag
  "traintupleKeys": [
   "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
   "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
- ]
+ ],
+ "tupleCount": 2
 }
 ```
 #### ------------ Query an ObjectiveLeaderboard ------------
@@ -1496,6 +1498,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"8412c0
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
  "computePlanID": "8412c09c3ce47cc3f2f4b86d3cb96850bda82ca1c177fbd4f5d4919966db12cb",
+ "doneCount": 0,
  "status": "todo",
  "tag": "a tag is simply a string",
  "testtupleKeys": [
@@ -1504,7 +1507,8 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"8412c0
  "traintupleKeys": [
   "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
   "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
- ]
+ ],
+ "tupleCount": 2
 }
 ```
 ##### Command peer example:
@@ -1518,6 +1522,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
   "aggregatetupleKeys": null,
   "compositeTraintupleKeys": null,
   "computePlanID": "8412c09c3ce47cc3f2f4b86d3cb96850bda82ca1c177fbd4f5d4919966db12cb",
+  "doneCount": 0,
   "status": "todo",
   "tag": "a tag is simply a string",
   "testtupleKeys": [
@@ -1526,7 +1531,8 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
   "traintupleKeys": [
    "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
    "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
-  ]
+  ],
+  "tupleCount": 2
  }
 ]
 ```
@@ -1548,6 +1554,7 @@ peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"8412c
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
  "computePlanID": "8412c09c3ce47cc3f2f4b86d3cb96850bda82ca1c177fbd4f5d4919966db12cb",
+ "doneCount": 0,
  "status": "canceled",
  "tag": "a tag is simply a string",
  "testtupleKeys": [
@@ -1556,6 +1563,7 @@ peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"8412c
  "traintupleKeys": [
   "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
   "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
- ]
+ ],
+ "tupleCount": 2
 }
 ```
