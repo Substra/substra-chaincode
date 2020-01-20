@@ -312,7 +312,7 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan) {
 	out.Status = in.Status
 	out.Tag = in.Tag
 	out.TupleCount = in.TuplesCount
-	out.TupleCount = in.TuplesCount
+	out.DoneCount = in.DoneCount
 }
 
 type outputPermissions struct {
