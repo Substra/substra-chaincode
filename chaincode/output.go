@@ -311,7 +311,7 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan) {
 	out.TesttupleKeys = in.TesttupleKeys
 	out.Status = in.Status
 	out.Tag = in.Tag
-	out.TupleCount = in.TuplesCount
+	out.TupleCount = in.TupleCount
 	out.DoneCount = in.DoneCount
 }
 

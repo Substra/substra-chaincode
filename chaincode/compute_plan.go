@@ -292,7 +292,7 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 func (cp *ComputePlan) Create(db *LedgerDB) (string, error) {
 	ID := GetRandomHash()
 	cp.AssetType = ComputePlanType
-	cp.TuplesCount = 1
+	cp.TupleCount = 1
 	err := db.Add(ID, cp)
 	if err != nil {
 		return "", err
@@ -331,7 +331,7 @@ func (cp *ComputePlan) CheckNewTupleStatus(tupleStatus string) bool {
 			return true
 		case StatusDone:
 			cp.DoneCount++
-			if cp.DoneCount == cp.TuplesCount {
+			if cp.DoneCount == cp.TupleCount {
 				cp.Status = tupleStatus
 			}
 			return true

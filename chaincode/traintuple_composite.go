@@ -182,7 +182,7 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 		return err
 	}
 	computePlan.CompositeTraintupleKeys = append(computePlan.CompositeTraintupleKeys, traintupleKey)
-	computePlan.TuplesCount++
+	computePlan.TupleCount++
 	computePlan.CheckNewTupleStatus(traintuple.Status)
 	err = computePlan.Save(db, traintuple.ComputePlanID)
 	if err != nil {
