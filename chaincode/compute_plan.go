@@ -366,6 +366,9 @@ func (cp *ComputePlan) AddTuple(tupleType AssetType, key, status string) {
 	}
 	cp.TupleCount++
 	cp.CheckNewTupleStatus(status)
+	if status == StatusTodo {
+		cp.TuplesInProgress = append(cp.TuplesInProgress, key)
+	}
 }
 
 // UpdateComputePlan retreive the compute plan if the ID is not empty,
@@ -378,8 +381,59 @@ func UpdateComputePlan(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey string
 	if err != nil {
 		return err
 	}
-	if cp.CheckNewTupleStatus(tupleStatus) {
+	statusUpdated := cp.CheckNewTupleStatus(tupleStatus)
+	inProgressUpdated := cp.CheckInProgress(tupleStatus, tupleKey)
+	if statusUpdated || inProgressUpdated {
 		return cp.Save(db, ComputePlanID)
 	}
 	return nil
+}
+
+// CheckInProgress check the status and key againts the list of tuples in
+// progress and update it accordingly. It returns true if there is any change to
+// the compute plan, false otherwise.
+func (cp *ComputePlan) CheckInProgress(tupleStatus, tupleKey string) bool {
+	switch tupleStatus {
+	case StatusTodo:
+		if !stringInSlice(tupleKey, cp.TuplesInProgress) {
+			cp.TuplesInProgress = append(cp.TuplesInProgress, tupleKey)
+			return true
+		}
+	case StatusDone:
+		for i, k := range cp.TuplesInProgress {
+			if k == tupleKey {
+				cp.TuplesInProgress = append(cp.TuplesInProgress[:i], cp.TuplesInProgress[i+1:]...)
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func rebootComputePlan(db *LedgerDB, computePlanID string) (outputComputePlan, error) {
+	var out outputComputePlan
+
+	cp, err := db.GetComputePlan(computePlanID)
+	if err != nil {
+		return out, err
+	}
+
+	if stringInSlice(cp.Status, []string{StatusDone, StatusCanceled}) {
+		out.Fill(computePlanID, cp)
+		return out, nil
+	}
+
+	for _, key := range cp.TuplesInProgress {
+		err = rebootTuple(db, key)
+		if err != nil {
+			return out, err
+		}
+	}
+	cp.Status = StatusTodo
+	err = cp.Save(db, computePlanID)
+	if err != nil {
+		return out, nil
+	}
+	out.Fill(computePlanID, cp)
+	return out, nil
 }

@@ -285,7 +285,7 @@ func logStartAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err
 	if err = validateTupleOwner(db, aggregatetuple.Worker); err != nil {
 		return
 	}
-	if err = aggregatetuple.commitStatusUpdate(db, inp.Key, status); err != nil {
+	if err = aggregatetuple.commitStatusUpdate(db, inp.Key, status, false); err != nil {
 		return
 	}
 	err = o.Fill(db, aggregatetuple, inp.Key)
@@ -312,7 +312,7 @@ func logFailAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err 
 	if err = validateTupleOwner(db, aggregatetuple.Worker); err != nil {
 		return
 	}
-	if err = aggregatetuple.commitStatusUpdate(db, inp.Key, status); err != nil {
+	if err = aggregatetuple.commitStatusUpdate(db, inp.Key, status, false); err != nil {
 		return
 	}
 
@@ -356,7 +356,7 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 	if err = validateTupleOwner(db, aggregatetuple.Worker); err != nil {
 		return
 	}
-	if err = aggregatetuple.commitStatusUpdate(db, aggregatetupleKey, status); err != nil {
+	if err = aggregatetuple.commitStatusUpdate(db, aggregatetupleKey, status, false); err != nil {
 		return
 	}
 
@@ -459,7 +459,7 @@ func UpdateAggregatetupleChild(db *LedgerDB, parentAggregatetupleKey string, chi
 	if newStatus == "" {
 		return
 	}
-	if err = childAggregatetuple.commitStatusUpdate(db, childAggregatetupleKey, newStatus); err != nil {
+	if err = childAggregatetuple.commitStatusUpdate(db, childAggregatetupleKey, newStatus, false); err != nil {
 		return
 	}
 
@@ -488,7 +488,7 @@ func getOutputAggregatetuples(db *LedgerDB, aggregatetupleKeys []string) (outAgg
 }
 
 // commitStatusUpdate update the aggregatetuple status in the ledger
-func (tuple *Aggregatetuple) commitStatusUpdate(db *LedgerDB, aggregatetupleKey string, newStatus string) error {
+func (tuple *Aggregatetuple) commitStatusUpdate(db *LedgerDB, aggregatetupleKey string, newStatus string, forceUpdate bool) error {
 	if tuple.Status == newStatus {
 		return nil
 	}
@@ -498,7 +498,7 @@ func (tuple *Aggregatetuple) commitStatusUpdate(db *LedgerDB, aggregatetupleKey 
 		return nil
 	}
 
-	if err := tuple.validateNewStatus(db, newStatus); err != nil {
+	if err := tuple.validateNewStatus(db, newStatus); err != nil && !forceUpdate {
 		return fmt.Errorf("update aggregatetuple %s failed: %s", aggregatetupleKey, err.Error())
 	}
 

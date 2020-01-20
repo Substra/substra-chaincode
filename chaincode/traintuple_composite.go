@@ -316,7 +316,7 @@ func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTrain
 	if err = validateTupleOwner(db, compositeTraintuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, status); err != nil {
+	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, status, false); err != nil {
 		return
 	}
 	err = o.Fill(db, compositeTraintuple, inp.Key)
@@ -351,7 +351,7 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 	if err = validateTupleOwner(db, compositeTraintuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = compositeTraintuple.commitStatusUpdate(db, compositeTraintupleKey, status); err != nil {
+	if err = compositeTraintuple.commitStatusUpdate(db, compositeTraintupleKey, status, false); err != nil {
 		return
 	}
 
@@ -389,7 +389,7 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 	if err = validateTupleOwner(db, compositeTraintuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, status); err != nil {
+	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, status, false); err != nil {
 		return
 	}
 
@@ -487,7 +487,7 @@ func UpdateCompositeTraintupleChild(db *LedgerDB, parentTraintupleKey string, ch
 	if newStatus == "" {
 		return
 	}
-	if err = childTraintuple.commitStatusUpdate(db, childTraintupleKey, newStatus); err != nil {
+	if err = childTraintuple.commitStatusUpdate(db, childTraintupleKey, newStatus, false); err != nil {
 		return
 	}
 
@@ -535,7 +535,7 @@ func (traintuple *CompositeTraintuple) isReady(db *LedgerDB, newDoneTraintupleKe
 }
 
 // commitStatusUpdate update the traintuple status in the ledger
-func (traintuple *CompositeTraintuple) commitStatusUpdate(db *LedgerDB, traintupleKey string, newStatus string) error {
+func (traintuple *CompositeTraintuple) commitStatusUpdate(db *LedgerDB, traintupleKey string, newStatus string, forceUpdate bool) error {
 	if traintuple.Status == newStatus {
 		return nil
 	}
@@ -545,7 +545,7 @@ func (traintuple *CompositeTraintuple) commitStatusUpdate(db *LedgerDB, traintup
 		return nil
 	}
 
-	if err := traintuple.validateNewStatus(db, newStatus); err != nil {
+	if err := traintuple.validateNewStatus(db, newStatus); err != nil && !forceUpdate {
 		return fmt.Errorf("update traintuple %s failed: %s", traintupleKey, err.Error())
 	}
 

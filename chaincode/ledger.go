@@ -40,7 +40,7 @@ const (
 
 // StatusUpdater is exported
 type StatusUpdater interface {
-	commitStatusUpdate(db *LedgerDB, key string, status string) error
+	commitStatusUpdate(db *LedgerDB, key string, status string, forceUpdate bool) error
 }
 
 // Objective is the representation of one of the element type stored in the ledger
@@ -191,6 +191,7 @@ type ComputePlan struct {
 	TesttupleKeys           []string  `json:"testtupleKeys"`
 	TraintupleKeys          []string  `json:"traintupleKeys"`
 	TupleCount              int       `json:"tupleCount"`
+	TuplesInProgress        []string  `json:"tuplesInProgess"`
 }
 
 // ---------------------------------------------------------------------------------

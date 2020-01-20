@@ -644,3 +644,165 @@ func checkComputePlanMetrics(t *testing.T, db *LedgerDB, cpID string, doneCount,
 	assert.Equal(t, doneCount, out.DoneCount)
 	assert.Equal(t, tupleCount, out.TupleCount)
 }
+
+func TestRebootComputePlan(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "aggregateAlgo")
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+	outCP, err := createComputePlanInternal(db, defaultComputePlan)
+	assert.NoError(t, err)
+
+	testCases := []struct {
+		desc          string
+		init          func()
+		CPStatus      string
+		eventNil      bool
+		nbEventTrain  int
+		nbEventTest   int
+		keyFirstEvent string
+	}{
+		{
+			desc:          "one todo two waiting",
+			init:          func() {},
+			CPStatus:      StatusTodo,
+			eventNil:      false,
+			nbEventTrain:  1,
+			nbEventTest:   0,
+			keyFirstEvent: outCP.TraintupleKeys[0],
+		},
+		{
+			desc: "one done one todo one waiting",
+			init: func() {
+				traintupleToDone(t, db, outCP.TraintupleKeys[0])
+			},
+			CPStatus:      StatusTodo,
+			eventNil:      false,
+			nbEventTrain:  1,
+			nbEventTest:   0,
+			keyFirstEvent: outCP.TraintupleKeys[1],
+		},
+		{
+			desc: "one done one failed one waiting",
+			init: func() {
+				fail := inputLogFailTrain{}
+				fail.Key = outCP.TraintupleKeys[1]
+				_, err = logFailTrain(db, assetToArgs(fail))
+				assert.NoError(t, err)
+			},
+			CPStatus:      StatusTodo,
+			eventNil:      false,
+			nbEventTrain:  1,
+			nbEventTest:   0,
+			keyFirstEvent: outCP.TraintupleKeys[1],
+		},
+		{
+			desc:          "re-reboot",
+			init:          func() {},
+			CPStatus:      StatusTodo,
+			eventNil:      false,
+			nbEventTrain:  1,
+			nbEventTest:   0,
+			keyFirstEvent: outCP.TraintupleKeys[1],
+		},
+		{
+			desc: "one done one doing one waiting",
+			init: func() {
+				start := inputHash{}
+				start.Key = outCP.TraintupleKeys[1]
+				_, err = logStartTrain(db, assetToArgs(start))
+				assert.NoError(t, err)
+			},
+			CPStatus:      StatusTodo,
+			eventNil:      false,
+			nbEventTrain:  1,
+			nbEventTest:   0,
+			keyFirstEvent: outCP.TraintupleKeys[1],
+		},
+		{
+			desc: "two done one todo",
+			init: func() {
+				traintupleToDone(t, db, outCP.TraintupleKeys[1])
+			},
+			CPStatus:      StatusTodo,
+			eventNil:      false,
+			nbEventTrain:  0,
+			nbEventTest:   1,
+			keyFirstEvent: outCP.TesttupleKeys[0],
+		},
+		{
+			desc: "all done",
+			init: func() {
+				testtupleToDone(t, db, outCP.TesttupleKeys[0])
+			},
+			CPStatus: StatusDone,
+			eventNil: true,
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			tC.init()
+			// Reset tuple event stack
+			db.tuplesEvent = nil
+
+			_, err = rebootComputePlan(db, outCP.ComputePlanID)
+			assert.NoError(t, err)
+
+			out, err := getOutComputePlan(db, outCP.ComputePlanID)
+			assert.NoError(t, err)
+			assert.Equal(t, tC.CPStatus, out.Status)
+			if tC.eventNil {
+				require.Nil(t, db.tuplesEvent)
+				return
+			}
+			require.NotNil(t, db.tuplesEvent)
+			require.Len(t, db.tuplesEvent.Traintuples, tC.nbEventTrain)
+			require.Len(t, db.tuplesEvent.Testtuples, tC.nbEventTest)
+			if tC.nbEventTrain != 0 {
+				lastTrainEvent := db.tuplesEvent.Traintuples[0]
+				assert.Equal(t, tC.keyFirstEvent, lastTrainEvent.Key)
+				assert.Equal(t, StatusTodo, lastTrainEvent.Status)
+				return
+			}
+			if tC.nbEventTest != 0 {
+				lastTestEvent := db.tuplesEvent.Testtuples[0]
+				assert.Equal(t, tC.keyFirstEvent, lastTestEvent.Key)
+				assert.Equal(t, StatusTodo, lastTestEvent.Status)
+				return
+			}
+		})
+	}
+}
+
+func TestRebootComputePlanCanceled(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "aggregateAlgo")
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+	outCP, err := createComputePlanInternal(db, modelCompositionComputePlan)
+	assert.NoError(t, err)
+
+	// Success for the first CompositeTrain
+	_, err = logStartCompositeTrain(db, assetToArgs(inputHash{Key: outCP.CompositeTraintupleKeys[0]}))
+	assert.NoError(t, err)
+	success := inputLogSuccessCompositeTrain{}
+	success.Key = outCP.CompositeTraintupleKeys[0]
+	success.fillDefaults()
+	_, err = logSuccessCompositeTrain(db, assetToArgs(success))
+	assert.NoError(t, err)
+
+	_, err = cancelComputePlan(db, assetToArgs(inputHash{Key: outCP.ComputePlanID}))
+	assert.NoError(t, err)
+
+	db.tuplesEvent = nil
+
+	_, err = rebootComputePlan(db, outCP.ComputePlanID)
+	assert.NoError(t, err)
+
+	out, err := getOutComputePlan(db, outCP.ComputePlanID)
+	assert.NoError(t, err)
+	assert.Equal(t, StatusCanceled, out.Status)
+	require.Nil(t, db.tuplesEvent)
+}

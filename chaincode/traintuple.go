@@ -280,7 +280,7 @@ func logStartTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) 
 	if err = validateTupleOwner(db, traintuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = traintuple.commitStatusUpdate(db, inp.Key, status); err != nil {
+	if err = traintuple.commitStatusUpdate(db, inp.Key, status, false); err != nil {
 		return
 	}
 	err = o.Fill(db, traintuple, inp.Key)
@@ -312,7 +312,7 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 	if err = validateTupleOwner(db, traintuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = traintuple.commitStatusUpdate(db, traintupleKey, status); err != nil {
+	if err = traintuple.commitStatusUpdate(db, traintupleKey, status, false); err != nil {
 		return
 	}
 
@@ -351,7 +351,7 @@ func logFailTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 	if err = validateTupleOwner(db, traintuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = traintuple.commitStatusUpdate(db, inp.Key, status); err != nil {
+	if err = traintuple.commitStatusUpdate(db, inp.Key, status, false); err != nil {
 		return
 	}
 
@@ -553,7 +553,7 @@ func UpdateTraintupleChild(db *LedgerDB, parentTraintupleKey string, childTraint
 	if newStatus == "" {
 		return
 	}
-	if err = childTraintuple.commitStatusUpdate(db, childTraintupleKey, newStatus); err != nil {
+	if err = childTraintuple.commitStatusUpdate(db, childTraintupleKey, newStatus, false); err != nil {
 		return
 	}
 
@@ -588,7 +588,7 @@ func IsReady(db *LedgerDB, inModelKeys []string, newDoneTraintupleKey string) (r
 }
 
 // commitStatusUpdate update the traintuple status in the ledger
-func (traintuple *Traintuple) commitStatusUpdate(db *LedgerDB, traintupleKey string, newStatus string) error {
+func (traintuple *Traintuple) commitStatusUpdate(db *LedgerDB, traintupleKey string, newStatus string, forceUpdate bool) error {
 	if traintuple.Status == newStatus {
 		return nil
 	}
@@ -598,7 +598,7 @@ func (traintuple *Traintuple) commitStatusUpdate(db *LedgerDB, traintupleKey str
 		return nil
 	}
 
-	if err := traintuple.validateNewStatus(db, newStatus); err != nil {
+	if err := traintuple.validateNewStatus(db, newStatus); err != nil && !forceUpdate {
 		return fmt.Errorf("update traintuple %s failed: %s", traintupleKey, err.Error())
 	}
 
@@ -653,7 +653,7 @@ func UpdateTesttupleChildren(db *LedgerDB, traintupleKey string, traintupleStatu
 
 		testtuple.TraintupleKey = traintupleKey
 
-		if err := testtuple.commitStatusUpdate(db, testtupleKey, newStatus); err != nil {
+		if err := testtuple.commitStatusUpdate(db, testtupleKey, newStatus, false); err != nil {
 			return err
 		}
 

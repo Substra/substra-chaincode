@@ -1405,7 +1405,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"tag\":\"a tag
 {
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
- "computePlanID": "c51b1a4fe5a6c5abe5595ed530fbf1a9d822e6f22c57a029102db82ae71b41e4",
+ "computePlanID": "c93e2062a9d15186312f2eb2f0bdc7a5799acc9983233d78b2e01fbb97de9d56",
  "doneCount": 0,
  "status": "todo",
  "tag": "a tag is simply a string",
@@ -1490,14 +1490,14 @@ Smart contract: `queryComputePlan`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"c51b1a4fe5a6c5abe5595ed530fbf1a9d822e6f22c57a029102db82ae71b41e4\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"c93e2062a9d15186312f2eb2f0bdc7a5799acc9983233d78b2e01fbb97de9d56\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
- "computePlanID": "c51b1a4fe5a6c5abe5595ed530fbf1a9d822e6f22c57a029102db82ae71b41e4",
+ "computePlanID": "c93e2062a9d15186312f2eb2f0bdc7a5799acc9983233d78b2e01fbb97de9d56",
  "doneCount": 0,
  "status": "todo",
  "tag": "a tag is simply a string",
@@ -1521,7 +1521,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
  {
   "aggregatetupleKeys": null,
   "compositeTraintupleKeys": null,
-  "computePlanID": "c51b1a4fe5a6c5abe5595ed530fbf1a9d822e6f22c57a029102db82ae71b41e4",
+  "computePlanID": "c93e2062a9d15186312f2eb2f0bdc7a5799acc9983233d78b2e01fbb97de9d56",
   "doneCount": 0,
   "status": "todo",
   "tag": "a tag is simply a string",
@@ -1546,14 +1546,14 @@ Smart contract: `cancelComputePlan`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"c51b1a4fe5a6c5abe5595ed530fbf1a9d822e6f22c57a029102db82ae71b41e4\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"c93e2062a9d15186312f2eb2f0bdc7a5799acc9983233d78b2e01fbb97de9d56\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
- "computePlanID": "c51b1a4fe5a6c5abe5595ed530fbf1a9d822e6f22c57a029102db82ae71b41e4",
+ "computePlanID": "c93e2062a9d15186312f2eb2f0bdc7a5799acc9983233d78b2e01fbb97de9d56",
  "doneCount": 0,
  "status": "canceled",
  "tag": "a tag is simply a string",

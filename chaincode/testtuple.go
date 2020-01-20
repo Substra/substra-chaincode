@@ -294,7 +294,7 @@ func logStartTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 	if err = validateTupleOwner(db, testtuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
+	if err = testtuple.commitStatusUpdate(db, inp.Key, status, false); err != nil {
 		return
 	}
 	err = o.Fill(db, inp.Key, testtuple)
@@ -321,7 +321,7 @@ func logSuccessTest(db *LedgerDB, args []string) (o outputTesttuple, err error) 
 	if err = validateTupleOwner(db, testtuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
+	if err = testtuple.commitStatusUpdate(db, inp.Key, status, false); err != nil {
 		return
 	}
 	err = o.Fill(db, inp.Key, testtuple)
@@ -348,7 +348,7 @@ func logFailTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 	if err = validateTupleOwner(db, testtuple.Dataset.Worker); err != nil {
 		return
 	}
-	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
+	if err = testtuple.commitStatusUpdate(db, inp.Key, status, false); err != nil {
 		return
 	}
 	err = o.Fill(db, inp.Key, testtuple)
@@ -432,8 +432,8 @@ func (testtuple *Testtuple) validateNewStatus(db *LedgerDB, status string) error
 }
 
 // commitStatusUpdate update the testtuple status in the ledger
-func (testtuple *Testtuple) commitStatusUpdate(db *LedgerDB, testtupleKey string, newStatus string) error {
-	if err := testtuple.validateNewStatus(db, newStatus); err != nil {
+func (testtuple *Testtuple) commitStatusUpdate(db *LedgerDB, testtupleKey string, newStatus string, forceUpdate bool) error {
+	if err := testtuple.validateNewStatus(db, newStatus); err != nil && !forceUpdate {
 		return fmt.Errorf("update testtuple %s failed: %s", testtupleKey, err.Error())
 	}
 

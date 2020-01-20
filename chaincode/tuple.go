@@ -257,3 +257,13 @@ func determineTupleStatus(db *LedgerDB, tupleStatus, computePlanID string) (stri
 	}
 	return tupleStatus, nil
 }
+
+func rebootTuple(db *LedgerDB, key string) error {
+	tuple, err := db.GetStatusUpdater(key)
+	if err != nil {
+		return nil
+	}
+	err = tuple.commitStatusUpdate(db, key, StatusTodo, true)
+	db.AddTupleEvent(key)
+	return err
+}
