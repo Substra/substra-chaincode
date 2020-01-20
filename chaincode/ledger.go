@@ -190,7 +190,7 @@ type ComputePlan struct {
 	Tag                     string    `json:"tag"`
 	TesttupleKeys           []string  `json:"testtupleKeys"`
 	TraintupleKeys          []string  `json:"traintupleKeys"`
-	TuplesCount             int       `json:"tuplesCount"`
+	TupleCount              int       `json:"tupleCount"`
 }
 
 // ---------------------------------------------------------------------------------

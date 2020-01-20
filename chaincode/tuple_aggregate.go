@@ -153,7 +153,7 @@ func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetu
 		return err
 	}
 	computePlan.AggregatetupleKeys = append(computePlan.AggregatetupleKeys, traintupleKey)
-	computePlan.TuplesCount++
+	computePlan.TupleCount++
 	computePlan.CheckNewTupleStatus(tuple.Status)
 	err = computePlan.Save(db, tuple.ComputePlanID)
 	if err != nil {

@@ -595,3 +595,52 @@ func TestCreateTagedEmptyComputePlan(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, tag, out.Tag)
 }
+
+func TestComputePlanMetrics(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "aggregateAlgo")
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	out, err := createComputePlanInternal(db, defaultComputePlan)
+	assert.NoError(t, err)
+	checkComputePlanMetrics(t, db, out.ComputePlanID, 0, 3)
+
+	traintupleToDone(t, db, out.TraintupleKeys[0])
+	checkComputePlanMetrics(t, db, out.ComputePlanID, 1, 3)
+
+	traintupleToDone(t, db, out.TraintupleKeys[1])
+	checkComputePlanMetrics(t, db, out.ComputePlanID, 2, 3)
+
+	testtupleToDone(t, db, out.TesttupleKeys[0])
+	checkComputePlanMetrics(t, db, out.ComputePlanID, 3, 3)
+}
+
+func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
+	_, err := logStartTrain(db, assetToArgs(inputHash{Key: key}))
+	assert.NoError(t, err)
+
+	success := inputLogSuccessTrain{}
+	success.Key = key
+	success.fillDefaults()
+	_, err = logSuccessTrain(db, assetToArgs(success))
+	assert.NoError(t, err)
+}
+func testtupleToDone(t *testing.T, db *LedgerDB, key string) {
+	_, err := logStartTest(db, assetToArgs(inputHash{Key: key}))
+	assert.NoError(t, err)
+
+	success := inputLogSuccessTest{}
+	success.Key = key
+	success.createDefault()
+	_, err = logSuccessTest(db, assetToArgs(success))
+	assert.NoError(t, err)
+}
+
+func checkComputePlanMetrics(t *testing.T, db *LedgerDB, cpID string, doneCount, tupleCount int) {
+	out, err := getOutComputePlan(db, cpID)
+	assert.NoError(t, err)
+	assert.Equal(t, doneCount, out.DoneCount)
+	assert.Equal(t, tupleCount, out.TupleCount)
+}

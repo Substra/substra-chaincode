@@ -191,7 +191,7 @@ func (testtuple *Testtuple) AddToComputePlan(db *LedgerDB, testtupleKey string) 
 		return err
 	}
 	computePlan.TesttupleKeys = append(computePlan.TesttupleKeys, testtupleKey)
-	computePlan.TuplesCount++
+	computePlan.TupleCount++
 	computePlan.CheckNewTupleStatus(testtuple.Status)
 	err = computePlan.Save(db, testtuple.ComputePlanID)
 	if err != nil {

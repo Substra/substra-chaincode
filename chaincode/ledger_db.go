@@ -80,7 +80,7 @@ func (db *LedgerDB) Get(key string, object interface{}) error {
 	if !ok {
 		buff, err = db.cc.GetState(key)
 		if err != nil || buff == nil {
-			return errors.NotFound(err)
+			return errors.NotFound(err, "no asset for key %s", key)
 		}
 		db.putTransactionState(key, buff)
 	}
