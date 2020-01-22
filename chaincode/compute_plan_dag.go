@@ -75,7 +75,7 @@ func (dag *ComputeDAG) sort() error {
 			current[i].Depth = depth
 			final = append(final, current[i])
 			if _, ok := IDPresents[current[i].ID]; ok {
-				return errors.Internal("compute plan error: Duplicate training task ID: %s", current[i].ID)
+				return errors.Conflict("compute plan error: Duplicate training task ID: %s", current[i].ID)
 			}
 			IDPresents[current[i].ID] = current[i].Depth
 		} else {
