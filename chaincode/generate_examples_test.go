@@ -123,7 +123,7 @@ func TestPipeline(t *testing.T) {
 	assert.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
 	traintuple := outputTraintuple{}
 	respTraintuple := resp.Payload
-	if err := bytesToStruct(respTraintuple, &traintuple); err != nil {
+	if err := json.Unmarshal(respTraintuple, &traintuple); err != nil {
 		t.Errorf("when unmarshalling queried traintuple with error %s", err)
 	}
 	trainWorker := traintuple.Dataset.Worker
@@ -185,7 +185,7 @@ func TestPipeline(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	respTesttuple := resp.Payload
 	testtuple := outputTesttuple{}
-	if err := bytesToStruct(respTesttuple, &testtuple); err != nil {
+	if err := json.Unmarshal(respTesttuple, &testtuple); err != nil {
 		t.Errorf("when unmarshalling queried testtuple with error %s", err)
 	}
 	testWorker := testtuple.Dataset.Worker

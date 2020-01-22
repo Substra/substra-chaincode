@@ -52,10 +52,6 @@ func (dataManager *DataManager) Set(db *LedgerDB, inp inputDataManager) (string,
 // and returning corresponding dataSample hashes, associated dataManagers, testOnly and errors
 func setDataSample(db *LedgerDB, inp inputDataSample) (dataSampleHashes []string, dataSample DataSample, err error) {
 	dataSampleHashes = inp.Hashes
-	if err = checkHashes(dataSampleHashes); err != nil {
-		err = errors.BadRequest(err)
-		return
-	}
 	// check dataSample is not already in the ledger
 	if existingKeys := checkDataSamplesExist(db, dataSampleHashes); existingKeys != nil {
 		err = errors.Conflict("data samples with keys %s already exist", existingKeys).WithKeys(existingKeys)
@@ -91,11 +87,6 @@ func setDataSample(db *LedgerDB, inp inputDataSample) (dataSampleHashes []string
 // one or more dataSamplef
 func validateUpdateDataSample(db *LedgerDB, inp inputUpdateDataSample) (dataSampleHashes []string, dataManagerKeys []string, err error) {
 	// TODO return full dataSample
-	// check validity of dataSampleHashes
-	if err = checkHashes(inp.Hashes); err != nil {
-		err = errors.BadRequest(err)
-		return
-	}
 	// check dataManagers exist and are owned by the transaction requester
 	if err = checkDataManagerOwner(db, inp.DataManagerKeys); err != nil {
 		return
