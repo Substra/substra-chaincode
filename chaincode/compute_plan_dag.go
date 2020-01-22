@@ -1,6 +1,6 @@
 package main
 
-import "fmt"
+import "chaincode/errors"
 
 // TrainingTask is a node of a ComputeDAG. It represents a training task
 // (i.e. a Traintuple, a CompositeTraintuple or an Aggregatetuple)
@@ -75,7 +75,7 @@ func (dag *ComputeDAG) sort() error {
 			current[i].Depth = depth
 			final = append(final, current[i])
 			if _, ok := IDPresents[current[i].ID]; ok {
-				return fmt.Errorf("compute plan error: Duplicate training task ID: %s", current[i].ID)
+				return errors.Internal("compute plan error: Duplicate training task ID: %s", current[i].ID)
 			}
 			IDPresents[current[i].ID] = current[i].Depth
 		} else {
@@ -90,7 +90,7 @@ func (dag *ComputeDAG) sort() error {
 			for _, c := range current {
 				errorIDs = append(errorIDs, c.ID)
 			}
-			return fmt.Errorf("compute plan error: Cyclic or missing dependency among inModels IDs: %v", errorIDs)
+			return errors.Internal("compute plan error: Cyclic or missing dependency among inModels IDs: %v", errorIDs)
 		}
 		i = 0
 		current = temp

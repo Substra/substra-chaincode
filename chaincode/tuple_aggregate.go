@@ -16,7 +16,6 @@ package main
 
 import (
 	"chaincode/errors"
-	"fmt"
 	"strconv"
 )
 
@@ -65,7 +64,7 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 	for _, parentTraintupleKey := range inModels {
 		parentType, err := db.GetAssetType(parentTraintupleKey)
 		if err != nil {
-			return fmt.Errorf("could not retrieve traintuple type with key %s - %s", parentTraintupleKey, err.Error())
+			return errors.Internal("could not retrieve traintuple type with key %s - %s", parentTraintupleKey, err.Error())
 		}
 
 		parentPermissions := Permissions{}
@@ -92,11 +91,11 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 				parentStatuses = append(parentStatuses, tuple.Status)
 			}
 		default:
-			return fmt.Errorf("aggregate.SetFromParents: Unsupported parent type %s", parentType)
+			return errors.Internal("aggregate.SetFromParents: Unsupported parent type %s", parentType)
 		}
 
 		if err != nil {
-			return fmt.Errorf("could not retrieve traintuple type with key %s - %s", parentTraintupleKey, err.Error())
+			return errors.Internal("could not retrieve traintuple type with key %s - %s", parentTraintupleKey, err.Error())
 		}
 
 		inModelKeys = append(inModelKeys, parentTraintupleKey)
@@ -512,13 +511,13 @@ func (tuple *Aggregatetuple) commitStatusUpdate(db *LedgerDB, aggregatetupleKey 
 	}
 
 	if err := tuple.validateNewStatus(db, newStatus); err != nil {
-		return fmt.Errorf("update aggregatetuple %s failed: %s", aggregatetupleKey, err.Error())
+		return errors.Internal("update aggregatetuple %s failed: %s", aggregatetupleKey, err.Error())
 	}
 
 	oldStatus := tuple.Status
 	tuple.Status = newStatus
 	if err := db.Put(aggregatetupleKey, tuple); err != nil {
-		return fmt.Errorf("failed to update aggregatetuple %s - %s", aggregatetupleKey, err.Error())
+		return errors.Internal("failed to update aggregatetuple %s - %s", aggregatetupleKey, err.Error())
 	}
 
 	// update associated composite keys

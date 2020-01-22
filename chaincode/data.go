@@ -16,7 +16,6 @@ package main
 
 import (
 	"chaincode/errors"
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -323,7 +322,7 @@ func queryDataset(db *LedgerDB, args []string) (outputDataset, error) {
 func queryDataSamples(db *LedgerDB, args []string) ([]outputDataSample, error) {
 	outDataSamples := []outputDataSample{}
 	if len(args) != 0 {
-		err := fmt.Errorf("incorrect number of arguments, expecting nothing")
+		err := errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return outDataSamples, err
 	}
 	elementsKeys, err := db.GetIndexKeys("dataSample~dataManager~key", []string{"dataSample"})
@@ -393,7 +392,7 @@ func checkSameDataManager(db *LedgerDB, dataManagerKey string, dataSampleKeys []
 			return testOnly, trainOnly, err
 		}
 		if !stringInSlice(dataManagerKey, dataSample.DataManagerKeys) {
-			err = fmt.Errorf("dataSample do not belong to the same dataManager")
+			err = errors.BadRequest("dataSample do not belong to the same dataManager")
 			return testOnly, trainOnly, err
 		}
 		testOnly = testOnly && dataSample.TestOnly

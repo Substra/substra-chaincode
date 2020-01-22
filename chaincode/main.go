@@ -178,12 +178,12 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	// one event per call
 	err = db.SendTuplesEvent()
 	if err != nil {
-		return formatErrorResponse(fmt.Errorf("could not send event: %s", err.Error()))
+		return formatErrorResponse(errors.Internal("could not send event: %s", err.Error()))
 	}
 	// Marshal to json the smartcontract result
 	resp, err := json.Marshal(result)
 	if err != nil {
-		return formatErrorResponse(fmt.Errorf("could not format response: %s", err.Error()))
+		return formatErrorResponse(errors.Internal("could not format response: %s", err.Error()))
 	}
 
 	return shim.Success(resp)

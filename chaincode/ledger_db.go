@@ -17,7 +17,6 @@ package main
 import (
 	"chaincode/errors"
 	"encoding/json"
-	"fmt"
 	"sync"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -129,11 +128,11 @@ func (db *LedgerDB) Add(key string, object interface{}) error {
 func (db *LedgerDB) CreateIndex(index string, attributes []string) error {
 	compositeKey, err := db.cc.CreateCompositeKey(index, attributes)
 	if err != nil {
-		return fmt.Errorf("cannot create index %s: %s", index, err.Error())
+		return errors.Internal("cannot create index %s: %s", index, err.Error())
 	}
 	value := []byte{0x00}
 	if err = db.cc.PutState(compositeKey, value); err != nil {
-		return fmt.Errorf("cannot create index %s: %s", index, err.Error())
+		return errors.Internal("cannot create index %s: %s", index, err.Error())
 	}
 	return nil
 }
@@ -160,7 +159,7 @@ func (db *LedgerDB) GetIndexKeys(index string, attributes []string) ([]string, e
 	keys := make([]string, 0)
 	iterator, err := db.cc.GetStateByPartialCompositeKey(index, attributes)
 	if err != nil {
-		return nil, fmt.Errorf("get index %s failed: %s", index, err.Error())
+		return nil, errors.Internal("get index %s failed: %s", index, err.Error())
 	}
 	defer iterator.Close()
 	for iterator.HasNext() {
@@ -170,7 +169,7 @@ func (db *LedgerDB) GetIndexKeys(index string, attributes []string) ([]string, e
 		}
 		_, keyParts, err := db.cc.SplitCompositeKey(compositeKey.Key)
 		if err != nil {
-			return nil, fmt.Errorf("get index %s failed: cannot split key %s: %s", index, compositeKey.Key, err.Error())
+			return nil, errors.Internal("get index %s failed: cannot split key %s: %s", index, compositeKey.Key, err.Error())
 		}
 		keys = append(keys, keyParts[len(keyParts)-1])
 	}
@@ -393,7 +392,7 @@ func (db *LedgerDB) GetOutModelHashDress(traintupleKey string, modelType Composi
 			case TrunkType:
 				return tuple.OutTrunkModel.OutModel, nil
 			default:
-				return nil, fmt.Errorf("GetOutModelHashDress: Unsupported composite model type %s", modelType)
+				return nil, errors.Internal("GetOutModelHashDress: Unsupported composite model type %s", modelType)
 			}
 
 		case TraintupleType:
@@ -407,7 +406,7 @@ func (db *LedgerDB) GetOutModelHashDress(traintupleKey string, modelType Composi
 				return tuple.OutModel, nil
 			}
 		default:
-			return nil, fmt.Errorf("GetOutModelHashDress: Unsupported asset type %s", assetType)
+			return nil, errors.Internal("GetOutModelHashDress: Unsupported asset type %s", assetType)
 		}
 	}
 

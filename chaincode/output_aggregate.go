@@ -14,7 +14,7 @@
 
 package main
 
-import "fmt"
+import "chaincode/errors"
 
 type outputAggregatetuple struct {
 	Key           string            `json:"key"`
@@ -51,7 +51,7 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 	outputAggregatetuple.Tag = traintuple.Tag
 	algo, err := db.GetAggregateAlgo(traintuple.AlgoKey)
 	if err != nil {
-		err = fmt.Errorf("could not retrieve aggregate algo with key %s - %s", traintuple.AlgoKey, err.Error())
+		err = errors.Internal("could not retrieve aggregate algo with key %s - %s", traintuple.AlgoKey, err.Error())
 		return
 	}
 	outputAggregatetuple.Algo = &HashDressName{
@@ -66,7 +66,7 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 		}
 		hashDress, _err := db.GetOutModelHashDress(inModelKey, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
 		if _err != nil {
-			err = fmt.Errorf("could not fill in-model with key \"%s\": %s", inModelKey, _err.Error())
+			err = errors.Internal("could not fill in-model with key \"%s\": %s", inModelKey, _err.Error())
 			return
 		}
 		inModel := &Model{
