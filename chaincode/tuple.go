@@ -18,7 +18,6 @@ import (
 	"chaincode/errors"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"sort"
 )
 
@@ -174,7 +173,7 @@ func validateTupleOwner(db *LedgerDB, worker string) error {
 		return err
 	}
 	if txCreator != worker {
-		return fmt.Errorf("%s is not allowed to update tuple (%s)", txCreator, worker)
+		return errors.Forbidden("%s is not allowed to update tuple (%s)", txCreator, worker)
 	}
 	return nil
 }

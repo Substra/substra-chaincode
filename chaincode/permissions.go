@@ -14,9 +14,7 @@
 
 package main
 
-import (
-	"fmt"
-)
+import "chaincode/errors"
 
 // Permission represents one permission based on an action type
 type Permission struct {
@@ -73,7 +71,7 @@ func NewPermissions(db *LedgerDB, in inputPermissions) (Permissions, error) {
 		}
 
 		if !stringInSlice(authorizedID, nodesIDs) {
-			return Permissions{}, fmt.Errorf("invalid permission input values")
+			return Permissions{}, errors.BadRequest("invalid permission input values")
 		}
 	}
 
