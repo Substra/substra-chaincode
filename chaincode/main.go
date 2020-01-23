@@ -118,6 +118,8 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = queryFilter(db, args)
 	case "queryModelDetails":
 		result, err = queryModelDetails(db, args)
+	case "queryModelPermissions":
+		result, err = queryModelPermissions(db, args)
 	case "queryModels":
 		result, err = queryModels(db, args)
 	case "queryObjective":
