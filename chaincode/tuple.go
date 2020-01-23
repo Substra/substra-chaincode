@@ -164,6 +164,62 @@ func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err erro
 	return
 }
 
+func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, error) {
+	var out outputPermissions
+	inp := inputHash{}
+	err := AssetFromJSON(args, &inp)
+	if err != nil {
+		return out, err
+	}
+	keys, err := db.GetIndexKeys("tuple~modelHash~key", []string{"tuple", inp.Key})
+	if err != nil {
+		return out, errors.BadRequest(err, "queryModelPermissions: could not find tuple key form hash %s", inp.Key)
+	}
+	tupleType, err := db.GetAssetType(keys[0])
+	if err != nil {
+		return out, errors.Internal(err, "queryModelPermissions: could not retrieve model type with key %s", keys[0])
+	}
+
+	modelPermissions := Permissions{}
+
+	// get out-model and permissions from parent
+	switch tupleType {
+	case CompositeTraintupleType:
+		tuple, err := db.GetCompositeTraintuple(keys[0])
+		if err != nil {
+			return out, errors.Internal(err, "queryModelPermissions:")
+		}
+		if tuple.OutTrunkModel.OutModel.Hash == inp.Key {
+			modelPermissions = tuple.OutTrunkModel.Permissions
+			break
+		}
+		if tuple.OutHeadModel.OutModel.Hash == inp.Key {
+			modelPermissions = tuple.OutHeadModel.Permissions
+			break
+		}
+		return out, errors.Internal("queryModelPermissions: hash %s doesn't match headModel nor trunkModel", inp.Key)
+
+	case TraintupleType:
+		tuple, err := db.GetTraintuple(keys[0])
+		if err != nil {
+			return out, errors.Internal(err, "queryModelPermissions:")
+		}
+		modelPermissions = tuple.Permissions
+
+	case AggregatetupleType:
+		tuple, err := db.GetAggregatetuple(keys[0])
+		if err != nil {
+			return out, errors.Internal(err, "queryModelPermissions:")
+		}
+		modelPermissions = tuple.Permissions
+	default:
+		return out, errors.Internal("queryModelPermissions: Unsupported tuple type %s", tupleType)
+
+	}
+	out.Fill(modelPermissions)
+	return out, nil
+}
+
 // ----------------------------------------------------------
 // Utils for smartcontracts related to  multiple tuple types
 // ----------------------------------------------------------
