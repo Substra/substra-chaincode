@@ -172,11 +172,15 @@ func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, erro
 	}
 	keys, err := db.GetIndexKeys("tuple~modelHash~key", []string{"tuple", inp.Key})
 	if err != nil {
-		return out, errors.BadRequest(err, "queryModelPermissions: could not find tuple key form hash %s", inp.Key)
+		return out, err
 	}
-	tupleType, err := db.GetAssetType(keys[0])
+	if len(keys) == 0 {
+		return out, errors.NotFound("Could not find a model for hash %s", inp.Key)
+	}
+	key := keys[0]
+	tupleType, err := db.GetAssetType(key)
 	if err != nil {
-		return out, errors.Internal(err, "queryModelPermissions: could not retrieve model type with key %s", keys[0])
+		return out, errors.Internal(err, "queryModelPermissions: could not retrieve model type with key %s", key)
 	}
 
 	modelPermissions := Permissions{}
@@ -184,7 +188,7 @@ func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, erro
 	// get out-model and permissions from parent
 	switch tupleType {
 	case CompositeTraintupleType:
-		tuple, err := db.GetCompositeTraintuple(keys[0])
+		tuple, err := db.GetCompositeTraintuple(key)
 		if err != nil {
 			return out, errors.Internal(err, "queryModelPermissions:")
 		}
@@ -199,14 +203,14 @@ func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, erro
 		return out, errors.Internal("queryModelPermissions: hash %s doesn't match headModel nor trunkModel", inp.Key)
 
 	case TraintupleType:
-		tuple, err := db.GetTraintuple(keys[0])
+		tuple, err := db.GetTraintuple(key)
 		if err != nil {
 			return out, errors.Internal(err, "queryModelPermissions:")
 		}
 		modelPermissions = tuple.Permissions
 
 	case AggregatetupleType:
-		tuple, err := db.GetAggregatetuple(keys[0])
+		tuple, err := db.GetAggregatetuple(key)
 		if err != nil {
 			return out, errors.Internal(err, "queryModelPermissions:")
 		}

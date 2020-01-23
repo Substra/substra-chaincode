@@ -83,6 +83,10 @@ func assetToArgs(asset interface{}) []string {
 	return []string{string(assetToJSON(asset))}
 }
 
+func keyToArgs(key string) []string {
+	return []string{string(keyToJSON(key))}
+}
+
 func assetToJSON(asset interface{}) []byte {
 	assetjson, _ := json.Marshal(asset)
 	return assetjson
