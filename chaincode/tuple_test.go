@@ -182,3 +182,17 @@ func TestTagTuple(t *testing.T) {
 	assert.EqualValues(t, tag, testtuples[0].Tag)
 
 }
+
+func TestQueryModelPermissions(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "traintuple")
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+	traintupleToDone(t, db, traintupleKey)
+	outTrain, err := queryTraintuple(db, keyToArgs(traintupleKey))
+	assert.NoError(t, err)
+	outPerm, err := queryModelPermissions(db, keyToArgs(outTrain.OutModel.Hash))
+	assert.NoError(t, err)
+	assert.NotZero(t, outPerm)
+}
