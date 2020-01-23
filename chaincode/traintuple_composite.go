@@ -352,6 +352,14 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 		StorageAddress: inp.OutTrunkModel.StorageAddress}
 	compositeTraintuple.Log += inp.Log
 
+	err = db.CreateIndex("tuple~modelHash~key", []string{"tuple", inp.OutHeadModel.Hash, compositeTraintupleKey})
+	if err != nil {
+		return
+	}
+	err = db.CreateIndex("tuple~modelHash~key", []string{"tuple", inp.OutTrunkModel.Hash, compositeTraintupleKey})
+	if err != nil {
+		return
+	}
 	if err = validateTupleOwner(db, compositeTraintuple.Dataset.Worker); err != nil {
 		return
 	}
