@@ -362,6 +362,11 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 		StorageAddress: inp.OutModel.StorageAddress}
 	aggregatetuple.Log += inp.Log
 
+	err = db.CreateIndex("tuple~modelHash~key", []string{"tuple", inp.OutModel.Hash, aggregatetupleKey})
+	if err != nil {
+		return
+	}
+
 	if err = validateTupleOwner(db, aggregatetuple.Worker); err != nil {
 		return
 	}
