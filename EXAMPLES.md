@@ -1231,6 +1231,28 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
  }
 ]
 ```
+#### ------------ Query model permissions ------------
+Smart contract: `queryModelPermissions`
+
+##### JSON Inputs:
+```go
+{
+ "key": string (required,len=64,hexadecimal),
+}
+```
+##### Command peer example:
+```bash
+peer chaincode query -n mycc -c '{"Args":["queryModelPermissions","{\"key\":\"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed\"}"]}' -C myc
+```
+##### Command output:
+```json
+{
+ "process": {
+  "authorizedIDs": [],
+  "public": true
+ }
+}
+```
 #### ------------ Query Dataset ------------
 Smart contract: `queryDataset`
 
