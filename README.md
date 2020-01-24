@@ -34,6 +34,7 @@ Note for internal use only: See the [technical specifications](https://github.co
 
 ### Implemented smart contracts
 
+- `cancelComputePlan`
 - `createAggregatetuple`
 - `createCompositeTraintuple`
 - `createComputePlan`
@@ -69,6 +70,7 @@ Note for internal use only: See the [technical specifications](https://github.co
 - `queryDataset`
 - `queryFilter`
 - `queryModelDetails`
+- `queryModelPermissions`
 - `queryModels`
 - `queryNodes`
 - `queryObjective`
