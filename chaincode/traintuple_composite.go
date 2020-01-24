@@ -169,7 +169,8 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
 			return err
 		}
-		computePlan := ComputePlan{Status: traintuple.Status, CompositeTraintupleKeys: []string{traintupleKey}}
+		computePlan := ComputePlan{}
+		computePlan.AddTuple(traintuple.AssetType, traintupleKey, traintuple.Status)
 		traintuple.ComputePlanID, err = computePlan.Create(db)
 		if err != nil {
 			return err
@@ -181,9 +182,7 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 	if err != nil {
 		return err
 	}
-	computePlan.CompositeTraintupleKeys = append(computePlan.CompositeTraintupleKeys, traintupleKey)
-	computePlan.TupleCount++
-	computePlan.CheckNewTupleStatus(traintuple.Status)
+	computePlan.AddTuple(traintuple.AssetType, traintupleKey, traintuple.Status)
 	err = computePlan.Save(db, traintuple.ComputePlanID)
 	if err != nil {
 		return err
@@ -321,10 +320,6 @@ func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTrain
 		return
 	}
 	err = o.Fill(db, compositeTraintuple, inp.Key)
-	if err != nil {
-		return
-	}
-	err = UpdateComputePlan(db, compositeTraintuple.ComputePlanID, compositeTraintuple.Status)
 	return
 }
 
@@ -371,11 +366,6 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 	}
 
 	err = o.Fill(db, compositeTraintuple, inp.Key)
-	if err != nil {
-		return
-	}
-
-	err = UpdateComputePlan(db, compositeTraintuple.ComputePlanID, compositeTraintuple.Status)
 	return
 }
 
@@ -404,10 +394,6 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 	}
 
 	err = o.Fill(db, compositeTraintuple, inp.Key)
-	if err != nil {
-		return
-	}
-	err = UpdateComputePlan(db, compositeTraintuple.ComputePlanID, compositeTraintuple.Status)
 	if err != nil {
 		return
 	}
@@ -574,6 +560,9 @@ func (traintuple *CompositeTraintuple) commitStatusUpdate(db *LedgerDB, traintup
 	oldAttributes := []string{"compositeTraintuple", traintuple.Dataset.Worker, oldStatus, traintupleKey}
 	newAttributes := []string{"compositeTraintuple", traintuple.Dataset.Worker, traintuple.Status, traintupleKey}
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
+		return err
+	}
+	if err := UpdateComputePlan(db, traintuple.ComputePlanID, newStatus, traintupleKey); err != nil {
 		return err
 	}
 	logger.Infof("traintuple %s status updated: %s (from=%s)", traintupleKey, newStatus, oldStatus)

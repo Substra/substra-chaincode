@@ -139,7 +139,8 @@ func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetu
 			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
 			return err
 		}
-		computePlan := ComputePlan{Status: tuple.Status, AggregatetupleKeys: []string{traintupleKey}}
+		computePlan := ComputePlan{}
+		computePlan.AddTuple(tuple.AssetType, traintupleKey, tuple.Status)
 		tuple.ComputePlanID, err = computePlan.Create(db)
 		if err != nil {
 			return err
@@ -152,9 +153,7 @@ func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetu
 	if err != nil {
 		return err
 	}
-	computePlan.AggregatetupleKeys = append(computePlan.AggregatetupleKeys, traintupleKey)
-	computePlan.TupleCount++
-	computePlan.CheckNewTupleStatus(tuple.Status)
+	computePlan.AddTuple(tuple.AssetType, traintupleKey, tuple.Status)
 	err = computePlan.Save(db, tuple.ComputePlanID)
 	if err != nil {
 		return err
@@ -290,10 +289,6 @@ func logStartAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err
 		return
 	}
 	err = o.Fill(db, aggregatetuple, inp.Key)
-	if err != nil {
-		return
-	}
-	err = UpdateComputePlan(db, aggregatetuple.ComputePlanID, aggregatetuple.Status)
 	return
 }
 
@@ -322,10 +317,6 @@ func logFailAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err 
 	}
 
 	o.Fill(db, aggregatetuple, inp.Key)
-	err = UpdateComputePlan(db, aggregatetuple.ComputePlanID, aggregatetuple.Status)
-	if err != nil {
-		return
-	}
 	// Do not propagate failure if we are in a compute plan
 	if aggregatetuple.ComputePlanID != "" {
 		return
@@ -369,10 +360,6 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 		return
 	}
 
-	err = UpdateComputePlan(db, aggregatetuple.ComputePlanID, aggregatetuple.Status)
-	if err != nil {
-		return
-	}
 	err = UpdateTraintupleChildren(db, aggregatetupleKey, aggregatetuple.Status, []string{})
 	if err != nil {
 		return
@@ -526,6 +513,9 @@ func (tuple *Aggregatetuple) commitStatusUpdate(db *LedgerDB, aggregatetupleKey 
 	oldAttributes := []string{"aggregatetuple", tuple.Worker, oldStatus, aggregatetupleKey}
 	newAttributes := []string{"aggregatetuple", tuple.Worker, tuple.Status, aggregatetupleKey}
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
+		return err
+	}
+	if err := UpdateComputePlan(db, tuple.ComputePlanID, newStatus, aggregatetupleKey); err != nil {
 		return err
 	}
 	logger.Infof("aggregatetuple %s status updated: %s (from=%s)", aggregatetupleKey, newStatus, oldStatus)

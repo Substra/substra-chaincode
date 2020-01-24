@@ -292,7 +292,6 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 func (cp *ComputePlan) Create(db *LedgerDB) (string, error) {
 	ID := GetRandomHash()
 	cp.AssetType = ComputePlanType
-	cp.TupleCount = 1
 	err := db.Add(ID, cp)
 	if err != nil {
 		return "", err
@@ -346,13 +345,32 @@ func (cp *ComputePlan) CheckNewTupleStatus(tupleStatus string) bool {
 			cp.Status = tupleStatus
 			return true
 		}
+	case "":
+		cp.Status = tupleStatus
+		return true
 	}
 	return false
 }
 
+// AddTuple add the tuple key to the compute plan and update it accordingly
+func (cp *ComputePlan) AddTuple(tupleType AssetType, key, status string) {
+	switch tupleType {
+	case TraintupleType:
+		cp.TraintupleKeys = append(cp.TraintupleKeys, key)
+	case CompositeTraintupleType:
+		cp.CompositeTraintupleKeys = append(cp.CompositeTraintupleKeys, key)
+	case AggregatetupleType:
+		cp.AggregatetupleKeys = append(cp.AggregatetupleKeys, key)
+	case TesttupleType:
+		cp.TesttupleKeys = append(cp.TesttupleKeys, key)
+	}
+	cp.TupleCount++
+	cp.CheckNewTupleStatus(status)
+}
+
 // UpdateComputePlan retreive the compute plan if the ID is not empty,
 // check if the updated status change anything and save it if it's the case
-func UpdateComputePlan(db *LedgerDB, ComputePlanID, tupleStatus string) error {
+func UpdateComputePlan(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey string) error {
 	if ComputePlanID == "" {
 		return nil
 	}
