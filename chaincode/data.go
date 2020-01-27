@@ -16,7 +16,6 @@ package main
 
 import (
 	"chaincode/errors"
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -53,10 +52,6 @@ func (dataManager *DataManager) Set(db *LedgerDB, inp inputDataManager) (string,
 // and returning corresponding dataSample hashes, associated dataManagers, testOnly and errors
 func setDataSample(db *LedgerDB, inp inputDataSample) (dataSampleHashes []string, dataSample DataSample, err error) {
 	dataSampleHashes = inp.Hashes
-	if err = checkHashes(dataSampleHashes); err != nil {
-		err = errors.BadRequest(err)
-		return
-	}
 	// check dataSample is not already in the ledger
 	if existingKeys := checkDataSamplesExist(db, dataSampleHashes); existingKeys != nil {
 		err = errors.Conflict("data samples with keys %s already exist", existingKeys).WithKeys(existingKeys)
@@ -92,11 +87,6 @@ func setDataSample(db *LedgerDB, inp inputDataSample) (dataSampleHashes []string
 // one or more dataSamplef
 func validateUpdateDataSample(db *LedgerDB, inp inputUpdateDataSample) (dataSampleHashes []string, dataManagerKeys []string, err error) {
 	// TODO return full dataSample
-	// check validity of dataSampleHashes
-	if err = checkHashes(inp.Hashes); err != nil {
-		err = errors.BadRequest(err)
-		return
-	}
 	// check dataManagers exist and are owned by the transaction requester
 	if err = checkDataManagerOwner(db, inp.DataManagerKeys); err != nil {
 		return
@@ -323,7 +313,7 @@ func queryDataset(db *LedgerDB, args []string) (outputDataset, error) {
 func queryDataSamples(db *LedgerDB, args []string) ([]outputDataSample, error) {
 	outDataSamples := []outputDataSample{}
 	if len(args) != 0 {
-		err := fmt.Errorf("incorrect number of arguments, expecting nothing")
+		err := errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return outDataSamples, err
 	}
 	elementsKeys, err := db.GetIndexKeys("dataSample~dataManager~key", []string{"dataSample"})
@@ -393,7 +383,7 @@ func checkSameDataManager(db *LedgerDB, dataManagerKey string, dataSampleKeys []
 			return testOnly, trainOnly, err
 		}
 		if !stringInSlice(dataManagerKey, dataSample.DataManagerKeys) {
-			err = fmt.Errorf("dataSample do not belong to the same dataManager")
+			err = errors.BadRequest("dataSample do not belong to the same dataManager")
 			return testOnly, trainOnly, err
 		}
 		testOnly = testOnly && dataSample.TestOnly

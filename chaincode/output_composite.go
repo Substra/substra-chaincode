@@ -14,9 +14,7 @@
 
 package main
 
-import (
-	"fmt"
-)
+import "chaincode/errors"
 
 type outputCompositeAlgo struct {
 	outputAlgo
@@ -62,7 +60,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 	// fill algo
 	algo, err := db.GetCompositeAlgo(traintuple.AlgoKey)
 	if err != nil {
-		err = fmt.Errorf("could not retrieve composite algo with key %s - %s", traintuple.AlgoKey, err.Error())
+		err = errors.Internal("could not retrieve composite algo with key %s - %s", traintuple.AlgoKey, err.Error())
 		return
 	}
 	outputCompositeTraintuple.Algo = &HashDressName{
@@ -75,7 +73,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		// Head can only be a composite traintuple's head out model
 		hashDress, _err := db.GetOutModelHashDress(traintuple.InHeadModel, HeadType, []AssetType{CompositeTraintupleType})
 		if _err != nil {
-			err = fmt.Errorf("could not fill (head) in-model with key \"%s\": %s", traintuple.InHeadModel, _err.Error())
+			err = errors.Internal("could not fill (head) in-model with key \"%s\": %s", traintuple.InHeadModel, _err.Error())
 			return
 		}
 		outputCompositeTraintuple.InHeadModel = &Model{
@@ -95,7 +93,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		// - an aggregate tuple's out model
 		hashDress, _err := db.GetOutModelHashDress(traintuple.InTrunkModel, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
 		if _err != nil {
-			err = fmt.Errorf("could not fill (trunk) in-model with key \"%s\": %s", traintuple.InTrunkModel, _err.Error())
+			err = errors.Internal("could not fill (trunk) in-model with key \"%s\": %s", traintuple.InTrunkModel, _err.Error())
 			return
 		}
 		outputCompositeTraintuple.InTrunkModel = &Model{

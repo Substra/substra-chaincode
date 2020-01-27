@@ -49,7 +49,7 @@ func TestAlgo(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying an algo with status %d and message %s", resp.Status, resp.Message)
 	algo := outputAlgo{}
-	err = bytesToStruct(resp.Payload, &algo)
+	err = json.Unmarshal(resp.Payload, &algo)
 	assert.NoError(t, err, "when unmarshalling queried objective")
 	expectedAlgo := outputAlgo{
 		Key:  algoKey,

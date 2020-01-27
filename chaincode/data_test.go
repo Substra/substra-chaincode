@@ -66,7 +66,7 @@ func TestDataManager(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the dataManager, status %d and message %s", resp.Status, resp.Message)
 	dataManager := outputDataManager{}
-	err = bytesToStruct(resp.Payload, &dataManager)
+	err = json.Unmarshal(resp.Payload, &dataManager)
 	assert.NoError(t, err, "when unmarshalling queried dataManager")
 	expectedDataManager := outputDataManager{
 		ObjectiveKey: inpDataManager.ObjectiveKey,

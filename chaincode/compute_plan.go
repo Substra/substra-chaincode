@@ -16,7 +16,6 @@ package main
 
 import (
 	"chaincode/errors"
-	"fmt"
 	"strconv"
 )
 
@@ -31,7 +30,7 @@ func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, tra
 	for _, InModelID := range inpCP.InModelsIDs {
 		inModelKey, ok := traintupleKeysByID[InModelID]
 		if !ok {
-			return fmt.Errorf("model ID %s not found", InModelID)
+			return errors.BadRequest("model ID %s not found", InModelID)
 		}
 		inpTraintuple.InModels = append(inpTraintuple.InModels, inModelKey)
 	}
@@ -49,7 +48,7 @@ func (inpAggregatetuple *inputAggregatetuple) Fill(inpCP inputComputePlanAggrega
 	for _, InModelID := range inpCP.InModelsIDs {
 		inModelKey, ok := aggregatetupleKeysByID[InModelID]
 		if !ok {
-			return fmt.Errorf("model ID %s not found", InModelID)
+			return errors.BadRequest("model ID %s not found", InModelID)
 		}
 		inpAggregatetuple.InModels = append(inpAggregatetuple.InModels, inModelKey)
 	}
@@ -70,14 +69,14 @@ func (inpCompositeTraintuple *inputCompositeTraintuple) Fill(inpCP inputComputeP
 		var ok bool
 		inpCompositeTraintuple.InHeadModelKey, ok = traintupleKeysByID[inpCP.InHeadModelID]
 		if !ok {
-			return fmt.Errorf("head model ID %s not found", inpCP.InHeadModelID)
+			return errors.BadRequest("head model ID %s not found", inpCP.InHeadModelID)
 		}
 	}
 	if inpCP.InTrunkModelID != "" {
 		var ok bool
 		inpCompositeTraintuple.InTrunkModelKey, ok = traintupleKeysByID[inpCP.InTrunkModelID]
 		if !ok {
-			return fmt.Errorf("trunk model ID %s not found", inpCP.InTrunkModelID)
+			return errors.BadRequest("trunk model ID %s not found", inpCP.InTrunkModelID)
 		}
 	}
 	return nil
@@ -86,7 +85,7 @@ func (inpCompositeTraintuple *inputCompositeTraintuple) Fill(inpCP inputComputeP
 func (inpTesttuple *inputTesttuple) Fill(inpCP inputComputePlanTesttuple, traintupleKeysByID map[string]string) error {
 	traintupleKey, ok := traintupleKeysByID[inpCP.TraintupleID]
 	if !ok {
-		return fmt.Errorf("traintuple ID %s not found", inpCP.TraintupleID)
+		return errors.BadRequest("traintuple ID %s not found", inpCP.TraintupleID)
 	}
 	inpTesttuple.TraintupleKey = traintupleKey
 	inpTesttuple.DataManagerKey = inpCP.DataManagerKey

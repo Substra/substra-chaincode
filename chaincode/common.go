@@ -15,7 +15,7 @@
 package main
 
 import (
-	"fmt"
+	"chaincode/errors"
 	"strings"
 )
 
@@ -39,7 +39,7 @@ func queryFilter(db *LedgerDB, args []string) (elements interface{}, err error) 
 		"aggregatetuple~tag",
 	}
 	if !stringInSlice(inp.IndexName, validIndexNames) {
-		err = fmt.Errorf("invalid indexName filter query: %s", inp.IndexName)
+		err = errors.BadRequest("invalid indexName filter query: %s", inp.IndexName)
 		return
 	}
 	indexName := inp.IndexName + "~key"

@@ -145,7 +145,7 @@ func TestObjective(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying a dataManager with status %d and message %s", resp.Status, resp.Message)
 	objective := outputObjective{}
-	err = bytesToStruct(resp.Payload, &objective)
+	err = json.Unmarshal(resp.Payload, &objective)
 	assert.NoError(t, err, "when unmarshalling queried objective")
 	expectedObjective := outputObjective{
 		Key:   objectiveKey,

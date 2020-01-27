@@ -16,7 +16,6 @@ package main
 
 import (
 	"chaincode/errors"
-	"fmt"
 	"sort"
 )
 
@@ -116,7 +115,7 @@ func queryObjective(db *LedgerDB, args []string) (out outputObjective, err error
 func queryObjectives(db *LedgerDB, args []string) (outObjectives []outputObjective, err error) {
 	outObjectives = []outputObjective{}
 	if len(args) != 0 {
-		err = fmt.Errorf("incorrect number of arguments, expecting nothing")
+		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return
 	}
 	elementsKeys, err := db.GetIndexKeys("objective~owner~key", []string{"objective"})

@@ -16,7 +16,6 @@ package main
 
 import (
 	"chaincode/errors"
-	"fmt"
 	"reflect"
 	"sort"
 	"strconv"
@@ -434,7 +433,7 @@ func (testtuple *Testtuple) validateNewStatus(db *LedgerDB, status string) error
 // commitStatusUpdate update the testtuple status in the ledger
 func (testtuple *Testtuple) commitStatusUpdate(db *LedgerDB, testtupleKey string, newStatus string) error {
 	if err := testtuple.validateNewStatus(db, newStatus); err != nil {
-		return fmt.Errorf("update testtuple %s failed: %s", testtupleKey, err.Error())
+		return errors.Internal("update testtuple %s failed: %s", testtupleKey, err.Error())
 	}
 
 	// do not update if previous status is already Done, Failed, Todo, Doing
@@ -446,7 +445,7 @@ func (testtuple *Testtuple) commitStatusUpdate(db *LedgerDB, testtupleKey string
 	testtuple.Status = newStatus
 
 	if err := db.Put(testtupleKey, testtuple); err != nil {
-		return fmt.Errorf("failed to update testtuple status to %s with key %s", newStatus, testtupleKey)
+		return errors.Internal("failed to update testtuple status to %s with key %s", newStatus, testtupleKey)
 	}
 
 	// update associated composite key

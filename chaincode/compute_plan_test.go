@@ -15,7 +15,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -240,7 +239,7 @@ func validateTupleRank(t *testing.T, db *LedgerDB, expectedRank int, key string,
 		assert.NoError(t, err)
 		rank = tuple.Rank
 	default:
-		assert.NoError(t, fmt.Errorf("not implemented: %v", assetType))
+		t.Errorf("not implemented: %s", assetType)
 	}
 	assert.Equal(t, expectedRank, rank, "Rank for tuple of type %v with key \"%s\" should be %d", assetType, key, expectedRank)
 }

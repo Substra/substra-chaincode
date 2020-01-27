@@ -169,7 +169,7 @@ func TestQueryTesttuple(t *testing.T) {
 			resp = mockStub.MockInvoke("42", args)
 			respTesttuple := resp.Payload
 			testtuple := outputTesttuple{}
-			bytesToStruct(respTesttuple, &testtuple)
+			json.Unmarshal(respTesttuple, &testtuple)
 
 			// assert
 			assert.Equal(t, worker, testtuple.Creator)
@@ -210,7 +210,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 			resp := mockStub.MockInvoke("42", args)
 			assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
 			values := map[string]string{}
-			bytesToStruct(resp.Payload, &values)
+			json.Unmarshal(resp.Payload, &values)
 			testTupleKey := values["key"]
 
 			// Start training
@@ -254,7 +254,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 			case StatusDone:
 				assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
 				values = map[string]string{}
-				bytesToStruct(resp.Payload, &values)
+				json.Unmarshal(resp.Payload, &values)
 				testTupleKey = values["key"]
 				testTuple, err := queryTesttuple(db, assetToArgs(inputHash{Key: testTupleKey}))
 				assert.NoError(t, err)
