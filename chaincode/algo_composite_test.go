@@ -51,7 +51,7 @@ func TestCompositeAlgo(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying a composite algo with status %d and message %s", resp.Status, resp.Message)
 	algo := outputCompositeAlgo{}
-	err = bytesToStruct(resp.Payload, &algo)
+	err = json.Unmarshal(resp.Payload, &algo)
 	assert.NoError(t, err, "when unmarshalling queried composite algo")
 	expectedAlgo := outputCompositeAlgo{
 		outputAlgo: outputAlgo{

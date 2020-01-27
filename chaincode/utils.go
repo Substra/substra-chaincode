@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"reflect"
 	"unicode"
 	"unicode/utf8"
 
@@ -47,40 +46,6 @@ func typeInSlice(a AssetType, list []AssetType) bool {
 		}
 	}
 	return false
-}
-
-// inputStructToBytes converts fields of a struct (with string fields only, such as input struct defined in ledger.go) to a [][]byte
-func inputStructToBytes(v interface{}) (sb [][]byte, err error) {
-
-	e := reflect.Indirect(reflect.ValueOf(v))
-	for i := 0; i < e.NumField(); i++ {
-		v := e.Field(i)
-		if v.Type().Name() != "string" {
-			err = fmt.Errorf("struct should contain only string values")
-			return
-		}
-		varValue := v.String()
-		sb = append(sb, []byte(varValue))
-	}
-	return
-
-}
-
-// bytesToStruct converts bytes to one a the struct corresponding to elements stored in the ledger
-func bytesToStruct(elementBytes []byte, element interface{}) error {
-	return json.Unmarshal(elementBytes, &element)
-}
-
-// checkHashes checks if all elements in a slice are all hashes, returns error if not the case
-func checkHashes(hashes []string) (err error) {
-	for _, hash := range hashes {
-		// check validity of dataSampleHashes
-		if len(hash) != 64 {
-			err = fmt.Errorf("invalid hash %s", hash)
-			return
-		}
-	}
-	return
 }
 
 // AssetFromJSON unmarshal a stringify json into the passed interface

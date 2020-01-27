@@ -16,7 +16,6 @@ package main
 
 import (
 	"chaincode/errors"
-	"fmt"
 	"strconv"
 )
 
@@ -93,7 +92,7 @@ func (traintuple *Traintuple) SetFromParents(db *LedgerDB, inModels []string) er
 			return errors.BadRequest(err, "could not retrieve parent traintuple with key %s", parentTraintupleKey)
 		}
 		if !typeInSlice(tuple.AssetType, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType}) {
-			return fmt.Errorf("aggregate.SetFromParents: Unsupported parent type %s", tuple.AssetType)
+			return errors.Internal("aggregate.SetFromParents: Unsupported parent type %s", tuple.AssetType)
 		}
 		parentStatuses = append(parentStatuses, tuple.Status)
 		inModelKeys = append(inModelKeys, parentTraintupleKey)
@@ -471,15 +470,15 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 	// get traintuples having as inModels the input traintuple
 	childTraintupleKeys, err := db.GetIndexKeys("traintuple~inModel~key", []string{"traintuple", traintupleKey})
 	if err != nil {
-		return fmt.Errorf("error while getting associated tuples to update their inModel, traintupleKey=%s traintupleStatus=%s %s", traintupleKey, traintupleStatus, err)
+		return errors.Internal("error while getting associated tuples to update their inModel, traintupleKey=%s traintupleStatus=%s %s", traintupleKey, traintupleStatus, err)
 	}
 	childCompositeTraintupleKeys, err := db.GetIndexKeys("compositeTraintuple~inModel~key", []string{"compositeTraintuple", traintupleKey})
 	if err != nil {
-		return fmt.Errorf("error while getting associated composite traintuples to update their inModel")
+		return errors.Internal("error while getting associated composite traintuples to update their inModel")
 	}
 	childAggregatetupleKeys, err := db.GetIndexKeys("aggregatetuple~inModel~key", []string{"aggregatetuple", traintupleKey})
 	if err != nil {
-		return fmt.Errorf("error while getting associated aggregate tuples to update their inModel")
+		return errors.Internal("error while getting associated aggregate tuples to update their inModel")
 	}
 
 	allChildKeys := append(append(childTraintupleKeys, childCompositeTraintupleKeys...), childAggregatetupleKeys...)
@@ -499,7 +498,7 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 		}
 
 		if child.Status != StatusWaiting {
-			return fmt.Errorf("traintuple %s has invalid status : '%s' instead of waiting", childTraintupleKey, child.Status)
+			return errors.Internal("traintuple %s has invalid status : '%s' instead of waiting", childTraintupleKey, child.Status)
 		}
 
 		childTraintupleStatus := child.Status
@@ -522,7 +521,7 @@ func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStat
 				return err
 			}
 		default:
-			return fmt.Errorf("Unknown child traintuple type: %s", child.AssetType)
+			return errors.Internal("Unknown child traintuple type: %s", child.AssetType)
 		}
 
 		alreadyUpdatedKeys = append(alreadyUpdatedKeys, childTraintupleKey)
@@ -617,13 +616,13 @@ func (traintuple *Traintuple) commitStatusUpdate(db *LedgerDB, traintupleKey str
 	}
 
 	if err := traintuple.validateNewStatus(db, newStatus); err != nil {
-		return fmt.Errorf("update traintuple %s failed: %s", traintupleKey, err.Error())
+		return errors.Internal("update traintuple %s failed: %s", traintupleKey, err.Error())
 	}
 
 	oldStatus := traintuple.Status
 	traintuple.Status = newStatus
 	if err := db.Put(traintupleKey, traintuple); err != nil {
-		return fmt.Errorf("failed to update traintuple %s - %s", traintupleKey, err.Error())
+		return errors.Internal("failed to update traintuple %s - %s", traintupleKey, err.Error())
 	}
 
 	// update associated composite keys

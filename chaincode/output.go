@@ -15,7 +15,7 @@
 package main
 
 import (
-	"fmt"
+	"chaincode/errors"
 	"math"
 )
 
@@ -151,7 +151,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 	// fill algo
 	algo, err := db.GetAlgo(traintuple.AlgoKey)
 	if err != nil {
-		err = fmt.Errorf("could not retrieve algo with key %s - %s", traintuple.AlgoKey, err.Error())
+		err = errors.Internal("could not retrieve algo with key %s - %s", traintuple.AlgoKey, err.Error())
 		return
 	}
 	outputTraintuple.Algo = &HashDressName{
@@ -166,7 +166,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 		}
 		parentTraintuple, err := db.GetTraintuple(inModelKey)
 		if err != nil {
-			return fmt.Errorf("could not retrieve parent traintuple with key %s - %s", inModelKey, err.Error())
+			return errors.Internal("could not retrieve parent traintuple with key %s - %s", inModelKey, err.Error())
 		}
 		inModel := &Model{
 			TraintupleKey: inModelKey,
@@ -219,7 +219,7 @@ func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
 	// fill type
 	traintupleType, err := db.GetAssetType(in.TraintupleKey)
 	if err != nil {
-		return fmt.Errorf("could not retrieve traintuple type with key %s - %s", in.TraintupleKey, err.Error())
+		return errors.Internal("could not retrieve traintuple type with key %s - %s", in.TraintupleKey, err.Error())
 	}
 	out.TraintupleType = LowerFirst(traintupleType.String())
 
@@ -229,18 +229,18 @@ func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
 	case TraintupleType:
 		algo, err = db.GetAlgo(in.AlgoKey)
 		if err != nil {
-			return fmt.Errorf("could not retrieve algo with key %s - %s", in.AlgoKey, err.Error())
+			return errors.Internal("could not retrieve algo with key %s - %s", in.AlgoKey, err.Error())
 		}
 	case CompositeTraintupleType:
 		compositeAlgo, err := db.GetCompositeAlgo(in.AlgoKey)
 		if err != nil {
-			return fmt.Errorf("could not retrieve composite algo with key %s - %s", in.AlgoKey, err.Error())
+			return errors.Internal("could not retrieve composite algo with key %s - %s", in.AlgoKey, err.Error())
 		}
 		algo = compositeAlgo.Algo
 	case AggregatetupleType:
 		aggregateAlgo, err := db.GetAggregateAlgo(in.AlgoKey)
 		if err != nil {
-			return fmt.Errorf("could not retrieve aggregate algo with key %s - %s", in.AlgoKey, err.Error())
+			return errors.Internal("could not retrieve aggregate algo with key %s - %s", in.AlgoKey, err.Error())
 		}
 		algo = aggregateAlgo.Algo
 	}
@@ -252,10 +252,10 @@ func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
 	// fill objective
 	objective, err := db.GetObjective(in.ObjectiveKey)
 	if err != nil {
-		return fmt.Errorf("could not retrieve associated objective with key %s- %s", in.ObjectiveKey, err.Error())
+		return errors.Internal("could not retrieve associated objective with key %s- %s", in.ObjectiveKey, err.Error())
 	}
 	if objective.Metrics == nil {
-		return fmt.Errorf("objective %s is missing metrics values", in.ObjectiveKey)
+		return errors.Internal("objective %s is missing metrics values", in.ObjectiveKey)
 	}
 	metrics := HashDress{
 		Hash:           objective.Metrics.Hash,

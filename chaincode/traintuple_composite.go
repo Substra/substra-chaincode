@@ -16,7 +16,6 @@ package main
 
 import (
 	"chaincode/errors"
-	"fmt"
 	"strconv"
 )
 
@@ -560,13 +559,13 @@ func (traintuple *CompositeTraintuple) commitStatusUpdate(db *LedgerDB, traintup
 	}
 
 	if err := traintuple.validateNewStatus(db, newStatus); err != nil {
-		return fmt.Errorf("update traintuple %s failed: %s", traintupleKey, err.Error())
+		return errors.Internal("update traintuple %s failed: %s", traintupleKey, err.Error())
 	}
 
 	oldStatus := traintuple.Status
 	traintuple.Status = newStatus
 	if err := db.Put(traintupleKey, traintuple); err != nil {
-		return fmt.Errorf("failed to update traintuple %s - %s", traintupleKey, err.Error())
+		return errors.Internal("failed to update traintuple %s - %s", traintupleKey, err.Error())
 	}
 
 	// update associated composite keys
