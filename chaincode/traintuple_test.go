@@ -136,6 +136,7 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 func TestTraintupleComputePlanCreation(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	outTraintuple := outputTraintuple{}
 
 	// Add dataManager, dataSample and algo
 	registerItem(t, *mockStub, "algo")
@@ -156,11 +157,9 @@ func TestTraintupleComputePlanCreation(t *testing.T) {
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
-	res := map[string]string{}
-	err := json.Unmarshal(resp.Payload, &res)
+	err := json.Unmarshal(resp.Payload, &outTraintuple)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	key := res["key"]
+	key := outTraintuple.Key
 	require.EqualValues(t, key, traintupleKey)
 
 	inpTraintuple = inputTraintuple{Rank: "0"}
@@ -180,6 +179,7 @@ func TestTraintupleComputePlanCreation(t *testing.T) {
 func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	outTraintuple := outputTraintuple{}
 
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "algo")
@@ -188,11 +188,9 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
-	res := map[string]string{}
-	err := json.Unmarshal(resp.Payload, &res)
+	err := json.Unmarshal(resp.Payload, &outTraintuple)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	key := res["key"]
+	key := outTraintuple.Key
 	db := NewLedgerDB(mockStub)
 	tuple, err := db.GetTraintuple(key)
 	assert.NoError(t, err)
@@ -222,10 +220,9 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same ComputePlanID")
-	err = json.Unmarshal(resp.Payload, &res)
+	err = json.Unmarshal(resp.Payload, &outTraintuple)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	ttkey := res["key"]
+	ttkey := outTraintuple.Key
 	// Add new algo to check all ComputePlan algo consistency
 	newAlgoHash := strings.Replace(algoHash, "a", "b", 1)
 	inpAlgo := inputAlgo{Hash: newAlgoHash}
@@ -262,19 +259,17 @@ func TestTraintuple(t *testing.T) {
 	assert.EqualValuesf(t, 400, resp.Status, "when adding traintuple with unexisting algo, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add traintuple
+	out := outputTraintuple{}
 	resp, tt := registerItem(t, *mockStub, "traintuple")
 
 	inpTraintuple = tt.(inputTraintuple)
-	res := map[string]string{}
-	err := json.Unmarshal(resp.Payload, &res)
+	err := json.Unmarshal(resp.Payload, &out)
 	assert.NoError(t, err, "traintuple should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	traintupleKey := res["key"]
+	traintupleKey := out.Key
 	// Query traintuple from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
-	out := outputTraintuple{}
 	err = json.Unmarshal(resp.Payload, &out)
 	assert.NoError(t, err, "when unmarshalling queried traintuple")
 	expected := outputTraintuple{

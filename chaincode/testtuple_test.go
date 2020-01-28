@@ -26,15 +26,14 @@ import (
 func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	outTraintuple := outputTraintuple{}
 
 	// Add a some dataManager, dataSample and traintuple
 	resp, _ := registerItem(t, *mockStub, "traintuple")
 
-	res := map[string]string{}
-	err := json.Unmarshal(resp.Payload, &res)
+	err := json.Unmarshal(resp.Payload, &outTraintuple)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	traintupleKey := res["key"]
+	traintupleKey := outTraintuple.Key
 
 	// Mark the traintuple as failed
 	fail := inputLogFailTrain{}

@@ -319,7 +319,34 @@ peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd
 ##### Command output:
 ```json
 {
- "key": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+ "algo": {
+  "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "name": "hog + svm",
+  "storageAddress": "https://toto/algo/222/algo"
+ },
+ "computePlanID": "",
+ "creator": "SampleOrg",
+ "dataset": {
+  "keys": [
+   "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+  ],
+  "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "worker": "SampleOrg"
+ },
+ "inModels": null,
+ "key": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
+ "log": "",
+ "outModel": null,
+ "permissions": {
+  "process": {
+   "authorizedIDs": [],
+   "public": true
+  }
+ },
+ "rank": 0,
+ "status": "todo",
+ "tag": ""
 }
 ```
 #### ------------ Add Traintuple with inModel from previous traintuple ------------
@@ -344,13 +371,79 @@ peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd
 ##### Command output:
 ```json
 {
- "key": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
+ "algo": {
+  "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "name": "hog + svm",
+  "storageAddress": "https://toto/algo/222/algo"
+ },
+ "computePlanID": "",
+ "creator": "SampleOrg",
+ "dataset": {
+  "keys": [
+   "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+  ],
+  "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "worker": "SampleOrg"
+ },
+ "inModels": [
+  {
+   "hash": "",
+   "storageAddress": "",
+   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+  }
+ ],
+ "key": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab",
+ "log": "",
+ "outModel": null,
+ "permissions": {
+  "process": {
+   "authorizedIDs": [],
+   "public": true
+  }
+ },
+ "rank": 0,
+ "status": "waiting",
+ "tag": ""
 }
 ```
 ##### Command output:
 ```json
 {
- "key": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
+ "algo": {
+  "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "name": "hog + svm",
+  "storageAddress": "https://toto/algo/222/algo"
+ },
+ "computePlanID": "",
+ "creator": "SampleOrg",
+ "dataset": {
+  "keys": [
+   "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+  ],
+  "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "worker": "SampleOrg"
+ },
+ "inModels": [
+  {
+   "hash": "",
+   "storageAddress": "",
+   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
+  }
+ ],
+ "key": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab",
+ "log": "",
+ "outModel": null,
+ "permissions": {
+  "process": {
+   "authorizedIDs": [],
+   "public": true
+  }
+ },
+ "rank": 0,
+ "status": "waiting",
+ "tag": ""
 }
 ```
 #### ------------ Query Traintuples of worker with todo status ------------

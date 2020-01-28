@@ -106,14 +106,13 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Add Traintuple ------------")
 	inpTraintuple := inputTraintuple{}
+	outTraintuple := outputTraintuple{}
 	args := inpTraintuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTraintuple", inpTraintuple)
 	// Get traintuple key from Payload
-	res = map[string]string{}
-	err = json.Unmarshal(resp.Payload, &res)
+	err = json.Unmarshal(resp.Payload, &outTraintuple)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	traintupleKey := res["key"]
+	traintupleKey := outTraintuple.Key
 	// check not possible to create same traintuple
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 409, resp.Status, "when adding same traintuple with status %d and message %s", resp.Status, resp.Message)
@@ -134,11 +133,10 @@ func TestPipeline(t *testing.T) {
 	inpTraintuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTraintuple", inpTraintuple)
 	printResp(&out, resp.Payload)
-	res = map[string]string{}
-	err = json.Unmarshal(resp.Payload, &res)
+	outTraintuple = outputTraintuple{}
+	err = json.Unmarshal(resp.Payload, &outTraintuple)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	todoTraintupleKey := res["key"]
+	todoTraintupleKey := outTraintuple.Key
 
 	fmt.Fprintln(&out, "#### ------------ Query Traintuples of worker with todo status ------------")
 	filter := inputQueryFilter{
