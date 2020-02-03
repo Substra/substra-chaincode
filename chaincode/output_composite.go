@@ -81,7 +81,6 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 
 		if hashDress != nil {
 			outputCompositeTraintuple.InHeadModel.Hash = hashDress.Hash
-			outputCompositeTraintuple.InHeadModel.StorageAddress = hashDress.StorageAddress
 		}
 	}
 

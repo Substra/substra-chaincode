@@ -345,8 +345,8 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 	}
 
 	compositeTraintuple.OutHeadModel.OutModel = &HashDress{
-		Hash:           inp.OutHeadModel.Hash,
-		StorageAddress: inp.OutHeadModel.StorageAddress}
+		Hash:           inp.OutHeadModel.Hash}
+
 	compositeTraintuple.OutTrunkModel.OutModel = &HashDress{
 		Hash:           inp.OutTrunkModel.Hash,
 		StorageAddress: inp.OutTrunkModel.StorageAddress}

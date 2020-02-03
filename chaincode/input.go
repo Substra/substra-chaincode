@@ -133,7 +133,7 @@ type inputLog struct {
 
 type inputHashDress struct {
 	Hash           string `validate:"required,len=64,hexadecimal" json:"hash"`
-	StorageAddress string `validate:"required" json:"storageAddress"`
+	StorageAddress string `validate:"omitempty" json:"storageAddress"`
 }
 
 type inputQueryFilter struct {
