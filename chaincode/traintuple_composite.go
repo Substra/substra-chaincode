@@ -74,11 +74,11 @@ func (traintuple *CompositeTraintuple) SetFromInput(db *LedgerDB, inp inputCompo
 	}
 	traintuple.Dataset.Worker, err = getDataManagerOwner(db, traintuple.Dataset.DataManagerKey)
 
-	// permissions (head): creator only
-	creatorOnly := Permission{
+	// permissions (head): worker only where the data belong
+	workerOnly := Permission{
 		Public:        false,
-		AuthorizedIDs: []string{traintuple.Creator}}
-	traintuple.OutHeadModel.Permissions = Permissions{Process: creatorOnly, Download: creatorOnly}
+		AuthorizedIDs: []string{traintuple.Dataset.Worker}}
+	traintuple.OutHeadModel.Permissions = Permissions{Process: workerOnly, Download: workerOnly}
 
 	// permissions (trunk): dictated by input
 	permissions, err := NewPermissions(db, inp.OutTrunkModelPermissions)
