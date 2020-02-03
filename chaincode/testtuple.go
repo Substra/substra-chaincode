@@ -281,7 +281,7 @@ func createTesttupleInternal(db *LedgerDB, inp inputTesttuple) (string, error) {
 // logStartTest modifies a testtuple by changing its status from todo to doing
 func logStartTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 	status := StatusDoing
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -371,7 +371,7 @@ func logFailTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 
 // queryTesttuple returns a testtuple of the ledger given its key
 func queryTesttuple(db *LedgerDB, args []string) (out outputTesttuple, err error) {
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return

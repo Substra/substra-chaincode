@@ -458,7 +458,7 @@ Smart contract: `logSuccessTrain`
  "log": string (lte=200),
  "outModel": (required){
    "hash": string (required,len=64,hexadecimal),
-   "storageAddress": string (omitempty),
+   "storageAddress": string (required),
  },
 }
 ```

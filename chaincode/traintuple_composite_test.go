@@ -368,7 +368,7 @@ func TestTraintupleComposite(t *testing.T) {
 	endTraintuple := outputCompositeTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutHeadModel.OutHeadModel = &Hash{
+	expected.OutHeadModel.OutModel = &Hash{
 		Hash:           headModelHash}
 	expected.OutTrunkModel.OutModel = &HashDress{
 		Hash:           trunkModelHash,
@@ -761,11 +761,11 @@ func TestCorrectParent(t *testing.T) {
 	db := NewLedgerDB(mockStub)
 
 	// fetch aggregate child, and check its in-model is the parent's trunk out-model
-	child1, _ := queryAggregatetuple(db, assetToArgs(inputHash{Key: child1Key}))
+	child1, _ := queryAggregatetuple(db, assetToArgs(inputKey{Key: child1Key}))
 	assert.Equal(t, trunkModelHash, child1.InModels[0].Hash)
 
 	// fetch composite child, and check its head in-model is the parent's head out-model
-	child2, _ := queryCompositeTraintuple(db, assetToArgs(inputHash{Key: child2Key}))
+	child2, _ := queryCompositeTraintuple(db, assetToArgs(inputKey{Key: child2Key}))
 	assert.Equal(t, headModelHash, child2.InHeadModel.Hash)
 }
 

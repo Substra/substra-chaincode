@@ -39,7 +39,7 @@ type outputCompositeTraintuple struct {
 }
 
 type outHeadModelComposite struct {
-	OutHeadModel    *Hash             `json:"outModel"`
+	OutModel    *Hash             `json:"outModel"`
 	Permissions outputPermissions `json:"permissions"`
 }
 
@@ -58,7 +58,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 	outputCompositeTraintuple.Rank = traintuple.Rank
 	outputCompositeTraintuple.ComputePlanID = traintuple.ComputePlanID
 	outputCompositeTraintuple.OutHeadModel = outHeadModelComposite{
-		OutHeadModel:    traintuple.OutHeadModel.OutModel,
+		OutModel:    traintuple.OutHeadModel.OutModel,
 		Permissions: getOutPermissions(traintuple.OutHeadModel.Permissions)}
 	outputCompositeTraintuple.OutTrunkModel = outModelComposite{
 		OutModel:    traintuple.OutTrunkModel.OutModel,

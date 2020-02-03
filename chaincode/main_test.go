@@ -92,7 +92,7 @@ func assetToJSON(asset interface{}) []byte {
 }
 
 func keyToJSON(key string) []byte {
-	return assetToJSON(inputHash{Key: key})
+	return assetToJSON(inputKey{Key: key})
 }
 
 func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Response, interface{}) {
