@@ -112,6 +112,18 @@ func (traintuple *CompositeTraintuple) SetFromParents(db *LedgerDB, inp inputCom
 			head.AssetType,
 			inp.InHeadModelKey)
 	}
+
+	// Head Model is only processable on the same worker
+	worker, err := getDataManagerOwner(db, traintuple.Dataset.DataManagerKey)
+	compositeTraintuple, err := db.GetCompositeTraintuple(inp.InHeadModelKey)
+
+	if !compositeTraintuple.OutHeadModel.Permissions.CanProcess(compositeTraintuple.Dataset.Worker, worker) {
+		return errors.BadRequest(
+			"Dataset worker (%s) and head InModel owner (%s) must be the same",
+			worker,
+			compositeTraintuple.Dataset.Worker)
+	}
+
 	// [Trunk]
 	// It can be either:
 	// - a traintuple's out model
