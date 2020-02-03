@@ -99,7 +99,7 @@ func registerObjective(db *LedgerDB, args []string) (resp map[string]string, err
 
 // queryObjective returns a objective of the ledger given its key
 func queryObjective(db *LedgerDB, args []string) (out outputObjective, err error) {
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return

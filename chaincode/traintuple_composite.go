@@ -302,7 +302,7 @@ func createCompositeTraintupleInternal(db *LedgerDB, inp inputCompositeTraintupl
 // logStartCompositeTrain modifies a traintuple by changing its status from todo to doing
 func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraintuple, err error) {
 	status := StatusDoing
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -346,14 +346,14 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 	}
 
 	compositeTraintuple.OutHeadModel.OutModel = &Hash{
-		Hash:           inp.OutHeadModel.Key}
+		Hash:           inp.OutHeadModel.Hash}
 
 	compositeTraintuple.OutTrunkModel.OutModel = &HashDress{
 		Hash:           inp.OutTrunkModel.Hash,
 		StorageAddress: inp.OutTrunkModel.StorageAddress}
 	compositeTraintuple.Log += inp.Log
 
-	err = db.CreateIndex("tuple~modelHash~key", []string{"tuple", inp.OutHeadModel.Key, compositeTraintupleKey})
+	err = db.CreateIndex("tuple~modelHash~key", []string{"tuple", inp.OutHeadModel.Hash, compositeTraintupleKey})
 	if err != nil {
 		return
 	}
@@ -435,7 +435,7 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 
 // queryCompositeTraintuple returns info about a composite traintuple given its key
 func queryCompositeTraintuple(db *LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return

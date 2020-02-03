@@ -153,11 +153,11 @@ func TestModelComposition(t *testing.T) {
 func trainStart(db *LedgerDB, tupleType AssetType, tupleKey string) (interface{}, error) {
 	switch tupleType {
 	case TraintupleType:
-		return logStartTrain(db, assetToArgs(inputHash{Key: tupleKey}))
+		return logStartTrain(db, assetToArgs(inputKey{Key: tupleKey}))
 	case CompositeTraintupleType:
-		return logStartCompositeTrain(db, assetToArgs(inputHash{Key: tupleKey}))
+		return logStartCompositeTrain(db, assetToArgs(inputKey{Key: tupleKey}))
 	case AggregatetupleType:
-		return logStartAggregate(db, assetToArgs(inputHash{Key: tupleKey}))
+		return logStartAggregate(db, assetToArgs(inputKey{Key: tupleKey}))
 	default:
 		return nil, fmt.Errorf("unsupported test case %s", tupleType)
 	}
