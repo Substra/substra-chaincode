@@ -100,7 +100,7 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 		}
 
 		inModelKeys = append(inModelKeys, parentTraintupleKey)
-		permissions = MergePermissions(permissions, parentPermissions)
+		permissions = MergePermissions(permissions, parentPermissions, "union")
 	}
 	tuple.Status = determineStatusFromInModels(parentStatuses)
 	tuple.InModelKeys = inModelKeys

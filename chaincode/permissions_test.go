@@ -103,17 +103,17 @@ func TestMergingMechanism(t *testing.T) {
 				Public:        test.toMergeINR,
 				AuthorizedIDs: test.toMergeRU,
 			}
-			mergedPriv := mergePermissions(defaultPermission, toMerge)
+			mergedPriv := mergePermissions(defaultPermission, toMerge, "intersection")
 			assert.Equal(t, test.expectedINR, mergedPriv.Public)
 			assert.ElementsMatch(t, test.expectedRU, mergedPriv.AuthorizedIDs)
-			privMerged := mergePermissions(toMerge, defaultPermission)
+			privMerged := mergePermissions(toMerge, defaultPermission, "intersection")
 			assert.Equal(t, mergedPriv.Public, privMerged.Public, "merging should be transitif")
 			assert.ElementsMatch(t, mergedPriv.AuthorizedIDs, privMerged.AuthorizedIDs, "merging should be transitif")
 
-			theSamePriv := mergePermissions(Permission{Public: true}, toMerge)
+			theSamePriv := mergePermissions(Permission{Public: true}, toMerge, "intersection")
 			assert.Equal(t, toMerge.Public, theSamePriv.Public, "a non restrictive permission should be neutral")
 			assert.ElementsMatch(t, toMerge.AuthorizedIDs, theSamePriv.AuthorizedIDs, "a non restrictive permission should be neutral")
-			theSamePriv = mergePermissions(toMerge, Permission{Public: true})
+			theSamePriv = mergePermissions(toMerge, Permission{Public: true}, "intersection")
 			assert.Equal(t, toMerge.Public, theSamePriv.Public, "neutral element should be transitive")
 			assert.ElementsMatch(t, toMerge.AuthorizedIDs, theSamePriv.AuthorizedIDs, "neutral element should be transitive")
 		})

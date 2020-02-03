@@ -115,14 +115,14 @@ func (priv Permission) include(other Permission) bool {
 }
 
 // MergePermissions returns the intersection of input permissions
-func MergePermissions(x, y Permissions) Permissions {
+func MergePermissions(x, y Permissions, strategy string) Permissions {
 	perm := Permissions{}
-	perm.Process = mergePermissions(x.Process, y.Process)
-	perm.Download = mergePermissions(x.Download, y.Download)
+	perm.Process = mergePermissions(x.Process, y.Process, strategy)
+	perm.Download = mergePermissions(x.Download, y.Download, strategy)
 	return perm
 }
 
-func mergePermissions(x, y Permission) Permission {
+func mergePermissions(x, y Permission, strategy string) Permission {
 	priv := Permission{}
 	priv.Public = x.Public && y.Public
 
@@ -131,6 +131,10 @@ func mergePermissions(x, y Permission) Permission {
 		priv.AuthorizedIDs = x.AuthorizedIDs
 	case x.Public && !y.Public:
 		priv.AuthorizedIDs = y.AuthorizedIDs
+	case strategy  == "union":
+		priv.AuthorizedIDs = getNodesUnion(x, y)
+	case strategy == "intersection":
+		priv.AuthorizedIDs = x.getNodesIntersection(y)
 	default:
 		priv.AuthorizedIDs = x.getNodesIntersection(y)
 	}
@@ -148,4 +152,27 @@ func (priv Permission) getNodesIntersection(p Permission) []string {
 		}
 	}
 	return nodes
+}
+
+func getNodesUnion(x, y Permission) []string {
+	nodes := []string{}
+
+	for _, i := range x.AuthorizedIDs {
+		nodes = append(nodes, i)
+	}
+	for _, i := range y.AuthorizedIDs {
+		if !contains(nodes, i) {
+			nodes = append(nodes, i)
+		}
+	}
+	return nodes
+}
+
+func contains(s []string, e string) bool {
+    for _, a := range s {
+        if a == e {
+            return true
+        }
+    }
+    return false
 }

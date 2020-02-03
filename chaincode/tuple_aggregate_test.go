@@ -482,8 +482,8 @@ func TestAggregatetuplePermissions(t *testing.T) {
 	// verify permissions
 	assert.EqualValues(t, false, aggr.Permissions.Process.Public,
 		"the aggregate tuple should not be public")
-	assert.EqualValues(t, []string{worker, "nodeC"}, aggr.Permissions.Process.AuthorizedIDs,
-		"the aggregate tuple permissions should be the intersect of the in-model permissions")
+	assert.EqualValues(t, []string{worker, "nodeA", "nodeC", "nodeB", "nodeD"}, aggr.Permissions.Process.AuthorizedIDs,
+		"the aggregate tuple permissions should be the union of the in-model permissions")
 }
 
 func TestAggregatetupleLogSuccessFail(t *testing.T) {
