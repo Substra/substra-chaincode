@@ -369,8 +369,7 @@ func TestTraintupleComposite(t *testing.T) {
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
 	expected.OutHeadModel.OutModel = &HashDress{
-		Hash:           headModelHash,
-		StorageAddress: headModelAddress}
+		Hash:           headModelHash}
 	expected.OutTrunkModel.OutModel = &HashDress{
 		Hash:           trunkModelHash,
 		StorageAddress: trunkModelAddress}
