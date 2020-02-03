@@ -183,41 +183,19 @@ func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, erro
 		return out, errors.Internal(err, "queryModelPermissions: could not retrieve model type with key %s", key)
 	}
 
+	// By default model is public processable
 	modelPermissions := Permissions{}
+	modelPermissions.Process.Public = true
 
-	// get out-model and permissions from parent
-	switch tupleType {
-	case CompositeTraintupleType:
+	// get out-model and permissions from parent for head model in composite traintuple
+	if tupleType == CompositeTraintupleType{
 		tuple, err := db.GetCompositeTraintuple(key)
 		if err != nil {
 			return out, errors.Internal(err, "queryModelPermissions:")
 		}
-		if tuple.OutTrunkModel.OutModel.Hash == inp.Key {
-			modelPermissions = tuple.OutTrunkModel.Permissions
-			break
-		}
 		if tuple.OutHeadModel.OutModel.Hash == inp.Key {
 			modelPermissions = tuple.OutHeadModel.Permissions
-			break
 		}
-		return out, errors.Internal("queryModelPermissions: hash %s doesn't match headModel nor trunkModel", inp.Key)
-
-	case TraintupleType:
-		tuple, err := db.GetTraintuple(key)
-		if err != nil {
-			return out, errors.Internal(err, "queryModelPermissions:")
-		}
-		modelPermissions = tuple.Permissions
-
-	case AggregatetupleType:
-		tuple, err := db.GetAggregatetuple(key)
-		if err != nil {
-			return out, errors.Internal(err, "queryModelPermissions:")
-		}
-		modelPermissions = tuple.Permissions
-	default:
-		return out, errors.Internal("queryModelPermissions: Unsupported tuple type %s", tupleType)
-
 	}
 	out.Fill(modelPermissions)
 	return out, nil
