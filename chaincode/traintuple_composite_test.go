@@ -289,7 +289,7 @@ func TestTraintupleComposite(t *testing.T) {
 			OpenerHash:     dataManagerOpenerHash,
 			Worker:         worker,
 		},
-		OutHeadModel: outModelComposite{
+		OutHeadModel: outHeadModelComposite{
 			Permissions: outputPermissions{
 				Process: Permission{Public: false, AuthorizedIDs: []string{worker}},
 			},
@@ -368,7 +368,7 @@ func TestTraintupleComposite(t *testing.T) {
 	endTraintuple := outputCompositeTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutHeadModel.OutModel = &HashDress{
+	expected.OutHeadModel.OutHeadModel = &Hash{
 		Hash:           headModelHash}
 	expected.OutTrunkModel.OutModel = &HashDress{
 		Hash:           trunkModelHash,

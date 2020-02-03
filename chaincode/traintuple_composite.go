@@ -345,15 +345,15 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 		return
 	}
 
-	compositeTraintuple.OutHeadModel.OutModel = &HashDress{
-		Hash:           inp.OutHeadModel.Hash}
+	compositeTraintuple.OutHeadModel.OutModel = &Hash{
+		Hash:           inp.OutHeadModel.Key}
 
 	compositeTraintuple.OutTrunkModel.OutModel = &HashDress{
 		Hash:           inp.OutTrunkModel.Hash,
 		StorageAddress: inp.OutTrunkModel.StorageAddress}
 	compositeTraintuple.Log += inp.Log
 
-	err = db.CreateIndex("tuple~modelHash~key", []string{"tuple", inp.OutHeadModel.Hash, compositeTraintupleKey})
+	err = db.CreateIndex("tuple~modelHash~key", []string{"tuple", inp.OutHeadModel.Key, compositeTraintupleKey})
 	if err != nil {
 		return
 	}
