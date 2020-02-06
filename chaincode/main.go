@@ -160,6 +160,8 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		result, err = registerDataSample(db, args)
 	case "registerObjective":
 		result, err = registerObjective(db, args)
+	case "updateComputePlan":
+		result, err = updateComputePlan(db, args)
 	case "updateDataManager":
 		result, err = updateDataManager(db, args)
 	case "updateDataSample":
