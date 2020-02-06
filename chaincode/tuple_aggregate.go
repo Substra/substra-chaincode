@@ -270,7 +270,7 @@ func createAggregatetupleInternal(db *LedgerDB, inp inputAggregatetuple, checkCo
 // logStartAggregate modifies a aggregatetuple by changing its status from todo to doing
 func logStartAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err error) {
 	status := StatusDoing
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -393,7 +393,7 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 
 // queryAggregatetuple returns info about an aggregate tuple given its key
 func queryAggregatetuple(db *LedgerDB, args []string) (outputAggregatetuple outputAggregatetuple, err error) {
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return

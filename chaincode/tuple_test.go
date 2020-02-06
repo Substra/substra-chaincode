@@ -47,9 +47,9 @@ func TestRecursiveLogFailed(t *testing.T) {
 	testResp, err := createTesttuple(db, assetToArgs(grandChildtesttuple))
 	assert.NoError(t, err)
 
-	_, err = logStartTrain(db, assetToArgs(inputHash{Key: traintupleKey}))
+	_, err = logStartTrain(db, assetToArgs(inputKey{Key: traintupleKey}))
 	assert.NoError(t, err)
-	_, err = logFailTrain(db, assetToArgs(inputHash{Key: traintupleKey}))
+	_, err = logFailTrain(db, assetToArgs(inputKey{Key: traintupleKey}))
 	assert.NoError(t, err)
 
 	train2, err := db.GetTraintuple(grandChildresp["key"])

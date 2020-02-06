@@ -40,7 +40,7 @@ const (
 
 // queryModelDetails returns info about the testtuple and algo related to a traintuple
 func queryModelDetails(db *LedgerDB, args []string) (outModelDetails outputModelDetails, err error) {
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -165,7 +165,7 @@ func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err erro
 
 func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, error) {
 	var out outputPermissions
-	inp := inputHash{}
+	inp := inputKey{}
 	err := AssetFromJSON(args, &inp)
 	if err != nil {
 		return out, err
