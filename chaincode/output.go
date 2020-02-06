@@ -292,15 +292,16 @@ type TuplesEvent struct {
 }
 
 type outputComputePlan struct {
-	ComputePlanID           string   `json:"computePlanID"`
-	TraintupleKeys          []string `json:"traintupleKeys"`
-	AggregatetupleKeys      []string `json:"aggregatetupleKeys"`
-	CompositeTraintupleKeys []string `json:"compositeTraintupleKeys"`
-	TesttupleKeys           []string `json:"testtupleKeys"`
-	Tag                     string   `json:"tag"`
-	Status                  string   `json:"status"`
-	TupleCount              int      `json:"tupleCount"`
-	DoneCount               int      `json:"doneCount"`
+	ComputePlanID           string            `json:"computePlanID"`
+	TraintupleKeys          []string          `json:"traintupleKeys"`
+	AggregatetupleKeys      []string          `json:"aggregatetupleKeys"`
+	CompositeTraintupleKeys []string          `json:"compositeTraintupleKeys"`
+	TesttupleKeys           []string          `json:"testtupleKeys"`
+	Tag                     string            `json:"tag"`
+	Status                  string            `json:"status"`
+	TupleCount              int               `json:"tupleCount"`
+	DoneCount               int               `json:"doneCount"`
+	IDToKey                 map[string]string `json:"IDToKey"`
 }
 
 func (out *outputComputePlan) Fill(key string, in ComputePlan) {
@@ -313,6 +314,11 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan) {
 	out.Tag = in.Tag
 	out.TupleCount = in.TupleCount
 	out.DoneCount = in.DoneCount
+	IDToKey := map[string]string{}
+	for ID, item := range in.IDToItem {
+		IDToKey[ID] = item.Key
+	}
+	out.IDToKey = IDToKey
 }
 
 type outputPermissions struct {

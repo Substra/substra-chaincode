@@ -251,7 +251,10 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("query", "queryDataset", inputKey{newDataManagerKey})
 
 	fmt.Fprintln(&out, "#### ------------ Create a ComputePlan ------------")
-	resp = callAssertAndPrint("invoke", "createComputePlan", defaultComputePlan)
+	inputCP := inputNewComputePlan{}
+	inputCP.Tag = tag
+	inputCP.inputComputePlan = defaultComputePlan
+	resp = callAssertAndPrint("invoke", "createComputePlan", inputCP)
 	outCp := outputComputePlan{}
 	err = json.Unmarshal(resp.Payload, &outCp)
 

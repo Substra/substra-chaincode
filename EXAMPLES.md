@@ -1425,6 +1425,10 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"tag\":\"a tag
 ##### Command output:
 ```json
 {
+ "IDToKey": {
+  "firstTraintupleID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+  "secondTraintupleID": "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
+ },
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
  "computePlanID": "c51b1a4fe5a6c5abe5595ed530fbf1a9d822e6f22c57a029102db82ae71b41e4",
@@ -1517,6 +1521,10 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"c51b1a
 ##### Command output:
 ```json
 {
+ "IDToKey": {
+  "firstTraintupleID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+  "secondTraintupleID": "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
+ },
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
  "computePlanID": "c51b1a4fe5a6c5abe5595ed530fbf1a9d822e6f22c57a029102db82ae71b41e4",
@@ -1541,6 +1549,10 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
 ```json
 [
  {
+  "IDToKey": {
+   "firstTraintupleID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+   "secondTraintupleID": "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
+  },
   "aggregatetupleKeys": null,
   "compositeTraintupleKeys": null,
   "computePlanID": "c51b1a4fe5a6c5abe5595ed530fbf1a9d822e6f22c57a029102db82ae71b41e4",
@@ -1573,6 +1585,10 @@ peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"c51b1
 ##### Command output:
 ```json
 {
+ "IDToKey": {
+  "firstTraintupleID": "432fcffdf68892f5e4adeeed8bb618beaeaecf709f840671eca724a3e3109369",
+  "secondTraintupleID": "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
+ },
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
  "computePlanID": "c51b1a4fe5a6c5abe5595ed530fbf1a9d822e6f22c57a029102db82ae71b41e4",

@@ -10,7 +10,7 @@ func TestDAGSort(t *testing.T) {
 	ts := []struct {
 		name        string
 		list        []TrainingTask
-		IDToDepth   map[string]int
+		IDToDepth   map[string]CPItem
 		depths      []int
 		expectError bool
 		errorStr    string
@@ -77,7 +77,10 @@ func TestDAGSort(t *testing.T) {
 				{ID: "four", InModelsIDs: []string{"three", "one"}},
 				{ID: "two", InModelsIDs: []string{"one"}},
 			},
-			IDToDepth:   map[string]int{"alpha": 0, "beta": 4},
+			IDToDepth: map[string]CPItem{
+				"alpha": CPItem{Depth: 0},
+				"beta":  CPItem{Depth: 4},
+			},
 			depths:      []int{1, 2, 5, 6},
 			expectError: false},
 	}
@@ -85,7 +88,7 @@ func TestDAGSort(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			dag := ComputeDAG{
 				OrderTasks: tc.list,
-				IDPresents: tc.IDToDepth,
+				IDtoItem:   tc.IDToDepth,
 			}
 			err := dag.sort()
 			if err != nil {

@@ -147,15 +147,25 @@ type inputQueryFilter struct {
 }
 
 // inputConputePlan represent a coherent set of tuples uploaded together.
-// They share the same Objective represented by its key.
-// Beware, it's order sensitive since the `InModelsIDs` can only be interpreted
-// if the training tasks matching those IDs have already been created.
 type inputComputePlan struct {
-	Tag                  string                                `validate:"omitempty,lte=64" json:"tag"`
 	Traintuples          []inputComputePlanTraintuple          `validate:"omitempty" json:"traintuples"`
 	Aggregatetuples      []inputComputePlanAggregatetuple      `validate:"omitempty" json:"aggregatetuples"`
 	CompositeTraintuples []inputComputePlanCompositeTraintuple `validate:"omitempty" json:"compositeTraintuples"`
 	Testtuples           []inputComputePlanTesttuple           `validate:"omitempty" json:"testtuples"`
+}
+
+// inputNewComputePlan represent the set of tuples to be added to the compute
+// plan matching the ID
+type inputNewComputePlan struct {
+	Tag string `validate:"omitempty,lte=64" json:"tag"`
+	inputComputePlan
+}
+
+// inputUpdateComputePlan represent the set of tuples to be added to the compute
+// plan matching the ID
+type inputUpdateComputePlan struct {
+	ID string `validate:"required,required,len=64,hexadecimal" json:"ID"`
+	inputComputePlan
 }
 
 type inputComputePlanTraintuple struct {

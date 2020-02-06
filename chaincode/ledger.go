@@ -192,13 +192,19 @@ type ComputePlan struct {
 	AssetType               AssetType         `json:"assetType"`
 	CompositeTraintupleKeys []string          `json:"compositeTraintupleKeys"`
 	DoneCount               int               `json:"DoneCount"`
-	IDtoKey                 map[string]string `json:"IDtoKey"`
+	IDToItem                map[string]CPItem `json:"IDToItem"`
 	MaxRank                 int               `json:"maxRank"`
 	Status                  string            `json:"status"`
 	Tag                     string            `json:"tag"`
 	TesttupleKeys           []string          `json:"testtupleKeys"`
 	TraintupleKeys          []string          `json:"traintupleKeys"`
 	TupleCount              int               `json:"tupleCount"`
+}
+
+// CPItem is represent the information for one tuple in a Compute Plan
+type CPItem struct {
+	Depth int    `json:"depth"`
+	Key   string `json:"key"`
 }
 
 // ---------------------------------------------------------------------------------
