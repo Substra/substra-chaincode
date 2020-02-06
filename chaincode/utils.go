@@ -122,18 +122,6 @@ func (assetType AssetType) String() string {
 	}
 }
 
-// String returns a string representation for a composite model type
-func (modelType CompositeModelType) String() string {
-	switch modelType {
-	case HeadType:
-		return "Head"
-	case TrunkType:
-		return "Trunk"
-	default:
-		return fmt.Sprintf("(unknown model type: %d)", modelType)
-	}
-}
-
 var characterRunes = []rune("abcdef0123456789")
 
 // GetRandomHash generate a random string of 64 character
