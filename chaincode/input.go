@@ -164,7 +164,7 @@ type inputNewComputePlan struct {
 // inputUpdateComputePlan represent the set of tuples to be added to the compute
 // plan matching the ID
 type inputUpdateComputePlan struct {
-	ID string `validate:"required,required,len=64,hexadecimal" json:"ID"`
+	ComputePlanID string `validate:"required,required,len=64,hexadecimal" json:"computePlanID"`
 	inputComputePlan
 }
 

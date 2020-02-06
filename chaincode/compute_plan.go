@@ -117,9 +117,9 @@ func updateComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 
 	count := len(inp.Traintuples) + len(inp.Aggregatetuples) + len(inp.CompositeTraintuples)
 	if count == 0 {
-		return resp, errors.BadRequest("empty update for compute plan %s", inp.ID)
+		return resp, errors.BadRequest("empty update for compute plan %s", inp.ComputePlanID)
 	}
-	return updateComputePlanInternal(db, inp.ID, inp.inputComputePlan)
+	return updateComputePlanInternal(db, inp.ComputePlanID, inp.inputComputePlan)
 }
 
 func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string) (resp outputComputePlan, err error) {

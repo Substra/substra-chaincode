@@ -642,3 +642,39 @@ func checkComputePlanMetrics(t *testing.T, db *LedgerDB, cpID string, doneCount,
 	assert.Equal(t, doneCount, out.DoneCount)
 	assert.Equal(t, tupleCount, out.TupleCount)
 }
+
+func TestUpdateComputePlan(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockStub.MockTransactionStart("42")
+	registerItem(t, *mockStub, "aggregateAlgo")
+	db := NewLedgerDB(mockStub)
+
+	out, err := createComputePlanInternal(db, inputComputePlan{}, tag)
+	assert.NoError(t, err)
+	assert.Equal(t, tag, out.Tag)
+
+	out, err = updateComputePlanInternal(db, out.ComputePlanID, defaultComputePlan)
+	assert.NoError(t, err)
+	validateDefaultComputePlan(t, out)
+	for _, train := range defaultComputePlan.Traintuples {
+		assert.Contains(t, out.IDToKey, train.ID)
+	}
+
+	NewID := "Update"
+	up := inputComputePlan{
+		Traintuples: []inputComputePlanTraintuple{
+			{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        algoHash,
+				ID:             NewID,
+				InModelsIDs:    []string{traintupleID1, traintupleID2},
+			},
+		},
+	}
+	out, err = updateComputePlanInternal(db, out.ComputePlanID, up)
+	assert.NoError(t, err)
+	assert.Contains(t, out.IDToKey, NewID)
+	assert.Equal(t, 4, out.TupleCount)
+}
