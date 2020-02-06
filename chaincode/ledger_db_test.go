@@ -34,7 +34,10 @@ func TestGetOutModelHashDress(t *testing.T) {
 	_, err = db.GetOutModelHashDress(regular, HeadType, []AssetType{TraintupleType})
 	assert.NoError(t, err, "the regular traintuple should be found when requesting regular traintuples")
 
-	_, err = db.GetOutModelHashDress(composite, HeadType, []AssetType{CompositeTraintupleType})
+	_, err = db.GetOutModelHash(composite, HeadType, []AssetType{CompositeTraintupleType})
+	assert.NoError(t, err, "the composite traintuple should be found when requesting composite traintuples")
+
+	_, err = db.GetOutModelHashDress(composite, TrunkType, []AssetType{CompositeTraintupleType})
 	assert.NoError(t, err, "the composite traintuple should be found when requesting composite traintuples")
 
 	// 2. Incorrect requests

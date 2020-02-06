@@ -70,7 +70,7 @@ func TestPipeline(t *testing.T) {
 	dataManagerKey := res["key"]
 
 	fmt.Fprintln(&out, "#### ------------ Query DataManager From key ------------")
-	callAssertAndPrint("invoke", "queryDataManager", inputHash{dataManagerKey})
+	callAssertAndPrint("invoke", "queryDataManager", inputKey{dataManagerKey})
 
 	fmt.Fprintln(&out, "#### ------------ Add test DataSample ------------")
 	inpDataSample := inputDataSample{
@@ -148,7 +148,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "queryFilter", filter)
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Training ------------")
-	callAssertAndPrint("invoke", "logStartTrain", inputHash{traintupleKey})
+	callAssertAndPrint("invoke", "logStartTrain", inputKey{traintupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Training ------------")
 	inp := inputLogSuccessTrain{}
@@ -157,7 +157,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "logSuccessTrain", inp)
 
 	fmt.Fprintln(&out, "#### ------------ Query Traintuple From key ------------")
-	callAssertAndPrint("invoke", "queryTraintuple", inputHash{traintupleKey})
+	callAssertAndPrint("invoke", "queryTraintuple", inputKey{traintupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Add Non-Certified Testtuple ------------")
 	inpTesttuple := inputTesttuple{
@@ -204,7 +204,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "queryFilter", filter)
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Testing ------------")
-	callAssertAndPrint("invoke", "logStartTest", inputHash{testtupleKey})
+	callAssertAndPrint("invoke", "logStartTest", inputKey{testtupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Testing ------------")
 	success := inputLogSuccessTest{}
@@ -213,22 +213,22 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "logSuccessTest", success)
 
 	fmt.Fprintln(&out, "#### ------------ Query Testtuple from its key ------------")
-	callAssertAndPrint("query", "queryTesttuple", inputHash{testtupleKey})
+	callAssertAndPrint("query", "queryTesttuple", inputKey{testtupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Query all Testtuples ------------")
 	callAssertAndPrint("query", "queryTesttuples", nil)
 
 	fmt.Fprintln(&out, "#### ------------ Query details about a model ------------")
-	callAssertAndPrint("query", "queryModelDetails", inputHash{traintupleKey})
+	callAssertAndPrint("query", "queryModelDetails", inputKey{traintupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Query all models ------------")
 	callAssertAndPrint("query", "queryModels", nil)
 
 	fmt.Fprintln(&out, "#### ------------ Query model permissions ------------")
-	callAssertAndPrint("query", "queryModelPermissions", inputHash{modelHash})
+	callAssertAndPrint("query", "queryModelPermissions", inputKey{modelHash})
 
 	fmt.Fprintln(&out, "#### ------------ Query Dataset ------------")
-	callAssertAndPrint("query", "queryDataset", inputHash{dataManagerOpenerHash})
+	callAssertAndPrint("query", "queryDataset", inputKey{dataManagerOpenerHash})
 
 	fmt.Fprintln(&out, "#### ------------ Query nodes ------------")
 	callAssertAndPrint("query", "queryNodes", nil)
@@ -248,7 +248,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "updateDataSample", updateData)
 
 	fmt.Fprintln(&out, "#### ------------ Query the new Dataset ------------")
-	callAssertAndPrint("query", "queryDataset", inputHash{newDataManagerKey})
+	callAssertAndPrint("query", "queryDataset", inputKey{newDataManagerKey})
 
 	fmt.Fprintln(&out, "#### ------------ Create a ComputePlan ------------")
 	resp = callAssertAndPrint("invoke", "createComputePlan", defaultComputePlan)
@@ -262,10 +262,10 @@ func TestPipeline(t *testing.T) {
 	}
 	callAssertAndPrint("invoke", "queryObjectiveLeaderboard", inpLeaderboard)
 
-	callAssertAndPrint("invoke", "queryComputePlan", inputHash{outCp.ComputePlanID})
+	callAssertAndPrint("invoke", "queryComputePlan", inputKey{outCp.ComputePlanID})
 	callAssertAndPrint("invoke", "queryComputePlans", nil)
 
-	callAssertAndPrint("invoke", "cancelComputePlan", inputHash{outCp.ComputePlanID})
+	callAssertAndPrint("invoke", "cancelComputePlan", inputKey{outCp.ComputePlanID})
 
 	// Use the output to check the EXAMPLES.md file and if asked update it
 	doc := out.String()

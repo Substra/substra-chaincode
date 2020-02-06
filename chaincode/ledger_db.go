@@ -388,8 +388,6 @@ func (db *LedgerDB) GetOutModelHashDress(traintupleKey string, modelType Composi
 				continue
 			}
 			switch modelType {
-			case HeadType:
-				return tuple.OutHeadModel.OutModel, nil
 			case TrunkType:
 				return tuple.OutTrunkModel.OutModel, nil
 			default:
@@ -408,6 +406,34 @@ func (db *LedgerDB) GetOutModelHashDress(traintupleKey string, modelType Composi
 			}
 		default:
 			return nil, fmt.Errorf("GetOutModelHashDress: Unsupported asset type %s", assetType)
+		}
+	}
+
+	return nil, errors.NotFound(
+		"GetOutModelHashDress: Could not find traintuple %s with key \"%s\". Allowed types: %v.",
+		modelType,
+		traintupleKey,
+		allowedAssetTypes)
+}
+
+// GetOutModelHash retrieves an out-Head-Model from a traintuple key.
+// Return an error if the traintupleKey was not found.
+func (db *LedgerDB) GetOutModelHash(traintupleKey string, modelType CompositeModelType, allowedAssetTypes []AssetType) (*Hash, error) {
+	for _, assetType := range allowedAssetTypes {
+		switch assetType {
+		case CompositeTraintupleType:
+			tuple, err := db.GetCompositeTraintuple(traintupleKey)
+			if err != nil {
+				continue
+			}
+			switch modelType {
+			case HeadType:
+				return tuple.OutHeadModel.OutModel, nil
+			default:
+				return nil, fmt.Errorf("GetOutModelHash: Unsupported composite model type %s", modelType)
+			}
+		default:
+			return nil, fmt.Errorf("GetOutModelHash: Unsupported asset type %s", assetType)
 		}
 	}
 

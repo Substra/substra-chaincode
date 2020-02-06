@@ -137,7 +137,7 @@ type CompositeTraintuple struct {
 	Dataset       *Dataset                    `json:"dataset"`
 	InHeadModel   string                      `json:"inHeadModel"`
 	InTrunkModel  string                      `json:"inTrunkModel"`
-	OutHeadModel  CompositeTraintupleOutModel `json:"outHeadModel"`
+	OutHeadModel  CompositeTraintupleOutHeadModel `json:"outHeadModel"`
 	OutTrunkModel CompositeTraintupleOutModel `json:"outTrunkModel"`
 }
 
@@ -160,6 +160,12 @@ type Aggregatetuple struct {
 // CompositeTraintupleOutModel is the out-model of a CompositeTraintuple
 type CompositeTraintupleOutModel struct {
 	OutModel    *HashDress  `json:"outModel"`
+	Permissions Permissions `json:"permissions"`
+}
+
+// CompositeTraintupleOutHeadModel is the out-model of a CompositeTraintuple
+type CompositeTraintupleOutHeadModel struct {
+	OutModel    *Hash  `json:"outModel"`
 	Permissions Permissions `json:"permissions"`
 }
 
@@ -196,6 +202,11 @@ type ComputePlan struct {
 // ---------------------------------------------------------------------------------
 // Struct used in the representation of elements stored in the ledger
 // ---------------------------------------------------------------------------------
+
+// HashDress stores a hash and a Storage Address
+type Hash struct {
+	Hash           string `json:"hash"`
+}
 
 // HashDress stores a hash and a Storage Address
 type HashDress struct {

@@ -77,7 +77,7 @@ func registerAlgo(db *LedgerDB, args []string) (resp map[string]string, err erro
 
 // queryAlgo returns an algo of the ledger given its key
 func queryAlgo(db *LedgerDB, args []string) (out outputAlgo, err error) {
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
