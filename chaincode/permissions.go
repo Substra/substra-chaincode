@@ -22,7 +22,7 @@ type Permission struct {
 	// the nodes listed in AuthorizedIDs (open to all nodes if false)
 	Public bool `json:"public"`
 	// AuthorizedIDs list all authorised nodes other than the asset's owner
-	AuthorizedIDs []string `json:"authorizedIDs", omitempty`
+	AuthorizedIDs []string `json:"authorizedIDs"`
 }
 
 // Permissions represents all permissions associated with an asset

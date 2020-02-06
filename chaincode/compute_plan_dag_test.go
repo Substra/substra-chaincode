@@ -10,6 +10,7 @@ func TestDAGSort(t *testing.T) {
 	ts := []struct {
 		name        string
 		list        []TrainingTask
+		IDToDepth   map[string]int
 		depths      []int
 		expectError bool
 		errorStr    string
@@ -69,10 +70,23 @@ func TestDAGSort(t *testing.T) {
 			},
 			expectError: true,
 			errorStr:    `compute plan error: Duplicate training task ID: one`},
+		{name: "with existing IDs",
+			list: []TrainingTask{
+				{ID: "three", InModelsIDs: []string{"two", "beta"}},
+				{ID: "one", InModelsIDs: []string{"alpha"}},
+				{ID: "four", InModelsIDs: []string{"three", "one"}},
+				{ID: "two", InModelsIDs: []string{"one"}},
+			},
+			IDToDepth:   map[string]int{"alpha": 0, "beta": 4},
+			depths:      []int{1, 2, 5, 6},
+			expectError: false},
 	}
 	for _, tc := range ts {
 		t.Run(tc.name, func(t *testing.T) {
-			dag := ComputeDAG{OrderTasks: tc.list}
+			dag := ComputeDAG{
+				OrderTasks: tc.list,
+				IDPresents: tc.IDToDepth,
+			}
 			err := dag.sort()
 			if err != nil {
 				assert.Error(t, err)

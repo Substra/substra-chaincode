@@ -103,14 +103,10 @@ func createComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	if err != nil {
 		return
 	}
-	count := len(inp.Traintuples) + len(inp.Aggregatetuples) + len(inp.CompositeTraintuples)
-	if count == 0 {
-		return createEmptyComputePlan(db, inp)
-	}
 	return createComputePlanInternal(db, inp)
 }
 
-func createEmptyComputePlan(db *LedgerDB, inp inputComputePlan) (resp outputComputePlan, err error) {
+func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputComputePlan, err error) {
 	var computePlan ComputePlan
 	computePlan.Status = StatusWaiting
 	computePlan.Tag = inp.Tag
@@ -118,18 +114,22 @@ func createEmptyComputePlan(db *LedgerDB, inp inputComputePlan) (resp outputComp
 	if err != nil {
 		return resp, err
 	}
-	resp.Fill(ID, computePlan)
-	return resp, nil
+	count := len(inp.Traintuples) + len(inp.Aggregatetuples) + len(inp.CompositeTraintuples)
+	if count == 0 {
+		resp.Fill(ID, computePlan)
+		return resp, nil
+	}
+	return updateComputePlanInternal(db, ID, inp)
 }
 
-func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputComputePlan, err error) {
-	var computePlanID, tupleKey string
+func updateComputePlanInternal(db *LedgerDB, computePlanID string, inp inputComputePlan) (resp outputComputePlan, err error) {
+	var tupleKey string
 	traintupleKeysByID := map[string]string{}
-	DAG, err := createComputeDAG(inp)
+	DAG, err := createComputeDAG(inp, map[string]int{})
 	if err != nil {
 		return resp, errors.BadRequest(err)
 	}
-	for i, task := range DAG.OrderTasks {
+	for _, task := range DAG.OrderTasks {
 		switch task.TaskType {
 		case TraintupleType:
 			computeTraintuple := inp.Traintuples[task.InputIndex]
@@ -187,14 +187,6 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 
 			traintupleKeysByID[computeAggregatetuple.ID] = tupleKey
 		}
-		if i == 0 {
-			tuple, err := db.GetGenericTuple(tupleKey)
-			if err != nil {
-				return resp, err
-			}
-			computePlanID = tuple.ComputePlanID
-		}
-
 	}
 
 	for index, computeTesttuple := range inp.Testtuples {
@@ -214,13 +206,6 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 	computePlan, err := db.GetComputePlan(computePlanID)
 	if err != nil {
 		return resp, err
-	}
-	if inp.Tag != "" {
-		computePlan.Tag = inp.Tag
-		err = computePlan.Save(db, computePlanID)
-		if err != nil {
-			return resp, errors.BadRequest(err, "problem with tag %s: ", inp.Tag)
-		}
 	}
 	resp.Fill(computePlanID, computePlan)
 	return resp, err

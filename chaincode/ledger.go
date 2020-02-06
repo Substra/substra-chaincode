@@ -188,15 +188,17 @@ type Testtuple struct {
 
 // ComputePlan is the ledger's representation of a compute plan.
 type ComputePlan struct {
-	AggregatetupleKeys      []string  `json:"aggregatetupleKeys"`
-	AssetType               AssetType `json:"assetType"`
-	CompositeTraintupleKeys []string  `json:"compositeTraintupleKeys"`
-	DoneCount               int       `json:"DoneCount"`
-	Status                  string    `json:"status"`
-	Tag                     string    `json:"tag"`
-	TesttupleKeys           []string  `json:"testtupleKeys"`
-	TraintupleKeys          []string  `json:"traintupleKeys"`
-	TupleCount              int       `json:"tupleCount"`
+	AggregatetupleKeys      []string          `json:"aggregatetupleKeys"`
+	AssetType               AssetType         `json:"assetType"`
+	CompositeTraintupleKeys []string          `json:"compositeTraintupleKeys"`
+	DoneCount               int               `json:"DoneCount"`
+	IDtoKey                 map[string]string `json:"IDtoKey"`
+	MaxRank                 int               `json:"maxRank"`
+	Status                  string            `json:"status"`
+	Tag                     string            `json:"tag"`
+	TesttupleKeys           []string          `json:"testtupleKeys"`
+	TraintupleKeys          []string          `json:"traintupleKeys"`
+	TupleCount              int               `json:"tupleCount"`
 }
 
 // ---------------------------------------------------------------------------------
