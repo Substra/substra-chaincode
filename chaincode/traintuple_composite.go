@@ -112,6 +112,17 @@ func (traintuple *CompositeTraintuple) SetFromParents(db *LedgerDB, inp inputCom
 			head.AssetType,
 			inp.InHeadModelKey)
 	}
+
+	// Head Model is only processable on the same worker
+	compositeTraintuple, err := db.GetCompositeTraintuple(inp.InHeadModelKey)
+
+	if traintuple.Dataset.Worker != compositeTraintuple.Dataset.Worker {
+		return errors.BadRequest(
+			"Dataset worker (%s) and head InModel owner (%s) must be the same",
+			traintuple.Dataset.Worker,
+			compositeTraintuple.Dataset.Worker)
+	}
+
 	// [Trunk]
 	// It can be either:
 	// - a traintuple's out model
@@ -345,7 +356,7 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 	}
 
 	compositeTraintuple.OutHeadModel.OutModel = &Hash{
-		Hash:           inp.OutHeadModel.Hash}
+		Hash: inp.OutHeadModel.Hash}
 
 	compositeTraintuple.OutTrunkModel.OutModel = &HashDress{
 		Hash:           inp.OutTrunkModel.Hash,
