@@ -298,6 +298,6 @@ func determineTupleStatus(db *LedgerDB, tupleStatus, computePlanID string) (stri
 	return tupleStatus, nil
 }
 
-func createModelIndex(db *LedgerDB, tupleKey, modelHash string) error {
+func createModelIndex(db *LedgerDB, modelHash, tupleKey string) error {
 	return db.CreateIndex("tuple~modelHash~key", []string{"tuple", modelHash, tupleKey})
 }
