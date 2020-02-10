@@ -190,7 +190,7 @@ func (testtuple *Testtuple) AddToComputePlan(db *LedgerDB, testtupleKey string) 
 	if err != nil {
 		return err
 	}
-	computePlan.AddTuple(testtuple.AssetType, testtupleKey, testtuple.Status)
+	computePlan.AddTuple(TesttupleType, testtupleKey, testtuple.Status)
 	err = computePlan.Save(db, testtuple.ComputePlanID)
 	if err != nil {
 		return err
