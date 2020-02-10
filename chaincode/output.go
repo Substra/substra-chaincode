@@ -315,8 +315,8 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan) {
 	out.TupleCount = in.TupleCount
 	out.DoneCount = in.DoneCount
 	IDToKey := map[string]string{}
-	for ID, item := range in.IDToItem {
-		IDToKey[ID] = item.Key
+	for ID, trainTask := range in.IDToTrainTask {
+		IDToKey[ID] = trainTask.Key
 	}
 	out.IDToKey = IDToKey
 }

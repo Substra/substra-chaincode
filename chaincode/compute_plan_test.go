@@ -676,5 +676,10 @@ func TestUpdateComputePlan(t *testing.T) {
 	out, err = updateComputePlanInternal(db, out.ComputePlanID, up)
 	assert.NoError(t, err)
 	assert.Contains(t, out.IDToKey, NewID)
+	assert.Len(
+		t,
+		out.IDToKey,
+		3,
+		"IDToKey should match the 3 train like tuples keys to their respective ID")
 	assert.Equal(t, 4, out.TupleCount)
 }

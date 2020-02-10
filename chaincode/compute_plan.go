@@ -19,7 +19,7 @@ import (
 	"strconv"
 )
 
-func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, IDToCPItem map[string]CPItem) error {
+func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, IDToCPTrainTask map[string]CPTrainTask) error {
 	inpTraintuple.DataManagerKey = inpCP.DataManagerKey
 	inpTraintuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpTraintuple.AlgoKey = inpCP.AlgoKey
@@ -28,17 +28,17 @@ func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, IDT
 	// Set the inModels by matching the id to tuples key previously
 	// encontered in this compute plan
 	for _, InModelID := range inpCP.InModelsIDs {
-		item, ok := IDToCPItem[InModelID]
+		trainTask, ok := IDToCPTrainTask[InModelID]
 		if !ok {
 			return errors.BadRequest("model ID %s not found", InModelID)
 		}
-		inpTraintuple.InModels = append(inpTraintuple.InModels, item.Key)
+		inpTraintuple.InModels = append(inpTraintuple.InModels, trainTask.Key)
 	}
 
 	return nil
 
 }
-func (inpAggregatetuple *inputAggregatetuple) Fill(inpCP inputComputePlanAggregatetuple, IDToCPItem map[string]CPItem) error {
+func (inpAggregatetuple *inputAggregatetuple) Fill(inpCP inputComputePlanAggregatetuple, IDToCPTrainTask map[string]CPTrainTask) error {
 	inpAggregatetuple.AlgoKey = inpCP.AlgoKey
 	inpAggregatetuple.Tag = inpCP.Tag
 	inpAggregatetuple.Worker = inpCP.Worker
@@ -46,17 +46,17 @@ func (inpAggregatetuple *inputAggregatetuple) Fill(inpCP inputComputePlanAggrega
 	// Set the inModels by matching the id to tuples key previously
 	// encontered in this compute plan
 	for _, InModelID := range inpCP.InModelsIDs {
-		item, ok := IDToCPItem[InModelID]
+		trainTask, ok := IDToCPTrainTask[InModelID]
 		if !ok {
 			return errors.BadRequest("model ID %s not found", InModelID)
 		}
-		inpAggregatetuple.InModels = append(inpAggregatetuple.InModels, item.Key)
+		inpAggregatetuple.InModels = append(inpAggregatetuple.InModels, trainTask.Key)
 	}
 
 	return nil
 
 }
-func (inpCompositeTraintuple *inputCompositeTraintuple) Fill(inpCP inputComputePlanCompositeTraintuple, IDToCPItem map[string]CPItem) error {
+func (inpCompositeTraintuple *inputCompositeTraintuple) Fill(inpCP inputComputePlanCompositeTraintuple, IDToCPTrainTask map[string]CPTrainTask) error {
 	inpCompositeTraintuple.DataManagerKey = inpCP.DataManagerKey
 	inpCompositeTraintuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpCompositeTraintuple.AlgoKey = inpCP.AlgoKey
@@ -67,29 +67,29 @@ func (inpCompositeTraintuple *inputCompositeTraintuple) Fill(inpCP inputComputeP
 	// encontered in this compute plan
 	if inpCP.InHeadModelID != "" {
 		var ok bool
-		item, ok := IDToCPItem[inpCP.InHeadModelID]
+		trainTask, ok := IDToCPTrainTask[inpCP.InHeadModelID]
 		if !ok {
 			return errors.BadRequest("head model ID %s not found", inpCP.InHeadModelID)
 		}
-		inpCompositeTraintuple.InHeadModelKey = item.Key
+		inpCompositeTraintuple.InHeadModelKey = trainTask.Key
 	}
 	if inpCP.InTrunkModelID != "" {
 		var ok bool
-		item, ok := IDToCPItem[inpCP.InTrunkModelID]
+		trainTask, ok := IDToCPTrainTask[inpCP.InTrunkModelID]
 		if !ok {
 			return errors.BadRequest("trunk model ID %s not found", inpCP.InTrunkModelID)
 		}
-		inpCompositeTraintuple.InTrunkModelKey = item.Key
+		inpCompositeTraintuple.InTrunkModelKey = trainTask.Key
 	}
 	return nil
 }
 
-func (inpTesttuple *inputTesttuple) Fill(inpCP inputComputePlanTesttuple, IDToCPItem map[string]CPItem) error {
-	item, ok := IDToCPItem[inpCP.TraintupleID]
+func (inpTesttuple *inputTesttuple) Fill(inpCP inputComputePlanTesttuple, IDToCPTrainTask map[string]CPTrainTask) error {
+	trainTask, ok := IDToCPTrainTask[inpCP.TraintupleID]
 	if !ok {
 		return errors.BadRequest("traintuple ID %s not found", inpCP.TraintupleID)
 	}
-	inpTesttuple.TraintupleKey = item.Key
+	inpTesttuple.TraintupleKey = trainTask.Key
 	inpTesttuple.DataManagerKey = inpCP.DataManagerKey
 	inpTesttuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpTesttuple.Tag = inpCP.Tag
@@ -144,11 +144,11 @@ func updateComputePlanInternal(db *LedgerDB, computePlanID string, inp inputComp
 	if err != nil {
 		return resp, err
 	}
-	IDToItem := map[string]CPItem{}
-	for ID, item := range computePlan.IDToItem {
-		IDToItem[ID] = item
+	IDToTrainTask := map[string]CPTrainTask{}
+	for ID, trainTask := range computePlan.IDToTrainTask {
+		IDToTrainTask[ID] = trainTask
 	}
-	DAG, err := createComputeDAG(inp, computePlan.IDToItem)
+	DAG, err := createComputeDAG(inp, computePlan.IDToTrainTask)
 	if err != nil {
 		return resp, errors.BadRequest(err)
 	}
@@ -160,7 +160,7 @@ func updateComputePlanInternal(db *LedgerDB, computePlanID string, inp inputComp
 				Rank: strconv.Itoa(task.Depth),
 			}
 			inpTraintuple.ComputePlanID = computePlanID
-			err = inpTraintuple.Fill(computeTraintuple, IDToItem)
+			err = inpTraintuple.Fill(computeTraintuple, IDToTrainTask)
 			if err != nil {
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeTraintuple.ID)
 			}
@@ -177,7 +177,7 @@ func updateComputePlanInternal(db *LedgerDB, computePlanID string, inp inputComp
 				Rank: strconv.Itoa(task.Depth),
 			}
 			inpCompositeTraintuple.ComputePlanID = computePlanID
-			err = inpCompositeTraintuple.Fill(computeCompositeTraintuple, IDToItem)
+			err = inpCompositeTraintuple.Fill(computeCompositeTraintuple, IDToTrainTask)
 			if err != nil {
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeCompositeTraintuple.ID)
 			}
@@ -193,7 +193,7 @@ func updateComputePlanInternal(db *LedgerDB, computePlanID string, inp inputComp
 				Rank: strconv.Itoa(task.Depth),
 			}
 			inpAggregatetuple.ComputePlanID = computePlanID
-			err = inpAggregatetuple.Fill(computeAggregatetuple, IDToItem)
+			err = inpAggregatetuple.Fill(computeAggregatetuple, IDToTrainTask)
 			if err != nil {
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeAggregatetuple.ID)
 			}
@@ -204,12 +204,12 @@ func updateComputePlanInternal(db *LedgerDB, computePlanID string, inp inputComp
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeAggregatetuple.ID)
 			}
 		}
-		IDToItem[task.ID] = CPItem{Depth: task.Depth, Key: tupleKey}
+		IDToTrainTask[task.ID] = CPTrainTask{Depth: task.Depth, Key: tupleKey}
 	}
 
 	for index, computeTesttuple := range inp.Testtuples {
 		inpTesttuple := inputTesttuple{}
-		err = inpTesttuple.Fill(computeTesttuple, IDToItem)
+		err = inpTesttuple.Fill(computeTesttuple, IDToTrainTask)
 		if err != nil {
 			return resp, errors.BadRequest("testtuple at index %s: "+err.Error(), index)
 		}
@@ -225,7 +225,7 @@ func updateComputePlanInternal(db *LedgerDB, computePlanID string, inp inputComp
 	if err != nil {
 		return resp, err
 	}
-	computePlan.IDToItem = IDToItem
+	computePlan.IDToTrainTask = IDToTrainTask
 	err = computePlan.Save(db, computePlanID)
 	if err != nil {
 		return resp, err

@@ -15,12 +15,12 @@ type TrainingTask struct {
 // ComputeDAG is a Directed Acyclic Graph (DAG)
 // used for compute plans
 type ComputeDAG struct {
-	OrderTasks []TrainingTask
-	IDtoItem   map[string]CPItem
+	OrderTasks    []TrainingTask
+	IDToTrainTask map[string]CPTrainTask
 }
 
 // Create a Directed Acyclic Graph (DAG) from a compute plan
-func createComputeDAG(cp inputComputePlan, IDtoItem map[string]CPItem) (ComputeDAG, error) {
+func createComputeDAG(cp inputComputePlan, IDToTrainTask map[string]CPTrainTask) (ComputeDAG, error) {
 	DAG := ComputeDAG{}
 	for i, traintuple := range cp.Traintuples {
 		task := TrainingTask{
@@ -49,7 +49,7 @@ func createComputeDAG(cp inputComputePlan, IDtoItem map[string]CPItem) (ComputeD
 		}
 		DAG.OrderTasks = append(DAG.OrderTasks, task)
 	}
-	DAG.IDtoItem = IDtoItem
+	DAG.IDToTrainTask = IDToTrainTask
 	err := DAG.sort()
 	if err != nil {
 		return DAG, err
@@ -61,8 +61,8 @@ func createComputeDAG(cp inputComputePlan, IDtoItem map[string]CPItem) (ComputeD
 func (dag *ComputeDAG) sort() error {
 	current := dag.OrderTasks
 	var temp, final []TrainingTask
-	if dag.IDtoItem == nil {
-		dag.IDtoItem = make(map[string]CPItem)
+	if dag.IDToTrainTask == nil {
+		dag.IDToTrainTask = make(map[string]CPTrainTask)
 	}
 	for i := 0; len(current) != 0; {
 		depth := 0
@@ -71,17 +71,20 @@ func (dag *ComputeDAG) sort() error {
 			if ID == "" {
 				continue
 			}
-			parent, ok := dag.IDtoItem[ID]
+			parent, ok := dag.IDToTrainTask[ID]
 			ready = ready && ok
+			if !ok {
+				break
+			}
 			depth = max(depth, parent.Depth+1)
 		}
 		if ready {
 			current[i].Depth = depth
 			final = append(final, current[i])
-			if _, ok := dag.IDtoItem[current[i].ID]; ok {
+			if _, ok := dag.IDToTrainTask[current[i].ID]; ok {
 				return errors.BadRequest("compute plan error: Duplicate training task ID: %s", current[i].ID)
 			}
-			dag.IDtoItem[current[i].ID] = CPItem{Depth: current[i].Depth}
+			dag.IDToTrainTask[current[i].ID] = CPTrainTask{Depth: current[i].Depth}
 		} else {
 			temp = append(temp, current[i])
 		}
@@ -101,12 +104,6 @@ func (dag *ComputeDAG) sort() error {
 		temp = []TrainingTask{}
 	}
 	dag.OrderTasks = final
-	return nil
-}
-
-func (dag *ComputeDAG) addAndSort(new *ComputeDAG) error {
-	new.sort()
-	dag = new
 	return nil
 }
 
