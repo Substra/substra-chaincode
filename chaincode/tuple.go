@@ -170,17 +170,18 @@ func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, erro
 	if err != nil {
 		return out, err
 	}
-	keys, err := db.GetIndexKeys("tuple~modelHash~key", []string{"tuple", inp.Key})
+	modelHash := inp.Key
+	keys, err := db.GetIndexKeys("tuple~modelHash~key", []string{"tuple", modelHash})
 	if err != nil {
 		return out, err
 	}
 	if len(keys) == 0 {
-		return out, errors.NotFound("Could not find a model for hash %s", inp.Key)
+		return out, errors.NotFound("Could not find a model for hash %s", modelHash)
 	}
-	key := keys[0]
-	tupleType, err := db.GetAssetType(key)
+	tupleKey := keys[0]
+	tupleType, err := db.GetAssetType(tupleKey)
 	if err != nil {
-		return out, errors.Internal(err, "queryModelPermissions: could not retrieve model type with key %s", key)
+		return out, errors.Internal(err, "queryModelPermissions: could not retrieve model type with tupleKey %s", tupleKey)
 	}
 
 	// By default model is public processable
@@ -188,12 +189,14 @@ func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, erro
 	modelPermissions.Process.Public = true
 
 	// get out-model and permissions from parent for head model in composite traintuple
-	if tupleType == CompositeTraintupleType{
-		tuple, err := db.GetCompositeTraintuple(key)
+	if tupleType == CompositeTraintupleType {
+		tuple, err := db.GetCompositeTraintuple(tupleKey)
 		if err != nil {
 			return out, errors.Internal(err, "queryModelPermissions:")
 		}
-		if tuple.OutHeadModel.OutModel.Hash == inp.Key {
+		// if `modelHash` refers to the head out-model, return the head out-model permissions
+		// if `modelHash` refers to the trunk out-model, do nothing (default to "public processable")
+		if tuple.OutHeadModel.OutModel.Hash == modelHash {
 			modelPermissions = tuple.OutHeadModel.Permissions
 		}
 	}
@@ -293,12 +296,4 @@ func determineTupleStatus(db *LedgerDB, tupleStatus, computePlanID string) (stri
 		return StatusAborted, nil
 	}
 	return tupleStatus, nil
-}
-
-func createModelIndex(db *LedgerDB, tupleKey, modelHash string) error {
-	err := db.CreateIndex("tuple~modelHash~key", []string{"tuple", modelHash, tupleKey})
-	if err != nil {
-		return err
-	}
-	return nil
 }

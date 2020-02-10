@@ -313,7 +313,7 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 		StorageAddress: inp.OutModel.StorageAddress}
 	traintuple.Log += inp.Log
 
-	err = db.CreateIndex("tuple~modelHash~key", []string{"tuple", inp.OutModel.Hash, traintupleKey})
+	err = createModelIndex(db, inp.OutModel.Hash, traintupleKey)
 	if err != nil {
 		return
 	}
