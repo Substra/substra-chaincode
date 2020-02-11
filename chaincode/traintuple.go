@@ -136,7 +136,7 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 			return err
 		}
 		computePlan := ComputePlan{}
-		computePlan.AddTuple(traintuple.AssetType, traintupleKey, traintuple.Status)
+		computePlan.AddTuple(TraintupleType, traintupleKey, traintuple.Status)
 		traintuple.ComputePlanID, err = computePlan.Create(db)
 		if err != nil {
 			return err
@@ -148,7 +148,7 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 	if err != nil {
 		return err
 	}
-	computePlan.AddTuple(traintuple.AssetType, traintupleKey, traintuple.Status)
+	computePlan.AddTuple(TraintupleType, traintupleKey, traintuple.Status)
 	err = computePlan.Save(db, traintuple.ComputePlanID)
 	if err != nil {
 		return err

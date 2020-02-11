@@ -169,7 +169,7 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 			return err
 		}
 		computePlan := ComputePlan{}
-		computePlan.AddTuple(traintuple.AssetType, traintupleKey, traintuple.Status)
+		computePlan.AddTuple(CompositeTraintupleType, traintupleKey, traintuple.Status)
 		traintuple.ComputePlanID, err = computePlan.Create(db)
 		if err != nil {
 			return err
@@ -181,7 +181,7 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 	if err != nil {
 		return err
 	}
-	computePlan.AddTuple(traintuple.AssetType, traintupleKey, traintuple.Status)
+	computePlan.AddTuple(CompositeTraintupleType, traintupleKey, traintuple.Status)
 	err = computePlan.Save(db, traintuple.ComputePlanID)
 	if err != nil {
 		return err
