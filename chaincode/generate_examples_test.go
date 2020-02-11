@@ -251,9 +251,34 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("query", "queryDataset", inputKey{newDataManagerKey})
 
 	fmt.Fprintln(&out, "#### ------------ Create a ComputePlan ------------")
-	resp = callAssertAndPrint("invoke", "createComputePlan", defaultComputePlan)
+	inputCP := inputNewComputePlan{}
+	inputCP.Tag = tag
+	inputCP.inputComputePlan = defaultComputePlan
+	resp = callAssertAndPrint("invoke", "createComputePlan", inputCP)
 	outCp := outputComputePlan{}
 	err = json.Unmarshal(resp.Payload, &outCp)
+
+	fmt.Fprintln(&out, "#### ------------ Update a ComputePlan ------------")
+	upCP := inputUpdateComputePlan{}
+	upCP.ComputePlanID = outCp.ComputePlanID
+	upCP.Traintuples = []inputComputePlanTraintuple{
+		{
+			DataManagerKey: dataManagerOpenerHash,
+			DataSampleKeys: []string{trainDataSampleHash1},
+			AlgoKey:        algoHash,
+			ID:             "thirdTraintupleID",
+			InModelsIDs:    []string{traintupleID1, traintupleID2},
+		},
+	}
+	upCP.Testtuples = []inputComputePlanTesttuple{
+		{
+			DataManagerKey: dataManagerOpenerHash,
+			DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+			ObjectiveKey:   objectiveDescriptionHash,
+			TraintupleID:   "thirdTraintupleID",
+		},
+	}
+	callAssertAndPrint("invoke", "updateComputePlan", upCP)
 
 	fmt.Fprintln(&out, "#### ------------ Query an ObjectiveLeaderboard ------------")
 	inpLeaderboard := inputLeaderboard{
@@ -262,9 +287,11 @@ func TestPipeline(t *testing.T) {
 	}
 	callAssertAndPrint("invoke", "queryObjectiveLeaderboard", inpLeaderboard)
 
+	fmt.Fprintln(&out, "#### ------------ Query Compute Plan(s) ------------")
 	callAssertAndPrint("invoke", "queryComputePlan", inputKey{outCp.ComputePlanID})
 	callAssertAndPrint("invoke", "queryComputePlans", nil)
 
+	fmt.Fprintln(&out, "#### ------------ Cancel a ComputePlan ------------")
 	callAssertAndPrint("invoke", "cancelComputePlan", inputKey{outCp.ComputePlanID})
 
 	// Use the output to check the EXAMPLES.md file and if asked update it

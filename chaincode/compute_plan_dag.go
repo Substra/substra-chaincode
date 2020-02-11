@@ -15,11 +15,12 @@ type TrainingTask struct {
 // ComputeDAG is a Directed Acyclic Graph (DAG)
 // used for compute plans
 type ComputeDAG struct {
-	OrderTasks []TrainingTask
+	OrderTasks    []TrainingTask
+	IDToTrainTask map[string]TrainTask
 }
 
 // Create a Directed Acyclic Graph (DAG) from a compute plan
-func createComputeDAG(cp inputComputePlan) (ComputeDAG, error) {
+func createComputeDAG(cp inputComputePlan, IDToTrainTask map[string]TrainTask) (ComputeDAG, error) {
 	DAG := ComputeDAG{}
 	for i, traintuple := range cp.Traintuples {
 		task := TrainingTask{
@@ -48,6 +49,7 @@ func createComputeDAG(cp inputComputePlan) (ComputeDAG, error) {
 		}
 		DAG.OrderTasks = append(DAG.OrderTasks, task)
 	}
+	DAG.IDToTrainTask = IDToTrainTask
 	err := DAG.sort()
 	if err != nil {
 		return DAG, err
@@ -59,7 +61,9 @@ func createComputeDAG(cp inputComputePlan) (ComputeDAG, error) {
 func (dag *ComputeDAG) sort() error {
 	current := dag.OrderTasks
 	var temp, final []TrainingTask
-	IDPresents := map[string]int{}
+	if dag.IDToTrainTask == nil {
+		dag.IDToTrainTask = make(map[string]TrainTask)
+	}
 	for i := 0; len(current) != 0; {
 		depth := 0
 		ready := true
@@ -67,17 +71,20 @@ func (dag *ComputeDAG) sort() error {
 			if ID == "" {
 				continue
 			}
-			parentDepth, ok := IDPresents[ID]
+			parent, ok := dag.IDToTrainTask[ID]
 			ready = ready && ok
-			depth = max(depth, parentDepth+1)
+			if !ok {
+				break
+			}
+			depth = max(depth, parent.Depth+1)
 		}
 		if ready {
 			current[i].Depth = depth
 			final = append(final, current[i])
-			if _, ok := IDPresents[current[i].ID]; ok {
+			if _, ok := dag.IDToTrainTask[current[i].ID]; ok {
 				return errors.BadRequest("compute plan error: Duplicate training task ID: %s", current[i].ID)
 			}
-			IDPresents[current[i].ID] = current[i].Depth
+			dag.IDToTrainTask[current[i].ID] = TrainTask{Depth: current[i].Depth}
 		} else {
 			temp = append(temp, current[i])
 		}

@@ -23,7 +23,6 @@ import (
 
 var (
 	defaultComputePlan = inputComputePlan{
-		Tag: tag,
 		Traintuples: []inputComputePlanTraintuple{
 			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerOpenerHash,
@@ -163,7 +162,7 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan)
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag)
 	assert.NoError(t, err)
 	assert.NotNil(t, db.tuplesEvent)
 	assert.Len(t, db.tuplesEvent.CompositeTraintuples, 2)
@@ -252,7 +251,7 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	tag := []string{"compositeTraintuple1", "compositeTraintuple2", "aggregatetuple1", "aggregatetuple2"}
+	IDs := []string{"compositeTraintuple1", "compositeTraintuple2", "aggregatetuple1", "aggregatetuple2"}
 
 	inCP := inputComputePlan{
 		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
@@ -260,31 +259,31 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        compositeAlgoHash,
-				ID:             tag[0],
+				ID:             IDs[0],
 			},
 			{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        compositeAlgoHash,
-				ID:             tag[1],
-				InTrunkModelID: tag[0],
-				InHeadModelID:  tag[0],
+				ID:             IDs[1],
+				InTrunkModelID: IDs[0],
+				InHeadModelID:  IDs[0],
 			},
 		},
 		Aggregatetuples: []inputComputePlanAggregatetuple{
 			{
 				AlgoKey: aggregateAlgoHash,
-				ID:      tag[2],
+				ID:      IDs[2],
 			},
 			{
 				AlgoKey:     aggregateAlgoHash,
-				ID:          tag[3],
-				InModelsIDs: []string{tag[2]},
+				ID:          IDs[3],
+				InModelsIDs: []string{IDs[2]},
 			},
 		},
 	}
 
-	outCP, err := createComputePlanInternal(db, inCP)
+	outCP, err := createComputePlanInternal(db, inCP, tag)
 	assert.NoError(t, err)
 
 	// Check the composite traintuples
@@ -326,7 +325,7 @@ func TestCreateComputePlan(t *testing.T) {
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlanInternal(db, inCP)
+	outCP, err := createComputePlanInternal(db, inCP, tag)
 	assert.NoError(t, err)
 	validateDefaultComputePlan(t, outCP)
 
@@ -379,7 +378,7 @@ func TestQueryComputePlan(t *testing.T) {
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlanInternal(db, inCP)
+	outCP, err := createComputePlanInternal(db, inCP, tag)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 
@@ -399,7 +398,7 @@ func TestQueryComputePlans(t *testing.T) {
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlanInternal(db, inCP)
+	outCP, err := createComputePlanInternal(db, inCP, tag)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 
@@ -447,7 +446,7 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 		Testtuples: []inputComputePlanTesttuple{},
 	}
 
-	outCP, err := createComputePlanInternal(db, inCP)
+	outCP, err := createComputePlanInternal(db, inCP, tag)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 	assert.Len(t, outCP.TesttupleKeys, 0)
@@ -484,7 +483,7 @@ func TestCancelComputePlan(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan)
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag)
 	assert.NoError(t, err)
 	assert.NotNil(t, db.tuplesEvent)
 	assert.Len(t, db.tuplesEvent.CompositeTraintuples, 2)
@@ -526,7 +525,7 @@ func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan)
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag)
 	assert.NoError(t, err)
 
 	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[0]}))
@@ -558,7 +557,7 @@ func TestLogSuccessAfterCancel(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan)
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag)
 	assert.NoError(t, err)
 
 	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[0]}))
@@ -590,7 +589,7 @@ func TestCreateTagedEmptyComputePlan(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlan(db, assetToArgs(inputComputePlan{Tag: tag}))
+	out, err := createComputePlan(db, assetToArgs(inputNewComputePlan{Tag: tag}))
 	assert.NoError(t, err)
 	assert.Equal(t, tag, out.Tag)
 }
@@ -602,7 +601,7 @@ func TestComputePlanMetrics(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, defaultComputePlan)
+	out, err := createComputePlanInternal(db, defaultComputePlan, tag)
 	assert.NoError(t, err)
 	checkComputePlanMetrics(t, db, out.ComputePlanID, 0, 3)
 
@@ -642,4 +641,45 @@ func checkComputePlanMetrics(t *testing.T, db *LedgerDB, cpID string, doneCount,
 	assert.NoError(t, err)
 	assert.Equal(t, doneCount, out.DoneCount)
 	assert.Equal(t, tupleCount, out.TupleCount)
+}
+
+func TestUpdateComputePlan(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockStub.MockTransactionStart("42")
+	registerItem(t, *mockStub, "aggregateAlgo")
+	db := NewLedgerDB(mockStub)
+
+	out, err := createComputePlanInternal(db, inputComputePlan{}, tag)
+	assert.NoError(t, err)
+	assert.Equal(t, tag, out.Tag)
+
+	out, err = updateComputePlanInternal(db, out.ComputePlanID, defaultComputePlan)
+	assert.NoError(t, err)
+	validateDefaultComputePlan(t, out)
+	for _, train := range defaultComputePlan.Traintuples {
+		assert.Contains(t, out.IDToKey, train.ID)
+	}
+
+	NewID := "Update"
+	up := inputComputePlan{
+		Traintuples: []inputComputePlanTraintuple{
+			{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        algoHash,
+				ID:             NewID,
+				InModelsIDs:    []string{traintupleID1, traintupleID2},
+			},
+		},
+	}
+	out, err = updateComputePlanInternal(db, out.ComputePlanID, up)
+	assert.NoError(t, err)
+	assert.Contains(t, out.IDToKey, NewID)
+	assert.Len(
+		t,
+		out.IDToKey,
+		3,
+		"IDToKey should match the 3 train like tuples keys to their respective ID")
+	assert.Equal(t, 4, out.TupleCount)
 }

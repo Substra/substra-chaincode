@@ -87,6 +87,7 @@ Note for internal use only: See the [technical specifications](https://github.co
 - `registerDataSample`
 - `registerNode`
 - `registerObjective`
+- `updateComputePlan`
 - `updateDataManager`
 - `updateDataSample`
 
