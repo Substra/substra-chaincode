@@ -196,3 +196,28 @@ func TestQueryModelPermissions(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotZero(t, outPerm)
 }
+
+func TestQueryHeadModelPermissions(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "compositeTraintuple")
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	_, err := logStartCompositeTrain(db, assetToArgs(inputKey{Key: compositeTraintupleKey}))
+	assert.NoError(t, err)
+	success := inputLogSuccessCompositeTrain{}
+	success.Key = compositeTraintupleKey
+	success.fillDefaults()
+	_, err = logSuccessCompositeTrain(db, assetToArgs(success))
+	assert.NoError(t, err)
+
+	outTrain, err := queryCompositeTraintuple(db, keyToArgs(compositeTraintupleKey))
+	assert.NoError(t, err)
+	outPerm, err := queryModelPermissions(db, keyToArgs(outTrain.OutHeadModel.OutModel.Hash))
+	assert.NoError(t, err)
+	assert.NotZero(t, outPerm)
+	assert.False(t, outPerm.Process.Public)
+	assert.Len(t, outPerm.Process.AuthorizedIDs, 1)
+	assert.Contains(t, outPerm.Process.AuthorizedIDs, worker)
+}
