@@ -189,9 +189,7 @@ func (testtuple *Testtuple) AddToComputePlan(db *LedgerDB, testtupleKey string) 
 	if err != nil {
 		return err
 	}
-	computePlan.TesttupleKeys = append(computePlan.TesttupleKeys, testtupleKey)
-	computePlan.TupleCount++
-	computePlan.CheckNewTupleStatus(testtuple.Status)
+	computePlan.AddTuple(TesttupleType, testtupleKey, testtuple.Status)
 	err = computePlan.Save(db, testtuple.ComputePlanID)
 	if err != nil {
 		return err
@@ -299,10 +297,6 @@ func logStartTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 		return
 	}
 	err = o.Fill(db, inp.Key, testtuple)
-	if err != nil {
-		return
-	}
-	err = UpdateComputePlan(db, testtuple.ComputePlanID, testtuple.Status)
 	return
 }
 
@@ -327,10 +321,6 @@ func logSuccessTest(db *LedgerDB, args []string) (o outputTesttuple, err error) 
 		return
 	}
 	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
-		return
-	}
-	err = UpdateComputePlan(db, testtuple.ComputePlanID, testtuple.Status)
-	if err != nil {
 		return
 	}
 	err = o.Fill(db, inp.Key, testtuple)
@@ -358,10 +348,6 @@ func logFailTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 		return
 	}
 	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
-		return
-	}
-	err = UpdateComputePlan(db, testtuple.ComputePlanID, testtuple.Status)
-	if err != nil {
 		return
 	}
 	err = o.Fill(db, inp.Key, testtuple)
@@ -467,6 +453,9 @@ func (testtuple *Testtuple) commitStatusUpdate(db *LedgerDB, testtupleKey string
 	oldAttributes := []string{"testtuple", testtuple.Dataset.Worker, oldStatus, testtupleKey}
 	newAttributes := []string{"testtuple", testtuple.Dataset.Worker, testtuple.Status, testtupleKey}
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
+		return err
+	}
+	if err := UpdateComputePlan(db, testtuple.ComputePlanID, newStatus, testtupleKey); err != nil {
 		return err
 	}
 	logger.Infof("testtuple %s status updated: %s (from=%s)", testtupleKey, newStatus, oldStatus)
