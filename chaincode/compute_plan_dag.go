@@ -16,11 +16,11 @@ type TrainingTask struct {
 // used for compute plans
 type ComputeDAG struct {
 	OrderTasks    []TrainingTask
-	IDToTrainTask map[string]CPTrainTask
+	IDToTrainTask map[string]TrainTask
 }
 
 // Create a Directed Acyclic Graph (DAG) from a compute plan
-func createComputeDAG(cp inputComputePlan, IDToTrainTask map[string]CPTrainTask) (ComputeDAG, error) {
+func createComputeDAG(cp inputComputePlan, IDToTrainTask map[string]TrainTask) (ComputeDAG, error) {
 	DAG := ComputeDAG{}
 	for i, traintuple := range cp.Traintuples {
 		task := TrainingTask{
@@ -62,7 +62,7 @@ func (dag *ComputeDAG) sort() error {
 	current := dag.OrderTasks
 	var temp, final []TrainingTask
 	if dag.IDToTrainTask == nil {
-		dag.IDToTrainTask = make(map[string]CPTrainTask)
+		dag.IDToTrainTask = make(map[string]TrainTask)
 	}
 	for i := 0; len(current) != 0; {
 		depth := 0
@@ -84,7 +84,7 @@ func (dag *ComputeDAG) sort() error {
 			if _, ok := dag.IDToTrainTask[current[i].ID]; ok {
 				return errors.BadRequest("compute plan error: Duplicate training task ID: %s", current[i].ID)
 			}
-			dag.IDToTrainTask[current[i].ID] = CPTrainTask{Depth: current[i].Depth}
+			dag.IDToTrainTask[current[i].ID] = TrainTask{Depth: current[i].Depth}
 		} else {
 			temp = append(temp, current[i])
 		}
