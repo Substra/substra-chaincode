@@ -287,19 +287,12 @@ func TestPipeline(t *testing.T) {
 	}
 	callAssertAndPrint("invoke", "queryObjectiveLeaderboard", inpLeaderboard)
 
-<<<<<<< HEAD
+	fmt.Fprintln(&out, "#### ------------ Query Compute Plan(s) ------------")
 	callAssertAndPrint("invoke", "queryComputePlan", inputKey{outCp.ComputePlanID})
 	callAssertAndPrint("invoke", "queryComputePlans", nil)
 
-	callAssertAndPrint("invoke", "cancelComputePlan", inputKey{outCp.ComputePlanID})
-=======
-	fmt.Fprintln(&out, "#### ------------ Query Compute Plan(s) ------------")
-	callAssertAndPrint("invoke", "queryComputePlan", inputHash{outCp.ComputePlanID})
-	callAssertAndPrint("invoke", "queryComputePlans", nil)
-
 	fmt.Fprintln(&out, "#### ------------ Cancel a ComputePlan ------------")
-	callAssertAndPrint("invoke", "cancelComputePlan", inputHash{outCp.ComputePlanID})
->>>>>>> b447155... Update EXAMPLES
+	callAssertAndPrint("invoke", "cancelComputePlan", inputKey{outCp.ComputePlanID})
 
 	// Use the output to check the EXAMPLES.md file and if asked update it
 	doc := out.String()
