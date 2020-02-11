@@ -216,7 +216,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 			// Start training
 			mockStub.MockTransactionStart("42")
 			db := NewLedgerDB(mockStub)
-			_, err := logStartCompositeTrain(db, assetToArgs(inputHash{Key: compositeTraintupleKey}))
+			_, err := logStartCompositeTrain(db, assetToArgs(inputKey{Key: compositeTraintupleKey}))
 			assert.NoError(t, err)
 
 			// Succeed/fail training
@@ -239,7 +239,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 				assert.NoError(t, fmt.Errorf("Unknown status %s", status))
 			}
 
-			testTuple, err := queryTesttuple(db, assetToArgs(inputHash{Key: testTupleKey}))
+			testTuple, err := queryTesttuple(db, assetToArgs(inputKey{Key: testTupleKey}))
 			assert.NoError(t, err)
 			assert.Equal(t, expectedTesttupleStatus, testTuple.Status)
 			assert.Equal(t, compositeTraintupleKey, testTuple.TraintupleKey)
@@ -256,7 +256,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 				values = map[string]string{}
 				json.Unmarshal(resp.Payload, &values)
 				testTupleKey = values["key"]
-				testTuple, err := queryTesttuple(db, assetToArgs(inputHash{Key: testTupleKey}))
+				testTuple, err := queryTesttuple(db, assetToArgs(inputKey{Key: testTupleKey}))
 				assert.NoError(t, err)
 				assert.Equal(t, StatusTodo, testTuple.Status)
 			case StatusFailed:

@@ -227,7 +227,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 }
 
 func queryComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -266,7 +266,7 @@ func getOutComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err er
 }
 
 func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return

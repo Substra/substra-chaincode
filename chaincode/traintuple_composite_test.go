@@ -15,6 +15,7 @@
 package main
 
 import (
+	"chaincode/errors"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -289,7 +290,7 @@ func TestTraintupleComposite(t *testing.T) {
 			OpenerHash:     dataManagerOpenerHash,
 			Worker:         worker,
 		},
-		OutHeadModel: outModelComposite{
+		OutHeadModel: outHeadModelComposite{
 			Permissions: outputPermissions{
 				Process: Permission{Public: false, AuthorizedIDs: []string{worker}},
 			},
@@ -368,9 +369,8 @@ func TestTraintupleComposite(t *testing.T) {
 	endTraintuple := outputCompositeTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutHeadModel.OutModel = &HashDress{
-		Hash:           headModelHash,
-		StorageAddress: headModelAddress}
+	expected.OutHeadModel.OutModel = &Hash{
+		Hash: headModelHash}
 	expected.OutTrunkModel.OutModel = &HashDress{
 		Hash:           trunkModelHash,
 		StorageAddress: trunkModelAddress}
@@ -762,11 +762,11 @@ func TestCorrectParent(t *testing.T) {
 	db := NewLedgerDB(mockStub)
 
 	// fetch aggregate child, and check its in-model is the parent's trunk out-model
-	child1, _ := queryAggregatetuple(db, assetToArgs(inputHash{Key: child1Key}))
+	child1, _ := queryAggregatetuple(db, assetToArgs(inputKey{Key: child1Key}))
 	assert.Equal(t, trunkModelHash, child1.InModels[0].Hash)
 
 	// fetch composite child, and check its head in-model is the parent's head out-model
-	child2, _ := queryCompositeTraintuple(db, assetToArgs(inputHash{Key: child2Key}))
+	child2, _ := queryCompositeTraintuple(db, assetToArgs(inputKey{Key: child2Key}))
 	assert.Equal(t, headModelHash, child2.InHeadModel.Hash)
 }
 
@@ -790,4 +790,44 @@ func TestCreateTesttuplePermissions(t *testing.T) {
 	mockStub.Creator = initialCreator
 	resp = mockStub.MockInvoke("42", inpTesttuple.getArgs())
 	assert.EqualValues(t, 200, resp.Status, "When the creator is an authorized worker, the testtuple should be created without error: %s", resp.Message)
+}
+
+func TestHeadModelDifferentWorker(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "aggregatetuple")
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	// new node
+	mockStub.Creator = "NotFirstNode"
+	registerNode(db, []string{})
+
+	// new dataset on new worker
+	inpDM := inputDataManager{}
+	inpDM.createDefault()
+	inpDM.OpenerHash = GetRandomHash()
+	outDM, err := registerDataManager(db, assetToArgs(inpDM))
+	assert.NoError(t, err)
+	require.Contains(t, outDM, "key")
+
+	inpData := inputDataSample{}
+	inpData.createDefault()
+	inpData.Hashes = []string{GetRandomHash()}
+	inpData.DataManagerKeys = []string{outDM["key"]}
+	outData, err := registerDataSample(db, assetToArgs(inpData))
+	assert.NoError(t, err)
+	require.Contains(t, outData, "keys")
+
+	// try to create new composite traintuple on new worker with previous head model
+	in := inputCompositeTraintuple{}
+	in.fillDefaults()
+	in.DataManagerKey = outDM["key"]
+	in.DataSampleKeys = outData["keys"]
+	in.InHeadModelKey = compositeTraintupleKey
+	in.InTrunkModelKey = aggregatetupleKey
+	out, err := createCompositeTraintuple(db, assetToArgs(in))
+	assert.Error(t, err, "It should failed because dataset worker and head InModel are not the same")
+	assert.IsType(t, errors.BadRequest(), err)
+	assert.Nil(t, out)
 }

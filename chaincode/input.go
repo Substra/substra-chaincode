@@ -108,7 +108,7 @@ type inputTesttuple struct {
 	TraintupleKey  string   `validate:"required,len=64,hexadecimal" json:"traintupleKey"`
 }
 
-type inputHash struct {
+type inputKey struct {
 	Key string `validate:"required,len=64,hexadecimal" json:"key"`
 }
 
@@ -129,6 +129,10 @@ type inputLogFailTest struct {
 type inputLog struct {
 	Key string `validate:"required,len=64,hexadecimal" json:"key"`
 	Log string `validate:"lte=200" json:"log"`
+}
+
+type inputHash struct {
+	Hash string `validate:"required,len=64,hexadecimal" json:"hash"`
 }
 
 type inputHashDress struct {

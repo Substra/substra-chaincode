@@ -47,9 +47,9 @@ func TestRecursiveLogFailed(t *testing.T) {
 	testResp, err := createTesttuple(db, assetToArgs(grandChildtesttuple))
 	assert.NoError(t, err)
 
-	_, err = logStartTrain(db, assetToArgs(inputHash{Key: traintupleKey}))
+	_, err = logStartTrain(db, assetToArgs(inputKey{Key: traintupleKey}))
 	assert.NoError(t, err)
-	_, err = logFailTrain(db, assetToArgs(inputHash{Key: traintupleKey}))
+	_, err = logFailTrain(db, assetToArgs(inputKey{Key: traintupleKey}))
 	assert.NoError(t, err)
 
 	train2, err := db.GetTraintuple(grandChildresp["key"])
@@ -181,4 +181,43 @@ func TestTagTuple(t *testing.T) {
 	assert.Len(t, testtuples, 1, "there should be one traintuple")
 	assert.EqualValues(t, tag, testtuples[0].Tag)
 
+}
+
+func TestQueryModelPermissions(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "traintuple")
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+	traintupleToDone(t, db, traintupleKey)
+	outTrain, err := queryTraintuple(db, keyToArgs(traintupleKey))
+	assert.NoError(t, err)
+	outPerm, err := queryModelPermissions(db, keyToArgs(outTrain.OutModel.Hash))
+	assert.NoError(t, err)
+	assert.NotZero(t, outPerm)
+}
+
+func TestQueryHeadModelPermissions(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "compositeTraintuple")
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+
+	_, err := logStartCompositeTrain(db, assetToArgs(inputKey{Key: compositeTraintupleKey}))
+	assert.NoError(t, err)
+	success := inputLogSuccessCompositeTrain{}
+	success.Key = compositeTraintupleKey
+	success.fillDefaults()
+	_, err = logSuccessCompositeTrain(db, assetToArgs(success))
+	assert.NoError(t, err)
+
+	outTrain, err := queryCompositeTraintuple(db, keyToArgs(compositeTraintupleKey))
+	assert.NoError(t, err)
+	outPerm, err := queryModelPermissions(db, keyToArgs(outTrain.OutHeadModel.OutModel.Hash))
+	assert.NoError(t, err)
+	assert.NotZero(t, outPerm)
+	assert.False(t, outPerm.Process.Public)
+	assert.Len(t, outPerm.Process.AuthorizedIDs, 1)
+	assert.Contains(t, outPerm.Process.AuthorizedIDs, worker)
 }

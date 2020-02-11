@@ -256,9 +256,6 @@ func (success *inputLogSuccessCompositeTrain) fillDefaults() {
 	if success.OutHeadModel.Hash == "" {
 		success.OutHeadModel.Hash = headModelHash
 	}
-	if success.OutHeadModel.StorageAddress == "" {
-		success.OutHeadModel.StorageAddress = headModelAddress
-	}
 	if success.OutTrunkModel.Hash == "" {
 		success.OutTrunkModel.Hash = trunkModelHash
 	}

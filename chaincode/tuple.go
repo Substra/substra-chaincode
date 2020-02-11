@@ -40,7 +40,7 @@ const (
 
 // queryModelDetails returns info about the testtuple and algo related to a traintuple
 func queryModelDetails(db *LedgerDB, args []string) (outModelDetails outputModelDetails, err error) {
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -163,6 +163,47 @@ func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err erro
 	return
 }
 
+func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, error) {
+	var out outputPermissions
+	inp := inputKey{}
+	err := AssetFromJSON(args, &inp)
+	if err != nil {
+		return out, err
+	}
+	modelHash := inp.Key
+	keys, err := db.GetIndexKeys("tuple~modelHash~key", []string{"tuple", modelHash})
+	if err != nil {
+		return out, err
+	}
+	if len(keys) == 0 {
+		return out, errors.NotFound("Could not find a model for hash %s", modelHash)
+	}
+	tupleKey := keys[0]
+	tupleType, err := db.GetAssetType(tupleKey)
+	if err != nil {
+		return out, errors.Internal(err, "queryModelPermissions: could not retrieve model type with tupleKey %s", tupleKey)
+	}
+
+	// By default model is public processable
+	modelPermissions := Permissions{}
+	modelPermissions.Process.Public = true
+
+	// get out-model and permissions from parent for head model in composite traintuple
+	if tupleType == CompositeTraintupleType {
+		tuple, err := db.GetCompositeTraintuple(tupleKey)
+		if err != nil {
+			return out, errors.Internal(err, "queryModelPermissions:")
+		}
+		// if `modelHash` refers to the head out-model, return the head out-model permissions
+		// if `modelHash` refers to the trunk out-model, do nothing (default to "public processable")
+		if tuple.OutHeadModel.OutModel.Hash == modelHash {
+			modelPermissions = tuple.OutHeadModel.Permissions
+		}
+	}
+	out.Fill(modelPermissions)
+	return out, nil
+}
+
 // ----------------------------------------------------------
 // Utils for smartcontracts related to  multiple tuple types
 // ----------------------------------------------------------
@@ -255,4 +296,8 @@ func determineTupleStatus(db *LedgerDB, tupleStatus, computePlanID string) (stri
 		return StatusAborted, nil
 	}
 	return tupleStatus, nil
+}
+
+func createModelIndex(db *LedgerDB, modelHash, tupleKey string) error {
+	return db.CreateIndex("tuple~modelHash~key", []string{"tuple", modelHash, tupleKey})
 }

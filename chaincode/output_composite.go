@@ -21,19 +21,24 @@ type outputCompositeAlgo struct {
 }
 
 type outputCompositeTraintuple struct {
-	Key           string            `json:"key"`
-	Algo          *HashDressName    `json:"algo"`
-	Creator       string            `json:"creator"`
-	Dataset       *outputTtDataset  `json:"dataset"`
-	ComputePlanID string            `json:"computePlanID"`
-	InHeadModel   *Model            `json:"inHeadModel"`
-	InTrunkModel  *Model            `json:"inTrunkModel"`
-	Log           string            `json:"log"`
-	OutHeadModel  outModelComposite `json:"outHeadModel"`
-	OutTrunkModel outModelComposite `json:"outTrunkModel"`
-	Rank          int               `json:"rank"`
-	Status        string            `json:"status"`
-	Tag           string            `json:"tag"`
+	Key           string                `json:"key"`
+	Algo          *HashDressName        `json:"algo"`
+	Creator       string                `json:"creator"`
+	Dataset       *outputTtDataset      `json:"dataset"`
+	ComputePlanID string                `json:"computePlanID"`
+	InHeadModel   *Model                `json:"inHeadModel"`
+	InTrunkModel  *Model                `json:"inTrunkModel"`
+	Log           string                `json:"log"`
+	OutHeadModel  outHeadModelComposite `json:"outHeadModel"`
+	OutTrunkModel outModelComposite     `json:"outTrunkModel"`
+	Rank          int                   `json:"rank"`
+	Status        string                `json:"status"`
+	Tag           string                `json:"tag"`
+}
+
+type outHeadModelComposite struct {
+	OutModel    *Hash             `json:"outModel"`
+	Permissions outputPermissions `json:"permissions"`
 }
 
 type outModelComposite struct {
@@ -50,7 +55,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 	outputCompositeTraintuple.Status = traintuple.Status
 	outputCompositeTraintuple.Rank = traintuple.Rank
 	outputCompositeTraintuple.ComputePlanID = traintuple.ComputePlanID
-	outputCompositeTraintuple.OutHeadModel = outModelComposite{
+	outputCompositeTraintuple.OutHeadModel = outHeadModelComposite{
 		OutModel:    traintuple.OutHeadModel.OutModel,
 		Permissions: getOutPermissions(traintuple.OutHeadModel.Permissions)}
 	outputCompositeTraintuple.OutTrunkModel = outModelComposite{
@@ -71,7 +76,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 	// fill in-model (head)
 	if traintuple.InHeadModel != "" {
 		// Head can only be a composite traintuple's head out model
-		hashDress, _err := db.GetOutModelHashDress(traintuple.InHeadModel, HeadType, []AssetType{CompositeTraintupleType})
+		hash, _err := db.GetOutHeadModelHash(traintuple.InHeadModel)
 		if _err != nil {
 			err = errors.Internal("could not fill (head) in-model with key \"%s\": %s", traintuple.InHeadModel, _err.Error())
 			return
@@ -79,9 +84,8 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		outputCompositeTraintuple.InHeadModel = &Model{
 			TraintupleKey: traintuple.InHeadModel}
 
-		if hashDress != nil {
-			outputCompositeTraintuple.InHeadModel.Hash = hashDress.Hash
-			outputCompositeTraintuple.InHeadModel.StorageAddress = hashDress.StorageAddress
+		if hash != nil {
+			outputCompositeTraintuple.InHeadModel.Hash = hash.Hash
 		}
 	}
 
@@ -91,7 +95,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		// - a traintuple's out model
 		// - a composite traintuple's head out model
 		// - an aggregate tuple's out model
-		hashDress, _err := db.GetOutModelHashDress(traintuple.InTrunkModel, TrunkType, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
+		hashDress, _err := db.GetOutModelHashDress(traintuple.InTrunkModel, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
 		if _err != nil {
 			err = errors.Internal("could not fill (trunk) in-model with key \"%s\": %s", traintuple.InTrunkModel, _err.Error())
 			return

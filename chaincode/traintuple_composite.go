@@ -73,11 +73,11 @@ func (traintuple *CompositeTraintuple) SetFromInput(db *LedgerDB, inp inputCompo
 	}
 	traintuple.Dataset.Worker, err = getDataManagerOwner(db, traintuple.Dataset.DataManagerKey)
 
-	// permissions (head): creator only
-	creatorOnly := Permission{
+	// permissions (head): worker only where the data belong
+	workerOnly := Permission{
 		Public:        false,
-		AuthorizedIDs: []string{traintuple.Creator}}
-	traintuple.OutHeadModel.Permissions = Permissions{Process: creatorOnly, Download: creatorOnly}
+		AuthorizedIDs: []string{traintuple.Dataset.Worker}}
+	traintuple.OutHeadModel.Permissions = Permissions{Process: workerOnly, Download: workerOnly}
 
 	// permissions (trunk): dictated by input
 	permissions, err := NewPermissions(db, inp.OutTrunkModelPermissions)
@@ -112,6 +112,17 @@ func (traintuple *CompositeTraintuple) SetFromParents(db *LedgerDB, inp inputCom
 			head.AssetType,
 			inp.InHeadModelKey)
 	}
+
+	// Head Model is only processable on the same worker
+	compositeTraintuple, err := db.GetCompositeTraintuple(inp.InHeadModelKey)
+
+	if traintuple.Dataset.Worker != compositeTraintuple.Dataset.Worker {
+		return errors.BadRequest(
+			"Dataset worker (%s) and head InModel owner (%s) must be the same",
+			traintuple.Dataset.Worker,
+			compositeTraintuple.Dataset.Worker)
+	}
+
 	// [Trunk]
 	// It can be either:
 	// - a traintuple's out model
@@ -300,7 +311,7 @@ func createCompositeTraintupleInternal(db *LedgerDB, inp inputCompositeTraintupl
 // logStartCompositeTrain modifies a traintuple by changing its status from todo to doing
 func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraintuple, err error) {
 	status := StatusDoing
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -339,14 +350,22 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 		return
 	}
 
-	compositeTraintuple.OutHeadModel.OutModel = &HashDress{
-		Hash:           inp.OutHeadModel.Hash,
-		StorageAddress: inp.OutHeadModel.StorageAddress}
+	compositeTraintuple.OutHeadModel.OutModel = &Hash{
+		Hash: inp.OutHeadModel.Hash}
+
 	compositeTraintuple.OutTrunkModel.OutModel = &HashDress{
 		Hash:           inp.OutTrunkModel.Hash,
 		StorageAddress: inp.OutTrunkModel.StorageAddress}
 	compositeTraintuple.Log += inp.Log
 
+	err = createModelIndex(db, inp.OutHeadModel.Hash, compositeTraintupleKey)
+	if err != nil {
+		return
+	}
+	err = createModelIndex(db, inp.OutTrunkModel.Hash, compositeTraintupleKey)
+	if err != nil {
+		return
+	}
 	if err = validateTupleOwner(db, compositeTraintuple.Dataset.Worker); err != nil {
 		return
 	}
@@ -412,7 +431,7 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 
 // queryCompositeTraintuple returns info about a composite traintuple given its key
 func queryCompositeTraintuple(db *LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
-	inp := inputHash{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return

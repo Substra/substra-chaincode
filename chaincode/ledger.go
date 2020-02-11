@@ -126,19 +126,19 @@ type Traintuple struct {
 
 // CompositeTraintuple is like a traintuple, but for composite model composition
 type CompositeTraintuple struct {
-	AssetType     AssetType                   `json:"assetType"`
-	AlgoKey       string                      `json:"algoKey"`
-	ComputePlanID string                      `json:"computePlanID"`
-	Creator       string                      `json:"creator"`
-	Log           string                      `json:"log"`
-	Rank          int                         `json:"rank"`
-	Status        string                      `json:"status"`
-	Tag           string                      `json:"tag"`
-	Dataset       *Dataset                    `json:"dataset"`
-	InHeadModel   string                      `json:"inHeadModel"`
-	InTrunkModel  string                      `json:"inTrunkModel"`
-	OutHeadModel  CompositeTraintupleOutModel `json:"outHeadModel"`
-	OutTrunkModel CompositeTraintupleOutModel `json:"outTrunkModel"`
+	AssetType     AssetType                       `json:"assetType"`
+	AlgoKey       string                          `json:"algoKey"`
+	ComputePlanID string                          `json:"computePlanID"`
+	Creator       string                          `json:"creator"`
+	Log           string                          `json:"log"`
+	Rank          int                             `json:"rank"`
+	Status        string                          `json:"status"`
+	Tag           string                          `json:"tag"`
+	Dataset       *Dataset                        `json:"dataset"`
+	InHeadModel   string                          `json:"inHeadModel"`
+	InTrunkModel  string                          `json:"inTrunkModel"`
+	OutHeadModel  CompositeTraintupleOutHeadModel `json:"outHeadModel"`
+	OutTrunkModel CompositeTraintupleOutModel     `json:"outTrunkModel"`
 }
 
 // Aggregatetuple is like a traintuple, but for aggregate model composition
@@ -160,6 +160,12 @@ type Aggregatetuple struct {
 // CompositeTraintupleOutModel is the out-model of a CompositeTraintuple
 type CompositeTraintupleOutModel struct {
 	OutModel    *HashDress  `json:"outModel"`
+	Permissions Permissions `json:"permissions"`
+}
+
+// CompositeTraintupleOutHeadModel is the out-model of a CompositeTraintuple
+type CompositeTraintupleOutHeadModel struct {
+	OutModel    *Hash       `json:"outModel"`
 	Permissions Permissions `json:"permissions"`
 }
 
@@ -196,6 +202,11 @@ type ComputePlan struct {
 // ---------------------------------------------------------------------------------
 // Struct used in the representation of elements stored in the ledger
 // ---------------------------------------------------------------------------------
+
+// Hash stores a hash
+type Hash struct {
+	Hash string `json:"hash"`
+}
 
 // HashDress stores a hash and a Storage Address
 type HashDress struct {

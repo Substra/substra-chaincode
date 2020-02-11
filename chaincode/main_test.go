@@ -49,7 +49,6 @@ const aggregateAlgoName = "hog + svm aggregate"
 const modelHash = "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed"
 const modelAddress = "https://substrabac/model/toto"
 const headModelHash = modelHash
-const headModelAddress = modelAddress
 const trunkModelHash = "ccdbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482ecc"
 const trunkModelAddress = "https://substrabac/model/titi"
 const worker = "SampleOrg"
@@ -83,13 +82,17 @@ func assetToArgs(asset interface{}) []string {
 	return []string{string(assetToJSON(asset))}
 }
 
+func keyToArgs(key string) []string {
+	return []string{string(keyToJSON(key))}
+}
+
 func assetToJSON(asset interface{}) []byte {
 	assetjson, _ := json.Marshal(asset)
 	return assetjson
 }
 
 func keyToJSON(key string) []byte {
-	return assetToJSON(inputHash{Key: key})
+	return assetToJSON(inputKey{Key: key})
 }
 
 func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Response, interface{}) {

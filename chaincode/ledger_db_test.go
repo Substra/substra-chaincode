@@ -31,33 +31,20 @@ func TestGetOutModelHashDress(t *testing.T) {
 
 	// 1. Correct requests
 
-	_, err = db.GetOutModelHashDress(regular, HeadType, []AssetType{TraintupleType})
+	_, err = db.GetOutModelHashDress(regular, []AssetType{TraintupleType})
 	assert.NoError(t, err, "the regular traintuple should be found when requesting regular traintuples")
 
-	_, err = db.GetOutModelHashDress(composite, HeadType, []AssetType{CompositeTraintupleType})
+	_, err = db.GetOutHeadModelHash(composite)
+	assert.NoError(t, err, "the composite traintuple should be found when requesting composite traintuples")
+
+	_, err = db.GetOutModelHashDress(composite, []AssetType{CompositeTraintupleType})
 	assert.NoError(t, err, "the composite traintuple should be found when requesting composite traintuples")
 
 	// 2. Incorrect requests
 
-	_, err = db.GetOutModelHashDress(regular, HeadType, []AssetType{CompositeTraintupleType})
+	_, err = db.GetOutModelHashDress(regular, []AssetType{CompositeTraintupleType})
 	assert.Error(t, err, "the regular traintuple should not be found when requesting composite traintuples only")
 
-	_, err = db.GetOutModelHashDress(composite, HeadType, []AssetType{TraintupleType})
+	_, err = db.GetOutModelHashDress(composite, []AssetType{TraintupleType})
 	assert.Error(t, err, "the composite traintuple should be found when requesting regular traintuples only")
-
-	// 3. Error messages
-
-	_, err = db.GetOutModelHashDress("abc", HeadType, []AssetType{CompositeTraintupleType})
-	assert.Error(t, err, "the key should not be found")
-	assert.EqualError(t,
-		err,
-		"GetOutModelHashDress: Could not find traintuple Head with key \"abc\". Allowed types: [CompositeTraintuple].",
-		"the error message should be valid")
-
-	_, err = db.GetOutModelHashDress("abc", HeadType, []AssetType{TraintupleType, CompositeTraintupleType})
-	assert.Error(t, err, "the key should not be found")
-	assert.EqualError(t,
-		err,
-		"GetOutModelHashDress: Could not find traintuple Head with key \"abc\". Allowed types: [Traintuple CompositeTraintuple].",
-		"the error message should be valid")
 }
