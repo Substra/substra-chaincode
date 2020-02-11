@@ -15,7 +15,9 @@
 package main
 
 import (
+	"bytes"
 	"chaincode/errors"
+	"encoding/gob"
 	"encoding/json"
 	"sync"
 
@@ -84,7 +86,8 @@ func (db *LedgerDB) Get(key string, object interface{}) error {
 		db.putTransactionState(key, buff)
 	}
 
-	return json.Unmarshal(buff, &object)
+	d := gob.NewDecoder(bytes.NewReader(buff))
+	return d.Decode(object)
 }
 
 // KeyExists checks if a key is stored in the chaincode db
@@ -95,8 +98,14 @@ func (db *LedgerDB) KeyExists(key string) (bool, error) {
 
 // Put stores an object in the chaincode db, if the object already exists it is replaced
 func (db *LedgerDB) Put(key string, object interface{}) error {
-	buff, _ := json.Marshal(object)
+	b := bytes.Buffer{}
+	e := gob.NewEncoder(&b)
+	err := e.Encode(object)
+	if err != nil {
+		return err
+	}
 
+	buff := b.Bytes()
 	if err := db.cc.PutState(key, buff); err != nil {
 		return err
 	}
