@@ -115,7 +115,10 @@ func updateComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 		return
 	}
 
-	count := len(inp.Traintuples) + len(inp.Aggregatetuples) + len(inp.CompositeTraintuples)
+	count := len(inp.Traintuples) +
+		len(inp.Aggregatetuples) +
+		len(inp.CompositeTraintuples) +
+		len(inp.Testtuples)
 	if count == 0 {
 		return resp, errors.BadRequest("empty update for compute plan %s", inp.ComputePlanID)
 	}
