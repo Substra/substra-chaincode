@@ -15,8 +15,11 @@
 package main
 
 import (
+	"bytes"
 	"chaincode/errors"
+	"compress/gzip"
 	"encoding/json"
+	"io/ioutil"
 	"sync"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -77,7 +80,7 @@ func (db *LedgerDB) Get(key string, object interface{}) error {
 
 	buff, ok := db.getTransactionState(key)
 	if !ok {
-		buff, err = db.cc.GetState(key)
+		buff, err = db.GetStateGzip(key)
 		if err != nil || buff == nil {
 			return errors.NotFound(err, "no asset for key %s", key)
 		}
@@ -97,7 +100,7 @@ func (db *LedgerDB) KeyExists(key string) (bool, error) {
 func (db *LedgerDB) Put(key string, object interface{}) error {
 	buff, _ := json.Marshal(object)
 
-	if err := db.cc.PutState(key, buff); err != nil {
+	if err := db.PutStateGzip(key, buff); err != nil {
 		return err
 	}
 	// TransactionState is updated to ensure that even if the data is not committed, a further
@@ -106,6 +109,36 @@ func (db *LedgerDB) Put(key string, object interface{}) error {
 	db.putTransactionState(key, buff)
 
 	return nil
+}
+
+// GetStateGzip calls GetState, then gunzips the payload
+func (db *LedgerDB) GetStateGzip(key string) ([]byte, error) {
+	compressed, err := db.cc.GetState(key)
+	if err != nil {
+		return nil, err
+	}
+	bReader := bytes.NewReader(compressed)
+	zr, err := gzip.NewReader(bReader)
+	if err != nil {
+		return nil, err
+	}
+	return ioutil.ReadAll(zr)
+}
+
+// PutStateGzip gzips the payload, then calls PutState
+func (db *LedgerDB) PutStateGzip(key string, payload []byte) error {
+	var gzipped bytes.Buffer
+	zw := gzip.NewWriter(&gzipped)
+
+	_, err := zw.Write(payload)
+	if err != nil {
+		return err
+	}
+	if err := zw.Close(); err != nil {
+		return err
+	}
+	buff := gzipped.Bytes()
+	return db.cc.PutState(key, buff)
 }
 
 // Add stores an object in the chaincode db, it fails if the object already exists
