@@ -214,7 +214,7 @@ func run(s serializer) {
 	size := 0
 	for i := 0; i < 50000; i++ {
 		serialized, _ := s.serialize(tt)
-		tt2 := Traintuple{}
+		tt2 := CompositeTraintuple{}
 		s.deserialize(serialized, &tt2)
 		if i == 0 {
 			size = len(serialized)
