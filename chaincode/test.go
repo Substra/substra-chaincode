@@ -198,7 +198,7 @@ func validate(s serializer) error {
 	if err != nil {
 		return err
 	}
-	tt2 := Traintuple{}
+	tt2 := CompositeTraintuple{}
 	err = s.deserialize(serialized, &tt2)
 	if err != nil {
 		return err
