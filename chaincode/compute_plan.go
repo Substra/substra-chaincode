@@ -127,7 +127,7 @@ func updateComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 
 func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string) (resp outputComputePlan, err error) {
 	var computePlan ComputePlan
-	computePlan.Status = StatusWaiting
+	computePlan.State.Status = StatusWaiting
 	computePlan.Tag = tag
 	ID, err := computePlan.Create(db)
 	if err != nil {
@@ -287,8 +287,8 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 		return outputComputePlan{}, err
 	}
 
-	computeplan.Status = StatusCanceled
-	err = db.Put(inp.Key, computeplan)
+	computeplan.State.Status = StatusCanceled
+	err = computeplan.Save(db, inp.Key)
 	if err != nil {
 		return outputComputePlan{}, err
 	}
@@ -301,8 +301,13 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 // and register it in the compute plan index
 func (cp *ComputePlan) Create(db *LedgerDB) (string, error) {
 	ID := GetRandomHash()
+	cp.StateKey = GetRandomHash()
 	cp.AssetType = ComputePlanType
 	err := db.Add(ID, cp)
+	if err != nil {
+		return "", err
+	}
+	err = db.Add(cp.StateKey, cp.State)
 	if err != nil {
 		return "", err
 	}
@@ -314,7 +319,11 @@ func (cp *ComputePlan) Create(db *LedgerDB) (string, error) {
 
 // Save add or update the compute plan in the ledger
 func (cp *ComputePlan) Save(db *LedgerDB, ID string) error {
-	err := db.Put(ID, cp)
+	err := db.LazyPut(ID, cp)
+	if err != nil {
+		return err
+	}
+	err = db.LazyPut(cp.StateKey, cp.State)
 	if err != nil {
 		return err
 	}
@@ -325,38 +334,38 @@ func (cp *ComputePlan) Save(db *LedgerDB, ID string) error {
 // and, if required, it updates the compute plan' status and/or its doneCount.
 // It returns true if there is any change to the compute plan, false otherwise.
 func (cp *ComputePlan) CheckNewTupleStatus(tupleStatus string) bool {
-	switch cp.Status {
+	switch cp.State.Status {
 	case StatusFailed, StatusCanceled:
 	case StatusDone:
 		// We might add tuples to a done compute plan
 		if stringInSlice(tupleStatus, []string{StatusWaiting, StatusTodo}) {
-			cp.Status = tupleStatus
+			cp.State.Status = tupleStatus
 			return true
 		}
 	case StatusDoing:
 		switch tupleStatus {
 		case StatusFailed:
-			cp.Status = tupleStatus
+			cp.State.Status = tupleStatus
 			return true
 		case StatusDone:
-			cp.DoneCount++
-			if cp.DoneCount == cp.TupleCount {
-				cp.Status = tupleStatus
+			cp.State.DoneCount++
+			if cp.State.DoneCount == cp.State.TupleCount {
+				cp.State.Status = tupleStatus
 			}
 			return true
 		}
 	case StatusTodo:
 		if tupleStatus == StatusDoing {
-			cp.Status = tupleStatus
+			cp.State.Status = tupleStatus
 			return true
 		}
 	case StatusWaiting:
 		if tupleStatus == StatusTodo {
-			cp.Status = tupleStatus
+			cp.State.Status = tupleStatus
 			return true
 		}
 	case "":
-		cp.Status = tupleStatus
+		cp.State.Status = tupleStatus
 		return true
 	}
 	return false
@@ -374,7 +383,7 @@ func (cp *ComputePlan) AddTuple(tupleType AssetType, key, status string) {
 	case TesttupleType:
 		cp.TesttupleKeys = append(cp.TesttupleKeys, key)
 	}
-	cp.TupleCount++
+	cp.State.TupleCount++
 	cp.CheckNewTupleStatus(status)
 }
 

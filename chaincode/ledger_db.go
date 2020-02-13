@@ -15,6 +15,7 @@
 package main
 
 import (
+	"bytes"
 	"chaincode/errors"
 	"encoding/json"
 	"sync"
@@ -50,7 +51,7 @@ func NewLedgerDB(stub shim.ChaincodeStubInterface) *LedgerDB {
 // Low-level functions to handle asset structs
 // ----------------------------------------------
 
-// gettransactionState returns a copy of an object that has been updated or created during the transaction
+// getTransactionState returns a copy of an object that has been updated or created during the transaction
 func (db *LedgerDB) getTransactionState(key string) ([]byte, bool) {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
@@ -93,17 +94,38 @@ func (db *LedgerDB) KeyExists(key string) (bool, error) {
 	return buff != nil, err
 }
 
+// LazyPut is equivalent to Put but calls put if and only if the new value differ from the cached state
+func (db *LedgerDB) LazyPut(key string, object interface{}) error {
+	buff, err := json.Marshal(object)
+	if err != nil {
+		return errors.Internal(err)
+	}
+
+	cachedValue, exists := db.getTransactionState(key)
+
+	if exists && bytes.Equal(buff, cachedValue) {
+		return nil
+	}
+
+	return db.put(key, buff)
+}
+
 // Put stores an object in the chaincode db, if the object already exists it is replaced
 func (db *LedgerDB) Put(key string, object interface{}) error {
 	buff, _ := json.Marshal(object)
 
-	if err := db.cc.PutState(key, buff); err != nil {
+	return db.put(key, buff)
+}
+
+// put stores a value in the chaincode db whether it already exists or not
+func (db *LedgerDB) put(key string, value []byte) error {
+	if err := db.cc.PutState(key, value); err != nil {
 		return err
 	}
 	// TransactionState is updated to ensure that even if the data is not committed, a further
 	// call to get this struct will returned the updated one (and not the original one).
 	// This is currently required when setting the statuses of the traintuple children.
-	db.putTransactionState(key, buff)
+	db.putTransactionState(key, value)
 
 	return nil
 }
@@ -363,6 +385,9 @@ func (db *LedgerDB) GetComputePlan(ID string) (ComputePlan, error) {
 	}
 	if computePlan.AssetType != ComputePlanType {
 		return computePlan, errors.NotFound("compute plan %s not found", ID)
+	}
+	if err := db.Get(computePlan.StateKey, &(computePlan.State)); err != nil {
+		return computePlan, err
 	}
 	return computePlan, nil
 }
