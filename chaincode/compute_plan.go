@@ -133,7 +133,10 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string) (
 	if err != nil {
 		return resp, err
 	}
-	count := len(inp.Traintuples) + len(inp.Aggregatetuples) + len(inp.CompositeTraintuples)
+	count := len(inp.Traintuples) +
+		len(inp.Aggregatetuples) +
+		len(inp.CompositeTraintuples) +
+		len(inp.Testtuples)
 	if count == 0 {
 		resp.Fill(ID, computePlan)
 		return resp, nil
