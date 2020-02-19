@@ -15,9 +15,12 @@
 package main
 
 import (
+	"bytes"
 	"chaincode/errors"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"unicode"
 	"unicode/utf8"
@@ -131,4 +134,29 @@ func GetRandomHash() string {
 		b[i] = characterRunes[rand.Intn(len(characterRunes))]
 	}
 	return string(b)
+}
+
+// Gzip ...
+func Gzip(data []byte) ([]byte, error) {
+	var compressed bytes.Buffer
+	zw := gzip.NewWriter(&compressed)
+	_, err := zw.Write(data)
+	if err != nil {
+		return nil, err
+	}
+	if err := zw.Close(); err != nil {
+		return nil, err
+	}
+	buff := compressed.Bytes()
+	return buff, nil
+}
+
+// UnGzip ...
+func UnGzip(data []byte) ([]byte, error) {
+	bReader := bytes.NewReader(data)
+	zr, err := gzip.NewReader(bReader)
+	if err != nil {
+		return nil, err
+	}
+	return ioutil.ReadAll(zr)
 }

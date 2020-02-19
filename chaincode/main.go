@@ -32,16 +32,31 @@ type SubstraChaincode struct {
 // Create a global logger for the chaincode. Its default level is Info
 var logger = shim.NewLogger("substra-chaincode")
 
+// InitSettings ...
+type InitSettings struct {
+	LedgerSettings LedgerSettings `json:"ledgerSettings"`
+}
+
+// default init settings
+var initSettings = InitSettings{
+	LedgerSettings: LedgerSettings{
+		EnableGzip: true,
+		Foo:        "bar",
+	},
+}
+
 // Init is called during chaincode instantiation to initialize any
 // data. Note that chaincode upgrade also calls this function to reset
 // or to migrate data.
-// TODO!!!!
 func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response {
-	// Get the args from the transaction proposal
-	args := stub.GetStringArgs()
-	if len(args) != 1 {
-		return shim.Error("Incorrect arguments. Expecting nothing...")
+	_, args := stub.GetFunctionAndParameters()
+	if len(args) == 1 {
+		err := AssetFromJSON(args, &initSettings)
+		if err != nil {
+			return shim.Error(fmt.Sprintf("Incorrect arguments. %s", err.Error()))
+		}
 	}
+	ledgerSettings = initSettings.LedgerSettings
 	return shim.Success(nil)
 }
 
