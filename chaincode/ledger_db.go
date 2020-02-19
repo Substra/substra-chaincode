@@ -26,8 +26,7 @@ var ledgerSettings LedgerSettings
 
 // LedgerSettings ...
 type LedgerSettings struct {
-	EnableGzip bool   `json:"enableGzip"`
-	Foo        string `json:"foo"`
+	EnableGzip bool `json:"enableGzip"`
 }
 
 // State is a in-memory representation of the db state

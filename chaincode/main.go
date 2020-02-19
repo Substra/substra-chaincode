@@ -41,7 +41,6 @@ type InitSettings struct {
 var initSettings = InitSettings{
 	LedgerSettings: LedgerSettings{
 		EnableGzip: true,
-		Foo:        "bar",
 	},
 }
 
@@ -50,6 +49,10 @@ var initSettings = InitSettings{
 // or to migrate data.
 func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	_, args := stub.GetFunctionAndParameters()
+
+	// If settings are provided, use them.
+	// If not settings are provided, or if some settings are missing,
+	//    use the default values defined above.
 	if len(args) == 1 {
 		err := AssetFromJSON(args, &initSettings)
 		if err != nil {
