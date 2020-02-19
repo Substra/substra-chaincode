@@ -433,7 +433,9 @@ func (stub *MockStub) GetArgsSlice() ([]byte, error) {
 }
 
 func (stub *MockStub) setTxTimestamp(time *timestamp.Timestamp) {
-	stub.TxTimestamp = time
+	// Using a sequential timestamp make the tests' output determinist.
+	stub.TxTimestamp.Seconds = stub.TxTimestamp.Seconds + 1
+	stub.TxTimestamp.Nanos = stub.TxTimestamp.Nanos + 1
 }
 
 func (stub *MockStub) GetTxTimestamp() (*timestamp.Timestamp, error) {
@@ -491,6 +493,7 @@ func NewMockStub(name string, cc shim.Chaincode) *MockStub {
 	s.Keys = list.New()
 	s.ChaincodeEventsChannel = make(chan *pb.ChaincodeEvent, 100) //define large capacity for non-blocking setEvent calls.
 	s.Decorations = make(map[string][]byte)
+	s.TxTimestamp = &timestamp.Timestamp{}
 
 	return s
 }

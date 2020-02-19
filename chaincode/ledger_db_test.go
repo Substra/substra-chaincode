@@ -27,7 +27,9 @@ func TestGetOutModelHashDress(t *testing.T) {
 
 	registerItem(t, *mockStub, "compositeAlgo")
 	regular, err := registerTraintuple(mockStub, TraintupleType)
+	assert.NoError(t, err)
 	composite, err := registerTraintuple(mockStub, CompositeTraintupleType)
+	assert.NoError(t, err)
 
 	// 1. Correct requests
 
