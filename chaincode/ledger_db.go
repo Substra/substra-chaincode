@@ -22,6 +22,14 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+var ledgerSettings LedgerSettings
+
+// LedgerSettings ...
+type LedgerSettings struct {
+	EnableGzip bool   `json:"enableGzip"`
+	Foo        string `json:"foo"`
+}
+
 // State is a in-memory representation of the db state
 type State struct {
 	items map[string]([]byte)
@@ -72,19 +80,26 @@ func (db *LedgerDB) putTransactionState(key string, state []byte) {
 
 // Get retrieves an object stored in the chaincode db and set the input object value
 func (db *LedgerDB) Get(key string, object interface{}) error {
-	var buff []byte
-	var err error
+	var jsonBytes []byte
 
-	buff, ok := db.getTransactionState(key)
+	jsonBytes, ok := db.getTransactionState(key)
 	if !ok {
-		buff, err = db.cc.GetState(key)
-		if err != nil || buff == nil {
+		ledgerBytes, err := db.cc.GetState(key)
+		if err != nil || ledgerBytes == nil {
 			return errors.NotFound(err, "no asset for key %s", key)
 		}
-		db.putTransactionState(key, buff)
+		if ledgerSettings.EnableGzip {
+			jsonBytes, err = UnGzip(ledgerBytes)
+			if err != nil {
+				return errors.Internal(err, "error while ungzipping data for key %s", key)
+			}
+		} else {
+			jsonBytes = ledgerBytes
+		}
+		db.putTransactionState(key, jsonBytes)
 	}
 
-	return json.Unmarshal(buff, &object)
+	return json.Unmarshal(jsonBytes, &object)
 }
 
 // KeyExists checks if a key is stored in the chaincode db
@@ -95,15 +110,26 @@ func (db *LedgerDB) KeyExists(key string) (bool, error) {
 
 // Put stores an object in the chaincode db, if the object already exists it is replaced
 func (db *LedgerDB) Put(key string, object interface{}) error {
-	buff, _ := json.Marshal(object)
+	var ledgerBytes []byte
+	var err error
 
-	if err := db.cc.PutState(key, buff); err != nil {
+	jsonBytes, _ := json.Marshal(object)
+	if ledgerSettings.EnableGzip {
+		ledgerBytes, err = Gzip(jsonBytes)
+		if err != nil {
+			return err
+		}
+	} else {
+		ledgerBytes = jsonBytes
+	}
+
+	if err := db.cc.PutState(key, ledgerBytes); err != nil {
 		return err
 	}
 	// TransactionState is updated to ensure that even if the data is not committed, a further
 	// call to get this struct will returned the updated one (and not the original one).
 	// This is currently required when setting the statuses of the traintuple children.
-	db.putTransactionState(key, buff)
+	db.putTransactionState(key, jsonBytes)
 
 	return nil
 }
