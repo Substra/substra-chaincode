@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/peer"
@@ -52,11 +53,12 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	// Seed with a timestamp from the channel header so the chaincode's output
 	// stay determinist for each transaction. It's necessary because endorsers
 	// will compare it's own output to the proposal.
-	seed, err := stub.GetTxTimestamp()
+	timestamp, err := stub.GetTxTimestamp()
 	if err != nil {
 		return formatErrorResponse(err)
 	}
-	rand.Seed(seed.GetSeconds())
+	seedTime := time.Unix(timestamp.GetSeconds(), int64(timestamp.GetNanos()))
+	rand.Seed(seedTime.UnixNano())
 
 	// Extract the function and args from the transaction proposal
 	fn, args := stub.GetFunctionAndParameters()

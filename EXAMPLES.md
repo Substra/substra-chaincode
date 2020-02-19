@@ -1431,7 +1431,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"tag\":\"a tag
  },
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
- "computePlanID": "c101d5f01d69a3390d307d88da67f2a02d3f3395a0dc85ad53cef4975b22e33a",
+ "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
  "status": "todo",
  "tag": "a tag is simply a string",
@@ -1493,7 +1493,7 @@ Smart contract: `updateComputePlan`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["updateComputePlan","{\"computePlanID\":\"c101d5f01d69a3390d307d88da67f2a02d3f3395a0dc85ad53cef4975b22e33a\",\"traintuples\":[{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"id\":\"thirdTraintupleID\",\"inModelsIDs\":[\"firstTraintupleID\",\"secondTraintupleID\"],\"tag\":\"\"}],\"aggregatetuples\":null,\"compositeTraintuples\":null,\"testtuples\":[{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"tag\":\"\",\"traintupleID\":\"thirdTraintupleID\"}]}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["updateComputePlan","{\"computePlanID\":\"7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17\",\"traintuples\":[{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"algoKey\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"id\":\"thirdTraintupleID\",\"inModelsIDs\":[\"firstTraintupleID\",\"secondTraintupleID\"],\"tag\":\"\"}],\"aggregatetuples\":null,\"compositeTraintuples\":null,\"testtuples\":[{\"dataManagerKey\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"dataSampleKeys\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"objectiveKey\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"tag\":\"\",\"traintupleID\":\"thirdTraintupleID\"}]}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -1505,7 +1505,7 @@ peer chaincode invoke -n mycc -c '{"Args":["updateComputePlan","{\"computePlanID
  },
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
- "computePlanID": "c101d5f01d69a3390d307d88da67f2a02d3f3395a0dc85ad53cef4975b22e33a",
+ "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
  "status": "todo",
  "tag": "a tag is simply a string",
@@ -1593,7 +1593,7 @@ Smart contract: `queryComputePlan`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"c101d5f01d69a3390d307d88da67f2a02d3f3395a0dc85ad53cef4975b22e33a\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -1605,7 +1605,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"c101d5
  },
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
- "computePlanID": "c101d5f01d69a3390d307d88da67f2a02d3f3395a0dc85ad53cef4975b22e33a",
+ "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
  "status": "todo",
  "tag": "a tag is simply a string",
@@ -1636,7 +1636,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
   },
   "aggregatetupleKeys": null,
   "compositeTraintupleKeys": null,
-  "computePlanID": "c101d5f01d69a3390d307d88da67f2a02d3f3395a0dc85ad53cef4975b22e33a",
+  "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
   "doneCount": 0,
   "status": "todo",
   "tag": "a tag is simply a string",
@@ -1664,7 +1664,7 @@ Smart contract: `cancelComputePlan`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"c101d5f01d69a3390d307d88da67f2a02d3f3395a0dc85ad53cef4975b22e33a\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -1676,7 +1676,7 @@ peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"c101d
  },
  "aggregatetupleKeys": null,
  "compositeTraintupleKeys": null,
- "computePlanID": "c101d5f01d69a3390d307d88da67f2a02d3f3395a0dc85ad53cef4975b22e33a",
+ "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
  "status": "canceled",
  "tag": "a tag is simply a string",
