@@ -200,7 +200,7 @@ type ComputePlan struct {
 }
 
 // ComputePlanState is the ledger's representation of the compute plan state.
-// To minimize the size of every compute plan update it's record under another
+// To minimize the size of every compute plan, update its state record under another
 // key in the ledger. It will reduce the growing rate of the blockchain size.
 type ComputePlanState struct {
 	DoneCount  int    `json:"doneCount"`
