@@ -192,7 +192,7 @@ type ComputePlan struct {
 	AssetType               AssetType            `json:"assetType"`
 	CompositeTraintupleKeys []string             `json:"compositeTraintupleKeys"`
 	IDToTrainTask           map[string]TrainTask `json:"IDToTrainTask"`
-	State                   ComputePlanState     `json:"-"`
+	State                   ComputePlanState     `json:"-"` // "-" means this field is excluded from JSON (de)serialization
 	StateKey                string               `json:"stateKey"`
 	Tag                     string               `json:"tag"`
 	TesttupleKeys           []string             `json:"testtupleKeys"`
