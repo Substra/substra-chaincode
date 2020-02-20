@@ -34,12 +34,12 @@ var logger = shim.NewLogger("substra-chaincode")
 
 // InitSettings ...
 type InitSettings struct {
-	LedgerSettings LedgerSettings `json:"ledgerSettings"`
+	Ledger LedgerSettings `json:"ledger"`
 }
 
 // default init settings
 var initSettings = InitSettings{
-	LedgerSettings: LedgerSettings{
+	Ledger: LedgerSettings{
 		EnableGzip: true,
 	},
 }
@@ -59,7 +59,7 @@ func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response 
 			return shim.Error(fmt.Sprintf("Incorrect arguments. %s", err.Error()))
 		}
 	}
-	ledgerSettings = initSettings.LedgerSettings
+	ledgerSettings = initSettings.Ledger
 	return shim.Success(nil)
 }
 

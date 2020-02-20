@@ -61,7 +61,7 @@ func TestInit(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
-	var defaultVal = initSettings.LedgerSettings.EnableGzip
+	var defaultVal = initSettings.Ledger.EnableGzip
 
 	// Init without settings (use defaults)
 	resp := mockStub.MockInit("42", methodToByte("init"))
