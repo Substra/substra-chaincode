@@ -22,14 +22,8 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-var ledgerSettings = LedgerSettings{
-	EnableGzip: true,
-}
-
-// LedgerSettings ...
-type LedgerSettings struct {
-	EnableGzip bool
-}
+// global setting
+var enableLedgerGzip = true
 
 // State is a in-memory representation of the db state
 type State struct {
@@ -89,7 +83,7 @@ func (db *LedgerDB) Get(key string, object interface{}) error {
 		if err != nil || ledgerBytes == nil {
 			return errors.NotFound(err, "no asset for key %s", key)
 		}
-		if ledgerSettings.EnableGzip {
+		if enableLedgerGzip {
 			jsonBytes, err = UnGzip(ledgerBytes)
 			if err != nil {
 				return errors.Internal(err, "error while ungzipping data for key %s", key)
@@ -115,7 +109,7 @@ func (db *LedgerDB) Put(key string, object interface{}) error {
 	var err error
 
 	jsonBytes, _ := json.Marshal(object)
-	if ledgerSettings.EnableGzip {
+	if enableLedgerGzip {
 		ledgerBytes, err = Gzip(jsonBytes)
 		if err != nil {
 			return err

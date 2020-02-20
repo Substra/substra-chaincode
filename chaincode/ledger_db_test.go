@@ -55,7 +55,6 @@ func TestGetPut(t *testing.T) {
 	key := "mykey"
 	txID := "mytx"
 
-	ledgerSettings.EnableGzip = false
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	mockStub.MockInit("42", [][]byte{[]byte("init")})
