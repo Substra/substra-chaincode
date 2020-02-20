@@ -46,6 +46,11 @@ func (tuple *Aggregatetuple) SetFromInput(db *LedgerDB, inp inputAggregatetuple)
 		return errors.Forbidden("not authorized to process algo %s", inp.AlgoKey)
 	}
 	tuple.AlgoKey = inp.AlgoKey
+	// Check if worker is a valid node
+	_, err = db.GetNode(inp.Worker)
+	if err != nil {
+		return errors.BadRequest(err, "could nor retrieve worker %s", inp.Worker)
+	}
 	tuple.Worker = inp.Worker
 	return nil
 }
