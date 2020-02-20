@@ -434,6 +434,7 @@ func (stub *MockStub) GetArgsSlice() ([]byte, error) {
 
 func (stub *MockStub) setTxTimestamp(time *timestamp.Timestamp) {
 	// Using a sequential timestamp make the tests' output determinist.
+	// We're using a sequence and not a fix value so the seed won't reset at each Invoke.
 	stub.TxTimestamp.Seconds = stub.TxTimestamp.Seconds + 1
 	stub.TxTimestamp.Nanos = stub.TxTimestamp.Nanos + 1
 }
