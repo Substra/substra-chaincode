@@ -49,7 +49,7 @@ func (tuple *Aggregatetuple) SetFromInput(db *LedgerDB, inp inputAggregatetuple)
 	// Check if worker is a valid node
 	_, err = db.GetNode(inp.Worker)
 	if err != nil {
-		return errors.BadRequest(err, "could nor retrieve worker %s", inp.Worker)
+		return errors.BadRequest(err, "could not retrieve worker %s", inp.Worker)
 	}
 	tuple.Worker = inp.Worker
 	return nil
