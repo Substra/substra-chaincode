@@ -32,13 +32,13 @@ type SubstraChaincode struct {
 // Create a global logger for the chaincode. Its default level is Info
 var logger = shim.NewLogger("substra-chaincode")
 
-// InitSettings ...
-type InitSettings struct {
+// ChaincodeSettings ...
+type ChaincodeSettings struct {
 	Ledger LedgerSettings `json:"ledger"`
 }
 
 // default init settings
-var initSettings = InitSettings{
+var ccSettings = ChaincodeSettings{
 	Ledger: LedgerSettings{
 		EnableGzip: true,
 	},
@@ -54,12 +54,17 @@ func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response 
 	// If not settings are provided, or if some settings are missing,
 	//    use the default values defined above.
 	if len(args) == 1 {
-		err := AssetFromJSON(args, &initSettings)
+		err := AssetFromJSON(args, &ccSettings)
 		if err != nil {
 			return shim.Error(fmt.Sprintf("Incorrect arguments. %s", err.Error()))
 		}
 	}
-	ledgerSettings = initSettings.Ledger
+	settingsJSON, err := json.Marshal(ccSettings)
+	if err != nil {
+		return shim.Error(fmt.Sprintf("Failed to serialize init settings. %s", err.Error()))
+	}
+	logger.Infof("Chaincode initialized with settings: %v", string(settingsJSON))
+	ledgerSettings = ccSettings.Ledger
 	return shim.Success(nil)
 }
 

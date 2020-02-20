@@ -58,7 +58,7 @@ func TestGzip(t *testing.T) {
 
 	for _, enableGzip := range []bool{false, true} {
 		t.Run(fmt.Sprintf("TestGzip_%v", enableGzip), func(t *testing.T) {
-			var initSettings = InitSettings{
+			var initSettings = ChaincodeSettings{
 				LedgerSettings{
 					EnableGzip: enableGzip,
 				},
