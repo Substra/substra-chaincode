@@ -164,8 +164,8 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 
 	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag)
 	assert.NoError(t, err)
-	assert.NotNil(t, db.tuplesEvent)
-	assert.Len(t, db.tuplesEvent.CompositeTraintuples, 2)
+	assert.NotNil(t, db.event)
+	assert.Len(t, db.event.CompositeTraintuples, 2)
 
 	// ensure the returned ranks are correct
 	validateTupleRank(t, db, 0, out.CompositeTraintupleKeys[0], CompositeTraintupleType)
@@ -179,7 +179,7 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	_, err = logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[1]}))
 	assert.NoError(t, err)
 
-	db.tuplesEvent = &TuplesEvent{}
+	db.event = &Event{}
 	inpLogCompo := inputLogSuccessCompositeTrain{}
 	inpLogCompo.fillDefaults()
 	inpLogCompo.Key = out.CompositeTraintupleKeys[0]
@@ -189,12 +189,12 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	inpLogCompo.Key = out.CompositeTraintupleKeys[1]
 	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
 	assert.NoError(t, err)
-	assert.Len(t, db.tuplesEvent.Testtuples, 2)
-	for _, test := range db.tuplesEvent.Testtuples {
+	assert.Len(t, db.event.Testtuples, 2)
+	for _, test := range db.event.Testtuples {
 		assert.Equalf(t, StatusTodo, test.Status, "blame it on %+v", test)
 	}
-	require.Len(t, db.tuplesEvent.Aggregatetuples, 1)
-	assert.Equal(t, StatusTodo, db.tuplesEvent.Aggregatetuples[0].Status)
+	require.Len(t, db.event.Aggregatetuples, 1)
+	assert.Equal(t, StatusTodo, db.event.Aggregatetuples[0].Status)
 
 	_, err = logStartAggregate(db, assetToArgs(inputKey{out.AggregatetupleKeys[0]}))
 	assert.NoError(t, err)
@@ -211,7 +211,7 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	_, err = logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[3]}))
 	assert.NoError(t, err)
 
-	db.tuplesEvent = &TuplesEvent{}
+	db.event = &Event{}
 	inpLogCompo.Key = out.CompositeTraintupleKeys[2]
 	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
 	assert.NoError(t, err)
@@ -219,8 +219,8 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	inpLogCompo.Key = out.CompositeTraintupleKeys[3]
 	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
 	assert.NoError(t, err)
-	assert.Len(t, db.tuplesEvent.Testtuples, 2)
-	for _, test := range db.tuplesEvent.Testtuples {
+	assert.Len(t, db.event.Testtuples, 2)
+	for _, test := range db.event.Testtuples {
 		assert.Equalf(t, StatusTodo, test.Status, "blame it on %+v", test)
 	}
 }
@@ -485,8 +485,8 @@ func TestCancelComputePlan(t *testing.T) {
 
 	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag)
 	assert.NoError(t, err)
-	assert.NotNil(t, db.tuplesEvent)
-	assert.Len(t, db.tuplesEvent.CompositeTraintuples, 2)
+	assert.NotNil(t, db.event)
+	assert.Len(t, db.event.CompositeTraintuples, 2)
 
 	_, err = cancelComputePlan(db, assetToArgs(inputKey{Key: out.ComputePlanID}))
 	assert.NoError(t, err)

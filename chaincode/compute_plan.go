@@ -392,6 +392,7 @@ func UpdateComputePlan(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey string
 		return err
 	}
 	if cp.CheckNewTupleStatus(tupleStatus) {
+		db.AddComputePlanEvent(ComputePlanID, cp.Status)
 		return cp.Save(db, ComputePlanID)
 	}
 	return nil
