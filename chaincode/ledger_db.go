@@ -22,11 +22,13 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
-var ledgerSettings LedgerSettings
+var ledgerSettings = LedgerSettings{
+	EnableGzip: true,
+}
 
 // LedgerSettings ...
 type LedgerSettings struct {
-	EnableGzip bool `json:"enableGzip"`
+	EnableGzip bool
 }
 
 // State is a in-memory representation of the db state

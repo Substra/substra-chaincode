@@ -61,22 +61,9 @@ func TestInit(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
-	var defaultVal = ccSettings.Ledger.EnableGzip
-
-	// Init without settings (use defaults)
-	resp := mockStub.MockInit("42", methodToByte("init"))
+	// resp := mockStub.MockInit("42", [][]byte{[]byte("init")})
+	resp := mockStub.MockInit("42", [][]byte{[]byte("init")})
 	assert.EqualValuesf(t, 200, resp.Status, "init failed with status %d and message %s", resp.Status, resp.Message)
-	assert.EqualValuesf(t, ledgerSettings.EnableGzip, defaultVal, "init should use default values in the absence of overrides")
-
-	// Init with settings (use overrides)
-	var initSettings = ChaincodeSettings{
-		LedgerSettings{
-			EnableGzip: !defaultVal,
-		},
-	}
-	resp = mockStub.MockInit("42", methodAndAssetToByte("init", initSettings))
-	assert.EqualValuesf(t, 200, resp.Status, "init failed with status %d and message %s", resp.Status, resp.Message)
-	assert.EqualValuesf(t, ledgerSettings.EnableGzip, !defaultVal, "init should use overridden values in the absence of overrides")
 }
 
 func methodToByte(methodName string) [][]byte {

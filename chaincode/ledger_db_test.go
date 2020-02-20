@@ -15,7 +15,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -50,34 +49,26 @@ func TestGetOutModelHashDress(t *testing.T) {
 	assert.Error(t, err, "the composite traintuple should be found when requesting regular traintuples only")
 }
 
-func TestGzip(t *testing.T) {
+func TestGetPut(t *testing.T) {
 
 	data := "mydata"
 	key := "mykey"
 	txID := "mytx"
 
-	for _, enableGzip := range []bool{false, true} {
-		t.Run(fmt.Sprintf("TestGzip_%v", enableGzip), func(t *testing.T) {
-			var initSettings = ChaincodeSettings{
-				LedgerSettings{
-					EnableGzip: enableGzip,
-				},
-			}
-			scc := new(SubstraChaincode)
-			mockStub := NewMockStubWithRegisterNode("substra", scc)
-			mockStub.MockInit("42", methodAndAssetToByte("init", initSettings))
-			db := NewLedgerDB(mockStub)
+	ledgerSettings.EnableGzip = false
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockStub.MockInit("42", [][]byte{[]byte("init")})
+	db := NewLedgerDB(mockStub)
 
-			// put
-			mockStub.MockTransactionStart(txID)
-			db.Put(key, data)
-			mockStub.MockTransactionEnd(txID)
+	// put
+	mockStub.MockTransactionStart(txID)
+	db.Put(key, data)
+	mockStub.MockTransactionEnd(txID)
 
-			// get
-			var actual string
-			db.Get(key, &actual)
+	// get
+	var actual string
+	db.Get(key, &actual)
 
-			assert.Equal(t, data, actual, "Data should be retrieved from ledger successfully")
-		})
-	}
+	assert.Equal(t, data, actual, "Data should be retrieved from ledger successfully")
 }
