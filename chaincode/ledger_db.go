@@ -517,6 +517,9 @@ func (db *LedgerDB) AddComputePlanEvent(ComputePlanID, status string) error {
 	if !stringInSlice(status, []string{StatusCanceled, StatusFailed, StatusDone}) {
 		return nil
 	}
+	if db.event == nil {
+		db.event = &Event{}
+	}
 	cp := eventComputePlan{
 		ComputePlanID: ComputePlanID,
 		Status:        status,
