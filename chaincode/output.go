@@ -306,9 +306,12 @@ type outputComputePlan struct {
 
 func (out *outputComputePlan) Fill(key string, in ComputePlan) {
 	out.ComputePlanID = key
-	out.TraintupleKeys = in.TraintupleKeys
-	out.AggregatetupleKeys = in.AggregatetupleKeys
-	out.CompositeTraintupleKeys = in.CompositeTraintupleKeys
+	nb := getLimitedNbSliceElements(in.TraintupleKeys)
+	out.TraintupleKeys = in.TraintupleKeys[:nb]
+	nb = getLimitedNbSliceElements(in.AggregatetupleKeys)
+	out.AggregatetupleKeys = in.AggregatetupleKeys[:nb]
+	nb = getLimitedNbSliceElements(in.CompositeTraintupleKeys)
+	out.CompositeTraintupleKeys = in.CompositeTraintupleKeys[:nb]
 	out.TesttupleKeys = in.TesttupleKeys
 	out.Status = in.Status
 	out.Tag = in.Tag
