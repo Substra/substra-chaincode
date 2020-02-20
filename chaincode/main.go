@@ -52,7 +52,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 
 	// Seed with a timestamp from the channel header so the chaincode's output
 	// stay determinist for each transaction. It's necessary because endorsers
-	// will compare it's own output to the proposal.
+	// will compare their own output to the proposal.
 	timestamp, err := stub.GetTxTimestamp()
 	if err != nil {
 		return formatErrorResponse(err)
