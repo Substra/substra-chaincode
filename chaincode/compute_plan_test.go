@@ -274,11 +274,13 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 			{
 				AlgoKey: aggregateAlgoHash,
 				ID:      IDs[2],
+				Worker:  worker,
 			},
 			{
 				AlgoKey:     aggregateAlgoHash,
 				ID:          IDs[3],
 				InModelsIDs: []string{IDs[2]},
+				Worker:      worker,
 			},
 		},
 	}
