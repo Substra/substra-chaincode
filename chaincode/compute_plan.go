@@ -288,7 +288,7 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	}
 
 	computeplan.State.Status = StatusCanceled
-	err = computeplan.Save(db, inp.Key)
+	err = computeplan.SaveState(db)
 	if err != nil {
 		return outputComputePlan{}, err
 	}
@@ -323,11 +323,11 @@ func (cp *ComputePlan) Save(db *LedgerDB, ID string) error {
 	if err != nil {
 		return err
 	}
-	return db.Put(cp.StateKey, cp.State)
+	return cp.SaveState(db)
 }
 
 // SaveState add or update the compute plan in the ledger
-func (cp *ComputePlan) SaveState(db *LedgerDB, ID string) error {
+func (cp *ComputePlan) SaveState(db *LedgerDB) error {
 	return db.Put(cp.StateKey, cp.State)
 }
 
@@ -399,7 +399,7 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey s
 		return err
 	}
 	if cp.CheckNewTupleStatus(tupleStatus) {
-		return cp.SaveState(db, ComputePlanID)
+		return cp.SaveState(db)
 	}
 	return nil
 }

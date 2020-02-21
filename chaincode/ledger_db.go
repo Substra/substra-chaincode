@@ -97,18 +97,13 @@ func (db *LedgerDB) KeyExists(key string) (bool, error) {
 func (db *LedgerDB) Put(key string, object interface{}) error {
 	buff, _ := json.Marshal(object)
 
-	return db.put(key, buff)
-}
-
-// put stores a value in the chaincode db whether it already exists or not
-func (db *LedgerDB) put(key string, value []byte) error {
-	if err := db.cc.PutState(key, value); err != nil {
+	if err := db.cc.PutState(key, buff); err != nil {
 		return err
 	}
 	// TransactionState is updated to ensure that even if the data is not committed, a further
 	// call to get this struct will returned the updated one (and not the original one).
 	// This is currently required when setting the statuses of the traintuple children.
-	db.putTransactionState(key, value)
+	db.putTransactionState(key, buff)
 
 	return nil
 }
