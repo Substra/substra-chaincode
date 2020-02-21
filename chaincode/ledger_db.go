@@ -15,7 +15,6 @@
 package main
 
 import (
-	"bytes"
 	"chaincode/errors"
 	"encoding/json"
 	"sync"
@@ -92,22 +91,6 @@ func (db *LedgerDB) Get(key string, object interface{}) error {
 func (db *LedgerDB) KeyExists(key string) (bool, error) {
 	buff, err := db.cc.GetState(key)
 	return buff != nil, err
-}
-
-// LazyPut is equivalent to Put but calls put if and only if the new value differ from the cached state
-func (db *LedgerDB) LazyPut(key string, object interface{}) error {
-	buff, err := json.Marshal(object)
-	if err != nil {
-		return errors.Internal(err)
-	}
-
-	cachedValue, exists := db.getTransactionState(key)
-
-	if exists && bytes.Equal(buff, cachedValue) {
-		return nil
-	}
-
-	return db.put(key, buff)
 }
 
 // Put stores an object in the chaincode db, if the object already exists it is replaced

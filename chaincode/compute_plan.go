@@ -319,15 +319,16 @@ func (cp *ComputePlan) Create(db *LedgerDB) (string, error) {
 
 // Save add or update the compute plan in the ledger
 func (cp *ComputePlan) Save(db *LedgerDB, ID string) error {
-	err := db.LazyPut(ID, cp)
+	err := db.Put(ID, cp)
 	if err != nil {
 		return err
 	}
-	err = db.LazyPut(cp.StateKey, cp.State)
-	if err != nil {
-		return err
-	}
-	return nil
+	return db.Put(cp.StateKey, cp.State)
+}
+
+// SaveState add or update the compute plan in the ledger
+func (cp *ComputePlan) SaveState(db *LedgerDB, ID string) error {
+	return db.Put(cp.StateKey, cp.State)
 }
 
 // CheckNewTupleStatus check the tuple status (from an updated tuple or a new one)
@@ -387,9 +388,9 @@ func (cp *ComputePlan) AddTuple(tupleType AssetType, key, status string) {
 	cp.CheckNewTupleStatus(status)
 }
 
-// UpdateComputePlan retreive the compute plan if the ID is not empty,
+// UpdateComputePlanState retreive the compute plan if the ID is not empty,
 // check if the updated status change anything and save it if it's the case
-func UpdateComputePlan(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey string) error {
+func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey string) error {
 	if ComputePlanID == "" {
 		return nil
 	}
@@ -398,7 +399,7 @@ func UpdateComputePlan(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey string
 		return err
 	}
 	if cp.CheckNewTupleStatus(tupleStatus) {
-		return cp.Save(db, ComputePlanID)
+		return cp.SaveState(db, ComputePlanID)
 	}
 	return nil
 }

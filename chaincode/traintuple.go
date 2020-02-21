@@ -619,7 +619,7 @@ func (traintuple *Traintuple) commitStatusUpdate(db *LedgerDB, traintupleKey str
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
-	if err := UpdateComputePlan(db, traintuple.ComputePlanID, newStatus, traintupleKey); err != nil {
+	if err := UpdateComputePlanState(db, traintuple.ComputePlanID, newStatus, traintupleKey); err != nil {
 		return err
 	}
 	logger.Infof("traintuple %s status updated: %s (from=%s)", traintupleKey, newStatus, oldStatus)
