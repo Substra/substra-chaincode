@@ -189,7 +189,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	}
 	// Send event if there is any. It's done in one batch since we can only send
 	// one event per call
-	err = db.SendTuplesEvent()
+	err = db.SendEvent()
 	if err != nil {
 		return formatErrorResponse(errors.Internal("could not send event: %s", err.Error()))
 	}

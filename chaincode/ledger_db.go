@@ -443,9 +443,9 @@ func (db *LedgerDB) GetNode(key string) (Node, error) {
 // High-level functions for events
 // ----------------------------------------------
 
-// SendTuplesEvent sends an event with updated tuples if there is any
+// SendEvent sends an event with updated tuples if there is any
 // Only one event can be sent per transaction
-func (db *LedgerDB) SendTuplesEvent() error {
+func (db *LedgerDB) SendEvent() error {
 	if db.event == nil {
 		return nil
 	}
