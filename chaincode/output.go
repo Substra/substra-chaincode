@@ -313,10 +313,10 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan) {
 	nb = getLimitedNbSliceElements(in.CompositeTraintupleKeys)
 	out.CompositeTraintupleKeys = in.CompositeTraintupleKeys[:nb]
 	out.TesttupleKeys = in.TesttupleKeys
-	out.Status = in.Status
+	out.Status = in.State.Status
 	out.Tag = in.Tag
-	out.TupleCount = in.TupleCount
-	out.DoneCount = in.DoneCount
+	out.TupleCount = in.State.TupleCount
+	out.DoneCount = in.State.DoneCount
 	IDToKey := map[string]string{}
 	for ID, trainTask := range in.IDToTrainTask {
 		IDToKey[ID] = trainTask.Key

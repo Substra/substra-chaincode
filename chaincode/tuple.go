@@ -292,7 +292,7 @@ func determineTupleStatus(db *LedgerDB, tupleStatus, computePlanID string) (stri
 	if err != nil {
 		return "", err
 	}
-	if stringInSlice(computePlan.Status, []string{StatusFailed, StatusCanceled}) {
+	if stringInSlice(computePlan.State.Status, []string{StatusFailed, StatusCanceled}) {
 		return StatusAborted, nil
 	}
 	return tupleStatus, nil

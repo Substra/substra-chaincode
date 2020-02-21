@@ -524,7 +524,7 @@ func (tuple *Aggregatetuple) commitStatusUpdate(db *LedgerDB, aggregatetupleKey 
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
-	if err := UpdateComputePlan(db, tuple.ComputePlanID, newStatus, aggregatetupleKey); err != nil {
+	if err := UpdateComputePlanState(db, tuple.ComputePlanID, newStatus, aggregatetupleKey); err != nil {
 		return err
 	}
 	logger.Infof("aggregatetuple %s status updated: %s (from=%s)", aggregatetupleKey, newStatus, oldStatus)

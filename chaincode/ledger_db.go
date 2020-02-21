@@ -50,7 +50,7 @@ func NewLedgerDB(stub shim.ChaincodeStubInterface) *LedgerDB {
 // Low-level functions to handle asset structs
 // ----------------------------------------------
 
-// gettransactionState returns a copy of an object that has been updated or created during the transaction
+// getTransactionState returns a copy of an object that has been updated or created during the transaction
 func (db *LedgerDB) getTransactionState(key string) ([]byte, bool) {
 	db.mutex.Lock()
 	defer db.mutex.Unlock()
@@ -363,6 +363,9 @@ func (db *LedgerDB) GetComputePlan(ID string) (ComputePlan, error) {
 	}
 	if computePlan.AssetType != ComputePlanType {
 		return computePlan, errors.NotFound("compute plan %s not found", ID)
+	}
+	if err := db.Get(computePlan.StateKey, &(computePlan.State)); err != nil {
+		return computePlan, err
 	}
 	return computePlan, nil
 }

@@ -455,7 +455,7 @@ func (testtuple *Testtuple) commitStatusUpdate(db *LedgerDB, testtupleKey string
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
-	if err := UpdateComputePlan(db, testtuple.ComputePlanID, newStatus, testtupleKey); err != nil {
+	if err := UpdateComputePlanState(db, testtuple.ComputePlanID, newStatus, testtupleKey); err != nil {
 		return err
 	}
 	logger.Infof("testtuple %s status updated: %s (from=%s)", testtupleKey, newStatus, oldStatus)
