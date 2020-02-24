@@ -50,13 +50,22 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	// Log all input for potential debug later on.
 	logger.Infof("Args received by the chaincode: %#v", stub.GetStringArgs())
 
+	// Seed with a timestamp from the channel header so the chaincode's output
+	// stay determinist for each transaction. It's necessary because endorsers
+	// will compare their own output to the proposal.
+	timestamp, err := stub.GetTxTimestamp()
+	if err != nil {
+		return formatErrorResponse(err)
+	}
+	seedTime := time.Unix(timestamp.GetSeconds(), int64(timestamp.GetNanos()))
+	rand.Seed(seedTime.UnixNano())
+
 	// Extract the function and args from the transaction proposal
 	fn, args := stub.GetFunctionAndParameters()
 
 	db := NewLedgerDB(stub)
 
 	var result interface{}
-	var err error
 	switch fn {
 	case "createComputePlan":
 		result, err = createComputePlan(db, args)
@@ -219,7 +228,6 @@ func formatErrorResponse(err error) peer.Response {
 func main() {
 	// TODO use the same level as the shim or an env variable
 	logger.SetLevel(shim.LogDebug)
-	rand.Seed(time.Now().UTC().UnixNano())
 	if err := shim.Start(new(SubstraChaincode)); err != nil {
 		fmt.Printf("Error starting SubstraChaincode chaincode: %s", err)
 	}
