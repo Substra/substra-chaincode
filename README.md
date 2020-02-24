@@ -29,9 +29,6 @@ See [chaincode-docker-devmode](./chaincode-docker-devmode/README.rst)
 
 ## Documentation
 
-
-Note for internal use only: See the [technical specifications](https://github.com/SubstraFoundation/substra-spec/blob/master/technical_spec_substra.md#smartcontract).
-
 ### Implemented smart contracts
 
 - `cancelComputePlan`
