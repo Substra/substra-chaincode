@@ -30,7 +30,7 @@ type State struct {
 // LedgerDB to access the chaincode database during the lifetime of a SmartContract
 type LedgerDB struct {
 	cc               shim.ChaincodeStubInterface
-	tuplesEvent      *TuplesEvent
+	event            *Event
 	transactionState State
 	mutex            *sync.RWMutex
 }
@@ -443,17 +443,17 @@ func (db *LedgerDB) GetNode(key string) (Node, error) {
 // High-level functions for events
 // ----------------------------------------------
 
-// SendTuplesEvent sends an event with updated tuples if there is any
+// SendEvent sends an event with updated tuples if there is any
 // Only one event can be sent per transaction
-func (db *LedgerDB) SendTuplesEvent() error {
-	if db.tuplesEvent == nil {
+func (db *LedgerDB) SendEvent() error {
+	if db.event == nil {
 		return nil
 	}
-	payload, err := json.Marshal(*(db.tuplesEvent))
+	payload, err := json.Marshal(*(db.event))
 	if err != nil {
 		return err
 	}
-	err = db.cc.SetEvent("tuples-updated", payload)
+	err = db.cc.SetEvent("chaincode-updates", payload)
 	if err != nil {
 		return err
 	}
@@ -472,8 +472,8 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 	if genericTuple.Status != StatusTodo {
 		return nil
 	}
-	if db.tuplesEvent == nil {
-		db.tuplesEvent = &TuplesEvent{}
+	if db.event == nil {
+		db.event = &Event{}
 	}
 	switch genericTuple.AssetType {
 	case TraintupleType:
@@ -483,7 +483,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 		}
 		out := outputTraintuple{}
 		out.Fill(db, tuple, tupleKey)
-		db.tuplesEvent.Traintuples = append(db.tuplesEvent.Traintuples, out)
+		db.event.Traintuples = append(db.event.Traintuples, out)
 	case CompositeTraintupleType:
 		tuple, err := db.GetCompositeTraintuple(tupleKey)
 		if err != nil {
@@ -491,7 +491,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 		}
 		out := outputCompositeTraintuple{}
 		out.Fill(db, tuple, tupleKey)
-		db.tuplesEvent.CompositeTraintuples = append(db.tuplesEvent.CompositeTraintuples, out)
+		db.event.CompositeTraintuples = append(db.event.CompositeTraintuples, out)
 	case AggregatetupleType:
 		tuple, err := db.GetAggregatetuple(tupleKey)
 		if err != nil {
@@ -499,7 +499,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 		}
 		out := outputAggregatetuple{}
 		out.Fill(db, tuple, tupleKey)
-		db.tuplesEvent.Aggregatetuples = append(db.tuplesEvent.Aggregatetuples, out)
+		db.event.Aggregatetuples = append(db.event.Aggregatetuples, out)
 	case TesttupleType:
 		tuple, err := db.GetTesttuple(tupleKey)
 		if err != nil {
@@ -507,7 +507,28 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 		}
 		out := outputTesttuple{}
 		out.Fill(db, tupleKey, tuple)
-		db.tuplesEvent.Testtuples = append(db.tuplesEvent.Testtuples, out)
+		db.event.Testtuples = append(db.event.Testtuples, out)
 	}
+	return nil
+}
+
+// AddComputePlanEvent add the compute plan matching the ID to the event struct
+func (db *LedgerDB) AddComputePlanEvent(ComputePlanID, status string) error {
+	if !stringInSlice(status, []string{StatusCanceled, StatusFailed, StatusDone}) {
+		return nil
+	}
+	if db.event == nil {
+		db.event = &Event{}
+	}
+	cp := eventComputePlan{
+		ComputePlanID: ComputePlanID,
+		Status:        status,
+	}
+	algokeys, err := db.GetIndexKeys("algo~computeplanid~key", []string{"algo", ComputePlanID})
+	if err != nil {
+		return err
+	}
+	cp.AlgoKeys = algokeys
+	db.event.ComputePlans = append(db.event.ComputePlans, cp)
 	return nil
 }

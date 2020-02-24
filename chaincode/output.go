@@ -283,12 +283,19 @@ type outputModel struct {
 	Testtuple           outputTesttuple            `json:"testtuple"`
 }
 
-// TuplesEvent is the collection of tuples sent in an event
-type TuplesEvent struct {
+// Event is the collection of tuples sent in an event
+type Event struct {
 	Testtuples           []outputTesttuple           `json:"testtuple"`
 	Traintuples          []outputTraintuple          `json:"traintuple"`
 	CompositeTraintuples []outputCompositeTraintuple `json:"compositeTraintuple"`
 	Aggregatetuples      []outputAggregatetuple      `json:"aggregatetuple"`
+	ComputePlans         []eventComputePlan          `json:"computePlan"`
+}
+
+type eventComputePlan struct {
+	ComputePlanID string   `json:"computePlanID"`
+	Status        string   `json:"status"`
+	AlgoKeys      []string `json:"algoKeys"`
 }
 
 type outputComputePlan struct {

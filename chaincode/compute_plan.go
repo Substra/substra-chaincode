@@ -296,6 +296,7 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 		return outputComputePlan{}, err
 	}
 
+	db.AddComputePlanEvent(inp.Key, computeplan.State.Status)
 	resp.Fill(inp.Key, computeplan)
 	return resp, nil
 }
@@ -334,10 +335,10 @@ func (cp *ComputePlan) SaveState(db *LedgerDB) error {
 	return db.Put(cp.StateKey, cp.State)
 }
 
-// CheckNewTupleStatus check the tuple status (from an updated tuple or a new one)
+// UpdateStatus check the tuple status (from an updated tuple or a new one)
 // and, if required, it updates the compute plan' status and/or its doneCount.
 // It returns true if there is any change to the compute plan, false otherwise.
-func (cp *ComputePlan) CheckNewTupleStatus(tupleStatus string) bool {
+func (cp *ComputePlan) UpdateStatus(tupleStatus string) bool {
 	switch cp.State.Status {
 	case StatusFailed, StatusCanceled:
 	case StatusDone:
@@ -388,7 +389,7 @@ func (cp *ComputePlan) AddTuple(tupleType AssetType, key, status string) {
 		cp.TesttupleKeys = append(cp.TesttupleKeys, key)
 	}
 	cp.State.TupleCount++
-	cp.CheckNewTupleStatus(status)
+	cp.UpdateStatus(status)
 }
 
 // UpdateComputePlanState retreive the compute plan if the ID is not empty,
@@ -401,7 +402,8 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey s
 	if err != nil {
 		return err
 	}
-	if cp.CheckNewTupleStatus(tupleStatus) {
+	if cp.UpdateStatus(tupleStatus) {
+		db.AddComputePlanEvent(ComputePlanID, cp.State.Status)
 		return cp.SaveState(db)
 	}
 	return nil
