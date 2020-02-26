@@ -365,7 +365,15 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 	if err != nil {
 		return
 	}
+	err = AddModelToComputePlan(db, compositeTraintuple.ComputePlanID, inp.OutHeadModel.Hash)
+	if err != nil {
+		return
+	}
 	err = createModelIndex(db, inp.OutTrunkModel.Hash, compositeTraintupleKey)
+	if err != nil {
+		return
+	}
+	err = AddModelToComputePlan(db, compositeTraintuple.ComputePlanID, inp.OutTrunkModel.Hash)
 	if err != nil {
 		return
 	}

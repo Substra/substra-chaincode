@@ -410,3 +410,15 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey s
 	}
 	return nil
 }
+
+// AddModelToComputePlan link the model hash to the compute plan ID if it's not empty
+func AddModelToComputePlan(db *LedgerDB, ComputePlanID, modelHash string) error {
+	if ComputePlanID == "" {
+		return nil
+	}
+	err := db.CreateIndex("model~computePlanID~hash", []string{"model", ComputePlanID, modelHash})
+	if err != nil {
+		return err
+	}
+	return nil
+}

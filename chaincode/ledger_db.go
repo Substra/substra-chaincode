@@ -529,6 +529,13 @@ func (db *LedgerDB) AddComputePlanEvent(ComputePlanID, status string) error {
 		return err
 	}
 	cp.AlgoKeys = algokeys
+
+	modelHashes, err := db.GetIndexKeys("model~computePlanID~hash", []string{"model", ComputePlanID})
+	if err != nil {
+		return err
+	}
+	cp.ModelHashes = modelHashes
+
 	db.event.ComputePlans = append(db.event.ComputePlans, cp)
 	return nil
 }

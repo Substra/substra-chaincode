@@ -315,6 +315,10 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 	if err != nil {
 		return
 	}
+	err = AddModelToComputePlan(db, traintuple.ComputePlanID, traintuple.OutModel.Hash)
+	if err != nil {
+		return
+	}
 
 	if err = validateTupleOwner(db, traintuple.Dataset.Worker); err != nil {
 		return

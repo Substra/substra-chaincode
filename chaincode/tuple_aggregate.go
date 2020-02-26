@@ -364,6 +364,10 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 	if err != nil {
 		return
 	}
+	err = AddModelToComputePlan(db, aggregatetuple.ComputePlanID, aggregatetuple.OutModel.Hash)
+	if err != nil {
+		return
+	}
 
 	if err = validateTupleOwner(db, aggregatetuple.Worker); err != nil {
 		return
