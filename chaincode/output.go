@@ -280,7 +280,6 @@ type outputModel struct {
 	Aggregatetuple      *outputAggregatetuple      `json:"aggregatetuple,omitempty"`
 	CompositeTraintuple *outputCompositeTraintuple `json:"compositeTraintuple,omitempty"`
 	Traintuple          *outputTraintuple          `json:"traintuple,omitempty"`
-	Testtuple           outputTesttuple            `json:"testtuple"`
 }
 
 // Event is the collection of tuples sent in an event

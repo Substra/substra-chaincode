@@ -120,7 +120,6 @@ func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err erro
 			return
 		}
 		outputModel.Traintuple = &out
-		outputModel.Testtuple, err = getCertifiedOutputTesttuple(db, traintupleKey)
 		outModels = append(outModels, outputModel)
 	}
 
@@ -138,7 +137,6 @@ func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err erro
 			return
 		}
 		outputModel.CompositeTraintuple = &out
-		outputModel.Testtuple, err = getCertifiedOutputTesttuple(db, compositeTraintupleKey)
 		outModels = append(outModels, outputModel)
 	}
 
@@ -156,7 +154,6 @@ func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err erro
 			return
 		}
 		outputModel.Aggregatetuple = &out
-		outputModel.Testtuple, err = getCertifiedOutputTesttuple(db, aggregatetupleKey)
 		outModels = append(outModels, outputModel)
 	}
 
@@ -244,27 +241,6 @@ func HashForKey(objectType string, hashElements ...string) string {
 	}
 	sum := sha256.Sum256([]byte(toHash))
 	return hex.EncodeToString(sum[:])
-}
-
-func getCertifiedOutputTesttuple(db *LedgerDB, traintupleKey string) (outputTesttuple, error) {
-	var out outputTesttuple
-	// get associated testtuple
-	var testtupleKeys []string
-	testtupleKeys, err := db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", traintupleKey, "true"})
-	if err != nil {
-		return out, err
-	}
-	if len(testtupleKeys) == 0 {
-		return out, nil
-	}
-	// get testtuple and serialize it
-	testtupleKey := testtupleKeys[0]
-	out, err = getOutputTesttuple(db, testtupleKey)
-	if err != nil {
-		return out, err
-	}
-
-	return out, nil
 }
 
 func determineStatusFromInModels(statuses []string) string {
