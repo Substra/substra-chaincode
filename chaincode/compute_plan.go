@@ -138,7 +138,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string) (
 		len(inp.CompositeTraintuples) +
 		len(inp.Testtuples)
 	if count == 0 {
-		resp.Fill(ID, computePlan)
+		resp.Fill(ID, computePlan, []string{})
 		return resp, nil
 	}
 	return updateComputePlanInternal(db, ID, inp)
@@ -154,6 +154,7 @@ func updateComputePlanInternal(db *LedgerDB, computePlanID string, inp inputComp
 	for ID, trainTask := range computePlan.IDToTrainTask {
 		IDToTrainTask[ID] = trainTask
 	}
+	NewIDs := []string{}
 	DAG, err := createComputeDAG(inp, computePlan.IDToTrainTask)
 	if err != nil {
 		return resp, errors.BadRequest(err)
@@ -211,6 +212,7 @@ func updateComputePlanInternal(db *LedgerDB, computePlanID string, inp inputComp
 			}
 		}
 		IDToTrainTask[task.ID] = TrainTask{Depth: task.Depth, Key: tupleKey}
+		NewIDs = append(NewIDs, task.ID)
 	}
 
 	for index, computeTesttuple := range inp.Testtuples {
@@ -236,7 +238,7 @@ func updateComputePlanInternal(db *LedgerDB, computePlanID string, inp inputComp
 	if err != nil {
 		return resp, err
 	}
-	resp.Fill(computePlanID, computePlan)
+	resp.Fill(computePlanID, computePlan, NewIDs)
 	return resp, err
 }
 
@@ -275,7 +277,7 @@ func getOutComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err er
 		return resp, err
 	}
 
-	resp.Fill(key, computePlan)
+	resp.Fill(key, computePlan, []string{})
 	return resp, err
 }
 
@@ -297,7 +299,7 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	}
 
 	db.AddComputePlanEvent(inp.Key, computeplan.State.Status)
-	resp.Fill(inp.Key, computeplan)
+	resp.Fill(inp.Key, computeplan, []string{})
 	return resp, nil
 }
 
