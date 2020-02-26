@@ -681,7 +681,7 @@ func TestUpdateComputePlan(t *testing.T) {
 	assert.Len(
 		t,
 		out.IDToKey,
-		3,
-		"IDToKey should match the 3 train like tuples keys to their respective ID")
+		1,
+		"IDToKey should match the newly created tuple keys to its ID")
 	assert.Equal(t, 4, out.TupleCount)
 }
