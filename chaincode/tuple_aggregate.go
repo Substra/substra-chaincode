@@ -195,7 +195,7 @@ func (tuple *Aggregatetuple) Save(db *LedgerDB, aggregatetupleKey string) error 
 		return err
 	}
 	for _, inModelKey := range tuple.InModelKeys {
-		if err := db.CreateIndex("aggregatetuple~inModel~key", []string{"aggregatetuple", inModelKey, aggregatetupleKey}); err != nil {
+		if err := db.CreateIndex("tuple~inModel~key", []string{"tuple", inModelKey, aggregatetupleKey}); err != nil {
 			return err
 		}
 	}
