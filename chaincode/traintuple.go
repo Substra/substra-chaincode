@@ -315,7 +315,7 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 	if err != nil {
 		return
 	}
-	err = AddModelToComputePlan(db, traintuple.ComputePlanID, traintuple.OutModel.Hash)
+	err = ListModelIfIntermediary(db, traintuple.ComputePlanID, traintupleKey, traintuple.OutModel.Hash)
 	if err != nil {
 		return
 	}
