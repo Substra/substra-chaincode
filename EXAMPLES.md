@@ -1091,39 +1091,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
 ```json
 [
  {
-  "testtuple": {
-   "algo": {
-    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "name": "hog + svm",
-    "storageAddress": "https://toto/algo/222/algo"
-   },
-   "certified": true,
-   "computePlanID": "",
-   "creator": "SampleOrg",
-   "dataset": {
-    "keys": [
-     "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-     "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-    ],
-    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "perf": 0,
-    "worker": "SampleOrg"
-   },
-   "key": "d009acea2d213bc7149ee15b0eb23217e7f06154b79c7046a73eb13a50c3f9dc",
-   "log": "",
-   "objective": {
-    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-    "metrics": {
-     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-     "storageAddress": "https://toto/objective/222/metrics"
-    }
-   },
-   "rank": 0,
-   "status": "waiting",
-   "tag": "",
-   "traintupleKey": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab",
-   "traintupleType": "traintuple"
-  },
   "traintuple": {
    "algo": {
     "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -1162,39 +1129,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
   }
  },
  {
-  "testtuple": {
-   "algo": {
-    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "name": "hog + svm",
-    "storageAddress": "https://toto/algo/222/algo"
-   },
-   "certified": true,
-   "computePlanID": "",
-   "creator": "SampleOrg",
-   "dataset": {
-    "keys": [
-     "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-     "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-    ],
-    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "perf": 0.9,
-    "worker": "SampleOrg"
-   },
-   "key": "5ae68332a1e7182d9286692a892c7bf6f339d71d393ec6308e598c159d369aba",
-   "log": "no error, ah ah ah",
-   "objective": {
-    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-    "metrics": {
-     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-     "storageAddress": "https://toto/objective/222/metrics"
-    }
-   },
-   "rank": 0,
-   "status": "done",
-   "tag": "",
-   "traintupleKey": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
-   "traintupleType": "traintuple"
-  },
   "traintuple": {
    "algo": {
     "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
