@@ -586,6 +586,6 @@ func (traintuple *CompositeTraintuple) commitStatusUpdate(db *LedgerDB, traintup
 	if err := UpdateComputePlanState(db, traintuple.ComputePlanID, newStatus, traintupleKey); err != nil {
 		return err
 	}
-	logger.Infof("traintuple %s status updated: %s (from=%s)", traintupleKey, newStatus, oldStatus)
+	logger.Infof("compositetraintuple %s status updated: %s (from=%s)", traintupleKey, newStatus, oldStatus)
 	return nil
 }
