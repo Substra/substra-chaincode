@@ -417,7 +417,7 @@ func ListModelIfIntermediary(db *LedgerDB, ComputePlanID, tupleKey, modelHash st
 	if ComputePlanID == "" {
 		return nil
 	}
-	allChildKeys, err := db.GetIndexKeys("tuple~inModel~key", []string{"tuple", traintupleKey})
+	allChildKeys, err := db.GetIndexKeys("tuple~inModel~key", []string{"tuple", tupleKey})
 	if err != nil {
 		return err
 	}
