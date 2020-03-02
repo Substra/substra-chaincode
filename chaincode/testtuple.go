@@ -432,6 +432,10 @@ func (testtuple *Testtuple) validateNewStatus(db *LedgerDB, status string) error
 
 // commitStatusUpdate update the testtuple status in the ledger
 func (testtuple *Testtuple) commitStatusUpdate(db *LedgerDB, testtupleKey string, newStatus string) error {
+	if testtuple.Status == newStatus {
+		return nil
+	}
+
 	if err := testtuple.validateNewStatus(db, newStatus); err != nil {
 		return errors.Internal("update testtuple %s failed: %s", testtupleKey, err.Error())
 	}
