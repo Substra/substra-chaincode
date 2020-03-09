@@ -452,6 +452,12 @@ func (cp *ComputePlan) HandleIntermediaryModel(db *LedgerDB) ([]string, error) {
 		if err != nil {
 			return []string{}, err
 		}
+		if len(keys) == 0 {
+			// This occurs for the hashes added during the same transaction. But
+			// thoses models can just be added to the in use ones
+			inUseModels = append(inUseModels, hash)
+			continue
+		}
 		tupleKey := keys[0]
 		tupleChildKeys, err := db.GetIndexKeys("tuple~inModel~key", []string{"tuple", tupleKey})
 		if err != nil {
