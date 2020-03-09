@@ -203,9 +203,10 @@ type ComputePlan struct {
 // To minimize the size of every compute plan, update its state record under another
 // key in the ledger. It will reduce the growing rate of the blockchain size.
 type ComputePlanState struct {
-	DoneCount  int    `json:"doneCount"`
-	Status     string `json:"status"`
-	TupleCount int    `json:"tupleCount"`
+	DoneCount         int      `json:"doneCount"`
+	IntermediaryModel []string `json:"intermediaryModel"`
+	Status            string   `json:"status"`
+	TupleCount        int      `json:"tupleCount"`
 }
 
 // TrainTask is represent the information for one tuple in a Compute Plan
