@@ -105,7 +105,7 @@ func createComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	if err != nil {
 		return
 	}
-	return createComputePlanInternal(db, inp.inputComputePlan, inp.Tag)
+	return createComputePlanInternal(db, inp.inputComputePlan, inp.Tag, inp.CleanModels)
 }
 
 func updateComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
@@ -125,10 +125,11 @@ func updateComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	return updateComputePlanInternal(db, inp.ComputePlanID, inp.inputComputePlan)
 }
 
-func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string) (resp outputComputePlan, err error) {
+func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string, cleanModels bool) (resp outputComputePlan, err error) {
 	var computePlan ComputePlan
 	computePlan.State.Status = StatusWaiting
 	computePlan.Tag = tag
+	computePlan.CleanModels = cleanModels
 	ID, err := computePlan.Create(db)
 	if err != nil {
 		return resp, err
@@ -425,6 +426,13 @@ func ListModelIfIntermediary(db *LedgerDB, ComputePlanID, tupleKey, modelHash st
 	if ComputePlanID == "" {
 		return nil
 	}
+	cp, err := db.GetComputePlan(ComputePlanID)
+	if err != nil {
+		return err
+	}
+	if !cp.CleanModels {
+		return nil
+	}
 	allChildKeys, err := db.GetIndexKeys("tuple~inModel~key", []string{"tuple", tupleKey})
 	if err != nil {
 		return err
@@ -434,10 +442,6 @@ func ListModelIfIntermediary(db *LedgerDB, ComputePlanID, tupleKey, modelHash st
 		// listed in the index
 		return nil
 	}
-	cp, err := db.GetComputePlan(ComputePlanID)
-	if err != nil {
-		return err
-	}
 	cp.State.IntermediaryModel = append(cp.State.IntermediaryModel, modelHash)
 
 	return cp.SaveState(db)
@@ -445,6 +449,9 @@ func ListModelIfIntermediary(db *LedgerDB, ComputePlanID, tupleKey, modelHash st
 
 // HandleIntermediaryModel is a function
 func (cp *ComputePlan) HandleIntermediaryModel(db *LedgerDB) ([]string, error) {
+	if !cp.CleanModels {
+		return []string{}, nil
+	}
 	var doneModels, inUseModels []string
 	for _, hash := range cp.State.IntermediaryModel {
 		done := true
