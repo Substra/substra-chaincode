@@ -304,6 +304,7 @@ type outputComputePlan struct {
 	AggregatetupleKeys      []string          `json:"aggregatetupleKeys"`
 	CompositeTraintupleKeys []string          `json:"compositeTraintupleKeys"`
 	TesttupleKeys           []string          `json:"testtupleKeys"`
+	CleanModels             bool              `json:"cleanModels"`
 	Tag                     string            `json:"tag"`
 	Status                  string            `json:"status"`
 	TupleCount              int               `json:"tupleCount"`

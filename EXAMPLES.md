@@ -1364,6 +1364,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"cleanModels\"
   "secondTraintupleID": "d23f8cf290b902417ae698d68e2c6835483521d54fcbece31208517759b7c299"
  },
  "aggregatetupleKeys": null,
+ "cleanModels": false,
  "compositeTraintupleKeys": null,
  "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
@@ -1436,6 +1437,7 @@ peer chaincode invoke -n mycc -c '{"Args":["updateComputePlan","{\"computePlanID
   "thirdTraintupleID": "c163663889566a4c51fad3765107774891f8ed456dcc859a9a1a7fcd17b11386"
  },
  "aggregatetupleKeys": null,
+ "cleanModels": false,
  "compositeTraintupleKeys": null,
  "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
@@ -1532,6 +1534,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"7dd808
 {
  "IDToKey": {},
  "aggregatetupleKeys": null,
+ "cleanModels": false,
  "compositeTraintupleKeys": null,
  "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
@@ -1559,6 +1562,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
  {
   "IDToKey": {},
   "aggregatetupleKeys": null,
+  "cleanModels": false,
   "compositeTraintupleKeys": null,
   "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
   "doneCount": 0,
@@ -1595,6 +1599,7 @@ peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"7dd80
 {
  "IDToKey": {},
  "aggregatetupleKeys": null,
+ "cleanModels": false,
  "compositeTraintupleKeys": null,
  "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
