@@ -470,7 +470,12 @@ func (cp *ComputePlan) HandleIntermediaryModel(db *LedgerDB) ([]string, error) {
 		if err != nil {
 			return []string{}, err
 		}
-		for _, key := range tupleChildKeys {
+		testtupleKeys, err := db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", tupleKey})
+		if err != nil {
+			return []string{}, err
+		}
+		allKeys := append(tupleChildKeys, testtupleKeys...)
+		for _, key := range allKeys {
 			tuple, err := db.GetGenericTuple(key)
 			if err != nil {
 				return []string{}, err

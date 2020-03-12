@@ -330,6 +330,7 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan, newIDs []string) 
 		IDToKey[ID] = in.IDToTrainTask[ID].Key
 	}
 	out.IDToKey = IDToKey
+	out.CleanModels = in.CleanModels
 }
 
 type outputPermissions struct {
