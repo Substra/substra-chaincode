@@ -190,7 +190,7 @@ type Testtuple struct {
 type ComputePlan struct {
 	AggregatetupleKeys      []string             `json:"aggregatetupleKeys"`
 	AssetType               AssetType            `json:"assetType"`
-	CleanModels             bool                 `json:"cleanModels"`
+	CleanModels             bool                 `json:"cleanModels"` // whether or not to delete intermediary models
 	CompositeTraintupleKeys []string             `json:"compositeTraintupleKeys"`
 	IDToTrainTask           map[string]TrainTask `json:"IDToTrainTask"`
 	State                   ComputePlanState     `json:"-"` // "-" means this field is excluded from JSON (de)serialization
