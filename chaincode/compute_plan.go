@@ -438,7 +438,7 @@ func ListModelIfIntermediary(db *LedgerDB, ComputePlanID, tupleKey, modelHash st
 		return err
 	}
 	if len(allChildKeys) == 0 {
-		// If a tuple has no children it's concidered final and should not be
+		// If a tuple has no children it's considered final and should not be
 		// listed in the index
 		return nil
 	}
