@@ -173,6 +173,7 @@ func (testtuple *Testtuple) GetKey() string {
 	// create testtuple key and check if it already exists
 	hashKeys := []string{
 		testtuple.TraintupleKey,
+		testtuple.ObjectiveKey,
 		testtuple.Dataset.OpenerHash,
 		testtuple.Creator,
 	}
