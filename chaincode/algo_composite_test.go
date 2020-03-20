@@ -68,6 +68,7 @@ func TestCompositeAlgo(t *testing.T) {
 			Permissions: outputPermissions{
 				Process: Permission{Public: true, AuthorizedIDs: []string{}},
 			},
+			Metadata: inpAlgo.Metadata,
 		},
 	}
 	assert.Exactly(t, expectedAlgo, algo)

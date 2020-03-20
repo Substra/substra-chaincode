@@ -296,6 +296,7 @@ func TestTraintupleComposite(t *testing.T) {
 				Process: Permission{Public: true, AuthorizedIDs: []string{}},
 			},
 		},
+		Metadata: inpTraintuple.Metadata,
 		Status: StatusTodo,
 	}
 	assert.Exactly(t, expected, out, "the composite traintuple queried from the ledger differ from expected")

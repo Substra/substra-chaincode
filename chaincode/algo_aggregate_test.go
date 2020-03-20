@@ -16,7 +16,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -69,6 +68,7 @@ func TestAggregateAlgo(t *testing.T) {
 			Permissions: outputPermissions{
 				Process: Permission{Public: true, AuthorizedIDs: []string{}},
 			},
+			Metadata: inpAlgo.Metadata,
 		},
 	}
 	assert.Exactly(t, expectedAlgo, algo)

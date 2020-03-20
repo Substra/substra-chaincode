@@ -166,6 +166,7 @@ func TestObjective(t *testing.T) {
 			Name:           inpObjective.MetricsName,
 			StorageAddress: inpObjective.MetricsStorageAddress,
 		},
+		Metadata: inpObjective.Metadata,
 	}
 	assert.Exactly(t, expectedObjective, objective)
 

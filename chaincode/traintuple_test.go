@@ -289,6 +289,7 @@ func TestTraintuple(t *testing.T) {
 		Permissions: outputPermissions{
 			Process: Permission{Public: true, AuthorizedIDs: []string{}},
 		},
+		Metadata: inpTraintuple.Metadata,
 		Status: StatusTodo,
 	}
 	assert.Exactly(t, expected, out, "the traintuple queried from the ledger differ from expected")
