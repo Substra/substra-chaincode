@@ -27,6 +27,7 @@ type outputAggregatetuple struct {
 	Rank          int               `json:"rank"`
 	Status        string            `json:"status"`
 	Tag           string            `json:"tag"`
+	Metadata      map[string]string `json:"metadata"`
 	Permissions   outputPermissions `json:"permissions"`
 	Worker        string            `json:"worker"`
 }
@@ -49,6 +50,7 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 	outputAggregatetuple.ComputePlanID = traintuple.ComputePlanID
 	outputAggregatetuple.OutModel = traintuple.OutModel
 	outputAggregatetuple.Tag = traintuple.Tag
+	outputAggregatetuple.Metadata = traintuple.Metadata
 	algo, err := db.GetAggregateAlgo(traintuple.AlgoKey)
 	if err != nil {
 		err = errors.Internal("could not retrieve aggregate algo with key %s - %s", traintuple.AlgoKey, err.Error())

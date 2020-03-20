@@ -31,42 +31,46 @@ var (
 
 // inputObjective is the representation of input args to register a Objective
 type inputObjective struct {
-	Name                      string           `validate:"required,gte=1,lte=100" json:"name"`
-	DescriptionHash           string           `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
-	DescriptionStorageAddress string           `validate:"required,url" json:"descriptionStorageAddress"`
-	MetricsName               string           `validate:"required,gte=1,lte=100" json:"metricsName"`
-	MetricsHash               string           `validate:"required,len=64,hexadecimal" json:"metricsHash"`
-	MetricsStorageAddress     string           `validate:"required,url" json:"metricsStorageAddress"`
-	TestDataset               inputDataset     `validate:"omitempty" json:"testDataset"`
-	Permissions               inputPermissions `validate:"required" json:"permissions"`
+	Name                      string           	`validate:"required,gte=1,lte=100" json:"name"`
+	DescriptionHash           string           	`validate:"required,len=64,hexadecimal" json:"descriptionHash"`
+	DescriptionStorageAddress string           	`validate:"required,url" json:"descriptionStorageAddress"`
+	MetricsName               string           	`validate:"required,gte=1,lte=100" json:"metricsName"`
+	MetricsHash               string           	`validate:"required,len=64,hexadecimal" json:"metricsHash"`
+	MetricsStorageAddress     string           	`validate:"required,url" json:"metricsStorageAddress"`
+	TestDataset               inputDataset     	`validate:"omitempty" json:"testDataset"`
+	Permissions               inputPermissions 	`validate:"required" json:"permissions"`
+	Metadata				  map[string]string	`validate:"omitempty" json:"metadata"`
 }
 
 // inputDataset is the representation in input args to register a dataset
 type inputDataset struct {
-	DataManagerKey string   `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
-	DataSampleKeys []string `validate:"omitempty,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	DataManagerKey string   		  `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys []string 		  `validate:"omitempty,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	Metadata	   map[string]string  `validate:"omitempty" json:"metadata"`
 }
 
 // inputAlgo is the representation of input args to register an Algo
 type inputAlgo struct {
-	Name                      string           `validate:"required,gte=1,lte=100" json:"name"`
-	Hash                      string           `validate:"required,len=64,hexadecimal" json:"hash"`
-	StorageAddress            string           `validate:"required,url" json:"storageAddress"`
-	DescriptionHash           string           `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
-	DescriptionStorageAddress string           `validate:"required,url" json:"descriptionStorageAddress"`
-	Permissions               inputPermissions `validate:"required" json:"permissions"`
+	Name                      string            `validate:"required,gte=1,lte=100" json:"name"`
+	Hash                      string            `validate:"required,len=64,hexadecimal" json:"hash"`
+	StorageAddress            string            `validate:"required,url" json:"storageAddress"`
+	DescriptionHash           string            `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
+	DescriptionStorageAddress string            `validate:"required,url" json:"descriptionStorageAddress"`
+	Permissions               inputPermissions  `validate:"required" json:"permissions"`
+	Metadata				  map[string]string	`validate:"omitempty" json:"metadata"`
 }
 
 // inputDataManager is the representation of input args to register a DataManager
 type inputDataManager struct {
-	Name                      string           `validate:"required,gte=1,lte=100" json:"name"`
-	OpenerHash                string           `validate:"required,len=64,hexadecimal" json:"openerHash"`
-	OpenerStorageAddress      string           `validate:"required,url" json:"openerStorageAddress"`
-	Type                      string           `validate:"required,gte=1,lte=30" json:"type"`
-	DescriptionHash           string           `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
-	DescriptionStorageAddress string           `validate:"required,url" json:"descriptionStorageAddress"`
-	ObjectiveKey              string           `validate:"omitempty" json:"objectiveKey"` //`validate:"required"`
-	Permissions               inputPermissions `validate:"required" json:"permissions"`
+	Name                      string            `validate:"required,gte=1,lte=100" json:"name"`
+	OpenerHash                string            `validate:"required,len=64,hexadecimal" json:"openerHash"`
+	OpenerStorageAddress      string            `validate:"required,url" json:"openerStorageAddress"`
+	Type                      string            `validate:"required,gte=1,lte=30" json:"type"`
+	DescriptionHash           string            `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
+	DescriptionStorageAddress string            `validate:"required,url" json:"descriptionStorageAddress"`
+	ObjectiveKey              string            `validate:"omitempty" json:"objectiveKey"` //`validate:"required"`
+	Permissions               inputPermissions  `validate:"required" json:"permissions"`
+	Metadata				  map[string]string	`validate:"omitempty" json:"metadata"`
 }
 
 // inputUpdateDataManager is the representation of input args to update a dataManager with a objective
@@ -90,22 +94,24 @@ type inputUpdateDataSample struct {
 
 // inputTraintuple is the representation of input args to register a Traintuple
 type inputTraintuple struct {
-	AlgoKey        string   `validate:"required,len=64,hexadecimal" json:"algoKey"`
-	InModels       []string `validate:"omitempty,dive,len=64,hexadecimal" json:"inModels"`
-	DataManagerKey string   `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
-	DataSampleKeys []string `validate:"required,unique,gt=0,dive,len=64,hexadecimal" json:"dataSampleKeys"`
-	ComputePlanID  string   `validate:"omitempty" json:"computePlanID"`
-	Rank           string   `validate:"omitempty" json:"rank"`
-	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
+	AlgoKey        string   		 `validate:"required,len=64,hexadecimal" json:"algoKey"`
+	InModels       []string 		 `validate:"omitempty,dive,len=64,hexadecimal" json:"inModels"`
+	DataManagerKey string   		 `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys []string 		 `validate:"required,unique,gt=0,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	ComputePlanID  string   		 `validate:"omitempty" json:"computePlanID"`
+	Rank           string   		 `validate:"omitempty" json:"rank"`
+	Tag            string   		 `validate:"omitempty,lte=64" json:"tag"`
+	Metadata	   map[string]string `validate:"omitempty" json:"metadata"`
 }
 
 // inputTestuple is the representation of input args to register a Testtuple
 type inputTesttuple struct {
-	DataManagerKey string   `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
-	DataSampleKeys []string `validate:"omitempty,dive,len=64,hexadecimal" json:"dataSampleKeys"`
-	ObjectiveKey   string   `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
-	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
-	TraintupleKey  string   `validate:"required,len=64,hexadecimal" json:"traintupleKey"`
+	DataManagerKey string   		 `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys []string 		 `validate:"omitempty,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	ObjectiveKey   string   		 `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
+	Tag            string   		 `validate:"omitempty,lte=64" json:"tag"`
+	Metadata	   map[string]string `validate:"omitempty" json:"metadata"`
+	TraintupleKey  string   		 `validate:"required,len=64,hexadecimal" json:"traintupleKey"`
 }
 
 type inputKey struct {

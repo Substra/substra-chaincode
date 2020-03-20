@@ -41,6 +41,7 @@ func (traintuple *CompositeTraintuple) SetFromInput(db *LedgerDB, inp inputCompo
 	traintuple.Creator = creator
 	traintuple.Tag = inp.Tag
 	traintuple.ComputePlanID = inp.ComputePlanID
+	traintuple.Metadata = inp.Metadata
 	algo, err := db.GetCompositeAlgo(inp.AlgoKey)
 	if err != nil {
 		return errors.BadRequest(err, "could not retrieve Composite algo with key %s", inp.AlgoKey)

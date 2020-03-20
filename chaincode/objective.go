@@ -49,6 +49,7 @@ func (objective *Objective) Set(db *LedgerDB, inp inputObjective) (objectiveKey 
 		Hash:           inp.MetricsHash,
 		StorageAddress: inp.MetricsStorageAddress,
 	}
+	objective.Metadata = inp.Metadata
 	owner, err := GetTxCreator(db.cc)
 	if err != nil {
 		return

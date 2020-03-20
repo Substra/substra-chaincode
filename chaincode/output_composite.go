@@ -34,6 +34,7 @@ type outputCompositeTraintuple struct {
 	Rank          int                   `json:"rank"`
 	Status        string                `json:"status"`
 	Tag           string                `json:"tag"`
+	Metadata      map[string]string		`json:"metadata"`
 }
 
 type outHeadModelComposite struct {
@@ -62,6 +63,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		OutModel:    traintuple.OutTrunkModel.OutModel,
 		Permissions: getOutPermissions(traintuple.OutTrunkModel.Permissions)}
 	outputCompositeTraintuple.Tag = traintuple.Tag
+	outputCompositeTraintuple.Metadata = traintuple.Metadata
 	// fill algo
 	algo, err := db.GetCompositeAlgo(traintuple.AlgoKey)
 	if err != nil {
