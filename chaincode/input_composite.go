@@ -25,7 +25,7 @@ type inputCompositeTraintuple struct {
 	ComputePlanID            string            `validate:"omitempty" json:"computePlanID"`
 	Rank                     string            `validate:"omitempty" json:"rank"`
 	Tag                      string            `validate:"omitempty,lte=64" json:"tag"`
-	Metadata				 map[string]string `validate:"omitempty" json:"metadata"`
+	Metadata                 map[string]string `validate:"omitempty" json:"metadata"`
 }
 
 type inputCompositeAlgo struct {

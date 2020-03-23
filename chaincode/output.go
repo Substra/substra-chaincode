@@ -32,7 +32,7 @@ type outputObjective struct {
 	Owner       string            `json:"owner"`
 	TestDataset *Dataset          `json:"testDataset"`
 	Permissions outputPermissions `json:"permissions"`
-	Metadata	map[string]string `validate:"omitempty" json:"metadata"`
+	Metadata    map[string]string `validate:"omitempty" json:"metadata"`
 }
 
 func (out *outputObjective) Fill(key string, in Objective) {
@@ -52,11 +52,11 @@ type outputDataManager struct {
 	ObjectiveKey string            `json:"objectiveKey"`
 	Description  *HashDress        `json:"description"`
 	Key          string            `json:"key"`
+	Metadata     map[string]string `validate:"omitempty" json:"metadata"`
 	Name         string            `json:"name"`
 	Opener       HashDress         `json:"opener"`
 	Owner        string            `json:"owner"`
 	Permissions  outputPermissions `json:"permissions"`
-	Metadata	 map[string]string `validate:"omitempty" json:"metadata"`
 	Type         string            `json:"type"`
 }
 
@@ -64,12 +64,12 @@ func (out *outputDataManager) Fill(key string, in DataManager) {
 	out.ObjectiveKey = in.ObjectiveKey
 	out.Description = in.Description
 	out.Key = key
+	out.Metadata = in.Metadata
 	out.Name = in.Name
 	out.Opener.Hash = key
 	out.Opener.StorageAddress = in.OpenerStorageAddress
 	out.Owner = in.Owner
 	out.Permissions.Fill(in.Permissions)
-	out.Metadata = in.Metadata
 	out.Type = in.Type
 }
 
@@ -87,9 +87,9 @@ func (out *outputDataSample) Fill(key string, in DataSample) {
 
 type outputDataset struct {
 	outputDataManager
-	TrainDataSampleKeys []string 		  `json:"trainDataSampleKeys"`
-	TestDataSampleKeys  []string 		  `json:"testDataSampleKeys"`
-	Metadata			map[string]string `validate:"omitempty" json:"metadata"`
+	Metadata            map[string]string  `validate:"omitempty" json:"metadata"`
+	TrainDataSampleKeys []string           `json:"trainDataSampleKeys"`
+	TestDataSampleKeys  []string           `json:"testDataSampleKeys"`
 }
 
 func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, testKeys []string) {
@@ -105,7 +105,7 @@ type outputAlgo struct {
 	Description *HashDress        `json:"description"`
 	Owner       string            `json:"owner"`
 	Permissions outputPermissions `json:"permissions"`
-	Metadata	map[string]string `json:"metadata"`
+	Metadata    map[string]string `json:"metadata"`
 }
 
 func (out *outputAlgo) Fill(key string, in Algo) {
@@ -121,10 +121,10 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 
 // outputTtDataset is the representation of a Traintuple Dataset
 type outputTtDataset struct {
-	Worker         string   		 `json:"worker"`
-	DataSampleKeys []string 		 `json:"keys"`
-	OpenerHash     string   		 `json:"openerHash"`
-	Metadata	   map[string]string `json:"metadata"`
+	Worker         string            `json:"worker"`
+	DataSampleKeys []string          `json:"keys"`
+	OpenerHash     string            `json:"openerHash"`
+	Metadata       map[string]string `json:"metadata"`
 }
 
 // outputTraintuple is the representation of one the element type stored in the
@@ -137,12 +137,12 @@ type outputTraintuple struct {
 	ComputePlanID string            `json:"computePlanID"`
 	InModels      []*Model          `json:"inModels"`
 	Log           string            `json:"log"`
+	Metadata      map[string]string `json:"metadata"`
 	OutModel      *HashDress        `json:"outModel"`
 	Permissions   outputPermissions `json:"permissions"`
 	Rank          int               `json:"rank"`
 	Status        string            `json:"status"`
 	Tag           string            `json:"tag"`
-	Metadata	  map[string]string `json:"metadata"`
 }
 
 //Fill is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
@@ -152,12 +152,12 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 	outputTraintuple.Creator = traintuple.Creator
 	outputTraintuple.Permissions.Fill(traintuple.Permissions)
 	outputTraintuple.Log = traintuple.Log
+	outputTraintuple.Metadata = traintuple.Metadata
 	outputTraintuple.Status = traintuple.Status
 	outputTraintuple.Rank = traintuple.Rank
 	outputTraintuple.ComputePlanID = traintuple.ComputePlanID
 	outputTraintuple.OutModel = traintuple.OutModel
 	outputTraintuple.Tag = traintuple.Tag
-	outputTraintuple.Metadata = traintuple.Metadata
 	// fill algo
 	algo, err := db.GetAlgo(traintuple.AlgoKey)
 	if err != nil {
@@ -199,20 +199,20 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 }
 
 type outputTesttuple struct {
-	Algo           *HashDressName 	 `json:"algo"`
-	Certified      bool           	 `json:"certified"`
-	ComputePlanID  string         	 `json:"computePlanID"`
-	Creator        string         	 `json:"creator"`
-	Dataset        *TtDataset     	 `json:"dataset"`
-	Key            string         	 `json:"key"`
-	Log            string         	 `json:"log"`
-	Objective      *TtObjective   	 `json:"objective"`
-	Rank           int            	 `json:"rank"`
-	Status         string         	 `json:"status"`
-	Tag            string         	 `json:"tag"`
-	Metadata	   map[string]string `json:"metadata"`
-	TraintupleKey  string         	 `json:"traintupleKey"`
-	TraintupleType string         	 `json:"traintupleType"`
+	Algo           *HashDressName    `json:"algo"`
+	Certified      bool              `json:"certified"`
+	ComputePlanID  string            `json:"computePlanID"`
+	Creator        string            `json:"creator"`
+	Dataset        *TtDataset        `json:"dataset"`
+	Key            string            `json:"key"`
+	Log            string            `json:"log"`
+	Metadata       map[string]string `json:"metadata"`
+	Objective      *TtObjective      `json:"objective"`
+	Rank           int               `json:"rank"`
+	Status         string            `json:"status"`
+	Tag            string            `json:"tag"`
+	TraintupleKey  string            `json:"traintupleKey"`
+	TraintupleType string            `json:"traintupleType"`
 }
 
 func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
@@ -222,10 +222,10 @@ func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
 	out.Dataset = in.Dataset
 	out.Key = key
 	out.Log = in.Log
+	out.Metadata = in.Metadata
 	out.Rank = in.Rank
 	out.Status = in.Status
 	out.Tag = in.Tag
-	out.Metadata = in.Metadata
 	out.TraintupleKey = in.TraintupleKey
 
 	// fill type
