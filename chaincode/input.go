@@ -157,7 +157,7 @@ type inputComputePlan struct {
 // inputNewComputePlan represent the set of tuples to be added to the compute
 // plan matching the ID
 type inputNewComputePlan struct {
-	CleanModels bool   `json:"cleanModels"`
+	CleanModels bool   `json:"cleanModels"` // whether or not to delete intermediary model
 	Tag         string `validate:"omitempty,lte=64" json:"tag"`
 	inputComputePlan
 }

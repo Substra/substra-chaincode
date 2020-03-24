@@ -513,7 +513,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 }
 
 // AddComputePlanEvent add the compute plan matching the ID to the event struct
-func (db *LedgerDB) AddComputePlanEvent(ComputePlanID, status string, modelHashes []string) error {
+func (db *LedgerDB) AddComputePlanEvent(ComputePlanID, status string, ModelsToDelete []string) error {
 	if db.event == nil {
 		db.event = &Event{}
 	}
@@ -526,7 +526,7 @@ func (db *LedgerDB) AddComputePlanEvent(ComputePlanID, status string, modelHashe
 		return err
 	}
 	cp.AlgoKeys = algokeys
-	cp.ModelHashes = modelHashes
+	cp.ModelsToDelete = ModelsToDelete
 	db.event.ComputePlans = append(db.event.ComputePlans, cp)
 	return nil
 }

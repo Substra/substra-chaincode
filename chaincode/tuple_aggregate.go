@@ -364,7 +364,7 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 	if err != nil {
 		return
 	}
-	err = ListModelIfIntermediary(db, aggregatetuple.ComputePlanID, aggregatetupleKey, aggregatetuple.OutModel.Hash)
+	err = TryAddIntermediaryModel(db, aggregatetuple.ComputePlanID, aggregatetupleKey, aggregatetuple.OutModel.Hash)
 	if err != nil {
 		return
 	}

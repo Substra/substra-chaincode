@@ -365,7 +365,7 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 	if err != nil {
 		return
 	}
-	err = ListModelIfIntermediary(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutHeadModel.Hash)
+	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutHeadModel.Hash)
 	if err != nil {
 		return
 	}
@@ -373,7 +373,7 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 	if err != nil {
 		return
 	}
-	err = ListModelIfIntermediary(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutTrunkModel.Hash)
+	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutTrunkModel.Hash)
 	if err != nil {
 		return
 	}
