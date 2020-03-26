@@ -620,6 +620,7 @@ func TestComputePlanMetrics(t *testing.T) {
 func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
 	_, err := logStartTrain(db, assetToArgs(inputKey{Key: key}))
 	assert.NoError(t, err)
+	flushEvent(db)
 
 	success := inputLogSuccessTrain{}
 	success.Key = key
@@ -630,6 +631,7 @@ func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
 func testtupleToDone(t *testing.T, db *LedgerDB, key string) {
 	_, err := logStartTest(db, assetToArgs(inputKey{Key: key}))
 	assert.NoError(t, err)
+	flushEvent(db)
 
 	success := inputLogSuccessTest{}
 	success.Key = key
@@ -684,4 +686,49 @@ func TestUpdateComputePlan(t *testing.T) {
 		1,
 		"IDToKey should match the newly created tuple keys to its ID")
 	assert.Equal(t, 4, out.TupleCount)
+}
+
+// When the smart contracts are called directly the event object is never reset
+// so we need to empty it by hand after each transaction when testing the event content
+func flushEvent(db *LedgerDB) {
+	if db.event == nil {
+		return
+	}
+	*(db.event) = Event{}
+}
+
+func TestCleanModels(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockStub.MockTransactionStart("42")
+	registerItem(t, *mockStub, "aggregateAlgo")
+	db := NewLedgerDB(mockStub)
+
+	out, err := createComputePlanInternal(db, defaultComputePlan, tag, true)
+	assert.NoError(t, err)
+	// Just created the compute plan so not in the event
+	assert.Len(t, db.event.ComputePlans, 0)
+	flushEvent(db)
+
+	traintupleToDone(t, db, out.TraintupleKeys[0])
+	// Present in the event but without any model to remove
+	assert.Len(t, db.event.ComputePlans, 1)
+	assert.Equal(t, db.event.ComputePlans[0].Status, StatusDoing)
+	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 0)
+	flushEvent(db)
+
+	traintupleToDone(t, db, out.TraintupleKeys[1])
+	// Present in the event but with one intermediary model done to remove
+	assert.Len(t, db.event.ComputePlans, 1)
+	assert.Equal(t, db.event.ComputePlans[0].Status, StatusDoing)
+	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 1)
+	flushEvent(db)
+
+	testtupleToDone(t, db, out.TesttupleKeys[0])
+	// Present in the event but without any model to remove because the last
+	// model is not intermerdiary
+	assert.Len(t, db.event.ComputePlans, 1)
+	assert.Equal(t, db.event.ComputePlans[0].Status, StatusDone)
+	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 0)
+
 }
