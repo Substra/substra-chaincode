@@ -620,7 +620,7 @@ func TestComputePlanMetrics(t *testing.T) {
 func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
 	_, err := logStartTrain(db, assetToArgs(inputKey{Key: key}))
 	assert.NoError(t, err)
-	flushEvent(db)
+	clearEvent(db)
 
 	success := inputLogSuccessTrain{}
 	success.Key = key
@@ -631,7 +631,7 @@ func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
 func testtupleToDone(t *testing.T, db *LedgerDB, key string) {
 	_, err := logStartTest(db, assetToArgs(inputKey{Key: key}))
 	assert.NoError(t, err)
-	flushEvent(db)
+	clearEvent(db)
 
 	success := inputLogSuccessTest{}
 	success.Key = key
@@ -690,7 +690,7 @@ func TestUpdateComputePlan(t *testing.T) {
 
 // When the smart contracts are called directly the event object is never reset
 // so we need to empty it by hand after each transaction when testing the event content
-func flushEvent(db *LedgerDB) {
+func clearEvent(db *LedgerDB) {
 	if db.event == nil {
 		return
 	}
@@ -708,21 +708,21 @@ func TestCleanModels(t *testing.T) {
 	assert.NoError(t, err)
 	// Just created the compute plan so not in the event
 	assert.Len(t, db.event.ComputePlans, 0)
-	flushEvent(db)
+	clearEvent(db)
 
 	traintupleToDone(t, db, out.TraintupleKeys[0])
 	// Present in the event but without any model to remove
 	assert.Len(t, db.event.ComputePlans, 1)
 	assert.Equal(t, db.event.ComputePlans[0].Status, StatusDoing)
 	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 0)
-	flushEvent(db)
+	clearEvent(db)
 
 	traintupleToDone(t, db, out.TraintupleKeys[1])
 	// Present in the event but with one intermediary model done to remove
 	assert.Len(t, db.event.ComputePlans, 1)
 	assert.Equal(t, db.event.ComputePlans[0].Status, StatusDoing)
 	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 1)
-	flushEvent(db)
+	clearEvent(db)
 
 	testtupleToDone(t, db, out.TesttupleKeys[0])
 	// Present in the event but without any model to remove because the last
