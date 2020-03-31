@@ -162,7 +162,7 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag)
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, false)
 	assert.NoError(t, err)
 	assert.NotNil(t, db.event)
 	assert.Len(t, db.event.CompositeTraintuples, 2)
@@ -285,7 +285,7 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 		},
 	}
 
-	outCP, err := createComputePlanInternal(db, inCP, tag)
+	outCP, err := createComputePlanInternal(db, inCP, tag, false)
 	assert.NoError(t, err)
 
 	// Check the composite traintuples
@@ -327,7 +327,7 @@ func TestCreateComputePlan(t *testing.T) {
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlanInternal(db, inCP, tag)
+	outCP, err := createComputePlanInternal(db, inCP, tag, false)
 	assert.NoError(t, err)
 	validateDefaultComputePlan(t, outCP)
 
@@ -380,7 +380,7 @@ func TestQueryComputePlan(t *testing.T) {
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlanInternal(db, inCP, tag)
+	outCP, err := createComputePlanInternal(db, inCP, tag, false)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 
@@ -400,7 +400,7 @@ func TestQueryComputePlans(t *testing.T) {
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlanInternal(db, inCP, tag)
+	outCP, err := createComputePlanInternal(db, inCP, tag, false)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 
@@ -448,7 +448,7 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 		Testtuples: []inputComputePlanTesttuple{},
 	}
 
-	outCP, err := createComputePlanInternal(db, inCP, tag)
+	outCP, err := createComputePlanInternal(db, inCP, tag, false)
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 	assert.Len(t, outCP.TesttupleKeys, 0)
@@ -485,7 +485,7 @@ func TestCancelComputePlan(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag)
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, false)
 	assert.NoError(t, err)
 	assert.NotNil(t, db.event)
 	assert.Len(t, db.event.CompositeTraintuples, 2)
@@ -527,7 +527,7 @@ func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag)
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, false)
 	assert.NoError(t, err)
 
 	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[0]}))
@@ -559,7 +559,7 @@ func TestLogSuccessAfterCancel(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag)
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, false)
 	assert.NoError(t, err)
 
 	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[0]}))
@@ -603,7 +603,7 @@ func TestComputePlanMetrics(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, defaultComputePlan, tag)
+	out, err := createComputePlanInternal(db, defaultComputePlan, tag, false)
 	assert.NoError(t, err)
 	checkComputePlanMetrics(t, db, out.ComputePlanID, 0, 3)
 
@@ -620,6 +620,7 @@ func TestComputePlanMetrics(t *testing.T) {
 func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
 	_, err := logStartTrain(db, assetToArgs(inputKey{Key: key}))
 	assert.NoError(t, err)
+	clearEvent(db)
 
 	success := inputLogSuccessTrain{}
 	success.Key = key
@@ -630,6 +631,7 @@ func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
 func testtupleToDone(t *testing.T, db *LedgerDB, key string) {
 	_, err := logStartTest(db, assetToArgs(inputKey{Key: key}))
 	assert.NoError(t, err)
+	clearEvent(db)
 
 	success := inputLogSuccessTest{}
 	success.Key = key
@@ -652,7 +654,7 @@ func TestUpdateComputePlan(t *testing.T) {
 	registerItem(t, *mockStub, "aggregateAlgo")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, inputComputePlan{}, tag)
+	out, err := createComputePlanInternal(db, inputComputePlan{}, tag, false)
 	assert.NoError(t, err)
 	assert.Equal(t, tag, out.Tag)
 
@@ -684,4 +686,49 @@ func TestUpdateComputePlan(t *testing.T) {
 		1,
 		"IDToKey should match the newly created tuple keys to its ID")
 	assert.Equal(t, 4, out.TupleCount)
+}
+
+// When the smart contracts are called directly the event object is never reset
+// so we need to empty it by hand after each transaction when testing the event content
+func clearEvent(db *LedgerDB) {
+	if db.event == nil {
+		return
+	}
+	*(db.event) = Event{}
+}
+
+func TestCleanModels(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockStub.MockTransactionStart("42")
+	registerItem(t, *mockStub, "aggregateAlgo")
+	db := NewLedgerDB(mockStub)
+
+	out, err := createComputePlanInternal(db, defaultComputePlan, tag, true)
+	assert.NoError(t, err)
+	// Just created the compute plan so not in the event
+	assert.Len(t, db.event.ComputePlans, 0)
+	clearEvent(db)
+
+	traintupleToDone(t, db, out.TraintupleKeys[0])
+	// Present in the event but without any model to remove
+	assert.Len(t, db.event.ComputePlans, 1)
+	assert.Equal(t, db.event.ComputePlans[0].Status, StatusDoing)
+	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 0)
+	clearEvent(db)
+
+	traintupleToDone(t, db, out.TraintupleKeys[1])
+	// Present in the event but with one intermediary model done to remove
+	assert.Len(t, db.event.ComputePlans, 1)
+	assert.Equal(t, db.event.ComputePlans[0].Status, StatusDoing)
+	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 1)
+	clearEvent(db)
+
+	testtupleToDone(t, db, out.TesttupleKeys[0])
+	// Present in the event but without any model to remove because the last
+	// model is not intermerdiary
+	assert.Len(t, db.event.ComputePlans, 1)
+	assert.Equal(t, db.event.ComputePlans[0].Status, StatusDone)
+	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 0)
+
 }

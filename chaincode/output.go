@@ -292,9 +292,10 @@ type Event struct {
 }
 
 type eventComputePlan struct {
-	ComputePlanID string   `json:"computePlanID"`
-	Status        string   `json:"status"`
-	AlgoKeys      []string `json:"algoKeys"`
+	AlgoKeys       []string `json:"algoKeys"`
+	ComputePlanID  string   `json:"computePlanID"`
+	ModelsToDelete []string `json:"modelsToDelete"`
+	Status         string   `json:"status"`
 }
 
 type outputComputePlan struct {
@@ -303,6 +304,7 @@ type outputComputePlan struct {
 	AggregatetupleKeys      []string          `json:"aggregatetupleKeys"`
 	CompositeTraintupleKeys []string          `json:"compositeTraintupleKeys"`
 	TesttupleKeys           []string          `json:"testtupleKeys"`
+	CleanModels             bool              `json:"cleanModels"`
 	Tag                     string            `json:"tag"`
 	Status                  string            `json:"status"`
 	TupleCount              int               `json:"tupleCount"`
@@ -328,6 +330,7 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan, newIDs []string) 
 		IDToKey[ID] = in.IDToTrainTask[ID].Key
 	}
 	out.IDToKey = IDToKey
+	out.CleanModels = in.CleanModels
 }
 
 type outputPermissions struct {

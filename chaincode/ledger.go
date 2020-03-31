@@ -190,6 +190,7 @@ type Testtuple struct {
 type ComputePlan struct {
 	AggregatetupleKeys      []string             `json:"aggregatetupleKeys"`
 	AssetType               AssetType            `json:"assetType"`
+	CleanModels             bool                 `json:"cleanModels"` // whether or not to delete intermediary models
 	CompositeTraintupleKeys []string             `json:"compositeTraintupleKeys"`
 	IDToTrainTask           map[string]TrainTask `json:"IDToTrainTask"`
 	State                   ComputePlanState     `json:"-"` // "-" means this field is excluded from JSON (de)serialization
@@ -203,9 +204,10 @@ type ComputePlan struct {
 // To minimize the size of every compute plan, update its state record under another
 // key in the ledger. It will reduce the growing rate of the blockchain size.
 type ComputePlanState struct {
-	DoneCount  int    `json:"doneCount"`
-	Status     string `json:"status"`
-	TupleCount int    `json:"tupleCount"`
+	DoneCount               int      `json:"doneCount"`
+	IntermediaryModelsInUse []string `json:"intermediaryModelsInUse"`
+	Status                  string   `json:"status"`
+	TupleCount              int      `json:"tupleCount"`
 }
 
 // TrainTask is represent the information for one tuple in a Compute Plan

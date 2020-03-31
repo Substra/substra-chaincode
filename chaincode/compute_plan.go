@@ -105,7 +105,7 @@ func createComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	if err != nil {
 		return
 	}
-	return createComputePlanInternal(db, inp.inputComputePlan, inp.Tag)
+	return createComputePlanInternal(db, inp.inputComputePlan, inp.Tag, inp.CleanModels)
 }
 
 func updateComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
@@ -125,10 +125,11 @@ func updateComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	return updateComputePlanInternal(db, inp.ComputePlanID, inp.inputComputePlan)
 }
 
-func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string) (resp outputComputePlan, err error) {
+func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string, cleanModels bool) (resp outputComputePlan, err error) {
 	var computePlan ComputePlan
 	computePlan.State.Status = StatusWaiting
 	computePlan.Tag = tag
+	computePlan.CleanModels = cleanModels
 	ID, err := computePlan.Create(db)
 	if err != nil {
 		return resp, err
@@ -298,7 +299,10 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 		return outputComputePlan{}, err
 	}
 
-	db.AddComputePlanEvent(inp.Key, computeplan.State.Status)
+	err = db.AddComputePlanEvent(inp.Key, computeplan.State.Status, computeplan.State.IntermediaryModelsInUse)
+	if err != nil {
+		return outputComputePlan{}, err
+	}
 	resp.Fill(inp.Key, computeplan, []string{})
 	return resp, nil
 }
@@ -404,9 +408,91 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey s
 	if err != nil {
 		return err
 	}
-	if cp.UpdateStatus(tupleStatus) {
-		db.AddComputePlanEvent(ComputePlanID, cp.State.Status)
+	statusUpdated := cp.UpdateStatus(tupleStatus)
+	doneModels, err := cp.CheckDoneIntermediaryModel(db)
+	if err != nil {
+		return err
+	}
+	if statusUpdated || len(doneModels) != 0 {
+		db.AddComputePlanEvent(ComputePlanID, cp.State.Status, doneModels)
 		return cp.SaveState(db)
 	}
 	return nil
+}
+
+// TryAddIntermediaryModel will reference the hash model if the compute plan ID
+// is not empty and if it's an intermediary model meaning without any children
+func TryAddIntermediaryModel(db *LedgerDB, ComputePlanID, tupleKey, modelHash string) error {
+	if ComputePlanID == "" {
+		return nil
+	}
+	cp, err := db.GetComputePlan(ComputePlanID)
+	if err != nil {
+		return err
+	}
+	if !cp.CleanModels {
+		return nil
+	}
+	allChildKeys, err := db.GetIndexKeys("tuple~inModel~key", []string{"tuple", tupleKey})
+	if err != nil {
+		return err
+	}
+	if len(allChildKeys) == 0 {
+		// If a tuple has no children it's considered final and should not be
+		// listed in the index
+		return nil
+	}
+	cp.State.IntermediaryModelsInUse = append(cp.State.IntermediaryModelsInUse, modelHash)
+
+	return cp.SaveState(db)
+}
+
+// CheckDoneIntermediaryModel check all models listed as intermediary. If any of
+// them are 'done', meaning that there is no train like tuples or testtuples
+// planned to use this model. If that the case its hash will be added to the
+// returned slice and remove from the compute plan's one.
+func (cp *ComputePlan) CheckDoneIntermediaryModel(db *LedgerDB) ([]string, error) {
+	if !cp.CleanModels {
+		return []string{}, nil
+	}
+	var doneModels, inUseModels []string
+	for _, hash := range cp.State.IntermediaryModelsInUse {
+		done := true
+		keys, err := db.GetIndexKeys("tuple~modelHash~key", []string{"tuple", hash})
+		if err != nil {
+			return []string{}, err
+		}
+		if len(keys) == 0 {
+			// This occurs for the hashes added during the same transaction. But
+			// thoses models can just be added to the in use ones
+			inUseModels = append(inUseModels, hash)
+			continue
+		}
+		tupleKey := keys[0]
+		tupleChildKeys, err := db.GetIndexKeys("tuple~inModel~key", []string{"tuple", tupleKey})
+		if err != nil {
+			return []string{}, err
+		}
+		testtupleKeys, err := db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", tupleKey})
+		if err != nil {
+			return []string{}, err
+		}
+		allKeys := append(tupleChildKeys, testtupleKeys...)
+		for _, key := range allKeys {
+			tuple, err := db.GetGenericTuple(key)
+			if err != nil {
+				return []string{}, err
+			}
+			if tuple.Status != StatusDone {
+				inUseModels = append(inUseModels, hash)
+				done = false
+				break
+			}
+		}
+		if done {
+			doneModels = append(doneModels, hash)
+		}
+	}
+	cp.State.IntermediaryModelsInUse = inUseModels
+	return doneModels, nil
 }

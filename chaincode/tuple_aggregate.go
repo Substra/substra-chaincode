@@ -195,7 +195,7 @@ func (tuple *Aggregatetuple) Save(db *LedgerDB, aggregatetupleKey string) error 
 		return err
 	}
 	for _, inModelKey := range tuple.InModelKeys {
-		if err := db.CreateIndex("aggregatetuple~inModel~key", []string{"aggregatetuple", inModelKey, aggregatetupleKey}); err != nil {
+		if err := db.CreateIndex("tuple~inModel~key", []string{"tuple", inModelKey, aggregatetupleKey}); err != nil {
 			return err
 		}
 	}
@@ -361,6 +361,10 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 	aggregatetuple.Log += inp.Log
 
 	err = createModelIndex(db, inp.OutModel.Hash, aggregatetupleKey)
+	if err != nil {
+		return
+	}
+	err = TryAddIntermediaryModel(db, aggregatetuple.ComputePlanID, aggregatetupleKey, aggregatetuple.OutModel.Hash)
 	if err != nil {
 		return
 	}

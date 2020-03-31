@@ -230,10 +230,10 @@ func (traintuple *CompositeTraintuple) Save(db *LedgerDB, traintupleKey string) 
 	}
 	// TODO: Do we create an index for head/trunk inModel or do we concider that
 	// they are classic inModels ?
-	if err := db.CreateIndex("compositeTraintuple~inModel~key", []string{"compositeTraintuple", traintuple.InHeadModel, traintupleKey}); err != nil {
+	if err := db.CreateIndex("tuple~inModel~key", []string{"tuple", traintuple.InHeadModel, traintupleKey}); err != nil {
 		return err
 	}
-	if err := db.CreateIndex("compositeTraintuple~inModel~key", []string{"compositeTraintuple", traintuple.InTrunkModel, traintupleKey}); err != nil {
+	if err := db.CreateIndex("tuple~inModel~key", []string{"tuple", traintuple.InTrunkModel, traintupleKey}); err != nil {
 		return err
 	}
 	if traintuple.ComputePlanID != "" {
@@ -365,7 +365,15 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 	if err != nil {
 		return
 	}
+	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutHeadModel.Hash)
+	if err != nil {
+		return
+	}
 	err = createModelIndex(db, inp.OutTrunkModel.Hash, compositeTraintupleKey)
+	if err != nil {
+		return
+	}
+	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutTrunkModel.Hash)
 	if err != nil {
 		return
 	}

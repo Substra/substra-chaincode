@@ -185,7 +185,7 @@ func (traintuple *Traintuple) Save(db *LedgerDB, traintupleKey string) error {
 		return err
 	}
 	for _, inModelKey := range traintuple.InModelKeys {
-		if err := db.CreateIndex("traintuple~inModel~key", []string{"traintuple", inModelKey, traintupleKey}); err != nil {
+		if err := db.CreateIndex("tuple~inModel~key", []string{"tuple", inModelKey, traintupleKey}); err != nil {
 			return err
 		}
 	}
@@ -312,6 +312,10 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 	traintuple.Log += inp.Log
 
 	err = createModelIndex(db, inp.OutModel.Hash, traintupleKey)
+	if err != nil {
+		return
+	}
+	err = TryAddIntermediaryModel(db, traintuple.ComputePlanID, traintupleKey, traintuple.OutModel.Hash)
 	if err != nil {
 		return
 	}
@@ -457,22 +461,11 @@ func (traintuple *Traintuple) validateNewStatus(db *LedgerDB, status string) err
 
 // UpdateTraintupleChildren updates the status of waiting trainuples  InModels of traintuples once they have been trained (succesfully or failed)
 func UpdateTraintupleChildren(db *LedgerDB, traintupleKey string, traintupleStatus string, alreadyUpdatedKeys []string) error {
-	// get traintuples having as inModels the input traintuple
-	childTraintupleKeys, err := db.GetIndexKeys("traintuple~inModel~key", []string{"traintuple", traintupleKey})
+	// get keys from tuple having as inModels the input traintuple
+	allChildKeys, err := db.GetIndexKeys("tuple~inModel~key", []string{"tuple", traintupleKey})
 	if err != nil {
-		return errors.Internal("error while getting associated tuples to update their inModel, traintupleKey=%s traintupleStatus=%s %s", traintupleKey, traintupleStatus, err)
+		return errors.Internal("error while getting associated tuples to update their inModel, tupleKey=%s tupleStatus=%s %s", traintupleKey, traintupleStatus, err)
 	}
-	childCompositeTraintupleKeys, err := db.GetIndexKeys("compositeTraintuple~inModel~key", []string{"compositeTraintuple", traintupleKey})
-	if err != nil {
-		return errors.Internal("error while getting associated composite traintuples to update their inModel")
-	}
-	childAggregatetupleKeys, err := db.GetIndexKeys("aggregatetuple~inModel~key", []string{"aggregatetuple", traintupleKey})
-	if err != nil {
-		return errors.Internal("error while getting associated aggregate tuples to update their inModel")
-	}
-
-	allChildKeys := append(append(childTraintupleKeys, childCompositeTraintupleKeys...), childAggregatetupleKeys...)
-
 	for _, childTraintupleKey := range allChildKeys {
 		if stringInSlice(childTraintupleKey, alreadyUpdatedKeys) {
 			continue
