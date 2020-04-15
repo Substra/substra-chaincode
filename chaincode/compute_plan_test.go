@@ -162,7 +162,7 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, false)
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, false, map[string]string{})
 	assert.NoError(t, err)
 	assert.NotNil(t, db.event)
 	assert.Len(t, db.event.CompositeTraintuples, 2)
@@ -285,7 +285,7 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 		},
 	}
 
-	outCP, err := createComputePlanInternal(db, inCP, tag, false)
+	outCP, err := createComputePlanInternal(db, inCP, tag, false, map[string]string{})
 	assert.NoError(t, err)
 
 	// Check the composite traintuples
@@ -327,7 +327,7 @@ func TestCreateComputePlan(t *testing.T) {
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlanInternal(db, inCP, tag, false)
+	outCP, err := createComputePlanInternal(db, inCP, tag, false, map[string]string{})
 	assert.NoError(t, err)
 	validateDefaultComputePlan(t, outCP)
 
@@ -380,7 +380,7 @@ func TestQueryComputePlan(t *testing.T) {
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlanInternal(db, inCP, tag, false)
+	outCP, err := createComputePlanInternal(db, inCP, tag, false, map[string]string{})
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 
@@ -400,7 +400,7 @@ func TestQueryComputePlans(t *testing.T) {
 
 	// Simply test method and return values
 	inCP := defaultComputePlan
-	outCP, err := createComputePlanInternal(db, inCP, tag, false)
+	outCP, err := createComputePlanInternal(db, inCP, tag, false, map[string]string{})
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 
@@ -448,7 +448,7 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 		Testtuples: []inputComputePlanTesttuple{},
 	}
 
-	outCP, err := createComputePlanInternal(db, inCP, tag, false)
+	outCP, err := createComputePlanInternal(db, inCP, tag, false, map[string]string{})
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 	assert.Len(t, outCP.TesttupleKeys, 0)
@@ -485,7 +485,7 @@ func TestCancelComputePlan(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, false)
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, false, map[string]string{})
 	assert.NoError(t, err)
 	assert.NotNil(t, db.event)
 	assert.Len(t, db.event.CompositeTraintuples, 2)
@@ -527,7 +527,7 @@ func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, false)
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, false, map[string]string{})
 	assert.NoError(t, err)
 
 	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[0]}))
@@ -559,7 +559,7 @@ func TestLogSuccessAfterCancel(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, false)
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, false, map[string]string{})
 	assert.NoError(t, err)
 
 	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[0]}))
@@ -603,7 +603,7 @@ func TestComputePlanMetrics(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, defaultComputePlan, tag, false)
+	out, err := createComputePlanInternal(db, defaultComputePlan, tag, false, map[string]string{})
 	assert.NoError(t, err)
 	checkComputePlanMetrics(t, db, out.ComputePlanID, 0, 3)
 
@@ -655,7 +655,7 @@ func TestUpdateComputePlan(t *testing.T) {
 	registerItem(t, *mockStub, "aggregateAlgo")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, inputComputePlan{}, tag, false)
+	out, err := createComputePlanInternal(db, inputComputePlan{}, tag, false, map[string]string{})
 	assert.NoError(t, err)
 	assert.Equal(t, tag, out.Tag)
 
@@ -705,7 +705,7 @@ func TestCleanModels(t *testing.T) {
 	registerItem(t, *mockStub, "aggregateAlgo")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, defaultComputePlan, tag, true)
+	out, err := createComputePlanInternal(db, defaultComputePlan, tag, true, map[string]string{})
 	assert.NoError(t, err)
 	// Just created the compute plan so not in the event
 	assert.Len(t, db.event.ComputePlans, 0)

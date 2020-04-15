@@ -105,7 +105,7 @@ func createComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	if err != nil {
 		return
 	}
-	return createComputePlanInternal(db, inp.inputComputePlan, inp.Tag, inp.CleanModels)
+	return createComputePlanInternal(db, inp.inputComputePlan, inp.Tag, inp.CleanModels, inp.Metadata)
 }
 
 func updateComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
@@ -125,11 +125,12 @@ func updateComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	return updateComputePlanInternal(db, inp.ComputePlanID, inp.inputComputePlan)
 }
 
-func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string, cleanModels bool) (resp outputComputePlan, err error) {
+func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string, cleanModels bool, metadata map[string]string) (resp outputComputePlan, err error) {
 	var computePlan ComputePlan
 	computePlan.State.Status = StatusWaiting
 	computePlan.Tag = tag
 	computePlan.CleanModels = cleanModels
+	computePlan.Metadata = metadata
 	ID, err := computePlan.Create(db)
 	if err != nil {
 		return resp, err
