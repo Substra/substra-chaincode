@@ -17,6 +17,7 @@ package main
 import "chaincode/errors"
 
 type outputCompositeAlgo struct {
+	*EmbeddedMetrics
 	outputAlgo
 }
 

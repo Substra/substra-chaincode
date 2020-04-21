@@ -169,7 +169,7 @@ func TestDataset(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding dataSample, status %d and message %s", resp.Status, resp.Message)
 	// check payload correspond to input dataSample keys
-	res := map[string][]string{}
+	res := map[string]interface{}{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	assert.Contains(t, res, "keys")

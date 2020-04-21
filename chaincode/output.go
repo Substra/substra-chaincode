@@ -25,6 +25,7 @@ const OutputAssetPaginationHardLimit = 500
 // Struct use as output representation of ledger data
 
 type outputObjective struct {
+	*EmbeddedMetrics
 	Key         string            `json:"key"`
 	Name        string            `json:"name"`
 	Description HashDress         `json:"description"`
@@ -47,6 +48,7 @@ func (out *outputObjective) Fill(key string, in Objective) {
 
 // outputDataManager is the return representation of the DataManager type stored in the ledger
 type outputDataManager struct {
+	*EmbeddedMetrics
 	ObjectiveKey string            `json:"objectiveKey"`
 	Description  *HashDress        `json:"description"`
 	Key          string            `json:"key"`
@@ -70,6 +72,7 @@ func (out *outputDataManager) Fill(key string, in DataManager) {
 }
 
 type outputDataSample struct {
+	*EmbeddedMetrics
 	DataManagerKeys []string `json:"dataManagerKeys"`
 	Owner           string   `json:"owner"`
 	Key             string   `json:"key"`
@@ -94,6 +97,7 @@ func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, t
 }
 
 type outputAlgo struct {
+	*EmbeddedMetrics
 	Key         string            `json:"key"`
 	Name        string            `json:"name"`
 	Content     HashDress         `json:"content"`
@@ -114,6 +118,7 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 
 // outputTtDataset is the representation of a Traintuple Dataset
 type outputTtDataset struct {
+	*EmbeddedMetrics
 	Worker         string   `json:"worker"`
 	DataSampleKeys []string `json:"keys"`
 	OpenerHash     string   `json:"openerHash"`
@@ -122,6 +127,7 @@ type outputTtDataset struct {
 // outputTraintuple is the representation of one the element type stored in the
 // ledger. It describes a training task occuring on the platform
 type outputTraintuple struct {
+	*EmbeddedMetrics
 	Key           string            `json:"key"`
 	Algo          *HashDressName    `json:"algo"`
 	Creator       string            `json:"creator"`
@@ -189,6 +195,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 }
 
 type outputTesttuple struct {
+	*EmbeddedMetrics
 	Algo           *HashDressName `json:"algo"`
 	Certified      bool           `json:"certified"`
 	ComputePlanID  string         `json:"computePlanID"`
@@ -269,6 +276,7 @@ func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
 }
 
 type outputModelDetails struct {
+	*EmbeddedMetrics
 	Aggregatetuple         *outputAggregatetuple      `json:"aggregatetuple,omitempty"`
 	CompositeTraintuple    *outputCompositeTraintuple `json:"compositeTraintuple,omitempty"`
 	Traintuple             *outputTraintuple          `json:"traintuple,omitempty"`
@@ -277,6 +285,7 @@ type outputModelDetails struct {
 }
 
 type outputModel struct {
+	*EmbeddedMetrics
 	Aggregatetuple      *outputAggregatetuple      `json:"aggregatetuple,omitempty"`
 	CompositeTraintuple *outputCompositeTraintuple `json:"compositeTraintuple,omitempty"`
 	Traintuple          *outputTraintuple          `json:"traintuple,omitempty"`
@@ -299,6 +308,7 @@ type eventComputePlan struct {
 }
 
 type outputComputePlan struct {
+	*EmbeddedMetrics
 	ComputePlanID           string            `json:"computePlanID"`
 	TraintupleKeys          []string          `json:"traintupleKeys"`
 	AggregatetupleKeys      []string          `json:"aggregatetupleKeys"`
@@ -334,6 +344,7 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan, newIDs []string) 
 }
 
 type outputPermissions struct {
+	*EmbeddedMetrics
 	Process Permission `validate:"required" json:"process"`
 }
 
@@ -346,6 +357,7 @@ func (out *outputPermissions) Fill(in Permissions) {
 }
 
 type outputLeaderboard struct {
+	*EmbeddedMetrics
 	Objective  outputObjective   `json:"objective"`
 	Testtuples outputBoardTuples `json:"testtuples"`
 }
@@ -365,6 +377,7 @@ func (out outputBoardTuples) Less(i, j int) bool {
 }
 
 type outputBoardTuple struct {
+	*EmbeddedMetrics
 	Algo          *HashDressName `json:"algo"`
 	Creator       string         `json:"creator"`
 	Key           string         `json:"key"`

@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -47,6 +48,7 @@ func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response 
 
 // Invoke is called per transaction on the chaincode.
 func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
+	start := time.Now()
 	// Log all input for potential debug later on.
 	logger.Infof("Args received by the chaincode: %#v", stub.GetStringArgs())
 
@@ -193,12 +195,29 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	if err != nil {
 		return formatErrorResponse(errors.Internal("could not send event: %s", err.Error()))
 	}
+
+	switch meter := result.(type) {
+	case Meter:
+		meter.AddDuration(int(time.Since(start).Milliseconds()))
+	case map[string]string:
+		if _, ok := meter["duration"]; !ok {
+			meter["duration"] = strconv.Itoa(int(time.Since(start).Milliseconds()))
+		}
+	case map[string][]string:
+		new := map[string]interface{}{
+			"duration": int(time.Since(start).Milliseconds()),
+		}
+		for k, v := range meter {
+			new[k] = v
+		}
+		result = new
+	}
+
 	// Marshal to json the smartcontract result
 	resp, err := json.Marshal(result)
 	if err != nil {
 		return formatErrorResponse(errors.Internal("could not format response: %s", err.Error()))
 	}
-
 	return shim.Success(resp)
 }
 

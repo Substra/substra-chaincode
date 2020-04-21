@@ -85,10 +85,10 @@ func TestTraintupleWithSingleDatasampleAggregate(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding aggregate tuple with a single data samples it should work: ", resp.Message)
 
-	traintuple := outputAggregatetuple{}
+	traintuple := map[string]string{}
 	err := json.Unmarshal(resp.Payload, &traintuple)
 	assert.NoError(t, err, "should be unmarshaled")
-	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(traintuple.Key)}
+	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(traintuple["key"])}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the aggregate tuple without error ", resp.Message)
 }

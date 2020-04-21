@@ -17,6 +17,7 @@ package main
 import "chaincode/errors"
 
 type outputAggregatetuple struct {
+	*EmbeddedMetrics
 	Key           string            `json:"key"`
 	Algo          *HashDressName    `json:"algo"`
 	Creator       string            `json:"creator"`

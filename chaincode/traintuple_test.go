@@ -75,10 +75,10 @@ func TestTraintupleWithSingleDatasample(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding traintuple with a single data samples it should work: ", resp.Message)
 
-	traintuple := outputTraintuple{}
+	traintuple := map[string]string{}
 	err := json.Unmarshal(resp.Payload, &traintuple)
 	assert.NoError(t, err, "should be unmarshaled")
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintuple.Key)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintuple["key"])}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
 }
