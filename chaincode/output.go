@@ -318,7 +318,7 @@ type outputComputePlan struct {
 	TesttupleKeys           []string          `json:"testtupleKeys"`
 	CleanModels             bool              `json:"cleanModels"`
 	Tag                     string            `json:"tag"`
-	Metadata                map[string]string  `json:"metadata"`
+	Metadata                map[string]string `json:"metadata"`
 	Status                  string            `json:"status"`
 	TupleCount              int               `json:"tupleCount"`
 	DoneCount               int               `json:"doneCount"`
