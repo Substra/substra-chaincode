@@ -30,11 +30,10 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	// Add a some dataManager, dataSample and traintuple
 	resp, _ := registerItem(t, *mockStub, "traintuple")
 
-	res := map[string]string{}
+	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	traintupleKey := res["key"]
+	traintupleKey := res.Key
 
 	// Mark the traintuple as failed
 	fail := inputLogFailTrain{}

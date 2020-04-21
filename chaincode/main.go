@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"strconv"
 	"time"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -199,10 +198,6 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	switch meter := result.(type) {
 	case Meter:
 		meter.AddDuration(int(time.Since(start).Milliseconds()))
-	case map[string]string:
-		if _, ok := meter["duration"]; !ok {
-			meter["duration"] = strconv.Itoa(int(time.Since(start).Milliseconds()))
-		}
 	case map[string][]string:
 		new := map[string]interface{}{
 			"duration": int(time.Since(start).Milliseconds()),

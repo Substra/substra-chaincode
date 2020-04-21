@@ -39,6 +39,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerDataManager","{\"name\":\"li
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 }
 ```
@@ -97,6 +98,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":[\"
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "keys": [
   "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
@@ -134,6 +136,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerObjective","{\"name\":\"MSI 
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 }
 ```
@@ -163,6 +166,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerAlgo","{\"name\":\"hog + svm
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 }
 ```
@@ -184,6 +188,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":[\"
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "keys": [
   "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
@@ -319,6 +324,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
 }
 ```
@@ -344,12 +350,14 @@ peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
 }
 ```
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
 }
 ```
@@ -571,6 +579,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"dataManagerKey\
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "3b807eb0bcd6b0798dc8f6eb415d2e58fb4d3515d2b00d4b888be1ca8145b7d8"
 }
 ```
@@ -594,6 +603,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"dataManagerKey\
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "4d49bf9147bf391f9610d830aae6630290e128dacd7c3540e82178a0e002951e"
 }
 ```
@@ -617,6 +627,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"dataManagerKey\
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "76d4a5908359eb6ba9c8fc89254c4b08e23aa20471ea3ddeee9a2835825dbd72"
 }
 ```
@@ -1262,6 +1273,7 @@ peer chaincode invoke -n mycc -c '{"Args":["updateDataSample","{\"hashes\":[\"aa
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "{\"keys\": [\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"]}"
 }
 ```

@@ -233,19 +233,19 @@ func (testtuple *Testtuple) Save(db *LedgerDB, testtupleKey string) error {
 // -------------------------------------
 
 // createTesttuple adds a Testtuple in the ledger
-func createTesttuple(db *LedgerDB, args []string) (map[string]string, error) {
+func createTesttuple(db *LedgerDB, args []string) (outputKey, error) {
 
 	inp := inputTesttuple{}
 	err := AssetFromJSON(args, &inp)
 	if err != nil {
-		return nil, err
+		return outputKey{}, err
 	}
 	key, err := createTesttupleInternal(db, inp)
 	if err != nil {
-		return nil, err
+		return outputKey{}, err
 	}
 
-	return map[string]string{"key": key}, nil
+	return outputKey{Key: key}, nil
 }
 
 func createTesttupleInternal(db *LedgerDB, inp inputTesttuple) (string, error) {

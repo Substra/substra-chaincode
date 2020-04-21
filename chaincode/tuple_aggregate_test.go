@@ -85,10 +85,10 @@ func TestTraintupleWithSingleDatasampleAggregate(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding aggregate tuple with a single data samples it should work: ", resp.Message)
 
-	traintuple := map[string]string{}
+	traintuple := outputKey{}
 	err := json.Unmarshal(resp.Payload, &traintuple)
 	assert.NoError(t, err, "should be unmarshaled")
-	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(traintuple["key"])}
+	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(traintuple.Key)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the aggregate tuple without error ", resp.Message)
 }
@@ -141,11 +141,10 @@ func TestTraintupleComputePlanCreationAggregate(t *testing.T) {
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
-	res := map[string]string{}
+	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	key := res["key"]
+	key := res.Key
 	require.EqualValues(t, aggregatetupleKey, key)
 
 	inpTraintuple = inputAggregatetuple{Rank: "0"}
@@ -173,11 +172,10 @@ func TestTraintupleMultipleCommputePlanCreationsAggregate(t *testing.T) {
 	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
-	res := map[string]string{}
+	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	key := res["key"]
+	key := res.Key
 	db := NewLedgerDB(mockStub)
 	tuple, err := db.GetAggregatetuple(key)
 	assert.NoError(t, err)
@@ -209,7 +207,6 @@ func TestTraintupleMultipleCommputePlanCreationsAggregate(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create an aggregate tuple with the same ComputePlanID")
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
 }
 
 func TestTraintupleAggregate(t *testing.T) {
@@ -234,11 +231,10 @@ func TestTraintupleAggregate(t *testing.T) {
 	resp, tt := registerItem(t, *mockStub, "aggregatetuple")
 
 	inpTraintuple = tt.(inputAggregatetuple)
-	res := map[string]string{}
+	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "aggregate tuple should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	traintupleKey := res["key"]
+	traintupleKey := res.Key
 	// Query traintuple from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)

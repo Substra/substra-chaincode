@@ -169,11 +169,10 @@ func TestTraintupleComputePlanCreationComposite(t *testing.T) {
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
-	res := map[string]string{}
+	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	key := res["key"]
+	key := res.Key
 	require.EqualValues(t, key, compositeTraintupleKey)
 
 	inpTraintuple = inputCompositeTraintuple{Rank: "0"}
@@ -201,11 +200,10 @@ func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
 	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
-	res := map[string]string{}
+	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	key := res["key"]
+	key := res.Key
 	db := NewLedgerDB(mockStub)
 	ct, err := db.GetCompositeTraintuple(key)
 	assert.NoError(t, err)
@@ -240,7 +238,6 @@ func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same ComputePlanID")
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
 }
 
 func TestTraintupleComposite(t *testing.T) {
@@ -265,11 +262,10 @@ func TestTraintupleComposite(t *testing.T) {
 	resp, tt := registerItem(t, *mockStub, "compositeTraintuple")
 
 	inpTraintuple = tt.(inputCompositeTraintuple)
-	res := map[string]string{}
+	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "composite traintuple should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	traintupleKey := res["key"]
+	traintupleKey := res.Key
 	// Query traintuple from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
@@ -809,12 +805,11 @@ func TestHeadModelDifferentWorker(t *testing.T) {
 	inpDM.OpenerHash = GetRandomHash()
 	outDM, err := registerDataManager(db, assetToArgs(inpDM))
 	assert.NoError(t, err)
-	require.Contains(t, outDM, "key")
 
 	inpData := inputDataSample{}
 	inpData.createDefault()
 	inpData.Hashes = []string{GetRandomHash()}
-	inpData.DataManagerKeys = []string{outDM["key"]}
+	inpData.DataManagerKeys = []string{outDM.Key}
 	outData, err := registerDataSample(db, assetToArgs(inpData))
 	assert.NoError(t, err)
 	require.Contains(t, outData, "keys")
@@ -822,12 +817,12 @@ func TestHeadModelDifferentWorker(t *testing.T) {
 	// try to create new composite traintuple on new worker with previous head model
 	in := inputCompositeTraintuple{}
 	in.fillDefaults()
-	in.DataManagerKey = outDM["key"]
+	in.DataManagerKey = outDM.Key
 	in.DataSampleKeys = outData["keys"]
 	in.InHeadModelKey = compositeTraintupleKey
 	in.InTrunkModelKey = aggregatetupleKey
 	out, err := createCompositeTraintuple(db, assetToArgs(in))
 	assert.Error(t, err, "It should failed because dataset worker and head InModel are not the same")
 	assert.IsType(t, errors.BadRequest(), err)
-	assert.Nil(t, out)
+	assert.Zero(t, out.Key)
 }

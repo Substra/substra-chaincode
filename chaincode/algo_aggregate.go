@@ -50,7 +50,7 @@ func (algo *AggregateAlgo) Set(db *LedgerDB, inp inputAggregateAlgo) (algoKey st
 // -------------------------------------------------------------------------------------------
 // registerAggregateAlgo stores a new algo in the ledger.
 // If the key exists, it will override the value with the new one
-func registerAggregateAlgo(db *LedgerDB, args []string) (resp map[string]string, err error) {
+func registerAggregateAlgo(db *LedgerDB, args []string) (resp outputKey, err error) {
 	inp := inputAggregateAlgo{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -72,7 +72,7 @@ func registerAggregateAlgo(db *LedgerDB, args []string) (resp map[string]string,
 	if err != nil {
 		return
 	}
-	return map[string]string{"key": algoKey}, nil
+	return outputKey{Key: algoKey}, nil
 }
 
 // queryAggregateAlgo returns an algo of the ledger given its key

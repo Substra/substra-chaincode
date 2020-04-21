@@ -69,7 +69,7 @@ func (objective *Objective) Set(db *LedgerDB, inp inputObjective) (objectiveKey 
 
 // registerObjective stores a new objective in the ledger.
 // If the key exists, it will override the value with the new one
-func registerObjective(db *LedgerDB, args []string) (resp map[string]string, err error) {
+func registerObjective(db *LedgerDB, args []string) (resp outputKey, err error) {
 	// convert input strings args to input struct inputObjective
 	inp := inputObjective{}
 	err = AssetFromJSON(args, &inp)
@@ -93,7 +93,7 @@ func registerObjective(db *LedgerDB, args []string) (resp map[string]string, err
 	}
 	// add objective to dataManager
 	err = addObjectiveDataManager(db, dataManagerKey, objectiveKey)
-	return map[string]string{"key": objectiveKey}, err
+	return outputKey{Key: objectiveKey}, err
 }
 
 // queryObjective returns a objective of the ledger given its key

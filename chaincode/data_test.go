@@ -48,11 +48,10 @@ func TestDataManager(t *testing.T) {
 	resp, tt := registerItem(t, *mockStub, "dataManager")
 
 	inpDataManager = tt.(inputDataManager)
-	res := map[string]string{}
+	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	dataManagerKey := res["key"]
+	dataManagerKey := res.Key
 	// check returned dataManager key corresponds to opener hash
 	assert.EqualValuesf(t, dataManagerOpenerHash, dataManagerKey, "when adding dataManager: dataManager key does not correspond to dataManager opener hash: %s - %s", dataManagerKey, dataManagerOpenerHash)
 

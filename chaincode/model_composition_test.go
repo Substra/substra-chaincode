@@ -69,14 +69,14 @@ func TestModelComposition(t *testing.T) {
 					child.InTrunkModelKey = parent2Key
 					childResp, err := createCompositeTraintuple(db, assetToArgs(child))
 					assert.NoError(t, err)
-					childKey = childResp["key"]
+					childKey = childResp.Key
 				case AggregatetupleType:
 					child := inputAggregatetuple{}
 					child.createDefault()
 					child.InModels = []string{parent1Key, parent2Key}
 					childResp, err := createAggregatetuple(db, assetToArgs(child))
 					assert.NoError(t, err)
-					childKey = childResp["key"]
+					childKey = childResp.Key
 				default:
 					assert.NoError(t, fmt.Errorf("unsupported test case %s", tt.parent2))
 				}
@@ -87,7 +87,7 @@ func TestModelComposition(t *testing.T) {
 				childTesttuple.fillDefaults()
 				childTestupleResp, err := createTesttuple(db, assetToArgs(childTesttuple))
 				assert.NoError(t, err)
-				childTesttupleKey := childTestupleResp["key"]
+				childTesttupleKey := childTestupleResp.Key
 
 				// start parents
 				_, err = trainStart(db, tt.parent1, parent1Key)
