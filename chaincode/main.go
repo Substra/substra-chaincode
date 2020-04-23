@@ -47,6 +47,7 @@ func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response 
 
 // Invoke is called per transaction on the chaincode.
 func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
+	start := time.Now()
 	// Log all input for potential debug later on.
 	logger.Infof("Args received by the chaincode: %#v", stub.GetStringArgs())
 
@@ -198,7 +199,14 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	if err != nil {
 		return formatErrorResponse(errors.Internal("could not format response: %s", err.Error()))
 	}
-
+	duration := int(time.Since(start).Milliseconds())
+	tempRespMap := map[string]interface{}{}
+	err = json.Unmarshal(resp, &tempRespMap)
+	if err != nil || tempRespMap == nil {
+		return shim.Success(resp)
+	}
+	tempRespMap["duration"] = duration
+	resp, err = json.Marshal(tempRespMap)
 	return shim.Success(resp)
 }
 

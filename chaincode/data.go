@@ -99,7 +99,7 @@ func validateUpdateDataSample(db *LedgerDB, inp inputUpdateDataSample) (dataSamp
 // -----------------------------------------------------------------
 
 // registerDataManager stores a new dataManager in the ledger.
-func registerDataManager(db *LedgerDB, args []string) (resp map[string]string, err error) {
+func registerDataManager(db *LedgerDB, args []string) (resp outputKey, err error) {
 	inp := inputDataManager{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -133,7 +133,7 @@ func registerDataManager(db *LedgerDB, args []string) (resp map[string]string, e
 	if err != nil {
 		return
 	}
-	return map[string]string{"key": dataManagerKey}, nil
+	return outputKey{Key: dataManagerKey}, nil
 }
 
 // registerDataSample stores new dataSample in the ledger (one or more).
@@ -172,7 +172,7 @@ func registerDataSample(db *LedgerDB, args []string) (dataSampleKeys map[string]
 }
 
 // updateDataSample associates one or more dataManagerKeys to one or more dataSample
-func updateDataSample(db *LedgerDB, args []string) (resp map[string]string, err error) {
+func updateDataSample(db *LedgerDB, args []string) (resp outputKey, err error) {
 	inp := inputUpdateDataSample{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -218,11 +218,11 @@ func updateDataSample(db *LedgerDB, args []string) (resp map[string]string, err 
 	// return updated dataSample keys
 	// TODO return a json struct
 	dataSampleKeys = "{\"keys\": [" + strings.TrimSuffix(dataSampleKeys, suffix) + "]}"
-	return map[string]string{"key": dataSampleKeys}, nil
+	return outputKey{Key: dataSampleKeys}, nil
 }
 
 // updateDataManager associates a objectiveKey to an existing dataManager
-func updateDataManager(db *LedgerDB, args []string) (resp map[string]string, err error) {
+func updateDataManager(db *LedgerDB, args []string) (resp outputKey, err error) {
 	inp := inputUpdateDataManager{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
@@ -233,7 +233,7 @@ func updateDataManager(db *LedgerDB, args []string) (resp map[string]string, err
 	if err = addObjectiveDataManager(db, inp.DataManagerKey, inp.ObjectiveKey); err != nil {
 		return
 	}
-	return map[string]string{"key": inp.DataManagerKey}, nil
+	return outputKey{Key: inp.DataManagerKey}, nil
 }
 
 // queryDataManager returns dataManager and its key

@@ -37,11 +37,10 @@ func TestAlgo(t *testing.T) {
 	resp, tt := registerItem(t, *mockStub, "algo")
 
 	inpAlgo = tt.(inputAlgo)
-	res := map[string]string{}
+	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	algoKey := res["key"]
+	algoKey := res.Key
 	assert.Equalf(t, inpAlgo.Hash, algoKey, "when adding algo, key does not corresponds to its hash - key: %s and hash %s", algoKey, inpAlgo.Hash)
 
 	// Query algo from key and check the consistency of returned arguments

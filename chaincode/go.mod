@@ -6,6 +6,7 @@ require (
 	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
 	github.com/Shopify/sarama v1.22.1 // indirect
 	github.com/containerd/continuity v0.0.0-20190426062206-aaeac12a7ffc // indirect
+	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/fsouza/go-dockerclient v1.4.0 // indirect
 	github.com/go-playground/locales v0.12.1 // indirect

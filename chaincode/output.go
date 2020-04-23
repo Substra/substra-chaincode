@@ -395,3 +395,7 @@ func (out *outputBoardTuple) Fill(db *LedgerDB, in Testtuple, testtupleKey strin
 func getLimitedNbSliceElements(s []string) int {
 	return int(math.Min(float64(len(s)), OutputAssetPaginationHardLimit))
 }
+
+type outputKey struct {
+	Key string `json:"key"`
+}

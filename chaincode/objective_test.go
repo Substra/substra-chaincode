@@ -47,18 +47,18 @@ func TestLeaderBoard(t *testing.T) {
 	assert.Len(t, leaderboard.Testtuples, 0)
 
 	// Update testtuple status directly
-	testtuple, err := db.GetTesttuple(keyMap["key"])
+	testtuple, err := db.GetTesttuple(keyMap.Key)
 	assert.NoError(t, err)
 	testtuple.Status = StatusDone
 	testtuple.Dataset.Perf = 0.9
-	err = db.Put(keyMap["key"], testtuple)
+	err = db.Put(keyMap.Key, testtuple)
 	assert.NoError(t, err)
 
 	leaderboard, err = queryObjectiveLeaderboard(db, assetToArgs(inpLeaderboard))
 	assert.NoError(t, err)
 	assert.Equal(t, objectiveDescriptionHash, leaderboard.Objective.Key)
 	require.Len(t, leaderboard.Testtuples, 1)
-	assert.Equal(t, keyMap["key"], leaderboard.Testtuples[0].Key)
+	assert.Equal(t, keyMap.Key, leaderboard.Testtuples[0].Key)
 	assert.Equal(t, traintupleKey, leaderboard.Testtuples[0].TraintupleKey)
 }
 func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
@@ -127,11 +127,10 @@ func TestObjective(t *testing.T) {
 	resp, tt := registerItem(t, *mockStub, "objective")
 
 	inpObjective = tt.(inputObjective)
-	res := map[string]string{}
+	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	objectiveKey := res["key"]
+	objectiveKey := res.Key
 	assert.EqualValuesf(
 		t,
 		inpObjective.DescriptionHash,

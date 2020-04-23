@@ -8,6 +8,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerNode"]}' -C myc
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "id": "SampleOrg"
 }
 ```
@@ -39,6 +40,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerDataManager","{\"name\":\"li
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 }
 ```
@@ -62,6 +64,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryDataManager","{\"key\":\"da1bb7
   "hash": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
   "storageAddress": "https://toto/dataManager/42234/description"
  },
+ "duration": 0,
  "key": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
  "name": "liver slide",
  "objectiveKey": "",
@@ -97,6 +100,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":[\"
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "keys": [
   "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
@@ -134,6 +138,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerObjective","{\"name\":\"MSI 
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 }
 ```
@@ -163,6 +168,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerAlgo","{\"name\":\"hog + svm
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 }
 ```
@@ -184,6 +190,7 @@ peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":[\"
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "keys": [
   "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
@@ -319,6 +326,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
 }
 ```
@@ -344,12 +352,14 @@ peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
 }
 ```
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "720f778397fa07e24c2f314599725bf97727ded07ff65a51fa1a97b24d11ecab"
 }
 ```
@@ -433,6 +443,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"9da043ddc
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "worker": "SampleOrg"
  },
+ "duration": 0,
  "inModels": null,
  "key": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
  "log": "",
@@ -484,6 +495,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"9da043d
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "worker": "SampleOrg"
  },
+ "duration": 0,
  "inModels": null,
  "key": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
  "log": "no error, ah ah ah",
@@ -533,6 +545,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"9da043d
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "worker": "SampleOrg"
  },
+ "duration": 0,
  "inModels": null,
  "key": "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3",
  "log": "no error, ah ah ah",
@@ -571,6 +584,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"dataManagerKey\
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "3b807eb0bcd6b0798dc8f6eb415d2e58fb4d3515d2b00d4b888be1ca8145b7d8"
 }
 ```
@@ -594,6 +608,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"dataManagerKey\
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "4d49bf9147bf391f9610d830aae6630290e128dacd7c3540e82178a0e002951e"
 }
 ```
@@ -617,6 +632,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"dataManagerKey\
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "76d4a5908359eb6ba9c8fc89254c4b08e23aa20471ea3ddeee9a2835825dbd72"
 }
 ```
@@ -738,6 +754,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"4d49bf9147
   "perf": 0,
   "worker": "SampleOrg"
  },
+ "duration": 0,
  "key": "4d49bf9147bf391f9610d830aae6630290e128dacd7c3540e82178a0e002951e",
  "log": "",
  "objective": {
@@ -789,6 +806,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"4d49bf91
   "perf": 0.9,
   "worker": "SampleOrg"
  },
+ "duration": 0,
  "key": "4d49bf9147bf391f9610d830aae6630290e128dacd7c3540e82178a0e002951e",
  "log": "no error, ah ah ah",
  "objective": {
@@ -838,6 +856,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"4d49bf914
   "perf": 0.9,
   "worker": "SampleOrg"
  },
+ "duration": 0,
  "key": "4d49bf9147bf391f9610d830aae6630290e128dacd7c3540e82178a0e002951e",
  "log": "no error, ah ah ah",
  "objective": {
@@ -979,6 +998,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"9da043
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "nonCertifiedTesttuples": [
   {
    "algo": {
@@ -1181,6 +1201,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelPermissions","{\"key\":\"ee
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "process": {
   "authorizedIDs": [],
   "public": true
@@ -1207,6 +1228,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"da1bb7c31f6
   "hash": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
   "storageAddress": "https://toto/dataManager/42234/description"
  },
+ "duration": 0,
  "key": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
  "name": "liver slide",
  "objectiveKey": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1262,6 +1284,7 @@ peer chaincode invoke -n mycc -c '{"Args":["updateDataSample","{\"hashes\":[\"aa
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "key": "{\"keys\": [\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"]}"
 }
 ```
@@ -1285,6 +1308,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"38a320b2a67
   "hash": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
   "storageAddress": "https://toto/dataManager/42234/description"
  },
+ "duration": 0,
  "key": "38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee",
  "name": "liver slide",
  "objectiveKey": "",
@@ -1368,6 +1392,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"cleanModels\"
  "compositeTraintupleKeys": null,
  "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
+ "duration": 0,
  "status": "todo",
  "tag": "a tag is simply a string",
  "testtupleKeys": [
@@ -1441,6 +1466,7 @@ peer chaincode invoke -n mycc -c '{"Args":["updateComputePlan","{\"computePlanID
  "compositeTraintupleKeys": null,
  "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
+ "duration": 0,
  "status": "todo",
  "tag": "a tag is simply a string",
  "testtupleKeys": [
@@ -1472,6 +1498,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
 ##### Command output:
 ```json
 {
+ "duration": 0,
  "objective": {
   "description": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1538,6 +1565,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"7dd808
  "compositeTraintupleKeys": null,
  "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
+ "duration": 0,
  "status": "todo",
  "tag": "a tag is simply a string",
  "testtupleKeys": [
@@ -1603,6 +1631,7 @@ peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"7dd80
  "compositeTraintupleKeys": null,
  "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
+ "duration": 0,
  "status": "canceled",
  "tag": "a tag is simply a string",
  "testtupleKeys": [

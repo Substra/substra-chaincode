@@ -258,19 +258,19 @@ func (traintuple *CompositeTraintuple) Save(db *LedgerDB, traintupleKey string) 
 // -------------------------------------------------
 
 // createCompositeTraintuple is the wrapper for the substra smartcontract createCompositeTraintuple
-func createCompositeTraintuple(db *LedgerDB, args []string) (map[string]string, error) {
+func createCompositeTraintuple(db *LedgerDB, args []string) (outputKey, error) {
 	inp := inputCompositeTraintuple{}
 	err := AssetFromJSON(args, &inp)
 	if err != nil {
-		return nil, err
+		return outputKey{}, err
 	}
 
 	key, err := createCompositeTraintupleInternal(db, inp, true)
 	if err != nil {
-		return nil, err
+		return outputKey{}, err
 	}
 
-	return map[string]string{"key": key}, nil
+	return outputKey{Key: key}, nil
 }
 
 // createCompositeTraintupleInternal adds a CompositeTraintuple in the ledger
