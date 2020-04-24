@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/SubstraFoundation/substra-chaincode.svg?branch=master)](https://travis-ci.org/SubstraFoundation/substra-chaincode)
 
-Chaincode for the Substra platfor
+Chaincode for the Substra platform
 
 ## License
 
