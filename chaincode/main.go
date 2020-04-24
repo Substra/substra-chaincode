@@ -29,6 +29,8 @@ import (
 type SubstraChaincode struct {
 }
 
+const version = "0.0.9"
+
 // Create a global logger for the chaincode. Its default level is Info
 var logger = shim.NewLogger("substra-chaincode")
 
@@ -48,7 +50,7 @@ func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response 
 // Invoke is called per transaction on the chaincode.
 func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	// Log all input for potential debug later on.
-	logger.Infof("Args received by the chaincode: %#v", stub.GetStringArgs())
+	logger.Infof("Args received by the chaincode (version: %s): %#v", version, stub.GetStringArgs())
 
 	// Seed with a timestamp from the channel header so the chaincode's output
 	// stay determinist for each transaction. It's necessary because endorsers
