@@ -183,7 +183,9 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	default:
 		err = errors.BadRequest("function \"%s\" not implemented", fn)
 	}
-	logger.Infof("Response from chaincode: %#v, error: %s", result, err)
+	// Invoke duration
+	duration := int(time.Since(start).Milliseconds())
+	logger.Infof("Response from chaincode (in %dms): %#v, error: %s", duration, result, err)
 	// Return the result as success payload
 	if err != nil {
 		return formatErrorResponse(err)
@@ -199,7 +201,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	if err != nil {
 		return formatErrorResponse(errors.Internal("could not format response: %s", err.Error()))
 	}
-	duration := int(time.Since(start).Milliseconds())
+	// Add duration to the output object when possible
 	tempRespMap := map[string]interface{}{}
 	err = json.Unmarshal(resp, &tempRespMap)
 	if err != nil || tempRespMap == nil {
