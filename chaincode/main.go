@@ -184,7 +184,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 		err = errors.BadRequest("function \"%s\" not implemented", fn)
 	}
 	// Invoke duration
-	duration := int(time.Since(start).Milliseconds())
+	duration := int(time.Since(start).Nanoseconds()) / 1000000
 	logger.Infof("Response from chaincode (in %dms): %#v, error: %s", duration, result, err)
 	// Return the result as success payload
 	if err != nil {
