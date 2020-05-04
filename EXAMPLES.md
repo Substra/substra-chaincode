@@ -1392,7 +1392,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"cleanModels\"
  "compositeTraintupleKeys": null,
  "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
- "duration": 1,
+ "duration": 0,
  "status": "todo",
  "tag": "a tag is simply a string",
  "testtupleKeys": [
@@ -1466,7 +1466,7 @@ peer chaincode invoke -n mycc -c '{"Args":["updateComputePlan","{\"computePlanID
  "compositeTraintupleKeys": null,
  "computePlanID": "7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17",
  "doneCount": 0,
- "duration": 1,
+ "duration": 0,
  "status": "todo",
  "tag": "a tag is simply a string",
  "testtupleKeys": [

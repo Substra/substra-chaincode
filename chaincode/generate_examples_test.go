@@ -21,6 +21,7 @@ import (
 	"io"
 	"io/ioutil"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -292,6 +293,9 @@ func TestPipeline(t *testing.T) {
 
 	// Use the output to check the EXAMPLES.md file and if asked update it
 	doc := out.String()
+	// Replace all duration tag to prevent flaky tests
+	reDuration := regexp.MustCompile(`\"duration\": [0-9]*`)
+	doc = reDuration.ReplaceAllString(doc, `"duration": 0`)
 	fromFile, err := ioutil.ReadFile(*examplesPath)
 	require.NoErrorf(t, err, "can not read the EXAMPLES.md file at the path %s", *examplesPath)
 	actualExamples := string(fromFile)
