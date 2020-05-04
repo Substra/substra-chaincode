@@ -399,3 +399,7 @@ func getLimitedNbSliceElements(s []string) int {
 type outputKey struct {
 	Key string `json:"key"`
 }
+
+type outputMetrics struct {
+	Duration int `json:"duration"`
+}

@@ -207,7 +207,10 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	if err != nil || tempRespMap == nil {
 		return shim.Success(resp)
 	}
-	tempRespMap["duration"] = duration
+	metrics := outputMetrics{
+		Duration: duration,
+	}
+	tempRespMap["__metrics__"] = metrics
 	resp, err = json.Marshal(tempRespMap)
 	return shim.Success(resp)
 }
