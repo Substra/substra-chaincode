@@ -4,8 +4,6 @@
 
 Chaincode for the Substra platform
 
-> :warning: This project is under active development. Please wait a while before using it...
-
 ## License
 
 This project is developed under the Apache License, Version 2.0 (Apache-2.0), located in the [LICENSE](./LICENSE) file.
