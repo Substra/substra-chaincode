@@ -21,6 +21,7 @@ import (
 	"io"
 	"io/ioutil"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -63,11 +64,10 @@ func TestPipeline(t *testing.T) {
 	inpDataManager.createDefault()
 	resp := callAssertAndPrint("invoke", "registerDataManager", inpDataManager)
 	// Get dataManager key from Payload
-	res := map[string]string{}
+	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	dataManagerKey := res["key"]
+	dataManagerKey := res.Key
 
 	fmt.Fprintln(&out, "#### ------------ Query DataManager From key ------------")
 	callAssertAndPrint("invoke", "queryDataManager", inputKey{dataManagerKey})
@@ -109,11 +109,10 @@ func TestPipeline(t *testing.T) {
 	args := inpTraintuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTraintuple", inpTraintuple)
 	// Get traintuple key from Payload
-	res = map[string]string{}
+	res = outputKey{}
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	traintupleKey := res["key"]
+	traintupleKey := res.Key
 	// check not possible to create same traintuple
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 409, resp.Status, "when adding same traintuple with status %d and message %s", resp.Status, resp.Message)
@@ -134,11 +133,10 @@ func TestPipeline(t *testing.T) {
 	inpTraintuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTraintuple", inpTraintuple)
 	printResp(&out, resp.Payload)
-	res = map[string]string{}
+	res = outputKey{}
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	todoTraintupleKey := res["key"]
+	todoTraintupleKey := res.Key
 
 	fmt.Fprintln(&out, "#### ------------ Query Traintuples of worker with todo status ------------")
 	filter := inputQueryFilter{
@@ -172,11 +170,10 @@ func TestPipeline(t *testing.T) {
 	args = inpTesttuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTesttuple", inpTesttuple)
 	// Get testtuple key from Payload
-	res = map[string]string{}
+	res = outputKey{}
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	assert.Contains(t, res, "key")
-	testtupleKey := res["key"]
+	testtupleKey := res.Key
 	// check not possible to create same testtuple
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 409, resp.Status, "when adding same testtuple with status %d and message %s", resp.Status, resp.Message)
@@ -296,6 +293,9 @@ func TestPipeline(t *testing.T) {
 
 	// Use the output to check the EXAMPLES.md file and if asked update it
 	doc := out.String()
+	// Replace all duration tag to prevent flaky tests
+	reDuration := regexp.MustCompile(`\"duration\": [0-9]*`)
+	doc = reDuration.ReplaceAllString(doc, `"duration": 0`)
 	fromFile, err := ioutil.ReadFile(*examplesPath)
 	require.NoErrorf(t, err, "can not read the EXAMPLES.md file at the path %s", *examplesPath)
 	actualExamples := string(fromFile)

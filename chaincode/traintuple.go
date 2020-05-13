@@ -211,20 +211,20 @@ func (traintuple *Traintuple) Save(db *LedgerDB, traintupleKey string) error {
 // -------------------------------------------------------------------------------------------
 
 // createTraintuple adds a Traintuple in the ledger
-func createTraintuple(db *LedgerDB, args []string) (map[string]string, error) {
+func createTraintuple(db *LedgerDB, args []string) (outputKey, error) {
 	inp := inputTraintuple{}
 	err := AssetFromJSON(args, &inp)
 	if err != nil {
-		return nil, err
+		return outputKey{}, err
 	}
 
 	key, err := createTraintupleInternal(db, inp, true)
 
 	if err != nil {
-		return nil, err
+		return outputKey{}, err
 	}
 
-	return map[string]string{"key": key}, nil
+	return outputKey{Key: key}, nil
 }
 
 func createTraintupleInternal(db *LedgerDB, inp inputTraintuple, checkComputePlanAvailability bool) (string, error) {

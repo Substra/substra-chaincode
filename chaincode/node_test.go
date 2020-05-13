@@ -28,11 +28,11 @@ func TestNode(t *testing.T) {
 
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "Node created")
-	assert.EqualValuesf(t, "{\"id\":\"SampleOrg\"}", string(resp.Payload), "Node created")
+	assert.Contains(t, string(resp.Payload), "\"id\":\"SampleOrg\"", "Node created")
 
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "Node registered twice")
-	assert.EqualValuesf(t, "{\"id\":\"SampleOrg\"}", string(resp.Payload), "Node registered twice")
+	assert.Contains(t, string(resp.Payload), "\"id\":\"SampleOrg\"", "Node registered twice")
 }
 
 func TestQueryNodes(t *testing.T) {
@@ -41,5 +41,5 @@ func TestQueryNodes(t *testing.T) {
 	response := mockStub.MockInvoke("43", [][]byte{[]byte("queryNodes")})
 
 	assert.EqualValuesf(t, 200, response.Status, "Node Created")
-	assert.EqualValuesf(t, "[{\"id\":\"SampleOrg\"}]", string(response.Payload), "Query nodes")
+	assert.Contains(t, string(response.Payload), "\"id\":\"SampleOrg\"", "Query nodes")
 }

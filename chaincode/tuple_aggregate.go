@@ -220,19 +220,19 @@ func (tuple *Aggregatetuple) Save(db *LedgerDB, aggregatetupleKey string) error 
 // Smart contracts related to aggregate tuples
 // -------------------------------------------------------------------------------------------
 // createAggregatetuple is the wrapper for the substra smartcontract createAggregatetuple
-func createAggregatetuple(db *LedgerDB, args []string) (map[string]string, error) {
+func createAggregatetuple(db *LedgerDB, args []string) (outputKey, error) {
 	inp := inputAggregatetuple{}
 	err := AssetFromJSON(args, &inp)
 	if err != nil {
-		return nil, err
+		return outputKey{}, err
 	}
 
 	key, err := createAggregatetupleInternal(db, inp, true)
 	if err != nil {
-		return nil, err
+		return outputKey{}, err
 	}
 
-	return map[string]string{"key": key}, nil
+	return outputKey{Key: key}, nil
 }
 
 // createAggregatetupleInternal adds a Aggregatetuple in the ledger
