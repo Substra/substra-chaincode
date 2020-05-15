@@ -577,10 +577,10 @@ func TestLogSuccessAfterCancel(t *testing.T) {
 	computePlan, err := getOutComputePlan(db, out.ComputePlanID)
 	assert.Equal(t, StatusCanceled, computePlan.Status)
 
-	tuples, err := queryCompositeTraintuples(db, []string{})
-	assert.NoError(t, err)
-	expected := []string{StatusDone, StatusDoing, StatusAborted, StatusAborted}
-	for i, tuple := range tuples {
+	expected := []string{StatusDoing, StatusDone, StatusAborted, StatusAborted}
+	for i, tuplekey := range out.CompositeTraintupleKeys {
+		tuple, err := queryCompositeTraintuple(db, keyToArgs(tuplekey))
+		assert.NoError(t, err)
 		assert.Equal(t, expected[i], tuple.Status)
 	}
 }
@@ -624,6 +624,7 @@ func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
 
 	success := inputLogSuccessTrain{}
 	success.Key = key
+	success.OutModel.Hash = GetRandomHash()
 	success.fillDefaults()
 	_, err = logSuccessTrain(db, assetToArgs(success))
 	assert.NoError(t, err)

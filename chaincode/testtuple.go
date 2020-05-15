@@ -176,6 +176,7 @@ func (testtuple *Testtuple) GetKey() string {
 		testtuple.ObjectiveKey,
 		testtuple.Dataset.OpenerHash,
 		testtuple.Creator,
+		testtuple.ComputePlanID,
 	}
 	hashKeys = append(hashKeys, testtuple.Dataset.DataSampleKeys...)
 	return HashForKey("testtuple", hashKeys...)

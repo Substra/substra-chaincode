@@ -104,7 +104,11 @@ func (traintuple *Traintuple) SetFromParents(db *LedgerDB, inModels []string) er
 
 // GetKey return the key of the traintuple depending on its key parameters.
 func (traintuple *Traintuple) GetKey() string {
-	hashKeys := []string{traintuple.Creator, traintuple.AlgoKey, traintuple.Dataset.DataManagerKey}
+	hashKeys := []string{
+		traintuple.Creator,
+		traintuple.AlgoKey,
+		traintuple.Dataset.DataManagerKey,
+		traintuple.ComputePlanID}
 	hashKeys = append(hashKeys, traintuple.Dataset.DataSampleKeys...)
 	hashKeys = append(hashKeys, traintuple.InModelKeys...)
 	return HashForKey("traintuple", hashKeys...)

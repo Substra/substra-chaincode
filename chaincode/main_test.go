@@ -52,9 +52,9 @@ const headModelHash = modelHash
 const trunkModelHash = "ccdbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482ecc"
 const trunkModelAddress = "https://substrabac/model/titi"
 const worker = "SampleOrg"
-const traintupleKey = "9da043ddc233996d2e62c196471290de4726fc59d65dbbd2b32a920326e8adf3"
-const compositeTraintupleKey = "57104c72d50215d8cfa288059fdf47bcc5f808f6685a5f08fa08f792cd782c68"
-const aggregatetupleKey = "af689258ffecdb5172b285b04475ac44941b7e6acd88a0d076059ce520cb0a95"
+const traintupleKey = "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
+const compositeTraintupleKey = "b6f20e7ed89073d995c50d4b2bff6bb365a05b8d77f10469117d8aad81d83989"
+const aggregatetupleKey = "48c17bb556e1a122138d89178d81b22469a0cae260af322de9b391086ad27b2c"
 const tag = "a tag is simply a string"
 
 func TestInit(t *testing.T) {

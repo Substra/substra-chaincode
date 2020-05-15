@@ -150,7 +150,8 @@ func (traintuple *CompositeTraintuple) GetKey() string {
 		traintuple.AlgoKey,
 		traintuple.Dataset.DataManagerKey,
 		traintuple.InHeadModel,
-		traintuple.InTrunkModel}
+		traintuple.InTrunkModel,
+		traintuple.ComputePlanID}
 	hashKeys = append(hashKeys, traintuple.Dataset.DataSampleKeys...)
 	return HashForKey("compositeTraintuple", hashKeys...)
 }
