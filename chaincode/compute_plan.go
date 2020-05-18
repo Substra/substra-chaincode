@@ -414,7 +414,10 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey s
 		return err
 	}
 	if statusUpdated || len(doneModels) != 0 {
-		db.AddComputePlanEvent(ComputePlanID, cp.State.Status, doneModels)
+		err = db.AddComputePlanEvent(ComputePlanID, cp.State.Status, doneModels)
+		if err != nil {
+			return err
+		}
 		return cp.SaveState(db)
 	}
 	return nil

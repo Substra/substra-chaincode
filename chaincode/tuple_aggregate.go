@@ -114,7 +114,7 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 
 // GetKey return the key of the aggregate tuple depending on its key parameters.
 func (tuple *Aggregatetuple) GetKey() string {
-	hashKeys := []string{tuple.Creator, tuple.AlgoKey}
+	hashKeys := []string{tuple.Creator, tuple.AlgoKey, tuple.ComputePlanID}
 	hashKeys = append(hashKeys, tuple.InModelKeys...)
 	return HashForKey("aggregate-traintuple", hashKeys...)
 }
