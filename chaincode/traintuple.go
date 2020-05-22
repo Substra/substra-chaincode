@@ -42,6 +42,8 @@ func (traintuple *Traintuple) SetFromInput(db *LedgerDB, inp inputTraintuple) er
 	traintuple.AssetType = TraintupleType
 	traintuple.Creator = creator
 	traintuple.Tag = inp.Tag
+	traintuple.ComputePlanID = inp.ComputePlanID
+
 	algo, err := db.GetAlgo(inp.AlgoKey)
 	if err != nil {
 		return errors.BadRequest(err, "could not retrieve algo with key %s", inp.AlgoKey)
