@@ -733,3 +733,59 @@ func TestCleanModels(t *testing.T) {
 	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 0)
 
 }
+
+func TestCreateSameComputePlanTwice(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockStub.MockTransactionStart("42")
+	registerItem(t, *mockStub, "aggregateAlgo")
+	db := NewLedgerDB(mockStub)
+
+	out, err := createComputePlanInternal(db, inputComputePlan{}, tag, false)
+	assert.NoError(t, err)
+	assert.Equal(t, tag, out.Tag)
+
+	up := inputComputePlan{
+		Traintuples: []inputComputePlanTraintuple{
+			{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        algoHash,
+				ID:             "traintuple",
+			},
+		},
+		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
+			{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{trainDataSampleHash1},
+				AlgoKey:        compositeAlgoHash,
+				ID:             "CompositeTraintuple",
+			},
+		},
+		Aggregatetuples: []inputComputePlanAggregatetuple{
+			{
+				AlgoKey: aggregateAlgoHash,
+				ID:      "Aggregatetuple",
+				Worker:  worker,
+			},
+		},
+		Testtuples: []inputComputePlanTesttuple{
+			{
+				DataManagerKey: dataManagerOpenerHash,
+				DataSampleKeys: []string{testDataSampleHash1},
+				ObjectiveKey:   objectiveDescriptionHash,
+				TraintupleID:   "traintuple",
+			},
+		},
+	}
+	out, err = updateComputePlanInternal(db, out.ComputePlanID, up)
+	assert.NoError(t, err)
+
+	// Upload the same tuples inside another compute plan
+	out, err = createComputePlanInternal(db, inputComputePlan{}, tag, false)
+	assert.NoError(t, err)
+	assert.Equal(t, tag, out.Tag)
+
+	out, err = updateComputePlanInternal(db, out.ComputePlanID, defaultComputePlan)
+	assert.NoError(t, err)
+}
