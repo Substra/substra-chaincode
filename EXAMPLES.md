@@ -8,9 +8,6 @@ peer chaincode invoke -n mycc -c '{"Args":["registerNode"]}' -C myc
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "id": "SampleOrg"
 }
 ```
@@ -42,9 +39,6 @@ peer chaincode invoke -n mycc -c '{"Args":["registerDataManager","{\"name\":\"li
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "key": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 }
 ```
@@ -64,9 +58,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryDataManager","{\"key\":\"da1bb7
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "description": {
   "hash": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
   "storageAddress": "https://toto/dataManager/42234/description"
@@ -106,9 +97,6 @@ peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":[\"
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "keys": [
   "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
@@ -146,9 +134,6 @@ peer chaincode invoke -n mycc -c '{"Args":["registerObjective","{\"name\":\"MSI 
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "key": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 }
 ```
@@ -178,9 +163,6 @@ peer chaincode invoke -n mycc -c '{"Args":["registerAlgo","{\"name\":\"hog + svm
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "key": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 }
 ```
@@ -202,9 +184,6 @@ peer chaincode invoke -n mycc -c '{"Args":["registerDataSample","{\"hashes\":[\"
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "keys": [
   "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
@@ -340,9 +319,6 @@ peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
 }
 ```
@@ -368,18 +344,12 @@ peer chaincode invoke -n mycc -c '{"Args":["createTraintuple","{\"algoKey\":\"fd
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "key": "ed8102d4f4e19e961585a0b544c76c87c9ffeaf1bcbec57247023e240e3bde2d"
 }
 ```
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "key": "ed8102d4f4e19e961585a0b544c76c87c9ffeaf1bcbec57247023e240e3bde2d"
 }
 ```
@@ -448,9 +418,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"ebbf6cdde
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "algo": {
   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "name": "hog + svm",
@@ -502,9 +469,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"ebbf6cd
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "algo": {
   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "name": "hog + svm",
@@ -554,9 +518,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"ebbf6cd
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "algo": {
   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "name": "hog + svm",
@@ -610,9 +571,6 @@ peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"dataManagerKey\
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "key": "6ad32c063f8f1ae04626987e0b15351c3a2007a417ba2bdc557b7ff4c7a9ebf8"
 }
 ```
@@ -636,9 +594,6 @@ peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"dataManagerKey\
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "key": "a0f368a23449ae1751ccb2335f79d8ff084bc7bb13e1e2b5252d930857bc4d2d"
 }
 ```
@@ -662,9 +617,6 @@ peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"dataManagerKey\
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "key": "f5515eef9906b6af129355146a648c94f390e32d0fb45a8f54fddfe3329df716"
 }
 ```
@@ -769,9 +721,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"a0f368a234
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "algo": {
   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "name": "hog + svm",
@@ -823,9 +772,6 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"a0f368a2
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "algo": {
   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "name": "hog + svm",
@@ -875,9 +821,6 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"a0f368a23
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "algo": {
   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "name": "hog + svm",
@@ -1036,9 +979,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"ebbf6c
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "nonCertifiedTesttuples": [
   {
    "algo": {
@@ -1241,9 +1181,6 @@ peer chaincode query -n mycc -c '{"Args":["queryModelPermissions","{\"key\":\"ee
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "process": {
   "authorizedIDs": [],
   "public": true
@@ -1266,9 +1203,6 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"da1bb7c31f6
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "description": {
   "hash": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
   "storageAddress": "https://toto/dataManager/42234/description"
@@ -1328,9 +1262,6 @@ peer chaincode invoke -n mycc -c '{"Args":["updateDataSample","{\"hashes\":[\"aa
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "key": "{\"keys\": [\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"]}"
 }
 ```
@@ -1350,9 +1281,6 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"38a320b2a67
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "description": {
   "hash": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
   "storageAddress": "https://toto/dataManager/42234/description"
@@ -1435,9 +1363,6 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"cleanModels\"
   "firstTraintupleID": "01feb56691d26983a641d29f4c2a5b7098f99eb471b7e5f03aaa78c8ae142ca9",
   "secondTraintupleID": "78914b1f480f5e81a26e4d04d88bdb27937e858c49c6bb9d1ae83ff6627ca0ab"
  },
- "__metrics__": {
-  "duration": 0
- },
  "aggregatetupleKeys": null,
  "cleanModels": false,
  "compositeTraintupleKeys": null,
@@ -1511,9 +1436,6 @@ peer chaincode invoke -n mycc -c '{"Args":["updateComputePlan","{\"computePlanID
  "IDToKey": {
   "thirdTraintupleID": "17c7623e87be77d8f93f21401e2eae98384de4a1d7ee841c0b9e0a07897cfbbf"
  },
- "__metrics__": {
-  "duration": 0
- },
  "aggregatetupleKeys": null,
  "cleanModels": false,
  "compositeTraintupleKeys": null,
@@ -1550,9 +1472,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
 ##### Command output:
 ```json
 {
- "__metrics__": {
-  "duration": 0
- },
  "objective": {
   "description": {
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1614,9 +1533,6 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"7dd808
 ```json
 {
  "IDToKey": {},
- "__metrics__": {
-  "duration": 0
- },
  "aggregatetupleKeys": null,
  "cleanModels": false,
  "compositeTraintupleKeys": null,
@@ -1682,9 +1598,6 @@ peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"7dd80
 ```json
 {
  "IDToKey": {},
- "__metrics__": {
-  "duration": 0
- },
  "aggregatetupleKeys": null,
  "cleanModels": false,
  "compositeTraintupleKeys": null,
