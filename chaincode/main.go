@@ -201,17 +201,6 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	if err != nil {
 		return formatErrorResponse(errors.Internal("could not format response: %s", err.Error()))
 	}
-	// Add duration to the output object when possible
-	tempRespMap := map[string]interface{}{}
-	err = json.Unmarshal(resp, &tempRespMap)
-	if err != nil || tempRespMap == nil {
-		return shim.Success(resp)
-	}
-	metrics := outputMetrics{
-		Duration: duration,
-	}
-	tempRespMap["__metrics__"] = metrics
-	resp, err = json.Marshal(tempRespMap)
 	return shim.Success(resp)
 }
 
