@@ -46,7 +46,7 @@ func TestModelComposition(t *testing.T) {
 		} {
 			testName := fmt.Sprintf("TestModelComposition_%s_%sParent1_%sParent2_%sChild", status, tt.parent1, tt.parent2, tt.child)
 			t.Run(testName, func(t *testing.T) {
-				scc := new(SubstraChaincode)
+				scc := new(Chaincode)
 				mockStub := NewMockStubWithRegisterNode("substra", scc)
 				registerItem(t, *mockStub, "aggregateAlgo")
 

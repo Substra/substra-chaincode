@@ -24,7 +24,7 @@ import (
 )
 
 func TestTesttupleOnFailedTraintuple(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
@@ -51,7 +51,7 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 }
 
 func TestCertifiedExplicitTesttuple(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
@@ -77,7 +77,7 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 }
 
 func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
@@ -146,7 +146,7 @@ func TestQueryTesttuple(t *testing.T) {
 	}
 	for _, tt := range testTable {
 		t.Run("TestQueryTesttuple"+tt.expectedTypeString, func(t *testing.T) {
-			scc := new(SubstraChaincode)
+			scc := new(Chaincode)
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
 			registerItem(t, *mockStub, "aggregatetuple")
 
@@ -196,7 +196,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 	for _, status := range []string{StatusDone, StatusFailed} {
 		testName := fmt.Sprintf("TestTesttupleOnCompositeTraintuple_%s", status)
 		t.Run(testName, func(t *testing.T) {
-			scc := new(SubstraChaincode)
+			scc := new(Chaincode)
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 			registerItem(t, *mockStub, "compositeTraintuple")

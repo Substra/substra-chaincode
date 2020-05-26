@@ -32,7 +32,7 @@ import (
 /////////////////////////////////////////////////////////////
 
 func TestTraintupleWithNoTestDatasetAggregate(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
@@ -62,7 +62,7 @@ func TestTraintupleWithNoTestDatasetAggregate(t *testing.T) {
 }
 
 func TestTraintupleWithSingleDatasampleAggregate(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
@@ -94,7 +94,7 @@ func TestTraintupleWithSingleDatasampleAggregate(t *testing.T) {
 }
 
 func TestNoPanicWhileQueryingIncompleteTraintupleAggregate(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "aggregatetuple")
@@ -119,7 +119,7 @@ func TestNoPanicWhileQueryingIncompleteTraintupleAggregate(t *testing.T) {
 }
 
 func TestTraintupleComputePlanCreationAggregate(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add dataManager, dataSample and algo
@@ -162,7 +162,7 @@ func TestTraintupleComputePlanCreationAggregate(t *testing.T) {
 }
 
 func TestTraintupleMultipleCommputePlanCreationsAggregate(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
@@ -210,7 +210,7 @@ func TestTraintupleMultipleCommputePlanCreationsAggregate(t *testing.T) {
 }
 
 func TestTraintupleAggregate(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add traintuple with invalid field
@@ -301,8 +301,8 @@ func TestTraintupleAggregate(t *testing.T) {
 	success.fillDefaults()
 
 	argsSlice := [][][]byte{
-		[][]byte{[]byte("logStartAggregate"), keyToJSON(traintupleKey)},
-		[][]byte{[]byte("logSuccessAggregate"), assetToJSON(success)},
+		{[]byte("logStartAggregate"), keyToJSON(traintupleKey)},
+		{[]byte("logSuccessAggregate"), assetToJSON(success)},
 	}
 	traintupleStatus := []string{StatusDoing, StatusDone}
 	for i := range traintupleStatus {
@@ -349,7 +349,7 @@ func TestTraintupleAggregate(t *testing.T) {
 }
 
 func TestQueryTraintupleNotFoundAggregate(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "aggregateAlgo")
 
@@ -378,7 +378,7 @@ func TestQueryTraintupleNotFoundAggregate(t *testing.T) {
 }
 
 func TestInsertTraintupleTwiceAggregate(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
@@ -419,7 +419,7 @@ func TestInsertTraintupleTwiceAggregate(t *testing.T) {
 /////////////////////////////////////////////
 
 func TestAggregatetuplePermissions(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "aggregateAlgo")
 
@@ -486,7 +486,7 @@ func TestAggregatetuplePermissions(t *testing.T) {
 func TestAggregatetupleLogSuccessFail(t *testing.T) {
 	for _, status := range []string{StatusDone, StatusFailed} {
 		t.Run("TestAggregatetupleLog"+status, func(t *testing.T) {
-			scc := new(SubstraChaincode)
+			scc := new(Chaincode)
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
 			resp, _ := registerItem(t, *mockStub, "aggregatetuple")
 			var _key struct{ Key string }
@@ -528,7 +528,7 @@ func TestAggregatetupleLogSuccessFail(t *testing.T) {
 }
 
 func TestQueryAggregatetuple(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	_, _ = registerItem(t, *mockStub, "compositeTraintuple")
 
@@ -561,7 +561,7 @@ func TestQueryAggregatetuple(t *testing.T) {
 }
 
 func TestCreateFailedAggregate(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "compositeTraintuple")
 	mockStub.MockTransactionStart("42")

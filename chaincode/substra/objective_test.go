@@ -23,7 +23,7 @@ import (
 )
 
 func TestLeaderBoard(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	db := NewLedgerDB(mockStub)
 	registerItem(t, *mockStub, "")
@@ -62,7 +62,7 @@ func TestLeaderBoard(t *testing.T) {
 	assert.Equal(t, traintupleKey, leaderboard.Testtuples[0].TraintupleKey)
 }
 func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	inpObjective := inputObjective{}
@@ -72,7 +72,7 @@ func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
 }
 func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	mockStub.MockInvoke("42", [][]byte{[]byte("registerNode")})
 
@@ -106,7 +106,7 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	assert.EqualValues(t, 400, resp.Status, "status should indicate an error since the dataManager key is a dataSample key")
 }
 func TestObjective(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add objective with invalid field

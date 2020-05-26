@@ -34,7 +34,7 @@ import (
 /////////////////////////////////////////////////////////////
 
 func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
@@ -64,7 +64,7 @@ func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 }
 
 func TestTraintupleWithSingleDatasampleComposite(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
@@ -97,7 +97,7 @@ func TestTraintupleWithSingleDatasampleComposite(t *testing.T) {
 }
 
 func TestTraintupleWithDuplicatedDatasamplesComposite(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
@@ -122,7 +122,7 @@ func TestTraintupleWithDuplicatedDatasamplesComposite(t *testing.T) {
 }
 
 func TestNoPanicWhileQueryingIncompleteTraintupleComposite(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "traintuple")
@@ -147,7 +147,7 @@ func TestNoPanicWhileQueryingIncompleteTraintupleComposite(t *testing.T) {
 }
 
 func TestTraintupleComputePlanCreationComposite(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add dataManager, dataSample and algo
@@ -190,7 +190,7 @@ func TestTraintupleComputePlanCreationComposite(t *testing.T) {
 }
 
 func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
@@ -241,7 +241,7 @@ func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
 }
 
 func TestTraintupleComposite(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add traintuple with invalid field
@@ -340,7 +340,7 @@ func TestTraintupleComposite(t *testing.T) {
 	success.Key = traintupleKey
 
 	argsSlice := [][][]byte{
-		[][]byte{[]byte("logStartCompositeTrain"), keyToJSON(traintupleKey)},
+		{[]byte("logStartCompositeTrain"), keyToJSON(traintupleKey)},
 		success.createDefault(),
 	}
 	traintupleStatus := []string{StatusDoing, StatusDone}
@@ -390,7 +390,7 @@ func TestTraintupleComposite(t *testing.T) {
 }
 
 func TestQueryTraintupleNotFoundComposite(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "compositeAlgo")
 
@@ -419,7 +419,7 @@ func TestQueryTraintupleNotFoundComposite(t *testing.T) {
 }
 
 func TestInsertTraintupleTwiceComposite(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
@@ -498,7 +498,7 @@ func TestCreateCompositeTraintupleInModels(t *testing.T) {
 	}
 	for _, tt := range testTable {
 		t.Run(tt.testName, func(t *testing.T) {
-			scc := new(SubstraChaincode)
+			scc := new(Chaincode)
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
 			registerItem(t, *mockStub, "trainDataset")
 
@@ -603,7 +603,7 @@ func TestCompositeTraintupleInModelTypes(t *testing.T) {
 }
 
 func testCompositeTraintupleInModelTypes(t *testing.T, headType AssetType, trunkType AssetType, shouldSucceed bool) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "aggregateAlgo")
 
@@ -646,7 +646,7 @@ func testCompositeTraintupleInModelTypes(t *testing.T, headType AssetType, trunk
 }
 
 func TestCompositeTraintuplePermissions(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "compositeAlgo")
 
@@ -677,7 +677,7 @@ func TestCompositeTraintuplePermissions(t *testing.T) {
 func TestCompositeTraintupleLogSuccessFail(t *testing.T) {
 	for _, status := range []string{StatusDone, StatusFailed} {
 		t.Run("TestCompositeTraintupleLog"+status, func(t *testing.T) {
-			scc := new(SubstraChaincode)
+			scc := new(Chaincode)
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
 			resp, _ := registerItem(t, *mockStub, "compositeTraintuple")
 			var _key struct{ Key string }
@@ -722,7 +722,7 @@ func TestCompositeTraintupleLogSuccessFail(t *testing.T) {
 // - a child aggregate tuple takes the *trunk* out-model from the parent as its in-model
 // - a child composite traintuple takes the *head* out-model from the parent as its head in-model
 func TestCorrectParent(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// register parent
@@ -769,7 +769,7 @@ func TestCorrectParent(t *testing.T) {
 }
 
 func TestCreateTesttuplePermissions(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	registerItem(t, *mockStub, "compositeTraintuple")
@@ -791,7 +791,7 @@ func TestCreateTesttuplePermissions(t *testing.T) {
 }
 
 func TestHeadModelDifferentWorker(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "aggregatetuple")
 	mockStub.MockTransactionStart("42")

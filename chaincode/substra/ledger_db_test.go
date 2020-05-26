@@ -21,7 +21,7 @@ import (
 )
 
 func TestGetOutModelHashDress(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	db := NewLedgerDB(mockStub)
 

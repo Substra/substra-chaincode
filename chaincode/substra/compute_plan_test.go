@@ -24,13 +24,13 @@ import (
 var (
 	defaultComputePlan = inputComputePlan{
 		Traintuples: []inputComputePlanTraintuple{
-			inputComputePlanTraintuple{
+			{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        algoHash,
 				ID:             traintupleID1,
 			},
-			inputComputePlanTraintuple{
+			{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash2},
 				ID:             traintupleID2,
@@ -39,7 +39,7 @@ var (
 			},
 		},
 		Testtuples: []inputComputePlanTesttuple{
-			inputComputePlanTesttuple{
+			{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 				ObjectiveKey:   objectiveDescriptionHash,
@@ -120,31 +120,31 @@ var (
 			},
 		},
 		Testtuples: []inputComputePlanTesttuple{
-			inputComputePlanTesttuple{
+			{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 				ObjectiveKey:   objectiveDescriptionHash,
 				TraintupleID:   "step_1_composite_A",
 			},
-			inputComputePlanTesttuple{
+			{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 				ObjectiveKey:   objectiveDescriptionHash,
 				TraintupleID:   "step_1_composite_B",
 			},
-			inputComputePlanTesttuple{
+			{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 				ObjectiveKey:   objectiveDescriptionHash,
 				TraintupleID:   "step_2_aggregate",
 			},
-			inputComputePlanTesttuple{
+			{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 				ObjectiveKey:   objectiveDescriptionHash,
 				TraintupleID:   "step_3_composite_A",
 			},
-			inputComputePlanTesttuple{
+			{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 				ObjectiveKey:   objectiveDescriptionHash,
@@ -155,7 +155,7 @@ var (
 )
 
 func TestModelCompositionComputePlanWorkflow(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "aggregateAlgo")
 
@@ -244,7 +244,7 @@ func validateTupleRank(t *testing.T, db *LedgerDB, expectedRank int, key string,
 }
 
 func TestCreateComputePlanCompositeAggregate(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "aggregateAlgo")
 
@@ -318,7 +318,7 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 }
 
 func TestCreateComputePlan(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "algo")
 
@@ -371,7 +371,7 @@ func TestCreateComputePlan(t *testing.T) {
 }
 
 func TestQueryComputePlan(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "algo")
 
@@ -391,7 +391,7 @@ func TestQueryComputePlan(t *testing.T) {
 }
 
 func TestQueryComputePlans(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "algo")
 
@@ -422,7 +422,7 @@ func validateDefaultComputePlan(t *testing.T, cp outputComputePlan) {
 }
 
 func TestComputePlanEmptyTesttuples(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "algo")
 
@@ -431,13 +431,13 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 
 	inCP := inputComputePlan{
 		Traintuples: []inputComputePlanTraintuple{
-			inputComputePlanTraintuple{
+			{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        algoHash,
 				ID:             traintupleID1,
 			},
-			inputComputePlanTraintuple{
+			{
 				DataManagerKey: dataManagerOpenerHash,
 				DataSampleKeys: []string{trainDataSampleHash2},
 				ID:             traintupleID2,
@@ -465,7 +465,7 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 }
 
 func TestQueryComputePlanEmpty(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "algo")
 
@@ -478,7 +478,7 @@ func TestQueryComputePlanEmpty(t *testing.T) {
 }
 
 func TestCancelComputePlan(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "aggregateAlgo")
 
@@ -520,7 +520,7 @@ func TestCancelComputePlan(t *testing.T) {
 }
 
 func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "aggregateAlgo")
 
@@ -552,7 +552,7 @@ func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
 }
 
 func TestLogSuccessAfterCancel(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "aggregateAlgo")
 
@@ -586,7 +586,7 @@ func TestLogSuccessAfterCancel(t *testing.T) {
 }
 
 func TestCreateTagedEmptyComputePlan(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
@@ -597,7 +597,7 @@ func TestCreateTagedEmptyComputePlan(t *testing.T) {
 }
 
 func TestComputePlanMetrics(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "aggregateAlgo")
 	mockStub.MockTransactionStart("42")
@@ -649,7 +649,7 @@ func checkComputePlanMetrics(t *testing.T, db *LedgerDB, cpID string, doneCount,
 }
 
 func TestUpdateComputePlan(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	mockStub.MockTransactionStart("42")
 	registerItem(t, *mockStub, "aggregateAlgo")
@@ -699,7 +699,7 @@ func clearEvent(db *LedgerDB) {
 }
 
 func TestCleanModels(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	mockStub.MockTransactionStart("42")
 	registerItem(t, *mockStub, "aggregateAlgo")
@@ -735,7 +735,7 @@ func TestCleanModels(t *testing.T) {
 }
 
 func TestCreateSameComputePlanTwice(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	mockStub.MockTransactionStart("42")
 	registerItem(t, *mockStub, "aggregateAlgo")

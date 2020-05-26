@@ -58,7 +58,7 @@ const aggregatetupleKey = "48c17bb556e1a122138d89178d81b22469a0cae260af322de9b39
 const tag = "a tag is simply a string"
 
 func TestInit(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// resp := mockStub.MockInit("42", [][]byte{[]byte("init")})
@@ -291,7 +291,7 @@ func initializeMockStateDB(t *testing.T, stub *MockStub) {
 }
 
 func TestQueryEmptyResponse(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	initializeMockStateDB(t, mockStub)
 

@@ -22,7 +22,7 @@ import (
 )
 
 func TestCompositeAlgo(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add algo with invalid field

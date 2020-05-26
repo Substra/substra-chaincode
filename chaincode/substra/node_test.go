@@ -21,7 +21,7 @@ import (
 )
 
 func TestNode(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStub("substra", scc)
 
 	args := append([][]byte{[]byte("registerNode")}, []byte{})
@@ -36,7 +36,7 @@ func TestNode(t *testing.T) {
 }
 
 func TestQueryNodes(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	response := mockStub.MockInvoke("43", [][]byte{[]byte("queryNodes")})
 

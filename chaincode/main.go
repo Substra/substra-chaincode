@@ -11,7 +11,7 @@ import (
 func main() {
 	// TODO use the same level as the shim or an env variable
 	// logger.SetLevel(shim.LogDebug)
-	if err := shim.Start(new(substra.SubstraChaincode)); err != nil {
+	if err := shim.Start(new(substra.Chaincode)); err != nil {
 		fmt.Printf("Error starting SubstraChaincode chaincode: %s", err)
 	}
 }

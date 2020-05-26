@@ -22,7 +22,7 @@ import (
 )
 
 func TestJsonInputsDataManager(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	inpDataManager := inputDataManager{}
@@ -34,7 +34,7 @@ func TestJsonInputsDataManager(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status)
 }
 func TestDataManager(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add dataManager with invalid field
@@ -109,7 +109,7 @@ func TestDataManager(t *testing.T) {
 }
 
 func TestGetTestDatasetKeys(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Input DataManager
@@ -140,7 +140,7 @@ func TestGetTestDatasetKeys(t *testing.T) {
 	assert.NotContains(t, v, testDataSampleHash1, "testDataSampleKeys should not contains the train dataSampleHash")
 }
 func TestDataset(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add dataSample with invalid field

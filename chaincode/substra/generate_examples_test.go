@@ -38,7 +38,7 @@ var (
 
 // TestPipeline ...
 func TestPipeline(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStub("substra", scc)
 	var out strings.Builder
 	callAssertAndPrint := func(peerCmd, smartContract string, inputAsset interface{}) peer.Response {

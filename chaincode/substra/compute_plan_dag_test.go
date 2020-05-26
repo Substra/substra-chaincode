@@ -78,8 +78,8 @@ func TestDAGSort(t *testing.T) {
 				{ID: "two", InModelsIDs: []string{"one"}},
 			},
 			IDToDepth: map[string]TrainTask{
-				"alpha": TrainTask{Depth: 0},
-				"beta":  TrainTask{Depth: 4},
+				"alpha": {Depth: 0},
+				"beta":  {Depth: 4},
 			},
 			depths:      []int{1, 2, 5, 6},
 			expectError: false},

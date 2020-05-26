@@ -24,8 +24,8 @@ import (
 	"github.com/hyperledger/fabric/protos/peer"
 )
 
-// SubstraChaincode is a Receiver for Chaincode shim functions
-type SubstraChaincode struct {
+// Chaincode is a Receiver for Chaincode shim functions
+type Chaincode struct {
 }
 
 // Create a global logger for the chaincode. Its default level is Info
@@ -35,7 +35,7 @@ var logger = shim.NewLogger("substra-chaincode")
 // data. Note that chaincode upgrade also calls this function to reset
 // or to migrate data.
 // TODO!!!!
-func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response {
+func (t *Chaincode) Init(stub shim.ChaincodeStubInterface) peer.Response {
 	// Get the args from the transaction proposal
 	args := stub.GetStringArgs()
 	if len(args) != 1 {
@@ -45,7 +45,7 @@ func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response 
 }
 
 // Invoke is called per transaction on the chaincode.
-func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
+func (t *Chaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
 	start := time.Now()
 	// Log all input for potential debug later on.
 	logger.Infof("Args received by the chaincode: %#v", stub.GetStringArgs())

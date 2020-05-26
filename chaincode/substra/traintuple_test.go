@@ -25,7 +25,7 @@ import (
 )
 
 func TestTraintupleWithNoTestDataset(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
@@ -52,7 +52,7 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 }
 
 func TestTraintupleWithSingleDatasample(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
@@ -84,7 +84,7 @@ func TestTraintupleWithSingleDatasample(t *testing.T) {
 }
 
 func TestTraintupleWithDuplicatedDatasamples(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
@@ -109,7 +109,7 @@ func TestTraintupleWithDuplicatedDatasamples(t *testing.T) {
 }
 
 func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "traintuple")
@@ -134,7 +134,7 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 }
 
 func TestTraintupleComputePlanCreation(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add dataManager, dataSample and algo
@@ -177,7 +177,7 @@ func TestTraintupleComputePlanCreation(t *testing.T) {
 }
 
 func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add a some dataManager, dataSample and traintuple
@@ -241,7 +241,7 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 }
 
 func TestTraintuple(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 
 	// Add traintuple with invalid field
@@ -333,7 +333,7 @@ func TestTraintuple(t *testing.T) {
 	success.Key = traintupleKey
 
 	argsSlice := [][][]byte{
-		[][]byte{[]byte("logStartTrain"), keyToJSON(traintupleKey)},
+		{[]byte("logStartTrain"), keyToJSON(traintupleKey)},
 		success.createDefault(),
 	}
 	traintupleStatus := []string{StatusDoing, StatusDone}
@@ -381,7 +381,7 @@ func TestTraintuple(t *testing.T) {
 }
 
 func TestQueryTraintupleNotFound(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "traintuple")
 
@@ -403,7 +403,7 @@ func TestQueryTraintupleNotFound(t *testing.T) {
 }
 
 func TestInsertTraintupleTwice(t *testing.T) {
-	scc := new(SubstraChaincode)
+	scc := new(Chaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "algo")
 
