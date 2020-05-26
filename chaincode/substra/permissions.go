@@ -75,7 +75,7 @@ func NewPermissions(db *LedgerDB, in inputPermissions) (Permissions, error) {
 		}
 	}
 
-	owner, err := GetTxCreator(db.cc)
+	owner, err := db.GetTxCreator()
 	if err != nil {
 		return Permissions{}, err
 	}

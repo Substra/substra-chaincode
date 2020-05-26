@@ -23,7 +23,7 @@ import (
 func (algo *Algo) Set(db *LedgerDB, inp inputAlgo) (algoKey string, err error) {
 	algoKey = inp.Hash
 	// find associated owner
-	owner, err := GetTxCreator(db.cc)
+	owner, err := db.GetTxCreator()
 	if err != nil {
 		return
 	}

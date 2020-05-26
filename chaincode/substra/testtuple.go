@@ -34,7 +34,7 @@ import (
 //  - Dataset
 //  - Certified
 func (testtuple *Testtuple) SetFromInput(db *LedgerDB, inp inputTesttuple) error {
-	creator, err := GetTxCreator(db.cc)
+	creator, err := db.GetTxCreator()
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 	var status, tupleCreator string
 	var permissions Permissions
 
-	creator, err := GetTxCreator(db.cc)
+	creator, err := db.GetTxCreator()
 	if err != nil {
 		return err
 	}

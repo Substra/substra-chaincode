@@ -34,7 +34,7 @@ func (dataManager *DataManager) Set(db *LedgerDB, inp inputDataManager) (string,
 		Hash:           inp.DescriptionHash,
 		StorageAddress: inp.DescriptionStorageAddress,
 	}
-	owner, err := GetTxCreator(db.cc)
+	owner, err := db.GetTxCreator()
 	if err != nil {
 		return "", "", err
 	}
@@ -60,7 +60,7 @@ func setDataSample(db *LedgerDB, inp inputDataSample) (dataSampleHashes []string
 	}
 
 	// get transaction owner
-	owner, err := GetTxCreator(db.cc)
+	owner, err := db.GetTxCreator()
 	if err != nil {
 		return
 	}
@@ -344,7 +344,7 @@ func queryDataSamples(db *LedgerDB, args []string) ([]outputDataSample, error) {
 // specified by their keys in a slice
 func checkDataManagerOwner(db *LedgerDB, dataManagerKeys []string) error {
 	// get transaction requester
-	txCreator, err := GetTxCreator(db.cc)
+	txCreator, err := db.GetTxCreator()
 	if err != nil {
 		return err
 	}
@@ -363,7 +363,7 @@ func checkDataManagerOwner(db *LedgerDB, dataManagerKeys []string) error {
 
 //  checkDataSampleOwner checks if the transaction requester is the owner of the dataSample
 func checkDataSampleOwner(db *LedgerDB, dataSample DataSample) error {
-	txRequester, err := GetTxCreator(db.cc)
+	txRequester, err := db.GetTxCreator()
 	if err != nil {
 		return err
 	}

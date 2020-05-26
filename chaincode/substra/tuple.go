@@ -206,7 +206,7 @@ func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, erro
 // ----------------------------------------------------------
 
 func validateTupleOwner(db *LedgerDB, worker string) error {
-	txCreator, err := GetTxCreator(db.cc)
+	txCreator, err := db.GetTxCreator()
 	if err != nil {
 		return err
 	}

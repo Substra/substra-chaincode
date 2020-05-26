@@ -18,14 +18,11 @@ import (
 	"chaincode/errors"
 	"encoding/json"
 	"fmt"
-	"gopkg.in/go-playground/validator.v9"
 	"math/rand"
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/golang/protobuf/proto"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/hyperledger/fabric/protos/msp"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 // stringInSlice check if a string is in a slice
@@ -64,23 +61,6 @@ func AssetFromJSON(args []string, asset interface{}) error {
 		return errors.BadRequest(err, "inputs validation failed: %s, error is:", arg)
 	}
 	return nil
-}
-
-// GetTxCreator returns the transaction creator
-func GetTxCreator(stub shim.ChaincodeStubInterface) (string, error) {
-	creator, err := stub.GetCreator()
-
-	if err != nil {
-		return "", err
-	}
-
-	sID := &msp.SerializedIdentity{}
-	err = proto.Unmarshal(creator, sID)
-	if err != nil {
-		return "", err
-	}
-
-	return sID.GetMspid(), nil
 }
 
 // LowerFirst returns the input string with the first letter lowercased

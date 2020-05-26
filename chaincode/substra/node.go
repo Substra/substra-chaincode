@@ -15,7 +15,7 @@
 package substra
 
 func registerNode(db *LedgerDB, args []string) (Node, error) {
-	txCreator, err := GetTxCreator(db.cc)
+	txCreator, err := db.GetTxCreator()
 	if err != nil {
 		return Node{}, err
 	}

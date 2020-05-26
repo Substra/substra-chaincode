@@ -35,7 +35,7 @@ func (traintuple *Traintuple) SetFromInput(db *LedgerDB, inp inputTraintuple) er
 
 	// TODO later: check permissions
 	// find associated creator and check permissions (TODO later)
-	creator, err := GetTxCreator(db.cc)
+	creator, err := db.GetTxCreator()
 	if err != nil {
 		return err
 	}

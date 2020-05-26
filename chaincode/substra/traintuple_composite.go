@@ -33,7 +33,7 @@ import (
 //  - Dataset
 func (traintuple *CompositeTraintuple) SetFromInput(db *LedgerDB, inp inputCompositeTraintuple) error {
 
-	creator, err := GetTxCreator(db.cc)
+	creator, err := db.GetTxCreator()
 	if err != nil {
 		return err
 	}

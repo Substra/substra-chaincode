@@ -50,7 +50,7 @@ func (objective *Objective) Set(db *LedgerDB, inp inputObjective) (objectiveKey 
 		StorageAddress: inp.MetricsStorageAddress,
 	}
 	objective.Metadata = inp.Metadata
-	owner, err := GetTxCreator(db.cc)
+	owner, err := db.GetTxCreator()
 	if err != nil {
 		return
 	}

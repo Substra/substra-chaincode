@@ -19,7 +19,9 @@ import (
 	"encoding/json"
 	"sync"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/hyperledger/fabric/protos/msp"
 )
 
 // State is a in-memory representation of the db state
@@ -118,6 +120,23 @@ func (db *LedgerDB) Add(key string, object interface{}) error {
 		return errors.Conflict("struct already exists (tkey: %s)", key).WithKey(key)
 	}
 	return db.Put(key, object)
+}
+
+// GetTxCreator returns the transaction creator
+func (db *LedgerDB) GetTxCreator() (string, error) {
+	creator, err := db.cc.GetCreator()
+
+	if err != nil {
+		return "", err
+	}
+
+	sID := &msp.SerializedIdentity{}
+	err = proto.Unmarshal(creator, sID)
+	if err != nil {
+		return "", err
+	}
+
+	return sID.GetMspid(), nil
 }
 
 // ----------------------------------------------

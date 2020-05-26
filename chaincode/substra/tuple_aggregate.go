@@ -31,7 +31,7 @@ import (
 //  - Tag
 //  - AlgoKey & ObjectiveKey
 func (tuple *Aggregatetuple) SetFromInput(db *LedgerDB, inp inputAggregatetuple) error {
-	creator, err := GetTxCreator(db.cc)
+	creator, err := db.GetTxCreator()
 	if err != nil {
 		return err
 	}
