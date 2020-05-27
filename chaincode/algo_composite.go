@@ -42,7 +42,7 @@ func (algo *CompositeAlgo) Set(db *LedgerDB, inp inputCompositeAlgo) (algoKey st
 	}
 	algo.Owner = owner
 	algo.Permissions = permissions
-	algo.Metadata = inp.Metadata
+	algo.Metadata = initMapOutput(inp.Metadata)
 	return
 }
 

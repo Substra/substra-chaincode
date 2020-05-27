@@ -130,7 +130,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string, c
 	computePlan.State.Status = StatusWaiting
 	computePlan.Tag = tag
 	computePlan.CleanModels = cleanModels
-	computePlan.Metadata = metadata
+	computePlan.Metadata = initMapOutput(metadata)
 	ID, err := computePlan.Create(db)
 	if err != nil {
 		return resp, err

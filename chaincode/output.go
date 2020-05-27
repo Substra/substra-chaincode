@@ -32,7 +32,7 @@ type outputObjective struct {
 	Owner       string            `json:"owner"`
 	TestDataset *Dataset          `json:"testDataset"`
 	Permissions outputPermissions `json:"permissions"`
-	Metadata    map[string]string `validate:"omitempty" json:"metadata"`
+	Metadata    map[string]string `json:"metadata"`
 }
 
 func (out *outputObjective) Fill(key string, in Objective) {

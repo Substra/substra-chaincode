@@ -18,6 +18,7 @@ import (
 	"chaincode/errors"
 	"encoding/json"
 	"fmt"
+	"gopkg.in/go-playground/validator.v9"
 	"math/rand"
 	"unicode"
 	"unicode/utf8"
@@ -25,7 +26,6 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/msp"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 // stringInSlice check if a string is in a slice
@@ -131,4 +131,11 @@ func GetRandomHash() string {
 		b[i] = characterRunes[rand.Intn(len(characterRunes))]
 	}
 	return string(b)
+}
+
+func initMapOutput(m map[string]string) map[string]string {
+	if m == nil {
+		return map[string]string{}
+	}
+	return m
 }
