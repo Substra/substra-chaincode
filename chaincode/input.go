@@ -165,7 +165,6 @@ type inputComputePlan struct {
 type inputNewComputePlan struct {
 	CleanModels bool              `json:"cleanModels"` // whether or not to delete intermediary models
 	Tag         string            `validate:"omitempty,lte=64" json:"tag"`
-	Metadata    map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 	inputComputePlan
 }
 
@@ -183,7 +182,6 @@ type inputComputePlanTraintuple struct {
 	ID             string            `validate:"required,lte=64" json:"id"`
 	InModelsIDs    []string          `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
 	Tag            string            `validate:"omitempty,lte=64" json:"tag"`
-	Metadata       map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 type inputComputePlanAggregatetuple struct {
@@ -192,7 +190,6 @@ type inputComputePlanAggregatetuple struct {
 	InModelsIDs []string          `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
 	Tag         string            `validate:"omitempty,lte=64" json:"tag"`
 	Worker      string            `validate:"required" json:"worker"`
-	Metadata    map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 type inputComputePlanCompositeTraintuple struct {
@@ -204,7 +201,6 @@ type inputComputePlanCompositeTraintuple struct {
 	InTrunkModelID           string            `validate:"required_with=InHeadModelID,omitempty,len=64,hexadecimal" json:"inTrunkModelID"`
 	OutTrunkModelPermissions inputPermissions  `validate:"required" json:"OutTrunkModelPermissions"`
 	Tag                      string            `validate:"omitempty,lte=64" json:"tag"`
-	Metadata                 map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 type inputComputePlanTesttuple struct {
@@ -213,7 +209,6 @@ type inputComputePlanTesttuple struct {
 	ObjectiveKey   string            `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
 	Tag            string            `validate:"omitempty,lte=64" json:"tag"`
 	TraintupleID   string            `validate:"required,lte=64" json:"traintupleID"`
-	Metadata       map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 type inputLeaderboard struct {
