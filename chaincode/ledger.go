@@ -258,6 +258,7 @@ type Model struct {
 type Dataset struct {
 	DataManagerKey string   `json:"dataManagerKey"`
 	DataSampleKeys []string `json:"dataSampleKeys"`
+	Metadata      map[string]string `json:"metadata"`
 	Worker         string   `json:"worker"`
 }
 

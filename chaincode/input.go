@@ -177,39 +177,43 @@ type inputUpdateComputePlan struct {
 }
 
 type inputComputePlanTraintuple struct {
-	DataManagerKey string   `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
-	DataSampleKeys []string `validate:"required,dive,len=64,hexadecimal" json:"dataSampleKeys"`
-	AlgoKey        string   `validate:"required,len=64,hexadecimal" json:"algoKey"`
-	ID             string   `validate:"required,lte=64" json:"id"`
-	InModelsIDs    []string `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
-	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
+	DataManagerKey string            `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys []string          `validate:"required,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	AlgoKey        string            `validate:"required,len=64,hexadecimal" json:"algoKey"`
+	ID             string            `validate:"required,lte=64" json:"id"`
+	InModelsIDs    []string          `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
+	Tag            string            `validate:"omitempty,lte=64" json:"tag"`
+	Metadata       map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 type inputComputePlanAggregatetuple struct {
-	AlgoKey     string   `validate:"required,len=64,hexadecimal" json:"algoKey"`
-	ID          string   `validate:"required,lte=64" json:"id"`
-	InModelsIDs []string `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
-	Tag         string   `validate:"omitempty,lte=64" json:"tag"`
-	Worker      string   `validate:"required" json:"worker"`
+	AlgoKey     string            `validate:"required,len=64,hexadecimal" json:"algoKey"`
+	ID          string            `validate:"required,lte=64" json:"id"`
+	InModelsIDs []string          `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
+	Tag         string            `validate:"omitempty,lte=64" json:"tag"`
+	Worker      string            `validate:"required" json:"worker"`
+	Metadata    map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 type inputComputePlanCompositeTraintuple struct {
-	DataManagerKey           string           `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
-	DataSampleKeys           []string         `validate:"required,dive,len=64,hexadecimal" json:"dataSampleKeys"`
-	AlgoKey                  string           `validate:"required,len=64,hexadecimal" json:"algoKey"`
-	ID                       string           `validate:"required,lte=64" json:"id"`
-	InHeadModelID            string           `validate:"required_with=InTrunkModelID,omitempty,len=64,hexadecimal" json:"inHeadModelID"`
-	InTrunkModelID           string           `validate:"required_with=InHeadModelID,omitempty,len=64,hexadecimal" json:"inTrunkModelID"`
-	OutTrunkModelPermissions inputPermissions `validate:"required" json:"OutTrunkModelPermissions"`
-	Tag                      string           `validate:"omitempty,lte=64" json:"tag"`
+	DataManagerKey           string            `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys           []string          `validate:"required,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	AlgoKey                  string            `validate:"required,len=64,hexadecimal" json:"algoKey"`
+	ID                       string            `validate:"required,lte=64" json:"id"`
+	InHeadModelID            string            `validate:"required_with=InTrunkModelID,omitempty,len=64,hexadecimal" json:"inHeadModelID"`
+	InTrunkModelID           string            `validate:"required_with=InHeadModelID,omitempty,len=64,hexadecimal" json:"inTrunkModelID"`
+	OutTrunkModelPermissions inputPermissions  `validate:"required" json:"OutTrunkModelPermissions"`
+	Tag                      string            `validate:"omitempty,lte=64" json:"tag"`
+	Metadata                 map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 type inputComputePlanTesttuple struct {
-	DataManagerKey string   `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
-	DataSampleKeys []string `validate:"omitempty,dive,len=64,hexadecimal" json:"dataSampleKeys"`
-	ObjectiveKey   string   `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
-	Tag            string   `validate:"omitempty,lte=64" json:"tag"`
-	TraintupleID   string   `validate:"required,lte=64" json:"traintupleID"`
+	DataManagerKey string            `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys []string          `validate:"omitempty,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	ObjectiveKey   string            `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
+	Tag            string            `validate:"omitempty,lte=64" json:"tag"`
+	TraintupleID   string            `validate:"required,lte=64" json:"traintupleID"`
+	Metadata       map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 type inputLeaderboard struct {

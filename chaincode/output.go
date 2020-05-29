@@ -52,7 +52,7 @@ type outputDataManager struct {
 	ObjectiveKey string            `json:"objectiveKey"`
 	Description  *HashDress        `json:"description"`
 	Key          string            `json:"key"`
-	Metadata     map[string]string `validate:"omitempty" json:"metadata"`
+	Metadata     map[string]string `json:"metadata"`
 	Name         string            `json:"name"`
 	Opener       HashDress         `json:"opener"`
 	Owner        string            `json:"owner"`
@@ -87,7 +87,7 @@ func (out *outputDataSample) Fill(key string, in DataSample) {
 
 type outputDataset struct {
 	outputDataManager
-	Metadata            map[string]string  `validate:"omitempty" json:"metadata"`
+	Metadata            map[string]string  `json:"metadata"`
 	TrainDataSampleKeys []string           `json:"trainDataSampleKeys"`
 	TestDataSampleKeys  []string           `json:"testDataSampleKeys"`
 }
@@ -96,6 +96,7 @@ func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, t
 	out.outputDataManager.Fill(key, in)
 	out.TrainDataSampleKeys = trainKeys
 	out.TestDataSampleKeys = testKeys
+	out.Metadata = in.Metadata
 }
 
 type outputAlgo struct {
