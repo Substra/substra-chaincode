@@ -53,7 +53,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 	outputCompositeTraintuple.Key = traintupleKey
 	outputCompositeTraintuple.Creator = traintuple.Creator
 	outputCompositeTraintuple.Log = traintuple.Log
-	outputCompositeTraintuple.Metadata = traintuple.Metadata
+	outputCompositeTraintuple.Metadata = initMapOutput(traintuple.Metadata)
 	outputCompositeTraintuple.Status = traintuple.Status
 	outputCompositeTraintuple.Rank = traintuple.Rank
 	outputCompositeTraintuple.ComputePlanID = traintuple.ComputePlanID

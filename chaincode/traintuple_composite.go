@@ -40,7 +40,7 @@ func (traintuple *CompositeTraintuple) SetFromInput(db *LedgerDB, inp inputCompo
 	traintuple.AssetType = CompositeTraintupleType
 	traintuple.Creator = creator
 	traintuple.ComputePlanID = inp.ComputePlanID
-	traintuple.Metadata = initMapOutput(inp.Metadata)
+	traintuple.Metadata = inp.Metadata
 	traintuple.Tag = inp.Tag
 	algo, err := db.GetCompositeAlgo(inp.AlgoKey)
 	if err != nil {

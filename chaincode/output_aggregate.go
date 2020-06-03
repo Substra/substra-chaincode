@@ -45,7 +45,7 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 	outputAggregatetuple.Key = traintupleKey
 	outputAggregatetuple.Creator = traintuple.Creator
 	outputAggregatetuple.Log = traintuple.Log
-	outputAggregatetuple.Metadata = traintuple.Metadata
+	outputAggregatetuple.Metadata = initMapOutput(traintuple.Metadata)
 	outputAggregatetuple.Status = traintuple.Status
 	outputAggregatetuple.Rank = traintuple.Rank
 	outputAggregatetuple.ComputePlanID = traintuple.ComputePlanID

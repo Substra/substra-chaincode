@@ -46,7 +46,6 @@ type inputObjective struct {
 type inputDataset struct {
 	DataManagerKey string             `validate:"omitempty,len=64,hexadecimal" json:"dataManagerKey"`
 	DataSampleKeys []string           `validate:"omitempty,dive,len=64,hexadecimal" json:"dataSampleKeys"`
-	Metadata       map[string]string  `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 // inputAlgo is the representation of input args to register an Algo

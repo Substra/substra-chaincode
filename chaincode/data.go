@@ -29,7 +29,7 @@ func (dataManager *DataManager) Set(db *LedgerDB, inp inputDataManager) (string,
 	dataManager.Name = inp.Name
 	dataManager.OpenerStorageAddress = inp.OpenerStorageAddress
 	dataManager.Type = inp.Type
-	dataManager.Metadata = initMapOutput(inp.Metadata)
+	dataManager.Metadata = inp.Metadata
 	dataManager.Description = &HashDress{
 		Hash:           inp.DescriptionHash,
 		StorageAddress: inp.DescriptionStorageAddress,

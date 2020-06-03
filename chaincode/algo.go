@@ -42,7 +42,7 @@ func (algo *Algo) Set(db *LedgerDB, inp inputAlgo) (algoKey string, err error) {
 	}
 	algo.Owner = owner
 	algo.Permissions = permissions
-	algo.Metadata = initMapOutput(inp.Metadata)
+	algo.Metadata = inp.Metadata
 	return
 }
 

@@ -44,7 +44,7 @@ func (out *outputObjective) Fill(key string, in Objective) {
 	out.Owner = in.Owner
 	out.TestDataset = in.TestDataset
 	out.Permissions.Fill(in.Permissions)
-	out.Metadata = in.Metadata
+	out.Metadata = initMapOutput(in.Metadata)
 }
 
 // outputDataManager is the return representation of the DataManager type stored in the ledger
@@ -64,7 +64,7 @@ func (out *outputDataManager) Fill(key string, in DataManager) {
 	out.ObjectiveKey = in.ObjectiveKey
 	out.Description = in.Description
 	out.Key = key
-	out.Metadata = in.Metadata
+	out.Metadata = initMapOutput(in.Metadata)
 	out.Name = in.Name
 	out.Opener.Hash = key
 	out.Opener.StorageAddress = in.OpenerStorageAddress
@@ -96,7 +96,7 @@ func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, t
 	out.outputDataManager.Fill(key, in)
 	out.TrainDataSampleKeys = trainKeys
 	out.TestDataSampleKeys = testKeys
-	out.Metadata = in.Metadata
+	out.Metadata = initMapOutput(in.Metadata)
 }
 
 type outputAlgo struct {
@@ -117,7 +117,7 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 	out.Description = in.Description
 	out.Owner = in.Owner
 	out.Permissions.Fill(in.Permissions)
-	out.Metadata = in.Metadata
+	out.Metadata = initMapOutput(in.Metadata)
 }
 
 // outputTtDataset is the representation of a Traintuple Dataset
@@ -153,7 +153,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 	outputTraintuple.Creator = traintuple.Creator
 	outputTraintuple.Permissions.Fill(traintuple.Permissions)
 	outputTraintuple.Log = traintuple.Log
-	outputTraintuple.Metadata = traintuple.Metadata
+	outputTraintuple.Metadata = initMapOutput(traintuple.Metadata)
 	outputTraintuple.Status = traintuple.Status
 	outputTraintuple.Rank = traintuple.Rank
 	outputTraintuple.ComputePlanID = traintuple.ComputePlanID
@@ -223,7 +223,7 @@ func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
 	out.Dataset = in.Dataset
 	out.Key = key
 	out.Log = in.Log
-	out.Metadata = in.Metadata
+	out.Metadata = initMapOutput(in.Metadata)
 	out.Rank = in.Rank
 	out.Status = in.Status
 	out.Tag = in.Tag
