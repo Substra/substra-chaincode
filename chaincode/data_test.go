@@ -83,7 +83,8 @@ func TestDataManager(t *testing.T) {
 			Hash:           dataManagerKey,
 			StorageAddress: inpDataManager.OpenerStorageAddress,
 		},
-		Type: inpDataManager.Type,
+		Type:     inpDataManager.Type,
+		Metadata: map[string]string{},
 	}
 	assert.Exactly(t, expectedDataManager, dataManager)
 

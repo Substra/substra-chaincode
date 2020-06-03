@@ -68,7 +68,7 @@ func TestAggregateAlgo(t *testing.T) {
 			Permissions: outputPermissions{
 				Process: Permission{Public: true, AuthorizedIDs: []string{}},
 			},
-			Metadata: inpAlgo.Metadata,
+			Metadata: map[string]string{},
 		},
 	}
 	assert.Exactly(t, expectedAlgo, algo)
