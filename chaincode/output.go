@@ -323,6 +323,7 @@ type outputComputePlan struct {
 	TesttupleKeys           []string          `json:"testtupleKeys"`
 	CleanModels             bool              `json:"cleanModels"`
 	Tag                     string            `json:"tag"`
+	Metadata                map[string]string `json:"metadata"`
 	Status                  string            `json:"status"`
 	TupleCount              int               `json:"tupleCount"`
 	DoneCount               int               `json:"doneCount"`
@@ -340,6 +341,7 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan, newIDs []string) 
 	out.TesttupleKeys = in.TesttupleKeys
 	out.Status = in.State.Status
 	out.Tag = in.Tag
+	out.Metadata = initMapOutput(in.Metadata)
 	out.TupleCount = in.State.TupleCount
 	out.DoneCount = in.State.DoneCount
 	IDToKey := map[string]string{}

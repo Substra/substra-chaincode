@@ -24,6 +24,7 @@ func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, IDT
 	inpTraintuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpTraintuple.AlgoKey = inpCP.AlgoKey
 	inpTraintuple.Tag = inpCP.Tag
+	inpTraintuple.Metadata = inpCP.Metadata
 
 	// Set the inModels by matching the id to tuples key previously
 	// encontered in this compute plan
@@ -41,6 +42,7 @@ func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, IDT
 func (inpAggregatetuple *inputAggregatetuple) Fill(inpCP inputComputePlanAggregatetuple, IDToTrainTask map[string]TrainTask) error {
 	inpAggregatetuple.AlgoKey = inpCP.AlgoKey
 	inpAggregatetuple.Tag = inpCP.Tag
+	inpAggregatetuple.Metadata = inpCP.Metadata
 	inpAggregatetuple.Worker = inpCP.Worker
 
 	// Set the inModels by matching the id to tuples key previously
@@ -61,6 +63,7 @@ func (inpCompositeTraintuple *inputCompositeTraintuple) Fill(inpCP inputComputeP
 	inpCompositeTraintuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpCompositeTraintuple.AlgoKey = inpCP.AlgoKey
 	inpCompositeTraintuple.Tag = inpCP.Tag
+	inpCompositeTraintuple.Metadata = inpCP.Metadata
 	inpCompositeTraintuple.OutTrunkModelPermissions = inpCP.OutTrunkModelPermissions
 
 	// Set the inModels by matching the id to traintuples key previously
@@ -93,6 +96,7 @@ func (inpTesttuple *inputTesttuple) Fill(inpCP inputComputePlanTesttuple, IDToTr
 	inpTesttuple.DataManagerKey = inpCP.DataManagerKey
 	inpTesttuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpTesttuple.Tag = inpCP.Tag
+	inpTesttuple.Metadata = inpCP.Metadata
 	inpTesttuple.ObjectiveKey = inpCP.ObjectiveKey
 
 	return nil
