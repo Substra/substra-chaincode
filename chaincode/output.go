@@ -43,6 +43,7 @@ func (out *outputObjective) Fill(key string, in Objective) {
 	out.Metrics = in.Metrics
 	out.Owner = in.Owner
 	out.TestDataset = in.TestDataset
+	out.TestDataset.Metadata = initMapOutput(in.TestDataset.Metadata)
 	out.Permissions.Fill(in.Permissions)
 	out.Metadata = initMapOutput(in.Metadata)
 }
@@ -87,9 +88,9 @@ func (out *outputDataSample) Fill(key string, in DataSample) {
 
 type outputDataset struct {
 	outputDataManager
-	Metadata            map[string]string  `json:"metadata"`
-	TrainDataSampleKeys []string           `json:"trainDataSampleKeys"`
-	TestDataSampleKeys  []string           `json:"testDataSampleKeys"`
+	Metadata            map[string]string `json:"metadata"`
+	TrainDataSampleKeys []string          `json:"trainDataSampleKeys"`
+	TestDataSampleKeys  []string          `json:"testDataSampleKeys"`
 }
 
 func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, testKeys []string) {
@@ -194,6 +195,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 		Worker:         traintuple.Dataset.Worker,
 		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
 		OpenerHash:     traintuple.Dataset.DataManagerKey,
+		Metadata:       initMapOutput(traintuple.Dataset.Metadata),
 	}
 
 	return

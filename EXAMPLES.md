@@ -298,7 +298,7 @@ peer chaincode query -n mycc -c '{"Args":["queryObjectives"]}' -C myc
     "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
    ],
-   "metadata": null,
+   "metadata": {},
    "worker": ""
   }
  }
@@ -392,7 +392,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"train
     "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
    ],
-   "metadata": null,
+   "metadata": {},
    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "worker": "SampleOrg"
   },
@@ -441,7 +441,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"ebbf6cdde
    "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
   ],
-  "metadata": null,
+  "metadata": {},
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "worker": "SampleOrg"
  },
@@ -494,7 +494,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"ebbf6cd
    "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
   ],
-  "metadata": null,
+  "metadata": {},
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "worker": "SampleOrg"
  },
@@ -545,7 +545,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"ebbf6cd
    "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
   ],
-  "metadata": null,
+  "metadata": {},
   "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "worker": "SampleOrg"
  },
@@ -1090,7 +1090,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"ebbf6c
     "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
    ],
-   "metadata": null,
+   "metadata": {},
    "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "worker": "SampleOrg"
   },
@@ -1136,7 +1136,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
      "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
      "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
     ],
-    "metadata": null,
+    "metadata": {},
     "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "worker": "SampleOrg"
    },
@@ -1173,7 +1173,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
      "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
      "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
     ],
-    "metadata": null,
+    "metadata": {},
     "openerHash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "worker": "SampleOrg"
    },
@@ -1536,7 +1536,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
     "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
    ],
-   "metadata": null,
+   "metadata": {},
    "worker": ""
   }
  },
