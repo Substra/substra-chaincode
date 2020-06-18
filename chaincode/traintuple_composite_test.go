@@ -285,6 +285,7 @@ func TestTraintupleComposite(t *testing.T) {
 			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 			OpenerHash:     dataManagerOpenerHash,
 			Worker:         worker,
+			Metadata:       map[string]string{},
 		},
 		OutHeadModel: outHeadModelComposite{
 			Permissions: outputPermissions{

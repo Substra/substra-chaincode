@@ -152,6 +152,7 @@ func TestObjective(t *testing.T) {
 		TestDataset: &Dataset{
 			DataManagerKey: dataManagerOpenerHash,
 			DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+			Metadata:       map[string]string{},
 		},
 		Name: inpObjective.Name,
 		Description: HashDress{
