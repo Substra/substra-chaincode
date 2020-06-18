@@ -353,7 +353,7 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan, newIDs []string) 
 }
 
 type outputPermissions struct {
-	Process Permission `validate:"required" json:"process"`
+	Process Permission `json:"process"`
 }
 
 func (out *outputPermissions) Fill(in Permissions) {
