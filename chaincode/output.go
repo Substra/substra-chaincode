@@ -43,7 +43,9 @@ func (out *outputObjective) Fill(key string, in Objective) {
 	out.Metrics = in.Metrics
 	out.Owner = in.Owner
 	out.TestDataset = in.TestDataset
-	out.TestDataset.Metadata = initMapOutput(in.TestDataset.Metadata)
+	if out.TestDataset != nil {
+		out.TestDataset.Metadata = initMapOutput(in.TestDataset.Metadata)
+	}
 	out.Permissions.Fill(in.Permissions)
 	out.Metadata = initMapOutput(in.Metadata)
 }
