@@ -285,11 +285,13 @@ func TestTraintuple(t *testing.T) {
 			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 			OpenerHash:     dataManagerOpenerHash,
 			Worker:         worker,
+			Metadata:       map[string]string{},
 		},
 		Permissions: outputPermissions{
 			Process: Permission{Public: true, AuthorizedIDs: []string{}},
 		},
-		Status: StatusTodo,
+		Metadata: map[string]string{},
+		Status:   StatusTodo,
 	}
 	assert.Exactly(t, expected, out, "the traintuple queried from the ledger differ from expected")
 

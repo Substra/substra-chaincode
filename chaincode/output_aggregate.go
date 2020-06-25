@@ -22,6 +22,7 @@ type outputAggregatetuple struct {
 	Creator       string            `json:"creator"`
 	ComputePlanID string            `json:"computePlanID"`
 	Log           string            `json:"log"`
+	Metadata      map[string]string `json:"metadata"`
 	InModels      []*Model          `json:"inModels"`
 	OutModel      *HashDress        `json:"outModel"`
 	Rank          int               `json:"rank"`
@@ -44,6 +45,7 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 	outputAggregatetuple.Key = traintupleKey
 	outputAggregatetuple.Creator = traintuple.Creator
 	outputAggregatetuple.Log = traintuple.Log
+	outputAggregatetuple.Metadata = initMapOutput(traintuple.Metadata)
 	outputAggregatetuple.Status = traintuple.Status
 	outputAggregatetuple.Rank = traintuple.Rank
 	outputAggregatetuple.ComputePlanID = traintuple.ComputePlanID

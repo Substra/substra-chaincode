@@ -258,6 +258,7 @@ func TestTraintupleAggregate(t *testing.T) {
 				AuthorizedIDs: []string{},
 			},
 		},
+		Metadata: map[string]string{},
 	}
 	assert.Exactly(t, expected, out, "the aggregate tuple queried from the ledger differ from expected")
 

@@ -285,6 +285,7 @@ func TestTraintupleComposite(t *testing.T) {
 			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 			OpenerHash:     dataManagerOpenerHash,
 			Worker:         worker,
+			Metadata:       map[string]string{},
 		},
 		OutHeadModel: outHeadModelComposite{
 			Permissions: outputPermissions{
@@ -296,7 +297,8 @@ func TestTraintupleComposite(t *testing.T) {
 				Process: Permission{Public: true, AuthorizedIDs: []string{}},
 			},
 		},
-		Status: StatusTodo,
+		Metadata: map[string]string{},
+		Status:   StatusTodo,
 	}
 	assert.Exactly(t, expected, out, "the composite traintuple queried from the ledger differ from expected")
 

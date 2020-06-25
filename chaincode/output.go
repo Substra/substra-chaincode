@@ -32,6 +32,7 @@ type outputObjective struct {
 	Owner       string            `json:"owner"`
 	TestDataset *Dataset          `json:"testDataset"`
 	Permissions outputPermissions `json:"permissions"`
+	Metadata    map[string]string `json:"metadata"`
 }
 
 func (out *outputObjective) Fill(key string, in Objective) {
@@ -42,7 +43,11 @@ func (out *outputObjective) Fill(key string, in Objective) {
 	out.Metrics = in.Metrics
 	out.Owner = in.Owner
 	out.TestDataset = in.TestDataset
+	if out.TestDataset != nil {
+		out.TestDataset.Metadata = initMapOutput(in.TestDataset.Metadata)
+	}
 	out.Permissions.Fill(in.Permissions)
+	out.Metadata = initMapOutput(in.Metadata)
 }
 
 // outputDataManager is the return representation of the DataManager type stored in the ledger
@@ -50,6 +55,7 @@ type outputDataManager struct {
 	ObjectiveKey string            `json:"objectiveKey"`
 	Description  *HashDress        `json:"description"`
 	Key          string            `json:"key"`
+	Metadata     map[string]string `json:"metadata"`
 	Name         string            `json:"name"`
 	Opener       HashDress         `json:"opener"`
 	Owner        string            `json:"owner"`
@@ -61,6 +67,7 @@ func (out *outputDataManager) Fill(key string, in DataManager) {
 	out.ObjectiveKey = in.ObjectiveKey
 	out.Description = in.Description
 	out.Key = key
+	out.Metadata = initMapOutput(in.Metadata)
 	out.Name = in.Name
 	out.Opener.Hash = key
 	out.Opener.StorageAddress = in.OpenerStorageAddress
@@ -83,14 +90,16 @@ func (out *outputDataSample) Fill(key string, in DataSample) {
 
 type outputDataset struct {
 	outputDataManager
-	TrainDataSampleKeys []string `json:"trainDataSampleKeys"`
-	TestDataSampleKeys  []string `json:"testDataSampleKeys"`
+	Metadata            map[string]string `json:"metadata"`
+	TrainDataSampleKeys []string          `json:"trainDataSampleKeys"`
+	TestDataSampleKeys  []string          `json:"testDataSampleKeys"`
 }
 
 func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, testKeys []string) {
 	out.outputDataManager.Fill(key, in)
 	out.TrainDataSampleKeys = trainKeys
 	out.TestDataSampleKeys = testKeys
+	out.Metadata = initMapOutput(in.Metadata)
 }
 
 type outputAlgo struct {
@@ -100,6 +109,7 @@ type outputAlgo struct {
 	Description *HashDress        `json:"description"`
 	Owner       string            `json:"owner"`
 	Permissions outputPermissions `json:"permissions"`
+	Metadata    map[string]string `json:"metadata"`
 }
 
 func (out *outputAlgo) Fill(key string, in Algo) {
@@ -110,13 +120,15 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 	out.Description = in.Description
 	out.Owner = in.Owner
 	out.Permissions.Fill(in.Permissions)
+	out.Metadata = initMapOutput(in.Metadata)
 }
 
 // outputTtDataset is the representation of a Traintuple Dataset
 type outputTtDataset struct {
-	Worker         string   `json:"worker"`
-	DataSampleKeys []string `json:"keys"`
-	OpenerHash     string   `json:"openerHash"`
+	Worker         string            `json:"worker"`
+	DataSampleKeys []string          `json:"keys"`
+	OpenerHash     string            `json:"openerHash"`
+	Metadata       map[string]string `json:"metadata"`
 }
 
 // outputTraintuple is the representation of one the element type stored in the
@@ -129,6 +141,7 @@ type outputTraintuple struct {
 	ComputePlanID string            `json:"computePlanID"`
 	InModels      []*Model          `json:"inModels"`
 	Log           string            `json:"log"`
+	Metadata      map[string]string `json:"metadata"`
 	OutModel      *HashDress        `json:"outModel"`
 	Permissions   outputPermissions `json:"permissions"`
 	Rank          int               `json:"rank"`
@@ -143,6 +156,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 	outputTraintuple.Creator = traintuple.Creator
 	outputTraintuple.Permissions.Fill(traintuple.Permissions)
 	outputTraintuple.Log = traintuple.Log
+	outputTraintuple.Metadata = initMapOutput(traintuple.Metadata)
 	outputTraintuple.Status = traintuple.Status
 	outputTraintuple.Rank = traintuple.Rank
 	outputTraintuple.ComputePlanID = traintuple.ComputePlanID
@@ -183,25 +197,27 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 		Worker:         traintuple.Dataset.Worker,
 		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
 		OpenerHash:     traintuple.Dataset.DataManagerKey,
+		Metadata:       initMapOutput(traintuple.Dataset.Metadata),
 	}
 
 	return
 }
 
 type outputTesttuple struct {
-	Algo           *HashDressName `json:"algo"`
-	Certified      bool           `json:"certified"`
-	ComputePlanID  string         `json:"computePlanID"`
-	Creator        string         `json:"creator"`
-	Dataset        *TtDataset     `json:"dataset"`
-	Key            string         `json:"key"`
-	Log            string         `json:"log"`
-	Objective      *TtObjective   `json:"objective"`
-	Rank           int            `json:"rank"`
-	Status         string         `json:"status"`
-	Tag            string         `json:"tag"`
-	TraintupleKey  string         `json:"traintupleKey"`
-	TraintupleType string         `json:"traintupleType"`
+	Algo           *HashDressName    `json:"algo"`
+	Certified      bool              `json:"certified"`
+	ComputePlanID  string            `json:"computePlanID"`
+	Creator        string            `json:"creator"`
+	Dataset        *TtDataset        `json:"dataset"`
+	Key            string            `json:"key"`
+	Log            string            `json:"log"`
+	Metadata       map[string]string `json:"metadata"`
+	Objective      *TtObjective      `json:"objective"`
+	Rank           int               `json:"rank"`
+	Status         string            `json:"status"`
+	Tag            string            `json:"tag"`
+	TraintupleKey  string            `json:"traintupleKey"`
+	TraintupleType string            `json:"traintupleType"`
 }
 
 func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
@@ -211,6 +227,7 @@ func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
 	out.Dataset = in.Dataset
 	out.Key = key
 	out.Log = in.Log
+	out.Metadata = initMapOutput(in.Metadata)
 	out.Rank = in.Rank
 	out.Status = in.Status
 	out.Tag = in.Tag

@@ -29,6 +29,7 @@ type outputCompositeTraintuple struct {
 	InHeadModel   *Model                `json:"inHeadModel"`
 	InTrunkModel  *Model                `json:"inTrunkModel"`
 	Log           string                `json:"log"`
+	Metadata      map[string]string     `json:"metadata"`
 	OutHeadModel  outHeadModelComposite `json:"outHeadModel"`
 	OutTrunkModel outModelComposite     `json:"outTrunkModel"`
 	Rank          int                   `json:"rank"`
@@ -52,6 +53,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 	outputCompositeTraintuple.Key = traintupleKey
 	outputCompositeTraintuple.Creator = traintuple.Creator
 	outputCompositeTraintuple.Log = traintuple.Log
+	outputCompositeTraintuple.Metadata = initMapOutput(traintuple.Metadata)
 	outputCompositeTraintuple.Status = traintuple.Status
 	outputCompositeTraintuple.Rank = traintuple.Rank
 	outputCompositeTraintuple.ComputePlanID = traintuple.ComputePlanID
@@ -114,6 +116,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		Worker:         traintuple.Dataset.Worker,
 		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
 		OpenerHash:     traintuple.Dataset.DataManagerKey,
+		Metadata:       initMapOutput(traintuple.Dataset.Metadata),
 	}
 
 	return

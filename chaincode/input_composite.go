@@ -16,15 +16,16 @@ package main
 
 // inputCompositeTraintuple is the representation of input args to register a composite Traintuple
 type inputCompositeTraintuple struct {
-	AlgoKey                  string           `validate:"required,len=64,hexadecimal" json:"algoKey"`
-	InHeadModelKey           string           `validate:"required_with=InTrunkModelKey,omitempty,len=64,hexadecimal" json:"inHeadModelKey"`
-	InTrunkModelKey          string           `validate:"required_with=InHeadModelKey,omitempty,len=64,hexadecimal" json:"inTrunkModelKey"`
-	OutTrunkModelPermissions inputPermissions `validate:"required" json:"OutTrunkModelPermissions"`
-	DataManagerKey           string           `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
-	DataSampleKeys           []string         `validate:"required,unique,gt=0,dive,len=64,hexadecimal" json:"dataSampleKeys"`
-	ComputePlanID            string           `validate:"omitempty" json:"computePlanID"`
-	Rank                     string           `validate:"omitempty" json:"rank"`
-	Tag                      string           `validate:"omitempty,lte=64" json:"tag"`
+	AlgoKey                  string            `validate:"required,len=64,hexadecimal" json:"algoKey"`
+	InHeadModelKey           string            `validate:"required_with=InTrunkModelKey,omitempty,len=64,hexadecimal" json:"inHeadModelKey"`
+	InTrunkModelKey          string            `validate:"required_with=InHeadModelKey,omitempty,len=64,hexadecimal" json:"inTrunkModelKey"`
+	OutTrunkModelPermissions inputPermissions  `validate:"required" json:"OutTrunkModelPermissions"`
+	DataManagerKey           string            `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
+	DataSampleKeys           []string          `validate:"required,unique,gt=0,dive,len=64,hexadecimal" json:"dataSampleKeys"`
+	ComputePlanID            string            `validate:"omitempty" json:"computePlanID"`
+	Rank                     string            `validate:"omitempty" json:"rank"`
+	Tag                      string            `validate:"omitempty,lte=64" json:"tag"`
+	Metadata                 map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 type inputCompositeAlgo struct {

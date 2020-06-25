@@ -40,6 +40,7 @@ func (testtuple *Testtuple) SetFromInput(db *LedgerDB, inp inputTesttuple) error
 	}
 	testtuple.Creator = creator
 	testtuple.Tag = inp.Tag
+	testtuple.Metadata = inp.Metadata
 	testtuple.AssetType = TesttupleType
 
 	// Get test dataset from objective
