@@ -18,6 +18,7 @@ import (
 	"chaincode/errors"
 	"encoding/json"
 	"sync"
+	"time"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
@@ -33,16 +34,18 @@ type LedgerDB struct {
 	event            *Event
 	transactionState State
 	mutex            *sync.RWMutex
+	txTime           time.Time
 }
 
 // NewLedgerDB create a new db to access the chaincode during a SmartContract
-func NewLedgerDB(stub shim.ChaincodeStubInterface) *LedgerDB {
+func NewLedgerDB(stub shim.ChaincodeStubInterface, txTime time.Time) *LedgerDB {
 	return &LedgerDB{
 		cc: stub,
 		transactionState: State{
 			items: make(map[string]([]byte)),
 		},
-		mutex: &sync.RWMutex{},
+		mutex:  &sync.RWMutex{},
+		txTime: txTime,
 	}
 }
 

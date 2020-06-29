@@ -58,13 +58,13 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	if err != nil {
 		return formatErrorResponse(err)
 	}
-	seedTime := time.Unix(timestamp.GetSeconds(), int64(timestamp.GetNanos()))
-	rand.Seed(seedTime.UnixNano())
+	txTime := time.Unix(timestamp.GetSeconds(), int64(timestamp.GetNanos()))
+	rand.Seed(txTime.UnixNano())
 
 	// Extract the function and args from the transaction proposal
 	fn, args := stub.GetFunctionAndParameters()
 
-	db := NewLedgerDB(stub)
+	db := NewLedgerDB(stub, txTime)
 
 	var result interface{}
 	switch fn {

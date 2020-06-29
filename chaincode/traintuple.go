@@ -43,6 +43,7 @@ func (traintuple *Traintuple) SetFromInput(db *LedgerDB, inp inputTraintuple) er
 	traintuple.Creator = creator
 	traintuple.Tag = inp.Tag
 	traintuple.ComputePlanID = inp.ComputePlanID
+	traintuple.InModelKeys = inp.InModels
 
 	algo, err := db.GetAlgo(inp.AlgoKey)
 	if err != nil {
@@ -81,27 +82,20 @@ func (traintuple *Traintuple) SetFromInput(db *LedgerDB, inp inputTraintuple) er
 	return err
 }
 
-// SetFromParents set the status of the traintuple depending on its "parents",
-// i.e. the traintuples from which it received the outModels as inModels.
-// Also it's InModelKeys are set.
-func (traintuple *Traintuple) SetFromParents(db *LedgerDB, inModels []string) error {
+func (traintuple *Traintuple) getStatusFromParents(db *LedgerDB) (string, error) {
 	var parentStatuses []string
-	inModelKeys := traintuple.InModelKeys
 
-	for _, parentTraintupleKey := range inModels {
+	for _, parentTraintupleKey := range traintuple.InModelKeys {
 		tuple, err := db.GetGenericTuple(parentTraintupleKey)
 		if err != nil {
-			return errors.BadRequest(err, "could not retrieve parent traintuple with key %s", parentTraintupleKey)
+			return "", errors.BadRequest(err, "could not retrieve parent traintuple with key %s", parentTraintupleKey)
 		}
 		if !typeInSlice(tuple.AssetType, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType}) {
-			return errors.Internal("aggregate.SetFromParents: Unsupported parent type %s", tuple.AssetType)
+			return "", errors.Internal("aggregate.SetFromParents: Unsupported parent type %s", tuple.AssetType)
 		}
 		parentStatuses = append(parentStatuses, tuple.Status)
-		inModelKeys = append(inModelKeys, parentTraintupleKey)
 	}
-	traintuple.Status = determineStatusFromInModels(parentStatuses)
-	traintuple.InModelKeys = inModelKeys
-	return nil
+	return determineStatusFromInModels(parentStatuses), nil
 }
 
 // GetKey return the key of the traintuple depending on its key parameters.
@@ -114,7 +108,6 @@ func (traintuple *Traintuple) GetKey() string {
 	hashKeys = append(hashKeys, traintuple.Dataset.DataSampleKeys...)
 	hashKeys = append(hashKeys, traintuple.InModelKeys...)
 	return HashForKey("traintuple", hashKeys...)
-
 }
 
 // AddToComputePlan set the traintuple's parameters that determines if it's part of on ComputePlan and how.
@@ -174,12 +167,42 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 	return nil
 }
 
-// Save will put in the legder interface both the traintuple with its key
+func (traintupleEvent *TraintupleEvent) getKey() string {
+	hashKeys := []string{
+		traintupleEvent.TraintupleKey,
+		strconv.FormatInt(traintupleEvent.CreationDate.UnixNano()/1000, 10),
+	}
+	return HashForKey("traintupleState", hashKeys...)
+}
+
+func (traintuple *Traintuple) createEvent(db *LedgerDB, traintupleKey string, traintupleStatus string, log string) error {
+	evt := TraintupleEvent{
+		TraintupleKey: traintupleKey,
+		CreationDate:  db.txTime,
+		Status:        traintupleStatus,
+		Log:           log,
+	}
+
+	key := evt.getKey()
+	if err := db.Add(key, evt); err != nil {
+		return err
+	}
+	timestamp := strconv.FormatInt(evt.CreationDate.UnixNano()/1000, 10)
+	if err := db.CreateIndex("traintuple~event", []string{traintupleKey, timestamp}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Create will put in the legder interface both the traintuple with its key
 // and all the associated composite keys
-func (traintuple *Traintuple) Save(db *LedgerDB, traintupleKey string) error {
+func (traintuple *Traintuple) Create(db *LedgerDB, traintupleKey string, traintupleStatus string) error {
 
 	// store in ledger
 	if err := db.Add(traintupleKey, traintuple); err != nil {
+		return err
+	}
+	if err := traintuple.createEvent(db, traintupleKey, traintupleStatus, "Created"); err != nil {
 		return err
 	}
 
@@ -187,7 +210,7 @@ func (traintuple *Traintuple) Save(db *LedgerDB, traintupleKey string) error {
 	if err := db.CreateIndex("traintuple~algo~key", []string{"traintuple", traintuple.AlgoKey, traintupleKey}); err != nil {
 		return err
 	}
-	if err := db.CreateIndex("traintuple~worker~status~key", []string{"traintuple", traintuple.Dataset.Worker, traintuple.Status, traintupleKey}); err != nil {
+	if err := db.CreateIndex("traintuple~worker~status~key", []string{"traintuple", traintuple.Dataset.Worker, traintupleStatus, traintupleKey}); err != nil {
 		return err
 	}
 	for _, inModelKey := range traintuple.InModelKeys {
@@ -239,10 +262,12 @@ func createTraintupleInternal(db *LedgerDB, inp inputTraintuple, checkComputePla
 	if err != nil {
 		return "", err
 	}
-	err = traintuple.SetFromParents(db, inp.InModels)
+
+	traintupleStatus, err := traintuple.getStatusFromParents(db)
 	if err != nil {
 		return "", err
 	}
+
 	traintupleKey := traintuple.GetKey()
 	// Test if the key (ergo the traintuple) already exists
 	tupleExists, err := db.KeyExists(traintupleKey)
@@ -257,7 +282,7 @@ func createTraintupleInternal(db *LedgerDB, inp inputTraintuple, checkComputePla
 		return "", err
 	}
 
-	err = traintuple.Save(db, traintupleKey)
+	err = traintuple.Create(db, traintupleKey, traintupleStatus)
 	if err != nil {
 		return "", err
 	}
@@ -460,9 +485,9 @@ func getOutputTraintuples(db *LedgerDB, traintupleKeys []string) (outTraintuples
 }
 
 // validateNewStatus verifies that the new status is consistent with the tuple current status
-func (traintuple *Traintuple) validateNewStatus(db *LedgerDB, status string) error {
+func (traintuple *Traintuple) validateNewStatus(db *LedgerDB, currentStatus string, newStatus string) error {
 	// check validity of worker and change of status
-	return checkUpdateTuple(db, traintuple.Dataset.Worker, traintuple.Status, status)
+	return checkUpdateTuple(db, traintuple.Dataset.Worker, currentStatus, newStatus)
 }
 
 // UpdateTraintupleChildren updates the status of waiting trainuples  InModels of traintuples once they have been trained (succesfully or failed)
@@ -593,38 +618,59 @@ func IsReady(db *LedgerDB, inModelKeys []string, newDoneTraintupleKey string) (r
 	return true, nil
 }
 
+func (traintuple *Traintuple) getStatus(db *LedgerDB, traintupleKey string) (string, error) {
+	traintupleKeys, err := db.GetIndexKeys("traintuple~event", []string{traintupleKey})
+	if err != nil {
+		return "", err
+	}
+	// TODO
+	// for _, traintupleKey := range traintupleKeys {
+	// 	var outputModel outputModel
+	// 	var out outputTraintuple
+
+	// 	out, err = getOutputTraintuple(db, traintupleKey)
+	// 	if err != nil {
+	// 		return
+	// 	}
+	// 	outputModel.Traintuple = &out
+	// 	outModels = append(outModels, outputModel)
+	// }
+}
+
 // commitStatusUpdate update the traintuple status in the ledger
 func (traintuple *Traintuple) commitStatusUpdate(db *LedgerDB, traintupleKey string, newStatus string) error {
-	if traintuple.Status == newStatus {
+	currentStatus := traintuple.getStatus(db)
+	if currentStatus == newStatus {
 		return nil
 	}
 
 	// do not update if previous status is already Done, Failed, Todo, Doing
-	if StatusAborted == newStatus && traintuple.Status != StatusWaiting {
+	if StatusAborted == newStatus && currentStatus != StatusWaiting {
 		return nil
 	}
 
-	if err := traintuple.validateNewStatus(db, newStatus); err != nil {
+	if err := traintuple.validateNewStatus(db, currentStatus, newStatus); err != nil {
 		return errors.Internal("update traintuple %s failed: %s", traintupleKey, err.Error())
 	}
 
-	oldStatus := traintuple.Status
+	// TODO
 	traintuple.Status = newStatus
+	// TODO
 	if err := db.Put(traintupleKey, traintuple); err != nil {
 		return errors.Internal("failed to update traintuple %s - %s", traintupleKey, err.Error())
 	}
 
 	// update associated composite keys
 	indexName := "traintuple~worker~status~key"
-	oldAttributes := []string{"traintuple", traintuple.Dataset.Worker, oldStatus, traintupleKey}
-	newAttributes := []string{"traintuple", traintuple.Dataset.Worker, traintuple.Status, traintupleKey}
+	oldAttributes := []string{"traintuple", traintuple.Dataset.Worker, currentStatus, traintupleKey}
+	newAttributes := []string{"traintuple", traintuple.Dataset.Worker, newStatus, traintupleKey}
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
 	if err := UpdateComputePlanState(db, traintuple.ComputePlanID, newStatus, traintupleKey); err != nil {
 		return err
 	}
-	logger.Infof("traintuple %s status updated: %s (from=%s)", traintupleKey, newStatus, oldStatus)
+	logger.Infof("traintuple %s status updated: %s (from=%s)", traintupleKey, newStatus, currentStatus)
 	return nil
 }
 

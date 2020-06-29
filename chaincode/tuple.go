@@ -217,7 +217,7 @@ func validateTupleOwner(db *LedgerDB, worker string) error {
 }
 
 // check validity of traintuple update: consistent status and agent submitting the transaction
-func checkUpdateTuple(db *LedgerDB, worker string, oldStatus string, newStatus string) error {
+func checkUpdateTuple(db *LedgerDB, worker string, currentStatus string, newStatus string) error {
 	if StatusAborted == newStatus {
 		return nil
 	}
@@ -226,8 +226,8 @@ func checkUpdateTuple(db *LedgerDB, worker string, oldStatus string, newStatus s
 		StatusWaiting: StatusTodo,
 		StatusTodo:    StatusDoing,
 		StatusDoing:   StatusDone}
-	if statusPossibilities[oldStatus] != newStatus && newStatus != StatusFailed {
-		return errors.BadRequest("cannot change status from %s to %s", oldStatus, newStatus)
+	if statusPossibilities[currentStatus] != newStatus && newStatus != StatusFailed {
+		return errors.BadRequest("cannot change status from %s to %s", currentStatus, newStatus)
 	}
 	return nil
 }

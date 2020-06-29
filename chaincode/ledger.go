@@ -14,6 +14,8 @@
 
 package main
 
+import "time"
+
 // ---------------------------------------------------------------------------------
 // Representation of elements stored in the ledger
 // ---------------------------------------------------------------------------------
@@ -108,6 +110,14 @@ type GenericTuple struct {
 	Tag           string    `json:"tag"`
 }
 
+// TraintupleEvent ...
+type TraintupleEvent struct {
+	TraintupleKey string    `json:"traintupleKey"`
+	CreationDate  time.Time `json:"creationDate"`
+	Status        string    `json:"status"`
+	Log           string    `json:"log"`
+}
+
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
 	AssetType     AssetType   `json:"assetType"`
@@ -116,7 +126,6 @@ type Traintuple struct {
 	Creator       string      `json:"creator"`
 	Log           string      `json:"log"`
 	Rank          int         `json:"rank"`
-	Status        string      `json:"status"`
 	Tag           string      `json:"tag"`
 	Dataset       *Dataset    `json:"dataset"`
 	InModelKeys   []string    `json:"inModels"`
