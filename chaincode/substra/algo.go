@@ -14,9 +14,7 @@
 
 package substra
 
-import (
-	"chaincode/errors"
-)
+import "chaincode/errors"
 
 // Set is a method of the receiver Algo. It uses inputAlgo fields to set the Algo
 // Returns the algoKey
@@ -51,9 +49,9 @@ func (algo *Algo) Set(db *LedgerDB, inp inputAlgo) (algoKey string, err error) {
 // -------------------------------------------------------------------------------------------
 // registerAlgo stores a new algo in the ledger.
 // If the key exists, it will override the value with the new one
-func registerAlgo(db *LedgerDB, args []string) (resp outputKey, err error) {
+func registerAlgo(db *LedgerDB, body string) (resp outputKey, err error) {
 	inp := inputAlgo{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -77,9 +75,9 @@ func registerAlgo(db *LedgerDB, args []string) (resp outputKey, err error) {
 }
 
 // queryAlgo returns an algo of the ledger given its key
-func queryAlgo(db *LedgerDB, args []string) (out outputAlgo, err error) {
+func queryAlgo(db *LedgerDB, body string) (out outputAlgo, err error) {
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -92,9 +90,9 @@ func queryAlgo(db *LedgerDB, args []string) (out outputAlgo, err error) {
 }
 
 // queryAlgos returns all algos of the ledger
-func queryAlgos(db *LedgerDB, args []string) (outAlgos []outputAlgo, err error) {
+func queryAlgos(db *LedgerDB, body string) (outAlgos []outputAlgo, err error) {
 	outAlgos = []outputAlgo{}
-	if len(args) != 0 {
+	if body != "" {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return
 	}

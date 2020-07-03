@@ -21,9 +21,9 @@ import (
 
 // queryFilter returns all elements of the ledger matching some filters
 // For now, ok for everything. Later returns if the requester has permission to see it
-func queryFilter(db *LedgerDB, args []string) (elements interface{}, err error) {
+func queryFilter(db *LedgerDB, body string) (elements interface{}, err error) {
 	inp := inputQueryFilter{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}

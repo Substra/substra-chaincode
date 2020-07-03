@@ -53,7 +53,7 @@ func (perms Permissions) CanProcess(owner, node string) bool {
 
 // NewPermissions create the Permissions according to the arg received
 func NewPermissions(db *LedgerDB, in inputPermissions) (Permissions, error) {
-	nodes, err := queryNodes(db, []string{})
+	nodes, err := queryNodes(db, "")
 	if err != nil {
 		return Permissions{}, err
 	}

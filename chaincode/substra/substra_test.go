@@ -78,12 +78,12 @@ func methodAndKeyToByte(key string, asset interface{}) [][]byte {
 	return [][]byte{[]byte("queryAlgo"), keyToJSON(key)}
 }
 
-func assetToArgs(asset interface{}) []string {
-	return []string{string(assetToJSON(asset))}
+func assetToBody(asset interface{}) string {
+	return string(assetToJSON(asset))
 }
 
-func keyToArgs(key string) []string {
-	return []string{string(keyToJSON(key))}
+func keyToBody(key string) string {
+	return string(keyToJSON(key))
 }
 
 func assetToJSON(asset interface{}) []byte {

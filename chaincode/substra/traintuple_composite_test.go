@@ -760,11 +760,11 @@ func TestCorrectParent(t *testing.T) {
 	db := NewLedgerDB(mockStub)
 
 	// fetch aggregate child, and check its in-model is the parent's trunk out-model
-	child1, _ := queryAggregatetuple(db, assetToArgs(inputKey{Key: child1Key}))
+	child1, _ := queryAggregatetuple(db, assetToBody(inputKey{Key: child1Key}))
 	assert.Equal(t, trunkModelHash, child1.InModels[0].Hash)
 
 	// fetch composite child, and check its head in-model is the parent's head out-model
-	child2, _ := queryCompositeTraintuple(db, assetToArgs(inputKey{Key: child2Key}))
+	child2, _ := queryCompositeTraintuple(db, assetToBody(inputKey{Key: child2Key}))
 	assert.Equal(t, headModelHash, child2.InHeadModel.Hash)
 }
 
@@ -799,20 +799,20 @@ func TestHeadModelDifferentWorker(t *testing.T) {
 
 	// new node
 	mockStub.Creator = "NotFirstNode"
-	registerNode(db, []string{})
+	registerNode(db, "")
 
 	// new dataset on new worker
 	inpDM := inputDataManager{}
 	inpDM.createDefault()
 	inpDM.OpenerHash = GetRandomHash()
-	outDM, err := registerDataManager(db, assetToArgs(inpDM))
+	outDM, err := registerDataManager(db, assetToBody(inpDM))
 	assert.NoError(t, err)
 
 	inpData := inputDataSample{}
 	inpData.createDefault()
 	inpData.Hashes = []string{GetRandomHash()}
 	inpData.DataManagerKeys = []string{outDM.Key}
-	outData, err := registerDataSample(db, assetToArgs(inpData))
+	outData, err := registerDataSample(db, assetToBody(inpData))
 	assert.NoError(t, err)
 	require.Contains(t, outData, "keys")
 
@@ -823,7 +823,7 @@ func TestHeadModelDifferentWorker(t *testing.T) {
 	in.DataSampleKeys = outData["keys"]
 	in.InHeadModelKey = compositeTraintupleKey
 	in.InTrunkModelKey = aggregatetupleKey
-	out, err := createCompositeTraintuple(db, assetToArgs(in))
+	out, err := createCompositeTraintuple(db, assetToBody(in))
 	assert.Error(t, err, "It should failed because dataset worker and head InModel are not the same")
 	assert.IsType(t, errors.BadRequest(), err)
 	assert.Zero(t, out.Key)

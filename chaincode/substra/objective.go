@@ -70,10 +70,10 @@ func (objective *Objective) Set(db *LedgerDB, inp inputObjective) (objectiveKey 
 
 // registerObjective stores a new objective in the ledger.
 // If the key exists, it will override the value with the new one
-func registerObjective(db *LedgerDB, args []string) (resp outputKey, err error) {
+func registerObjective(db *LedgerDB, body string) (resp outputKey, err error) {
 	// convert input strings args to input struct inputObjective
 	inp := inputObjective{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -98,9 +98,9 @@ func registerObjective(db *LedgerDB, args []string) (resp outputKey, err error) 
 }
 
 // queryObjective returns a objective of the ledger given its key
-func queryObjective(db *LedgerDB, args []string) (out outputObjective, err error) {
+func queryObjective(db *LedgerDB, body string) (out outputObjective, err error) {
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -113,9 +113,9 @@ func queryObjective(db *LedgerDB, args []string) (out outputObjective, err error
 }
 
 // queryObjectives returns all objectives of the ledger
-func queryObjectives(db *LedgerDB, args []string) (outObjectives []outputObjective, err error) {
+func queryObjectives(db *LedgerDB, body string) (outObjectives []outputObjective, err error) {
 	outObjectives = []outputObjective{}
-	if len(args) != 0 {
+	if body != "" {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return
 	}
@@ -137,9 +137,9 @@ func queryObjectives(db *LedgerDB, args []string) (outObjectives []outputObjecti
 
 // getObjectiveLeaderboard returns for an objective, all its certified testtuples with a done status, ordered by their perf
 // It can be an ascending sort or not depending on the ascendingOrder value.
-func queryObjectiveLeaderboard(db *LedgerDB, args []string) (outputLeaderboard, error) {
+func queryObjectiveLeaderboard(db *LedgerDB, body string) (outputLeaderboard, error) {
 	inp := inputLeaderboard{}
-	err := AssetFromJSON(args, &inp)
+	err := AssetFromJSON(body, &inp)
 	if err != nil {
 		return outputLeaderboard{}, err
 	}

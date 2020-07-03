@@ -31,25 +31,25 @@ func TestRecursiveLogFailed(t *testing.T) {
 	childtraintuple := inputTraintuple{}
 	childtraintuple.createDefault()
 	childtraintuple.InModels = []string{traintupleKey}
-	childResp, err := createTraintuple(db, assetToArgs(childtraintuple))
+	childResp, err := createTraintuple(db, assetToBody(childtraintuple))
 	assert.NoError(t, err)
 
 	grandChildtraintuple := inputTraintuple{}
 	grandChildtraintuple.createDefault()
 	grandChildtraintuple.InModels = []string{childResp.Key}
-	grandChildresp, err := createTraintuple(db, assetToArgs(grandChildtraintuple))
+	grandChildresp, err := createTraintuple(db, assetToBody(grandChildtraintuple))
 	assert.NoError(t, err)
 
 	grandChildtesttuple := inputTesttuple{
 		TraintupleKey: traintupleKey,
 		ObjectiveKey:  objectiveDescriptionHash,
 	}
-	testResp, err := createTesttuple(db, assetToArgs(grandChildtesttuple))
+	testResp, err := createTesttuple(db, assetToBody(grandChildtesttuple))
 	assert.NoError(t, err)
 
-	_, err = logStartTrain(db, assetToArgs(inputKey{Key: traintupleKey}))
+	_, err = logStartTrain(db, assetToBody(inputKey{Key: traintupleKey}))
 	assert.NoError(t, err)
-	_, err = logFailTrain(db, assetToArgs(inputKey{Key: traintupleKey}))
+	_, err = logFailTrain(db, assetToBody(inputKey{Key: traintupleKey}))
 	assert.NoError(t, err)
 
 	train2, err := db.GetTraintuple(grandChildresp.Key)
@@ -190,9 +190,9 @@ func TestQueryModelPermissions(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 	traintupleToDone(t, db, traintupleKey)
-	outTrain, err := queryTraintuple(db, keyToArgs(traintupleKey))
+	outTrain, err := queryTraintuple(db, keyToBody(traintupleKey))
 	assert.NoError(t, err)
-	outPerm, err := queryModelPermissions(db, keyToArgs(outTrain.OutModel.Hash))
+	outPerm, err := queryModelPermissions(db, keyToBody(outTrain.OutModel.Hash))
 	assert.NoError(t, err)
 	assert.NotZero(t, outPerm)
 }
@@ -204,17 +204,17 @@ func TestQueryHeadModelPermissions(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	_, err := logStartCompositeTrain(db, assetToArgs(inputKey{Key: compositeTraintupleKey}))
+	_, err := logStartCompositeTrain(db, assetToBody(inputKey{Key: compositeTraintupleKey}))
 	assert.NoError(t, err)
 	success := inputLogSuccessCompositeTrain{}
 	success.Key = compositeTraintupleKey
 	success.fillDefaults()
-	_, err = logSuccessCompositeTrain(db, assetToArgs(success))
+	_, err = logSuccessCompositeTrain(db, assetToBody(success))
 	assert.NoError(t, err)
 
-	outTrain, err := queryCompositeTraintuple(db, keyToArgs(compositeTraintupleKey))
+	outTrain, err := queryCompositeTraintuple(db, keyToBody(compositeTraintupleKey))
 	assert.NoError(t, err)
-	outPerm, err := queryModelPermissions(db, keyToArgs(outTrain.OutHeadModel.OutModel.Hash))
+	outPerm, err := queryModelPermissions(db, keyToBody(outTrain.OutHeadModel.OutModel.Hash))
 	assert.NoError(t, err)
 	assert.NotZero(t, outPerm)
 	assert.False(t, outPerm.Process.Public)

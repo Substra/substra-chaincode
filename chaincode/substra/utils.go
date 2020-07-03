@@ -46,19 +46,15 @@ func typeInSlice(a AssetType, list []AssetType) bool {
 }
 
 // AssetFromJSON unmarshal a stringify json into the passed interface
-func AssetFromJSON(args []string, asset interface{}) error {
-	if len(args) != 1 {
-		return errors.BadRequest("arguments should only contains 1 json string, received: %s", args)
-	}
-	arg := args[0]
-	err := json.Unmarshal([]byte(arg), &asset)
+func AssetFromJSON(body string, asset interface{}) error {
+	err := json.Unmarshal([]byte(body), &asset)
 	if err != nil {
-		return errors.BadRequest(err, "problem when reading json arg: %s, error is:", arg)
+		return errors.BadRequest(err, "problem when reading json arg: %s, error is:", body)
 	}
 	v := validator.New()
 	err = v.Struct(asset)
 	if err != nil {
-		return errors.BadRequest(err, "inputs validation failed: %s, error is:", arg)
+		return errors.BadRequest(err, "inputs validation failed: %s, error is:", body)
 	}
 	return nil
 }

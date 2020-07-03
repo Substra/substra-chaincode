@@ -14,7 +14,7 @@
 
 package substra
 
-func registerNode(db *LedgerDB, args []string) (Node, error) {
+func registerNode(db *LedgerDB, body string) (Node, error) {
 	txCreator, err := db.GetTxCreator()
 	if err != nil {
 		return Node{}, err
@@ -46,7 +46,7 @@ func registerNode(db *LedgerDB, args []string) (Node, error) {
 	return node, nil
 }
 
-func queryNodes(db *LedgerDB, args []string) (resp []Node, err error) {
+func queryNodes(db *LedgerDB, body string) (resp []Node, err error) {
 	elementsKeys, err := db.GetIndexKeys("node~key", []string{"node"})
 	if err != nil {
 		return nil, err

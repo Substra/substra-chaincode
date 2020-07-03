@@ -24,12 +24,12 @@ import (
 	"github.com/hyperledger/fabric/protos/peer"
 )
 
+// Create a global logger for the chaincode. Its default level is Info
+var logger = shim.NewLogger("substra-chaincode")
+
 // Chaincode is a Receiver for Chaincode shim functions
 type Chaincode struct {
 }
-
-// Create a global logger for the chaincode. Its default level is Info
-var logger = shim.NewLogger("substra-chaincode")
 
 // Init is called during chaincode instantiation to initialize any
 // data. Note that chaincode upgrade also calls this function to reset
@@ -46,139 +46,161 @@ func (t *Chaincode) Init(stub shim.ChaincodeStubInterface) peer.Response {
 
 // Invoke is called per transaction on the chaincode.
 func (t *Chaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
-	start := time.Now()
 	// Log all input for potential debug later on.
 	logger.Infof("Args received by the chaincode: %#v", stub.GetStringArgs())
+
+	// Extract the function and args from the transaction proposal
+	fn, args := stub.GetFunctionAndParameters()
+	db := NewLedgerDB(stub)
+	body, err := argsToBody(args)
+	if err != nil {
+		return formatErrorResponse(err)
+	}
+	return Invoke(db, fn, body)
+}
+
+func argsToBody(args []string) (string, error) {
+	var body string
+	var err error
+	switch len(args) {
+	case 0:
+	case 1:
+		body = args[0]
+	default:
+		err = errors.BadRequest("arguments should only contains 1 json string, received: %s", args)
+	}
+	return body, err
+}
+
+// Invoke is called per transaction on the chaincode.
+func Invoke(db *LedgerDB, fn string, body string) peer.Response {
+	start := time.Now()
 
 	// Seed with a timestamp from the channel header so the chaincode's output
 	// stay determinist for each transaction. It's necessary because endorsers
 	// will compare their own output to the proposal.
-	timestamp, err := stub.GetTxTimestamp()
+	// TODO: Pass this timestamp through the db/context
+	timestamp, err := db.cc.GetTxTimestamp()
 	if err != nil {
 		return formatErrorResponse(err)
 	}
 	seedTime := time.Unix(timestamp.GetSeconds(), int64(timestamp.GetNanos()))
 	rand.Seed(seedTime.UnixNano())
 
-	// Extract the function and args from the transaction proposal
-	fn, args := stub.GetFunctionAndParameters()
-
-	db := NewLedgerDB(stub)
-
 	var result interface{}
 	switch fn {
 	case "createComputePlan":
-		result, err = createComputePlan(db, args)
+		result, err = createComputePlan(db, body)
 	case "createTesttuple":
-		result, err = createTesttuple(db, args)
+		result, err = createTesttuple(db, body)
 	case "createTraintuple":
-		result, err = createTraintuple(db, args)
+		result, err = createTraintuple(db, body)
 	case "createCompositeTraintuple":
-		result, err = createCompositeTraintuple(db, args)
+		result, err = createCompositeTraintuple(db, body)
 	case "createAggregatetuple":
-		result, err = createAggregatetuple(db, args)
+		result, err = createAggregatetuple(db, body)
 	case "cancelComputePlan":
-		result, err = cancelComputePlan(db, args)
+		result, err = cancelComputePlan(db, body)
 	case "logFailTest":
-		result, err = logFailTest(db, args)
+		result, err = logFailTest(db, body)
 	case "logFailTrain":
-		result, err = logFailTrain(db, args)
+		result, err = logFailTrain(db, body)
 	case "logFailCompositeTrain":
-		result, err = logFailCompositeTrain(db, args)
+		result, err = logFailCompositeTrain(db, body)
 	case "logFailAggregate":
-		result, err = logFailAggregate(db, args)
+		result, err = logFailAggregate(db, body)
 	case "logStartTest":
-		result, err = logStartTest(db, args)
+		result, err = logStartTest(db, body)
 	case "logStartTrain":
-		result, err = logStartTrain(db, args)
+		result, err = logStartTrain(db, body)
 	case "logStartCompositeTrain":
-		result, err = logStartCompositeTrain(db, args)
+		result, err = logStartCompositeTrain(db, body)
 	case "logStartAggregate":
-		result, err = logStartAggregate(db, args)
+		result, err = logStartAggregate(db, body)
 	case "logSuccessTest":
-		result, err = logSuccessTest(db, args)
+		result, err = logSuccessTest(db, body)
 	case "logSuccessTrain":
-		result, err = logSuccessTrain(db, args)
+		result, err = logSuccessTrain(db, body)
 	case "logSuccessCompositeTrain":
-		result, err = logSuccessCompositeTrain(db, args)
+		result, err = logSuccessCompositeTrain(db, body)
 	case "logSuccessAggregate":
-		result, err = logSuccessAggregate(db, args)
+		result, err = logSuccessAggregate(db, body)
 	case "queryAlgo":
-		result, err = queryAlgo(db, args)
+		result, err = queryAlgo(db, body)
 	case "queryAlgos":
-		result, err = queryAlgos(db, args)
+		result, err = queryAlgos(db, body)
 	case "queryCompositeAlgo":
-		result, err = queryCompositeAlgo(db, args)
+		result, err = queryCompositeAlgo(db, body)
 	case "queryCompositeAlgos":
-		result, err = queryCompositeAlgos(db, args)
+		result, err = queryCompositeAlgos(db, body)
 	case "queryAggregateAlgo":
-		result, err = queryAggregateAlgo(db, args)
+		result, err = queryAggregateAlgo(db, body)
 	case "queryAggregateAlgos":
-		result, err = queryAggregateAlgos(db, args)
+		result, err = queryAggregateAlgos(db, body)
 	case "queryDataManager":
-		result, err = queryDataManager(db, args)
+		result, err = queryDataManager(db, body)
 	case "queryDataManagers":
-		result, err = queryDataManagers(db, args)
+		result, err = queryDataManagers(db, body)
 	case "queryDataSamples":
-		result, err = queryDataSamples(db, args)
+		result, err = queryDataSamples(db, body)
 	case "queryDataset":
-		result, err = queryDataset(db, args)
+		result, err = queryDataset(db, body)
 	case "queryFilter":
-		result, err = queryFilter(db, args)
+		result, err = queryFilter(db, body)
 	case "queryModelDetails":
-		result, err = queryModelDetails(db, args)
+		result, err = queryModelDetails(db, body)
 	case "queryModelPermissions":
-		result, err = queryModelPermissions(db, args)
+		result, err = queryModelPermissions(db, body)
 	case "queryModels":
-		result, err = queryModels(db, args)
+		result, err = queryModels(db, body)
 	case "queryObjective":
-		result, err = queryObjective(db, args)
+		result, err = queryObjective(db, body)
 	case "queryObjectiveLeaderboard":
-		result, err = queryObjectiveLeaderboard(db, args)
+		result, err = queryObjectiveLeaderboard(db, body)
 	case "queryObjectives":
-		result, err = queryObjectives(db, args)
+		result, err = queryObjectives(db, body)
 	case "queryTesttuple":
-		result, err = queryTesttuple(db, args)
+		result, err = queryTesttuple(db, body)
 	case "queryTesttuples":
-		result, err = queryTesttuples(db, args)
+		result, err = queryTesttuples(db, body)
 	case "queryTraintuple":
-		result, err = queryTraintuple(db, args)
+		result, err = queryTraintuple(db, body)
 	case "queryCompositeTraintuple":
-		result, err = queryCompositeTraintuple(db, args)
+		result, err = queryCompositeTraintuple(db, body)
 	case "queryAggregatetuple":
-		result, err = queryAggregatetuple(db, args)
+		result, err = queryAggregatetuple(db, body)
 	case "queryTraintuples":
-		result, err = queryTraintuples(db, args)
+		result, err = queryTraintuples(db, body)
 	case "queryCompositeTraintuples":
-		result, err = queryCompositeTraintuples(db, args)
+		result, err = queryCompositeTraintuples(db, body)
 	case "queryAggregatetuples":
-		result, err = queryAggregatetuples(db, args)
+		result, err = queryAggregatetuples(db, body)
 	case "queryComputePlan":
-		result, err = queryComputePlan(db, args)
+		result, err = queryComputePlan(db, body)
 	case "queryComputePlans":
-		result, err = queryComputePlans(db, args)
+		result, err = queryComputePlans(db, body)
 	case "registerAlgo":
-		result, err = registerAlgo(db, args)
+		result, err = registerAlgo(db, body)
 	case "registerCompositeAlgo":
-		result, err = registerCompositeAlgo(db, args)
+		result, err = registerCompositeAlgo(db, body)
 	case "registerAggregateAlgo":
-		result, err = registerAggregateAlgo(db, args)
+		result, err = registerAggregateAlgo(db, body)
 	case "registerDataManager":
-		result, err = registerDataManager(db, args)
+		result, err = registerDataManager(db, body)
 	case "registerDataSample":
-		result, err = registerDataSample(db, args)
+		result, err = registerDataSample(db, body)
 	case "registerObjective":
-		result, err = registerObjective(db, args)
+		result, err = registerObjective(db, body)
 	case "updateComputePlan":
-		result, err = updateComputePlan(db, args)
+		result, err = updateComputePlan(db, body)
 	case "updateDataManager":
-		result, err = updateDataManager(db, args)
+		result, err = updateDataManager(db, body)
 	case "updateDataSample":
-		result, err = updateDataSample(db, args)
+		result, err = updateDataSample(db, body)
 	case "registerNode":
-		result, err = registerNode(db, args)
+		result, err = registerNode(db, body)
 	case "queryNodes":
-		result, err = queryNodes(db, args)
+		result, err = queryNodes(db, body)
 	default:
 		err = errors.BadRequest("function \"%s\" not implemented", fn)
 	}

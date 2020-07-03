@@ -39,9 +39,9 @@ const (
 // ------------------------------------------------
 
 // queryModelDetails returns info about the testtuple and algo related to a traintuple
-func queryModelDetails(db *LedgerDB, args []string) (outModelDetails outputModelDetails, err error) {
+func queryModelDetails(db *LedgerDB, body string) (outModelDetails outputModelDetails, err error) {
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -98,10 +98,10 @@ func queryModelDetails(db *LedgerDB, args []string) (outModelDetails outputModel
 }
 
 // queryModels returns all traintuples and associated testuples
-func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err error) {
+func queryModels(db *LedgerDB, body string) (outModels []outputModel, err error) {
 	outModels = []outputModel{}
 
-	if len(args) != 0 {
+	if body != "" {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return
 	}
@@ -160,10 +160,10 @@ func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err erro
 	return
 }
 
-func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, error) {
+func queryModelPermissions(db *LedgerDB, body string) (outputPermissions, error) {
 	var out outputPermissions
 	inp := inputKey{}
-	err := AssetFromJSON(args, &inp)
+	err := AssetFromJSON(body, &inp)
 	if err != nil {
 		return out, err
 	}

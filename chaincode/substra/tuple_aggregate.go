@@ -222,9 +222,9 @@ func (tuple *Aggregatetuple) Save(db *LedgerDB, aggregatetupleKey string) error 
 // Smart contracts related to aggregate tuples
 // -------------------------------------------------------------------------------------------
 // createAggregatetuple is the wrapper for the substra smartcontract createAggregatetuple
-func createAggregatetuple(db *LedgerDB, args []string) (outputKey, error) {
+func createAggregatetuple(db *LedgerDB, body string) (outputKey, error) {
 	inp := inputAggregatetuple{}
-	err := AssetFromJSON(args, &inp)
+	err := AssetFromJSON(body, &inp)
 	if err != nil {
 		return outputKey{}, err
 	}
@@ -277,10 +277,10 @@ func createAggregatetupleInternal(db *LedgerDB, inp inputAggregatetuple, checkCo
 }
 
 // logStartAggregate modifies a aggregatetuple by changing its status from todo to doing
-func logStartAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err error) {
+func logStartAggregate(db *LedgerDB, body string) (o outputAggregatetuple, err error) {
 	status := StatusDoing
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -302,10 +302,10 @@ func logStartAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err
 }
 
 // logFailAggregate modifies a aggregatetuple by changing its status to fail and reports associated logs
-func logFailAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err error) {
+func logFailAggregate(db *LedgerDB, body string) (o outputAggregatetuple, err error) {
 	status := StatusFailed
 	inp := inputLogFailTrain{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -342,10 +342,10 @@ func logFailAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err 
 
 // logSuccessAggregate modifies an aggregateTupl by changing its status from doing to done
 // reports logs and associated performances
-func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err error) {
+func logSuccessAggregate(db *LedgerDB, body string) (o outputAggregatetuple, err error) {
 	status := StatusDone
 	inp := inputLogSuccessTrain{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -393,9 +393,9 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 }
 
 // queryAggregatetuple returns info about an aggregate tuple given its key
-func queryAggregatetuple(db *LedgerDB, args []string) (outputAggregatetuple outputAggregatetuple, err error) {
+func queryAggregatetuple(db *LedgerDB, body string) (outputAggregatetuple outputAggregatetuple, err error) {
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -412,10 +412,10 @@ func queryAggregatetuple(db *LedgerDB, args []string) (outputAggregatetuple outp
 }
 
 // queryAggregatetuples returns all aggregate tuples
-func queryAggregatetuples(db *LedgerDB, args []string) ([]outputAggregatetuple, error) {
+func queryAggregatetuples(db *LedgerDB, body string) ([]outputAggregatetuple, error) {
 	outputAggregatetuples := []outputAggregatetuple{}
 
-	if len(args) != 0 {
+	if body != "" {
 		err := errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return outputAggregatetuples, err
 	}

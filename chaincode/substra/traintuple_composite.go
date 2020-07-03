@@ -261,9 +261,9 @@ func (traintuple *CompositeTraintuple) Save(db *LedgerDB, traintupleKey string) 
 // -------------------------------------------------
 
 // createCompositeTraintuple is the wrapper for the substra smartcontract createCompositeTraintuple
-func createCompositeTraintuple(db *LedgerDB, args []string) (outputKey, error) {
+func createCompositeTraintuple(db *LedgerDB, body string) (outputKey, error) {
 	inp := inputCompositeTraintuple{}
-	err := AssetFromJSON(args, &inp)
+	err := AssetFromJSON(body, &inp)
 	if err != nil {
 		return outputKey{}, err
 	}
@@ -315,10 +315,10 @@ func createCompositeTraintupleInternal(db *LedgerDB, inp inputCompositeTraintupl
 }
 
 // logStartCompositeTrain modifies a traintuple by changing its status from todo to doing
-func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraintuple, err error) {
+func logStartCompositeTrain(db *LedgerDB, body string) (o outputCompositeTraintuple, err error) {
 	status := StatusDoing
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -341,10 +341,10 @@ func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTrain
 
 // logSuccessCompositeTrain modifies a traintuple by changing its status from doing to done
 // reports logs and associated performances
-func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraintuple, err error) {
+func logSuccessCompositeTrain(db *LedgerDB, body string) (o outputCompositeTraintuple, err error) {
 	status := StatusDone
 	inp := inputLogSuccessCompositeTrain{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -402,10 +402,10 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 }
 
 // logFailCompositeTrain modifies a traintuple by changing its status to fail and reports associated logs
-func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraintuple, err error) {
+func logFailCompositeTrain(db *LedgerDB, body string) (o outputCompositeTraintuple, err error) {
 	status := StatusFailed
 	inp := inputLogFailTrain{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -444,9 +444,9 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 }
 
 // queryCompositeTraintuple returns info about a composite traintuple given its key
-func queryCompositeTraintuple(db *LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
+func queryCompositeTraintuple(db *LedgerDB, body string) (outputTraintuple outputCompositeTraintuple, err error) {
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -463,10 +463,10 @@ func queryCompositeTraintuple(db *LedgerDB, args []string) (outputTraintuple out
 }
 
 // queryCompositeTraintuples returns all composite traintuples
-func queryCompositeTraintuples(db *LedgerDB, args []string) ([]outputCompositeTraintuple, error) {
+func queryCompositeTraintuples(db *LedgerDB, body string) ([]outputCompositeTraintuple, error) {
 	outTraintuples := []outputCompositeTraintuple{}
 
-	if len(args) != 0 {
+	if body != "" {
 		err := errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return outTraintuples, err
 	}

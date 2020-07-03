@@ -217,9 +217,9 @@ func (traintuple *Traintuple) Save(db *LedgerDB, traintupleKey string) error {
 // -------------------------------------------------------------------------------------------
 
 // createTraintuple adds a Traintuple in the ledger
-func createTraintuple(db *LedgerDB, args []string) (outputKey, error) {
+func createTraintuple(db *LedgerDB, body string) (outputKey, error) {
 	inp := inputTraintuple{}
-	err := AssetFromJSON(args, &inp)
+	err := AssetFromJSON(body, &inp)
 	if err != nil {
 		return outputKey{}, err
 	}
@@ -271,10 +271,10 @@ func createTraintupleInternal(db *LedgerDB, inp inputTraintuple, checkComputePla
 }
 
 // logStartTrain modifies a traintuple by changing its status from todo to doing
-func logStartTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
+func logStartTrain(db *LedgerDB, body string) (o outputTraintuple, err error) {
 	status := StatusDoing
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -297,10 +297,10 @@ func logStartTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) 
 
 // logSuccessTrain modifies a traintuple by changing its status from doing to done
 // reports logs and associated performances
-func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
+func logSuccessTrain(db *LedgerDB, body string) (o outputTraintuple, err error) {
 	status := StatusDone
 	inp := inputLogSuccessTrain{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -349,10 +349,10 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 }
 
 // logFailTrain modifies a traintuple by changing its status to fail and reports associated logs
-func logFailTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
+func logFailTrain(db *LedgerDB, body string) (o outputTraintuple, err error) {
 	status := StatusFailed
 	inp := inputLogFailTrain{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -391,9 +391,9 @@ func logFailTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 }
 
 // queryTraintuple returns info about a traintuple given its key
-func queryTraintuple(db *LedgerDB, args []string) (outputTraintuple outputTraintuple, err error) {
+func queryTraintuple(db *LedgerDB, body string) (outputTraintuple outputTraintuple, err error) {
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -410,10 +410,10 @@ func queryTraintuple(db *LedgerDB, args []string) (outputTraintuple outputTraint
 }
 
 // queryTraintuples returns all traintuples
-func queryTraintuples(db *LedgerDB, args []string) ([]outputTraintuple, error) {
+func queryTraintuples(db *LedgerDB, body string) ([]outputTraintuple, error) {
 	outTraintuples := []outputTraintuple{}
 
-	if len(args) != 0 {
+	if body != "" {
 		err := errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return outTraintuples, err
 	}

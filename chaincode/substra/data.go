@@ -100,9 +100,9 @@ func validateUpdateDataSample(db *LedgerDB, inp inputUpdateDataSample) (dataSamp
 // -----------------------------------------------------------------
 
 // registerDataManager stores a new dataManager in the ledger.
-func registerDataManager(db *LedgerDB, args []string) (resp outputKey, err error) {
+func registerDataManager(db *LedgerDB, body string) (resp outputKey, err error) {
 	inp := inputDataManager{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -138,10 +138,10 @@ func registerDataManager(db *LedgerDB, args []string) (resp outputKey, err error
 }
 
 // registerDataSample stores new dataSample in the ledger (one or more).
-func registerDataSample(db *LedgerDB, args []string) (dataSampleKeys map[string][]string, err error) {
+func registerDataSample(db *LedgerDB, body string) (dataSampleKeys map[string][]string, err error) {
 	// convert input strings args to input struct inputDataSample
 	inp := inputDataSample{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -173,9 +173,9 @@ func registerDataSample(db *LedgerDB, args []string) (dataSampleKeys map[string]
 }
 
 // updateDataSample associates one or more dataManagerKeys to one or more dataSample
-func updateDataSample(db *LedgerDB, args []string) (resp outputKey, err error) {
+func updateDataSample(db *LedgerDB, body string) (resp outputKey, err error) {
 	inp := inputUpdateDataSample{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -223,9 +223,9 @@ func updateDataSample(db *LedgerDB, args []string) (resp outputKey, err error) {
 }
 
 // updateDataManager associates a objectiveKey to an existing dataManager
-func updateDataManager(db *LedgerDB, args []string) (resp outputKey, err error) {
+func updateDataManager(db *LedgerDB, body string) (resp outputKey, err error) {
 	inp := inputUpdateDataManager{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -238,9 +238,9 @@ func updateDataManager(db *LedgerDB, args []string) (resp outputKey, err error) 
 }
 
 // queryDataManager returns dataManager and its key
-func queryDataManager(db *LedgerDB, args []string) (out outputDataManager, err error) {
+func queryDataManager(db *LedgerDB, body string) (out outputDataManager, err error) {
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -257,10 +257,10 @@ func queryDataManager(db *LedgerDB, args []string) (out outputDataManager, err e
 }
 
 // queryDataManagers returns all DataManagers of the ledger
-func queryDataManagers(db *LedgerDB, args []string) ([]outputDataManager, error) {
+func queryDataManagers(db *LedgerDB, body string) ([]outputDataManager, error) {
 	var err error
 	outDataManagers := []outputDataManager{}
-	if len(args) != 0 {
+	if body != "" {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return outDataManagers, err
 	}
@@ -282,10 +282,10 @@ func queryDataManagers(db *LedgerDB, args []string) ([]outputDataManager, error)
 }
 
 // queryDataset returns info about a dataManager and all related dataSample
-func queryDataset(db *LedgerDB, args []string) (outputDataset, error) {
+func queryDataset(db *LedgerDB, body string) (outputDataset, error) {
 	inp := inputKey{}
 	out := outputDataset{}
-	err := AssetFromJSON(args, &inp)
+	err := AssetFromJSON(body, &inp)
 	if err != nil {
 		return out, err
 	}
@@ -311,9 +311,9 @@ func queryDataset(db *LedgerDB, args []string) (outputDataset, error) {
 	return out, nil
 }
 
-func queryDataSamples(db *LedgerDB, args []string) ([]outputDataSample, error) {
+func queryDataSamples(db *LedgerDB, body string) ([]outputDataSample, error) {
 	outDataSamples := []outputDataSample{}
-	if len(args) != 0 {
+	if body != "" {
 		err := errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return outDataSamples, err
 	}

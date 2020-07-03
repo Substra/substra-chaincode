@@ -67,14 +67,14 @@ func TestModelComposition(t *testing.T) {
 					child.createDefault()
 					child.InHeadModelKey = parent1Key
 					child.InTrunkModelKey = parent2Key
-					childResp, err := createCompositeTraintuple(db, assetToArgs(child))
+					childResp, err := createCompositeTraintuple(db, assetToBody(child))
 					assert.NoError(t, err)
 					childKey = childResp.Key
 				case AggregatetupleType:
 					child := inputAggregatetuple{}
 					child.createDefault()
 					child.InModels = []string{parent1Key, parent2Key}
-					childResp, err := createAggregatetuple(db, assetToArgs(child))
+					childResp, err := createAggregatetuple(db, assetToBody(child))
 					assert.NoError(t, err)
 					childKey = childResp.Key
 				default:
@@ -85,7 +85,7 @@ func TestModelComposition(t *testing.T) {
 				childTesttuple := inputTesttuple{}
 				childTesttuple.TraintupleKey = childKey
 				childTesttuple.fillDefaults()
-				childTestupleResp, err := createTesttuple(db, assetToArgs(childTesttuple))
+				childTestupleResp, err := createTesttuple(db, assetToBody(childTesttuple))
 				assert.NoError(t, err)
 				childTesttupleKey := childTestupleResp.Key
 
@@ -153,11 +153,11 @@ func TestModelComposition(t *testing.T) {
 func trainStart(db *LedgerDB, tupleType AssetType, tupleKey string) (interface{}, error) {
 	switch tupleType {
 	case TraintupleType:
-		return logStartTrain(db, assetToArgs(inputKey{Key: tupleKey}))
+		return logStartTrain(db, assetToBody(inputKey{Key: tupleKey}))
 	case CompositeTraintupleType:
-		return logStartCompositeTrain(db, assetToArgs(inputKey{Key: tupleKey}))
+		return logStartCompositeTrain(db, assetToBody(inputKey{Key: tupleKey}))
 	case AggregatetupleType:
-		return logStartAggregate(db, assetToArgs(inputKey{Key: tupleKey}))
+		return logStartAggregate(db, assetToBody(inputKey{Key: tupleKey}))
 	default:
 		return nil, fmt.Errorf("unsupported test case %s", tupleType)
 	}
@@ -169,17 +169,17 @@ func trainSuccess(db *LedgerDB, tupleType AssetType, tupleKey string) (interface
 		successParent1 := inputLogSuccessTrain{}
 		successParent1.fillDefaults()
 		successParent1.Key = tupleKey
-		return logSuccessTrain(db, assetToArgs(successParent1))
+		return logSuccessTrain(db, assetToBody(successParent1))
 	case CompositeTraintupleType:
 		successParent1 := inputLogSuccessCompositeTrain{}
 		successParent1.fillDefaults()
 		successParent1.Key = tupleKey
-		return logSuccessCompositeTrain(db, assetToArgs(successParent1))
+		return logSuccessCompositeTrain(db, assetToBody(successParent1))
 	case AggregatetupleType:
 		successParent1 := inputLogSuccessTrain{}
 		successParent1.fillDefaults()
 		successParent1.Key = tupleKey
-		return logSuccessAggregate(db, assetToArgs(successParent1))
+		return logSuccessAggregate(db, assetToBody(successParent1))
 	default:
 		return nil, fmt.Errorf("unsupported test case %s", tupleType)
 	}
@@ -191,11 +191,11 @@ func trainFail(db *LedgerDB, tupleType AssetType, tupleKey string) (interface{},
 	in.fillDefaults()
 	switch tupleType {
 	case TraintupleType:
-		return logFailTrain(db, assetToArgs(in))
+		return logFailTrain(db, assetToBody(in))
 	case CompositeTraintupleType:
-		return logFailCompositeTrain(db, assetToArgs(in))
+		return logFailCompositeTrain(db, assetToBody(in))
 	case AggregatetupleType:
-		return logFailAggregate(db, assetToArgs(in))
+		return logFailAggregate(db, assetToBody(in))
 	default:
 		return nil, fmt.Errorf("unsupported test case %s", tupleType)
 	}

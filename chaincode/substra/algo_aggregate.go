@@ -14,9 +14,7 @@
 
 package substra
 
-import (
-	"chaincode/errors"
-)
+import "chaincode/errors"
 
 // Set is a method of the receiver Aggregate. It uses inputAggregateAlgo fields to set the AggregateAlgo
 // Returns the aggregateAlgoKey
@@ -51,9 +49,9 @@ func (algo *AggregateAlgo) Set(db *LedgerDB, inp inputAggregateAlgo) (algoKey st
 // -------------------------------------------------------------------------------------------
 // registerAggregateAlgo stores a new algo in the ledger.
 // If the key exists, it will override the value with the new one
-func registerAggregateAlgo(db *LedgerDB, args []string) (resp outputKey, err error) {
+func registerAggregateAlgo(db *LedgerDB, body string) (resp outputKey, err error) {
 	inp := inputAggregateAlgo{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -77,9 +75,9 @@ func registerAggregateAlgo(db *LedgerDB, args []string) (resp outputKey, err err
 }
 
 // queryAggregateAlgo returns an algo of the ledger given its key
-func queryAggregateAlgo(db *LedgerDB, args []string) (out outputAggregateAlgo, err error) {
+func queryAggregateAlgo(db *LedgerDB, body string) (out outputAggregateAlgo, err error) {
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -92,9 +90,9 @@ func queryAggregateAlgo(db *LedgerDB, args []string) (out outputAggregateAlgo, e
 }
 
 // queryAggregateAlgos returns all algos of the ledger
-func queryAggregateAlgos(db *LedgerDB, args []string) (outAlgos []outputAggregateAlgo, err error) {
+func queryAggregateAlgos(db *LedgerDB, body string) (outAlgos []outputAggregateAlgo, err error) {
 	outAlgos = []outputAggregateAlgo{}
-	if len(args) != 0 {
+	if body != "" {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return
 	}

@@ -567,10 +567,10 @@ func TestCreateFailedAggregate(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	_, err := logStartCompositeTrain(db, assetToArgs(inputKey{Key: compositeTraintupleKey}))
+	_, err := logStartCompositeTrain(db, assetToBody(inputKey{Key: compositeTraintupleKey}))
 	assert.NoError(t, err)
 
-	_, err = logFailCompositeTrain(db, assetToArgs(inputLogFailTrain{inputLog{Key: compositeTraintupleKey}}))
+	_, err = logFailCompositeTrain(db, assetToBody(inputLogFailTrain{inputLog{Key: compositeTraintupleKey}}))
 	assert.NoError(t, err)
 
 	in := inputAggregatetuple{}
@@ -579,7 +579,7 @@ func TestCreateFailedAggregate(t *testing.T) {
 	key, err := createAggregatetupleInternal(db, in, true)
 	assert.NoError(t, err)
 
-	out, err := queryAggregatetuple(db, assetToArgs(inputKey{Key: key}))
+	out, err := queryAggregatetuple(db, assetToBody(inputKey{Key: key}))
 	assert.NoError(t, err)
 	assert.Equal(t, StatusFailed, out.Status)
 }

@@ -14,9 +14,7 @@
 
 package substra
 
-import (
-	"chaincode/errors"
-)
+import "chaincode/errors"
 
 // Set is a method of the receiver CompositeAlgo. It uses inputCompositeAlgo fields to set the CompositeAlgo
 // Returns the compositeAlgoKey
@@ -51,9 +49,9 @@ func (algo *CompositeAlgo) Set(db *LedgerDB, inp inputCompositeAlgo) (algoKey st
 // -------------------------------------------------------------------------------------------
 // registerCompositeAlgo stores a new algo in the ledger.
 // If the key exists, it will override the value with the new one
-func registerCompositeAlgo(db *LedgerDB, args []string) (resp outputKey, err error) {
+func registerCompositeAlgo(db *LedgerDB, body string) (resp outputKey, err error) {
 	inp := inputCompositeAlgo{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -77,9 +75,9 @@ func registerCompositeAlgo(db *LedgerDB, args []string) (resp outputKey, err err
 }
 
 // queryCompositeAlgo returns an algo of the ledger given its key
-func queryCompositeAlgo(db *LedgerDB, args []string) (out outputCompositeAlgo, err error) {
+func queryCompositeAlgo(db *LedgerDB, body string) (out outputCompositeAlgo, err error) {
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -92,9 +90,9 @@ func queryCompositeAlgo(db *LedgerDB, args []string) (out outputCompositeAlgo, e
 }
 
 // queryCompositeAlgos returns all algos of the ledger
-func queryCompositeAlgos(db *LedgerDB, args []string) (outAlgos []outputCompositeAlgo, err error) {
+func queryCompositeAlgos(db *LedgerDB, body string) (outAlgos []outputCompositeAlgo, err error) {
 	outAlgos = []outputCompositeAlgo{}
-	if len(args) != 0 {
+	if body != "" {
 		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return
 	}

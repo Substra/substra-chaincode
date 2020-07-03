@@ -103,18 +103,18 @@ func (inpTesttuple *inputTesttuple) Fill(inpCP inputComputePlanTesttuple, IDToTr
 }
 
 // createComputePlan is the wrapper for the substra smartcontract CreateComputePlan
-func createComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
+func createComputePlan(db *LedgerDB, body string) (resp outputComputePlan, err error) {
 	inp := inputNewComputePlan{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
 	return createComputePlanInternal(db, inp.inputComputePlan, inp.Tag, inp.Metadata, inp.CleanModels)
 }
 
-func updateComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
+func updateComputePlan(db *LedgerDB, body string) (resp outputComputePlan, err error) {
 	inp := inputUpdateComputePlan{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -248,16 +248,16 @@ func updateComputePlanInternal(db *LedgerDB, computePlanID string, inp inputComp
 	return resp, err
 }
 
-func queryComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
+func queryComputePlan(db *LedgerDB, body string) (resp outputComputePlan, err error) {
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
 	return getOutComputePlan(db, inp.Key)
 }
 
-func queryComputePlans(db *LedgerDB, args []string) (resp []outputComputePlan, err error) {
+func queryComputePlans(db *LedgerDB, body string) (resp []outputComputePlan, err error) {
 	resp = []outputComputePlan{}
 	computePlanIDs, err := db.GetIndexKeys("computePlan~id", []string{"computePlan"})
 	if err != nil {
@@ -287,9 +287,9 @@ func getOutComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err er
 	return resp, err
 }
 
-func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
+func cancelComputePlan(db *LedgerDB, body string) (resp outputComputePlan, err error) {
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}

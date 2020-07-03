@@ -235,10 +235,10 @@ func (testtuple *Testtuple) Save(db *LedgerDB, testtupleKey string) error {
 // -------------------------------------
 
 // createTesttuple adds a Testtuple in the ledger
-func createTesttuple(db *LedgerDB, args []string) (outputKey, error) {
+func createTesttuple(db *LedgerDB, body string) (outputKey, error) {
 
 	inp := inputTesttuple{}
-	err := AssetFromJSON(args, &inp)
+	err := AssetFromJSON(body, &inp)
 	if err != nil {
 		return outputKey{}, err
 	}
@@ -279,10 +279,10 @@ func createTesttupleInternal(db *LedgerDB, inp inputTesttuple) (string, error) {
 }
 
 // logStartTest modifies a testtuple by changing its status from todo to doing
-func logStartTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
+func logStartTest(db *LedgerDB, body string) (o outputTesttuple, err error) {
 	status := StatusDoing
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -304,10 +304,10 @@ func logStartTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 }
 
 // logSuccessTest modifies a testtuple by changing its status to done, reports perf and logs
-func logSuccessTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
+func logSuccessTest(db *LedgerDB, body string) (o outputTesttuple, err error) {
 	status := StatusDone
 	inp := inputLogSuccessTest{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -331,10 +331,10 @@ func logSuccessTest(db *LedgerDB, args []string) (o outputTesttuple, err error) 
 }
 
 // logFailTest modifies a testtuple by changing its status to fail and reports associated logs
-func logFailTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
+func logFailTest(db *LedgerDB, body string) (o outputTesttuple, err error) {
 	status := StatusFailed
 	inp := inputLogFailTest{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -358,9 +358,9 @@ func logFailTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 }
 
 // queryTesttuple returns a testtuple of the ledger given its key
-func queryTesttuple(db *LedgerDB, args []string) (out outputTesttuple, err error) {
+func queryTesttuple(db *LedgerDB, body string) (out outputTesttuple, err error) {
 	inp := inputKey{}
-	err = AssetFromJSON(args, &inp)
+	err = AssetFromJSON(body, &inp)
 	if err != nil {
 		return
 	}
@@ -377,10 +377,10 @@ func queryTesttuple(db *LedgerDB, args []string) (out outputTesttuple, err error
 }
 
 // queryTesttuples returns all testtuples of the ledger
-func queryTesttuples(db *LedgerDB, args []string) ([]outputTesttuple, error) {
+func queryTesttuples(db *LedgerDB, body string) ([]outputTesttuple, error) {
 	outTesttuples := []outputTesttuple{}
 
-	if len(args) != 0 {
+	if body != "" {
 		err := errors.BadRequest("incorrect number of arguments, expecting nothing")
 		return outTesttuples, err
 	}
