@@ -24,6 +24,7 @@ func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, IDT
 	inpTraintuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpTraintuple.AlgoKey = inpCP.AlgoKey
 	inpTraintuple.Tag = inpCP.Tag
+	inpTraintuple.Metadata = inpCP.Metadata
 
 	// Set the inModels by matching the id to tuples key previously
 	// encontered in this compute plan
@@ -41,6 +42,7 @@ func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, IDT
 func (inpAggregatetuple *inputAggregatetuple) Fill(inpCP inputComputePlanAggregatetuple, IDToTrainTask map[string]TrainTask) error {
 	inpAggregatetuple.AlgoKey = inpCP.AlgoKey
 	inpAggregatetuple.Tag = inpCP.Tag
+	inpAggregatetuple.Metadata = inpCP.Metadata
 	inpAggregatetuple.Worker = inpCP.Worker
 
 	// Set the inModels by matching the id to tuples key previously
@@ -61,6 +63,7 @@ func (inpCompositeTraintuple *inputCompositeTraintuple) Fill(inpCP inputComputeP
 	inpCompositeTraintuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpCompositeTraintuple.AlgoKey = inpCP.AlgoKey
 	inpCompositeTraintuple.Tag = inpCP.Tag
+	inpCompositeTraintuple.Metadata = inpCP.Metadata
 	inpCompositeTraintuple.OutTrunkModelPermissions = inpCP.OutTrunkModelPermissions
 
 	// Set the inModels by matching the id to traintuples key previously
@@ -93,6 +96,7 @@ func (inpTesttuple *inputTesttuple) Fill(inpCP inputComputePlanTesttuple, IDToTr
 	inpTesttuple.DataManagerKey = inpCP.DataManagerKey
 	inpTesttuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpTesttuple.Tag = inpCP.Tag
+	inpTesttuple.Metadata = inpCP.Metadata
 	inpTesttuple.ObjectiveKey = inpCP.ObjectiveKey
 
 	return nil
@@ -105,7 +109,7 @@ func createComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	if err != nil {
 		return
 	}
-	return createComputePlanInternal(db, inp.inputComputePlan, inp.Tag, inp.CleanModels)
+	return createComputePlanInternal(db, inp.inputComputePlan, inp.Tag, inp.Metadata, inp.CleanModels)
 }
 
 func updateComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
@@ -125,10 +129,11 @@ func updateComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	return updateComputePlanInternal(db, inp.ComputePlanID, inp.inputComputePlan)
 }
 
-func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string, cleanModels bool) (resp outputComputePlan, err error) {
+func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string, metadata map[string]string, cleanModels bool) (resp outputComputePlan, err error) {
 	var computePlan ComputePlan
 	computePlan.State.Status = StatusWaiting
 	computePlan.Tag = tag
+	computePlan.Metadata = metadata
 	computePlan.CleanModels = cleanModels
 	ID, err := computePlan.Create(db)
 	if err != nil {

@@ -39,7 +39,7 @@ type inputObjective struct {
 	MetricsStorageAddress     string            `validate:"required,url" json:"metricsStorageAddress"`
 	TestDataset               inputDataset      `validate:"omitempty" json:"testDataset"`
 	Permissions               inputPermissions  `validate:"required" json:"permissions"`
-	Metadata                  map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
+	Metadata                  map[string]string `validate:"lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 // inputDataset is the representation in input args to register a dataset
@@ -56,7 +56,7 @@ type inputAlgo struct {
 	DescriptionHash           string            `validate:"required,len=64,hexadecimal" json:"descriptionHash"`
 	DescriptionStorageAddress string            `validate:"required,url" json:"descriptionStorageAddress"`
 	Permissions               inputPermissions  `validate:"required" json:"permissions"`
-	Metadata                  map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
+	Metadata                  map[string]string `validate:"lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 // inputDataManager is the representation of input args to register a DataManager
@@ -69,7 +69,7 @@ type inputDataManager struct {
 	DescriptionStorageAddress string            `validate:"required,url" json:"descriptionStorageAddress"`
 	ObjectiveKey              string            `validate:"omitempty" json:"objectiveKey"` //`validate:"required"`
 	Permissions               inputPermissions  `validate:"required" json:"permissions"`
-	Metadata                  map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
+	Metadata                  map[string]string `validate:"lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 // inputUpdateDataManager is the representation of input args to update a dataManager with a objective
@@ -100,7 +100,7 @@ type inputTraintuple struct {
 	ComputePlanID  string            `validate:"omitempty" json:"computePlanID"`
 	Rank           string            `validate:"omitempty" json:"rank"`
 	Tag            string            `validate:"omitempty,lte=64" json:"tag"`
-	Metadata       map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
+	Metadata       map[string]string `validate:"lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 // inputTestuple is the representation of input args to register a Testtuple
@@ -164,6 +164,7 @@ type inputComputePlan struct {
 type inputNewComputePlan struct {
 	CleanModels bool              `json:"cleanModels"` // whether or not to delete intermediary models
 	Tag         string            `validate:"omitempty,lte=64" json:"tag"`
+	Metadata    map[string]string `validate:"lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 	inputComputePlan
 }
 
@@ -181,6 +182,7 @@ type inputComputePlanTraintuple struct {
 	ID             string            `validate:"required,lte=64" json:"id"`
 	InModelsIDs    []string          `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
 	Tag            string            `validate:"omitempty,lte=64" json:"tag"`
+	Metadata       map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 type inputComputePlanAggregatetuple struct {
@@ -188,6 +190,7 @@ type inputComputePlanAggregatetuple struct {
 	ID          string            `validate:"required,lte=64" json:"id"`
 	InModelsIDs []string          `validate:"omitempty,dive,lte=64" json:"inModelsIDs"`
 	Tag         string            `validate:"omitempty,lte=64" json:"tag"`
+	Metadata    map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 	Worker      string            `validate:"required" json:"worker"`
 }
 
@@ -200,6 +203,7 @@ type inputComputePlanCompositeTraintuple struct {
 	InTrunkModelID           string            `validate:"required_with=InHeadModelID,omitempty,len=64,hexadecimal" json:"inTrunkModelID"`
 	OutTrunkModelPermissions inputPermissions  `validate:"required" json:"OutTrunkModelPermissions"`
 	Tag                      string            `validate:"omitempty,lte=64" json:"tag"`
+	Metadata                 map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
 
 type inputComputePlanTesttuple struct {
@@ -207,6 +211,7 @@ type inputComputePlanTesttuple struct {
 	DataSampleKeys []string          `validate:"omitempty,dive,len=64,hexadecimal" json:"dataSampleKeys"`
 	ObjectiveKey   string            `validate:"required,len=64,hexadecimal" json:"objectiveKey"`
 	Tag            string            `validate:"omitempty,lte=64" json:"tag"`
+	Metadata       map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 	TraintupleID   string            `validate:"required,lte=64" json:"traintupleID"`
 }
 
