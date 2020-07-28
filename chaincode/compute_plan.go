@@ -414,7 +414,11 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey s
 		return err
 	}
 	statusUpdated := cp.UpdateStatus(tupleStatus)
-	doneModels, err := cp.CheckDoneIntermediaryModel(db)
+	doneModels := []string{}
+	if tupleStatus == StatusDone {
+		doneModels, err = cp.CheckDoneIntermediaryModel(db)
+	}
+
 	if err != nil {
 		return err
 	}
