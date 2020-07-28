@@ -417,7 +417,6 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey s
 	doneModels := []string{}
 	if tupleStatus == StatusDone && cp.CleanModels {
 		doneModels, err = cp.UpdateIntermediaryModelsInuse(db)
-		stateUpdated = true
 	}
 
 	if err != nil {
@@ -428,8 +427,6 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey s
 		if err != nil {
 			return err
 		}
-	}
-	if stateUpdated {
 		return cp.SaveState(db)
 	}
 	return nil
