@@ -346,7 +346,7 @@ func (cp *ComputePlan) SaveState(db *LedgerDB) error {
 	return db.Put(cp.StateKey, cp.State)
 }
 
-// UpdateStatus check the tuple status (from an updated tuple or a new one)
+// UpdateState check the tuple status (from an updated tuple or a new one)
 // and, if required, it updates the compute plan' status and/or its doneCount.
 // It returns true if there is any change to the compute plan, false otherwise.
 func (cp *ComputePlan) UpdateState(tupleStatus string) bool {
