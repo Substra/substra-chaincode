@@ -346,10 +346,10 @@ func (cp *ComputePlan) SaveState(db *LedgerDB) error {
 	return db.Put(cp.StateKey, cp.State)
 }
 
-// UpdateStatus check the tuple status (from an updated tuple or a new one)
+// UpdateState check the tuple status (from an updated tuple or a new one)
 // and, if required, it updates the compute plan' status and/or its doneCount.
 // It returns true if there is any change to the compute plan, false otherwise.
-func (cp *ComputePlan) UpdateStatus(tupleStatus string) bool {
+func (cp *ComputePlan) UpdateState(tupleStatus string) bool {
 	switch cp.State.Status {
 	case StatusFailed, StatusCanceled:
 	case StatusDone:
@@ -400,7 +400,7 @@ func (cp *ComputePlan) AddTuple(tupleType AssetType, key, status string) {
 		cp.TesttupleKeys = append(cp.TesttupleKeys, key)
 	}
 	cp.State.TupleCount++
-	cp.UpdateStatus(status)
+	cp.UpdateState(status)
 }
 
 // UpdateComputePlanState retreive the compute plan if the ID is not empty,
@@ -413,16 +413,16 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey s
 	if err != nil {
 		return err
 	}
-	statusUpdated := cp.UpdateStatus(tupleStatus)
+	stateUpdated := cp.UpdateState(tupleStatus)
 	doneModels := []string{}
-	if tupleStatus == StatusDone {
-		doneModels, err = cp.CheckDoneIntermediaryModel(db)
+	if tupleStatus == StatusDone && cp.CleanModels {
+		doneModels, err = cp.UpdateIntermediaryModelsInuse(db)
 	}
 
 	if err != nil {
 		return err
 	}
-	if statusUpdated || len(doneModels) != 0 {
+	if stateUpdated || len(doneModels) != 0 {
 		err = db.AddComputePlanEvent(ComputePlanID, cp.State.Status, doneModels)
 		if err != nil {
 			return err
@@ -459,11 +459,11 @@ func TryAddIntermediaryModel(db *LedgerDB, ComputePlanID, tupleKey, modelHash st
 	return cp.SaveState(db)
 }
 
-// CheckDoneIntermediaryModel check all models listed as intermediary. If any of
+// UpdateIntermediaryModelsInuse check all models listed as intermediary. If any of
 // them are 'done', meaning that there is no train like tuples or testtuples
 // planned to use this model. If that the case its hash will be added to the
 // returned slice and remove from the compute plan's one.
-func (cp *ComputePlan) CheckDoneIntermediaryModel(db *LedgerDB) ([]string, error) {
+func (cp *ComputePlan) UpdateIntermediaryModelsInuse(db *LedgerDB) ([]string, error) {
 	if !cp.CleanModels {
 		return []string{}, nil
 	}
