@@ -184,7 +184,7 @@ func (db *LedgerDB) GetIndexKeys(index string, attributes []string) ([]string, e
 // It fails if it does not exists or if it does not have an `AssetType` field.
 func (db *LedgerDB) GetAssetType(key string) (AssetType, error) {
 	asset := struct {
-		AssetType AssetType `json:"assetType"`
+		AssetType AssetType `json:"asset_type"`
 	}{}
 	if err := db.Get(key, &asset); err != nil {
 		return asset.AssetType, err

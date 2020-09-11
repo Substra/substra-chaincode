@@ -134,7 +134,7 @@ func TestGetTestDatasetKeys(t *testing.T) {
 	err := json.Unmarshal(resp.Payload, &payload)
 	assert.NoError(t, err)
 
-	v, ok := payload["testDataSampleKeys"]
+	v, ok := payload["test_data_sample_keys"]
 	assert.True(t, ok, "payload should contains the test dataSample keys")
 	assert.Contains(t, v, testDataSampleHash2, "testDataSampleKeys should contain the test dataSampleHash")
 	assert.NotContains(t, v, testDataSampleHash1, "testDataSampleKeys should not contains the train dataSampleHash")

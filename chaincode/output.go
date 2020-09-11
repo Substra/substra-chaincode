@@ -30,7 +30,7 @@ type outputObjective struct {
 	Description HashDress         `json:"description"`
 	Metrics     *HashDressName    `json:"metrics"`
 	Owner       string            `json:"owner"`
-	TestDataset *Dataset          `json:"testDataset"`
+	TestDataset *Dataset          `json:"test_dataset"`
 	Permissions outputPermissions `json:"permissions"`
 	Metadata    map[string]string `json:"metadata"`
 }
@@ -52,7 +52,7 @@ func (out *outputObjective) Fill(key string, in Objective) {
 
 // outputDataManager is the return representation of the DataManager type stored in the ledger
 type outputDataManager struct {
-	ObjectiveKey string            `json:"objectiveKey"`
+	ObjectiveKey string            `json:"objective_key"`
 	Description  *HashDress        `json:"description"`
 	Key          string            `json:"key"`
 	Metadata     map[string]string `json:"metadata"`
@@ -77,7 +77,7 @@ func (out *outputDataManager) Fill(key string, in DataManager) {
 }
 
 type outputDataSample struct {
-	DataManagerKeys []string `json:"dataManagerKeys"`
+	DataManagerKeys []string `json:"data_manager_keys"`
 	Owner           string   `json:"owner"`
 	Key             string   `json:"key"`
 }
@@ -91,8 +91,8 @@ func (out *outputDataSample) Fill(key string, in DataSample) {
 type outputDataset struct {
 	outputDataManager
 	Metadata            map[string]string `json:"metadata"`
-	TrainDataSampleKeys []string          `json:"trainDataSampleKeys"`
-	TestDataSampleKeys  []string          `json:"testDataSampleKeys"`
+	TrainDataSampleKeys []string          `json:"train_data_sample_keys"`
+	TestDataSampleKeys  []string          `json:"test_data_sample_keys"`
 }
 
 func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, testKeys []string) {
@@ -127,7 +127,7 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 type outputTtDataset struct {
 	Worker         string            `json:"worker"`
 	DataSampleKeys []string          `json:"keys"`
-	OpenerHash     string            `json:"openerHash"`
+	OpenerHash     string            `json:"opener_hash"`
 	Metadata       map[string]string `json:"metadata"`
 }
 
@@ -138,11 +138,11 @@ type outputTraintuple struct {
 	Algo          *HashDressName    `json:"algo"`
 	Creator       string            `json:"creator"`
 	Dataset       *outputTtDataset  `json:"dataset"`
-	ComputePlanID string            `json:"computePlanID"`
-	InModels      []*Model          `json:"inModels"`
+	ComputePlanID string            `json:"compute_plan_id"`
+	InModels      []*Model          `json:"in_models"`
 	Log           string            `json:"log"`
 	Metadata      map[string]string `json:"metadata"`
-	OutModel      *HashDress        `json:"outModel"`
+	OutModel      *HashDress        `json:"out_model"`
 	Permissions   outputPermissions `json:"permissions"`
 	Rank          int               `json:"rank"`
 	Status        string            `json:"status"`
@@ -206,7 +206,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 type outputTesttuple struct {
 	Algo           *HashDressName    `json:"algo"`
 	Certified      bool              `json:"certified"`
-	ComputePlanID  string            `json:"computePlanID"`
+	ComputePlanID  string            `json:"compute_plan_id"`
 	Creator        string            `json:"creator"`
 	Dataset        *TtDataset        `json:"dataset"`
 	Key            string            `json:"key"`
@@ -216,8 +216,8 @@ type outputTesttuple struct {
 	Rank           int               `json:"rank"`
 	Status         string            `json:"status"`
 	Tag            string            `json:"tag"`
-	TraintupleKey  string            `json:"traintupleKey"`
-	TraintupleType string            `json:"traintupleType"`
+	TraintupleKey  string            `json:"traintuple_key"`
+	TraintupleType string            `json:"traintuple_type"`
 }
 
 func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
@@ -287,15 +287,15 @@ func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
 
 type outputModelDetails struct {
 	Aggregatetuple         *outputAggregatetuple      `json:"aggregatetuple,omitempty"`
-	CompositeTraintuple    *outputCompositeTraintuple `json:"compositeTraintuple,omitempty"`
+	CompositeTraintuple    *outputCompositeTraintuple `json:"composite_traintuple,omitempty"`
 	Traintuple             *outputTraintuple          `json:"traintuple,omitempty"`
 	Testtuple              outputTesttuple            `json:"testtuple"`
-	NonCertifiedTesttuples []outputTesttuple          `json:"nonCertifiedTesttuples"`
+	NonCertifiedTesttuples []outputTesttuple          `json:"non_certified_testtuples"`
 }
 
 type outputModel struct {
 	Aggregatetuple      *outputAggregatetuple      `json:"aggregatetuple,omitempty"`
-	CompositeTraintuple *outputCompositeTraintuple `json:"compositeTraintuple,omitempty"`
+	CompositeTraintuple *outputCompositeTraintuple `json:"composite_traintuple,omitempty"`
 	Traintuple          *outputTraintuple          `json:"traintuple,omitempty"`
 }
 
@@ -303,31 +303,31 @@ type outputModel struct {
 type Event struct {
 	Testtuples           []outputTesttuple           `json:"testtuple"`
 	Traintuples          []outputTraintuple          `json:"traintuple"`
-	CompositeTraintuples []outputCompositeTraintuple `json:"compositeTraintuple"`
+	CompositeTraintuples []outputCompositeTraintuple `json:"composite_traintuple"`
 	Aggregatetuples      []outputAggregatetuple      `json:"aggregatetuple"`
-	ComputePlans         []eventComputePlan          `json:"computePlan"`
+	ComputePlans         []eventComputePlan          `json:"compute_plan"`
 }
 
 type eventComputePlan struct {
 	AlgoKeys       []string `json:"algoKeys"`
-	ComputePlanID  string   `json:"computePlanID"`
+	ComputePlanID  string   `json:"compute_plan_id"`
 	ModelsToDelete []string `json:"modelsToDelete"`
 	Status         string   `json:"status"`
 }
 
 type outputComputePlan struct {
-	ComputePlanID           string            `json:"computePlanID"`
-	TraintupleKeys          []string          `json:"traintupleKeys"`
-	AggregatetupleKeys      []string          `json:"aggregatetupleKeys"`
-	CompositeTraintupleKeys []string          `json:"compositeTraintupleKeys"`
-	TesttupleKeys           []string          `json:"testtupleKeys"`
-	CleanModels             bool              `json:"cleanModels"`
+	ComputePlanID           string            `json:"compute_plan_id"`
+	TraintupleKeys          []string          `json:"traintuple_keys"`
+	AggregatetupleKeys      []string          `json:"aggregatetuple_keys"`
+	CompositeTraintupleKeys []string          `json:"composite_traintuple_keys"`
+	TesttupleKeys           []string          `json:"testtuple_keys"`
+	CleanModels             bool              `json:"clean_models"`
 	Tag                     string            `json:"tag"`
 	Metadata                map[string]string `json:"metadata"`
 	Status                  string            `json:"status"`
-	TupleCount              int               `json:"tupleCount"`
-	DoneCount               int               `json:"doneCount"`
-	IDToKey                 map[string]string `json:"IDToKey"`
+	TupleCount              int               `json:"tuple_count"`
+	DoneCount               int               `json:"done_count"`
+	IDToKey                 map[string]string `json:"id_to_key"`
 }
 
 func (out *outputComputePlan) Fill(key string, in ComputePlan, newIDs []string) {
@@ -387,7 +387,7 @@ type outputBoardTuple struct {
 	Algo          *HashDressName `json:"algo"`
 	Creator       string         `json:"creator"`
 	Key           string         `json:"key"`
-	TraintupleKey string         `json:"traintupleKey"`
+	TraintupleKey string         `json:"traintuple_key"`
 	Perf          float32        `json:"perf"`
 	Tag           string         `json:"tag"`
 }

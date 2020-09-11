@@ -25,25 +25,25 @@ type outputCompositeTraintuple struct {
 	Algo          *HashDressName        `json:"algo"`
 	Creator       string                `json:"creator"`
 	Dataset       *outputTtDataset      `json:"dataset"`
-	ComputePlanID string                `json:"computePlanID"`
-	InHeadModel   *Model                `json:"inHeadModel"`
-	InTrunkModel  *Model                `json:"inTrunkModel"`
+	ComputePlanID string                `json:"compute_plan_id"`
+	InHeadModel   *Model                `json:"in_head_model"`
+	InTrunkModel  *Model                `json:"in_trunk_model"`
 	Log           string                `json:"log"`
 	Metadata      map[string]string     `json:"metadata"`
-	OutHeadModel  outHeadModelComposite `json:"outHeadModel"`
-	OutTrunkModel outModelComposite     `json:"outTrunkModel"`
+	OutHeadModel  outHeadModelComposite `json:"out_head_model"`
+	OutTrunkModel outModelComposite     `json:"out_trunk_model"`
 	Rank          int                   `json:"rank"`
 	Status        string                `json:"status"`
 	Tag           string                `json:"tag"`
 }
 
 type outHeadModelComposite struct {
-	OutModel    *Hash             `json:"outModel"`
+	OutModel    *Hash             `json:"out_model"`
 	Permissions outputPermissions `json:"permissions"`
 }
 
 type outModelComposite struct {
-	OutModel    *HashDress        `json:"outModel"`
+	OutModel    *HashDress        `json:"out_model"`
 	Permissions outputPermissions `json:"permissions"`
 }
 

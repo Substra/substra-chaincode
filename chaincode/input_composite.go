@@ -16,13 +16,13 @@ package main
 
 // inputCompositeTraintuple is the representation of input args to register a composite Traintuple
 type inputCompositeTraintuple struct {
-	AlgoKey                  string            `validate:"required,len=64,hexadecimal" json:"algoKey"`
-	InHeadModelKey           string            `validate:"required_with=InTrunkModelKey,omitempty,len=64,hexadecimal" json:"inHeadModelKey"`
-	InTrunkModelKey          string            `validate:"required_with=InHeadModelKey,omitempty,len=64,hexadecimal" json:"inTrunkModelKey"`
-	OutTrunkModelPermissions inputPermissions  `validate:"required" json:"OutTrunkModelPermissions"`
-	DataManagerKey           string            `validate:"required,len=64,hexadecimal" json:"dataManagerKey"`
-	DataSampleKeys           []string          `validate:"required,unique,gt=0,dive,len=64,hexadecimal" json:"dataSampleKeys"`
-	ComputePlanID            string            `validate:"omitempty" json:"computePlanID"`
+	AlgoKey                  string            `validate:"required,len=64,hexadecimal" json:"algo_key"`
+	InHeadModelKey           string            `validate:"required_with=InTrunkModelKey,omitempty,len=64,hexadecimal" json:"in_head_model_key"`
+	InTrunkModelKey          string            `validate:"required_with=InHeadModelKey,omitempty,len=64,hexadecimal" json:"in_trunk_model_key"`
+	OutTrunkModelPermissions inputPermissions  `validate:"required" json:"out_trunk_model_permissions"`
+	DataManagerKey           string            `validate:"required,len=64,hexadecimal" json:"data_manager_key"`
+	DataSampleKeys           []string          `validate:"required,unique,gt=0,dive,len=64,hexadecimal" json:"data_sample_keys"`
+	ComputePlanID            string            `validate:"omitempty" json:"compute_plan_id"`
 	Rank                     string            `validate:"omitempty" json:"rank"`
 	Tag                      string            `validate:"omitempty,lte=64" json:"tag"`
 	Metadata                 map[string]string `validate:"lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
@@ -34,6 +34,6 @@ type inputCompositeAlgo struct {
 
 type inputLogSuccessCompositeTrain struct {
 	inputLog
-	OutHeadModel  inputHash `validate:"required" json:"outHeadModel"`
-	OutTrunkModel inputHashDress `validate:"required" json:"outTrunkModel"`
+	OutHeadModel  inputHash `validate:"required" json:"out_head_model"`
+	OutTrunkModel inputHashDress `validate:"required" json:"out_trunk_model"`
 }
