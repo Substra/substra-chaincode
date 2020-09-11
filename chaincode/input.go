@@ -212,7 +212,7 @@ type inputComputePlanTesttuple struct {
 	ObjectiveKey   string            `validate:"required,len=64,hexadecimal" json:"objective_key"`
 	Tag            string            `validate:"omitempty,lte=64" json:"tag"`
 	Metadata       map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
-	TraintupleID   string            `validate:"required,lte=64" json:"traintupleID"`
+	TraintupleID   string            `validate:"required,lte=64" json:"traintuple_id"`
 }
 
 type inputLeaderboard struct {
