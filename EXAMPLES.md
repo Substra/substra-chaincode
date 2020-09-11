@@ -688,8 +688,8 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   "rank": 0,
   "status": "todo",
   "tag": "",
-  "traintupleType": "traintuple",
-  "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
+  "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c",
+  "traintuple_type": "traintuple"
  },
  {
   "algo": {
@@ -722,8 +722,8 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   "rank": 0,
   "status": "todo",
   "tag": "",
-  "traintupleType": "traintuple",
-  "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
+  "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c",
+  "traintuple_type": "traintuple"
  }
 ]
 ```
@@ -773,8 +773,8 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"a0f368a234
  "rank": 0,
  "status": "doing",
  "tag": "",
- "traintupleType": "traintuple",
- "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
+ "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c",
+ "traintuple_type": "traintuple"
 }
 ```
 #### ------------ Log Success Testing ------------
@@ -825,8 +825,8 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"a0f368a2
  "rank": 0,
  "status": "done",
  "tag": "",
- "traintupleType": "traintuple",
- "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
+ "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c",
+ "traintuple_type": "traintuple"
 }
 ```
 #### ------------ Query Testtuple from its key ------------
@@ -875,8 +875,8 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"a0f368a23
  "rank": 0,
  "status": "done",
  "tag": "",
- "traintupleType": "traintuple",
- "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
+ "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c",
+ "traintuple_type": "traintuple"
 }
 ```
 #### ------------ Query all Testtuples ------------
@@ -918,8 +918,8 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "rank": 0,
   "status": "todo",
   "tag": "",
-  "traintupleType": "traintuple",
-  "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
+  "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c",
+  "traintuple_type": "traintuple"
  },
  {
   "algo": {
@@ -952,8 +952,8 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "rank": 0,
   "status": "done",
   "tag": "",
-  "traintupleType": "traintuple",
-  "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
+  "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c",
+  "traintuple_type": "traintuple"
  },
  {
   "algo": {
@@ -986,8 +986,8 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "rank": 0,
   "status": "waiting",
   "tag": "",
-  "traintupleType": "traintuple",
-  "traintuple_key": "ed8102d4f4e19e961585a0b544c76c87c9ffeaf1bcbec57247023e240e3bde2d"
+  "traintuple_key": "ed8102d4f4e19e961585a0b544c76c87c9ffeaf1bcbec57247023e240e3bde2d",
+  "traintuple_type": "traintuple"
  }
 ]
 ```
@@ -1039,8 +1039,8 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"ebbf6c
    "rank": 0,
    "status": "todo",
    "tag": "",
-   "traintupleType": "traintuple",
-   "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
+   "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c",
+   "traintuple_type": "traintuple"
   }
  ],
  "testtuple": {
@@ -1074,8 +1074,8 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"ebbf6c
   "rank": 0,
   "status": "done",
   "tag": "",
-  "traintupleType": "traintuple",
-  "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
+  "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c",
+  "traintuple_type": "traintuple"
  },
  "traintuple": {
   "algo": {

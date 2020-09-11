@@ -131,7 +131,7 @@ func TestQueryTesttuple(t *testing.T) {
 		},
 		{
 			traintupleKey:              compositeTraintupleKey,
-			expectedTypeString:         "compositeTraintuple",
+			expectedTypeString:         "composite_traintuple",
 			expectedAlgoName:           compositeAlgoName,
 			expectedAlgoHash:           compositeAlgoHash,
 			expectedAlgoStorageAddress: compositeAlgoStorageAddress,
