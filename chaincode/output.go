@@ -309,9 +309,9 @@ type Event struct {
 }
 
 type eventComputePlan struct {
-	AlgoKeys       []string `json:"algoKeys"`
+	AlgoKeys       []string `json:"algo_keys"`
 	ComputePlanID  string   `json:"compute_plan_id"`
-	ModelsToDelete []string `json:"modelsToDelete"`
+	ModelsToDelete []string `json:"models_to_delete"`
 	Status         string   `json:"status"`
 }
 
