@@ -20,11 +20,11 @@ type outputAggregatetuple struct {
 	Key           string            `json:"key"`
 	Algo          *HashDressName    `json:"algo"`
 	Creator       string            `json:"creator"`
-	ComputePlanID string            `json:"computePlanID"`
+	ComputePlanID string            `json:"compute_plan_id"`
 	Log           string            `json:"log"`
 	Metadata      map[string]string `json:"metadata"`
-	InModels      []*Model          `json:"inModels"`
-	OutModel      *HashDress        `json:"outModel"`
+	InModels      []*Model          `json:"in_models"`
+	OutModel      *HashDress        `json:"out_model"`
 	Rank          int               `json:"rank"`
 	Status        string            `json:"status"`
 	Tag           string            `json:"tag"`

@@ -20,8 +20,6 @@ import (
 	"fmt"
 	"gopkg.in/go-playground/validator.v9"
 	"math/rand"
-	"unicode"
-	"unicode/utf8"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -83,40 +81,31 @@ func GetTxCreator(stub shim.ChaincodeStubInterface) (string, error) {
 	return sID.GetMspid(), nil
 }
 
-// LowerFirst returns the input string with the first letter lowercased
-func LowerFirst(s string) string {
-	if s == "" {
-		return ""
-	}
-	r, n := utf8.DecodeRuneInString(s)
-	return string(unicode.ToLower(r)) + s[n:]
-}
-
 // String returns a string representation for an asset type
 func (assetType AssetType) String() string {
 	switch assetType {
 	case ObjectiveType:
-		return "Objective"
+		return "objective"
 	case DataManagerType:
-		return "DataManager"
+		return "data_manager"
 	case DataSampleType:
-		return "DataSample"
+		return "data_sample"
 	case AlgoType:
-		return "Algo"
+		return "algo"
 	case CompositeAlgoType:
-		return "CompositeAlgo"
+		return "composite_algo"
 	case AggregateAlgoType:
-		return "AggregateAlgo"
+		return "aggregate_algo"
 	case TraintupleType:
-		return "Traintuple"
+		return "traintuple"
 	case CompositeTraintupleType:
-		return "CompositeTraintuple"
+		return "composite_traintuple"
 	case AggregatetupleType:
-		return "Aggregatetuple"
+		return "aggregatetuple"
 	case TesttupleType:
-		return "Testtuple"
+		return "testtuple"
 	case ComputePlanType:
-		return "ComputePlan"
+		return "compute_plan"
 	default:
 		return fmt.Sprintf("(unknown asset type: %d)", assetType)
 	}

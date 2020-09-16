@@ -16,9 +16,9 @@ package main
 
 // inputAggregatetuple is the representation of input args to register an aggregate Tuple
 type inputAggregatetuple struct {
-	AlgoKey       string        	`validate:"required,len=64,hexadecimal" json:"algoKey"`
-	InModels      []string      	`validate:"omitempty,dive,len=64,hexadecimal" json:"inModels"`
-	ComputePlanID string        	`validate:"omitempty" json:"computePlanID"`
+	AlgoKey       string        	`validate:"required,len=64,hexadecimal" json:"algo_key"`
+	InModels      []string      	`validate:"omitempty,dive,len=64,hexadecimal" json:"in_models"`
+	ComputePlanID string        	`validate:"omitempty" json:"compute_plan_id"`
 	Metadata      map[string]string `validate:"lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 	Rank          string        	`validate:"omitempty" json:"rank"`
 	Tag           string        	`validate:"omitempty,lte=64" json:"tag"`
