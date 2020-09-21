@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/hyperledger/fabric-chaincode-go/shim"
 )
 
 // State is a in-memory representation of the db state

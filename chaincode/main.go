@@ -20,9 +20,11 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+	"os"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/hyperledger/fabric/protos/peer"
+	"github.com/hyperledger/fabric-chaincode-go/shim"
+	"github.com/hyperledger/fabric-protos-go/peer"
+	"github.com/sirupsen/logrus"
 )
 
 // SubstraChaincode is a Receiver for Chaincode shim functions
@@ -30,7 +32,7 @@ type SubstraChaincode struct {
 }
 
 // Create a global logger for the chaincode. Its default level is Info
-var logger = shim.NewLogger("substra-chaincode")
+var logger = logrus.New()
 
 // Init is called during chaincode instantiation to initialize any
 // data. Note that chaincode upgrade also calls this function to reset
@@ -227,10 +229,36 @@ func formatErrorResponse(err error) peer.Response {
 }
 
 // main function starts up the chaincode in the container during instantiate
-func main() {
+/*func main() {
 	// TODO use the same level as the shim or an env variable
 	logger.SetLevel(shim.LogDebug)
 	if err := shim.Start(new(SubstraChaincode)); err != nil {
 		fmt.Printf("Error starting SubstraChaincode chaincode: %s", err)
 	}
 }
+*/
+
+
+func main() {
+
+	logger.SetOutput(os.Stdout)
+	logger.SetLevel(logrus.DebugLevel)
+	logger.Infof("Start SubstraChaincode server")
+
+	server := &shim.ChaincodeServer{
+		CCID:    os.Getenv("CHAINCODE_CCID"),
+		Address: os.Getenv("CHAINCODE_ADDRESS"),
+		CC:      new(SubstraChaincode),
+		TLSProps: shim.TLSProperties{
+				Disabled: true,
+		},
+	}
+
+	// Start the chaincode external server
+	err := server.Start()
+
+	if err != nil {
+		fmt.Printf("Error starting SubstraChaincode chaincode: %s", err)
+	}
+}
+

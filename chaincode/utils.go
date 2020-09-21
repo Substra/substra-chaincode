@@ -24,8 +24,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/hyperledger/fabric/protos/msp"
+	"github.com/hyperledger/fabric-chaincode-go/shim"
+	"github.com/hyperledger/fabric-protos-go/msp"
 )
 
 // stringInSlice check if a string is in a slice

@@ -22,10 +22,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	peer "github.com/hyperledger/fabric/protos/peer"
+	peer "github.com/hyperledger/fabric-protos-go/peer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/sirupsen/logrus"
 )
 
 const objectiveKey = "5c1d9cd1-c2c1-082d-de09-21b56d11030c"
@@ -310,7 +311,7 @@ func printResp(buf io.Writer, payload []byte) {
 
 func TestMain(m *testing.M) {
 	//Raise log level to silence it during tests
-	logger.SetLevel(shim.LogCritical)
+	logger.SetLevel(logrus.PanicLevel)
 	os.Exit(m.Run())
 }
 
