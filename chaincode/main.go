@@ -17,10 +17,10 @@ package main
 import (
 	"chaincode/errors"
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"time"
 	"os"
+	"io/ioutil"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-protos-go/peer"
@@ -245,20 +245,38 @@ func main() {
 	logger.SetLevel(logrus.DebugLevel)
 	logger.Infof("Start SubstraChaincode server")
 
+	key, err := ioutil.ReadFile("/var/hyperledger/tls/client/pair/tls.key")
+	if err != nil {
+		logger.Errorf("Cannot read key file: %s", err)
+	}
+
+	cert, err := ioutil.ReadFile("/var/hyperledger/tls/client/pair/tls.crt")
+	if err != nil {
+		logger.Errorf("Cannot read cert file: %s", err)
+	}
+
+	ca, err := ioutil.ReadFile("/var/hyperledger/tls/client/cert/cacert.pem")
+	if err != nil {
+		logger.Errorf("Cannot read ca cert file: %s", err)
+	}
+
 	server := &shim.ChaincodeServer{
 		CCID:    os.Getenv("CHAINCODE_CCID"),
 		Address: os.Getenv("CHAINCODE_ADDRESS"),
 		CC:      new(SubstraChaincode),
 		TLSProps: shim.TLSProperties{
-				Disabled: true,
+				Disabled: false,
+				Key: key,
+				Cert: cert,
+				ClientCACerts: ca,
 		},
 	}
 
 	// Start the chaincode external server
-	err := server.Start()
+	err = server.Start()
 
 	if err != nil {
-		fmt.Printf("Error starting SubstraChaincode chaincode: %s", err)
+		logger.Errorf("Error starting SubstraChaincode chaincode: %s", err)
 	}
 }
 
