@@ -78,7 +78,7 @@ func registerCompositeAlgo(db *LedgerDB, args []string) (resp outputKey, err err
 
 // queryCompositeAlgo returns an algo of the ledger given its key
 func queryCompositeAlgo(db *LedgerDB, args []string) (out outputCompositeAlgo, err error) {
-	inp := inputKey{}
+	inp := inputKeyOld{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return

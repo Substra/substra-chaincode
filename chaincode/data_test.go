@@ -61,7 +61,7 @@ func TestDataManager(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 409, resp.Status, "when adding dataManager which already exists, status %d and message %s", resp.Status, resp.Message)
 	// Query dataManager and check fields match expectations
-	args = [][]byte{[]byte("queryDataManager"), keyToJSON(dataManagerKey)}
+	args = [][]byte{[]byte("queryDataManager"), keyToJSONOld(dataManagerKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the dataManager, status %d and message %s", resp.Status, resp.Message)
 	dataManager := outputDataManager{}
@@ -98,7 +98,7 @@ func TestDataManager(t *testing.T) {
 	assert.Len(t, dataManagers, 1)
 	assert.Exactly(t, expectedDataManager, dataManagers[0], "return objective different from registered one")
 
-	args = [][]byte{[]byte("queryDataset"), keyToJSON(inpDataManager.OpenerHash)}
+	args = [][]byte{[]byte("queryDataset"), keyToJSONOld(inpDataManager.OpenerHash)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying Dataset, status %d and message %s", resp.Status, resp.Message)
 	out := outputDataset{}
@@ -127,7 +127,7 @@ func TestGetTestDatasetKeys(t *testing.T) {
 	mockStub.MockInvoke("42", args)
 
 	// Query the DataManager
-	args = [][]byte{[]byte("queryDataset"), keyToJSON(inpDataManager.OpenerHash)}
+	args = [][]byte{[]byte("queryDataset"), keyToJSONOld(inpDataManager.OpenerHash)}
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "querying the dataManager should return an ok status")
 	payload := map[string]interface{}{}
@@ -182,7 +182,7 @@ func TestDataset(t *testing.T) {
 	assert.EqualValuesf(t, 409, resp.Status, "when adding dataSample which already exist, status %d and message %s", resp.Status, resp.Message)
 
 	// Query dataSample and check it corresponds to what was input
-	args = [][]byte{[]byte("queryDataset"), keyToJSON(inpDataManager.OpenerHash)}
+	args = [][]byte{[]byte("queryDataset"), keyToJSONOld(inpDataManager.OpenerHash)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying dataManager dataSample with status %d and message %s", resp.Status, resp.Message)
 	out := outputDataset{}

@@ -59,6 +59,9 @@ func (dataSample *inputDataSample) createDefault() [][]byte {
 }
 
 func (objective *inputObjective) createDefault() [][]byte {
+	if objective.Key == "" {
+		objective.Key = objectiveKey
+	}
 	if objective.Name == "" {
 		objective.Name = "MSI classification"
 	}
@@ -327,7 +330,7 @@ func (testtuple *inputTesttuple) fillDefaults() {
 		testtuple.TraintupleKey = traintupleKey
 	}
 	if testtuple.ObjectiveKey == "" {
-		testtuple.ObjectiveKey = objectiveDescriptionHash
+		testtuple.ObjectiveKey = objectiveKey
 	}
 }
 

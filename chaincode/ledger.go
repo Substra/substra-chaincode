@@ -45,14 +45,15 @@ type StatusUpdater interface {
 
 // Objective is the representation of one of the element type stored in the ledger
 type Objective struct {
-	Name                      string            `json:"name"`
-	AssetType                 AssetType         `json:"asset_type"`
-	DescriptionStorageAddress string            `json:"description_storage_address"`
-	Metrics                   *HashDressName    `json:"metrics"`
-	Owner                     string            `json:"owner"`
-	TestDataset               *Dataset          `json:"test_dataset"`
-	Permissions               Permissions       `json:"permissions"`
-	Metadata                  map[string]string `json:"metadata"`
+	Key         string            `json:"key"`
+	Name        string            `json:"name"`
+	AssetType   AssetType         `json:"asset_type"`
+	Description *HashDress        `json:"description"`
+	Metrics     *HashDressName    `json:"metrics"`
+	Owner       string            `json:"owner"`
+	TestDataset *Dataset          `json:"test_dataset"`
+	Permissions Permissions       `json:"permissions"`
+	Metadata    map[string]string `json:"metadata"`
 }
 
 // DataManager is the representation of one of the elements type stored in the ledger
@@ -256,10 +257,10 @@ type Model struct {
 
 // Dataset stores info about a dataManagerKey and a list of associated dataSample
 type Dataset struct {
-	DataManagerKey string   `json:"data_manager_key"`
-	DataSampleKeys []string `json:"data_sample_keys"`
-	Metadata      map[string]string `json:"metadata"`
-	Worker         string   `json:"worker"`
+	DataManagerKey string            `json:"data_manager_key"`
+	DataSampleKeys []string          `json:"data_sample_keys"`
+	Metadata       map[string]string `json:"metadata"`
+	Worker         string            `json:"worker"`
 }
 
 // ---------------------------------------------------------------------------------

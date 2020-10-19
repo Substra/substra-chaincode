@@ -21,7 +21,7 @@ import (
 
 // Set is a method of the receiver Objective. It checks the validity of inputObjective and uses its fields to set the Objective.
 // Returns the objectiveKey and the dataManagerKey associated to test dataSample
-func (objective *Objective) Set(db *LedgerDB, inp inputObjective) (objectiveKey string, dataManagerKey string, err error) {
+func (objective *Objective) Set(db *LedgerDB, inp inputObjective) (dataManagerKey string, err error) {
 	dataManagerKey = inp.TestDataset.DataManagerKey
 	if dataManagerKey != "" {
 		var testOnly bool
@@ -41,9 +41,13 @@ func (objective *Objective) Set(db *LedgerDB, inp inputObjective) (objectiveKey 
 	} else {
 		objective.TestDataset = nil
 	}
+	objective.Key = inp.Key
 	objective.AssetType = ObjectiveType
 	objective.Name = inp.Name
-	objective.DescriptionStorageAddress = inp.DescriptionStorageAddress
+	objective.Description = &HashDress{
+		Hash:           inp.DescriptionHash,
+		StorageAddress: inp.DescriptionStorageAddress,
+	}
 	objective.Metrics = &HashDressName{
 		Name:           inp.MetricsName,
 		Hash:           inp.MetricsHash,
@@ -60,7 +64,6 @@ func (objective *Objective) Set(db *LedgerDB, inp inputObjective) (objectiveKey 
 	}
 	objective.Owner = owner
 	objective.Permissions = permissions
-	objectiveKey = inp.DescriptionHash
 	return
 }
 
@@ -80,21 +83,21 @@ func registerObjective(db *LedgerDB, args []string) (resp outputKey, err error) 
 
 	// check validity of input args and convert it to Objective
 	objective := Objective{}
-	objectiveKey, dataManagerKey, err := objective.Set(db, inp)
+	dataManagerKey, err := objective.Set(db, inp)
 	if err != nil {
 		return
 	}
 	// submit to ledger
-	if err = db.Add(objectiveKey, objective); err != nil {
+	if err = db.Add(inp.Key, objective); err != nil {
 		return
 	}
 	// create composite key
-	if err = db.CreateIndex("objective~owner~key", []string{"objective", objective.Owner, objectiveKey}); err != nil {
+	if err = db.CreateIndex("objective~owner~key", []string{"objective", objective.Owner, inp.Key}); err != nil {
 		return
 	}
 	// add objective to dataManager
-	err = addObjectiveDataManager(db, dataManagerKey, objectiveKey)
-	return outputKey{Key: objectiveKey}, err
+	err = addObjectiveDataManager(db, dataManagerKey, inp.Key)
+	return outputKey{Key: inp.Key}, err
 }
 
 // queryObjective returns a objective of the ledger given its key
@@ -108,7 +111,7 @@ func queryObjective(db *LedgerDB, args []string) (out outputObjective, err error
 	if err != nil {
 		return
 	}
-	out.Fill(inp.Key, objective)
+	out.Fill(objective)
 	return
 }
 
@@ -129,7 +132,7 @@ func queryObjectives(db *LedgerDB, args []string) (outObjectives []outputObjecti
 			return outObjectives, err
 		}
 		var out outputObjective
-		out.Fill(key, objective)
+		out.Fill(objective)
 		outObjectives = append(outObjectives, out)
 	}
 	return
@@ -149,7 +152,7 @@ func queryObjectiveLeaderboard(db *LedgerDB, args []string) (outputLeaderboard, 
 		return outputLeaderboard{}, err
 	}
 	outObjective := outputObjective{}
-	outObjective.Fill(inp.ObjectiveKey, objective)
+	outObjective.Fill(objective)
 	out := outputLeaderboard{Objective: outObjective, Testtuples: []outputBoardTuple{}}
 
 	testtupleKeys, err := db.GetIndexKeys("testtuple~objective~certified~key", []string{"testtuple", inp.ObjectiveKey, "true"})

@@ -38,8 +38,8 @@ func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -58,7 +58,7 @@ func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 
 	traintuple := outputCompositeTraintuple{}
 	json.Unmarshal(resp.Payload, &traintuple)
-	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(traintuple.Key)}
+	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSONOld(traintuple.Key)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
 }
@@ -68,8 +68,8 @@ func TestTraintupleWithSingleDatasampleComposite(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -91,7 +91,7 @@ func TestTraintupleWithSingleDatasampleComposite(t *testing.T) {
 	traintuple := outputCompositeTraintuple{}
 	err := json.Unmarshal(resp.Payload, &traintuple)
 	assert.NoError(t, err, "should be unmarshaled")
-	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(traintuple.Key)}
+	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSONOld(traintuple.Key)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the composite traintuple without error ", resp.Message)
 }
@@ -101,8 +101,8 @@ func TestTraintupleWithDuplicatedDatasamplesComposite(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -133,12 +133,12 @@ func TestNoPanicWhileQueryingIncompleteTraintupleComposite(t *testing.T) {
 
 	// Retreive and alter existing objectif to pass Metrics at nil
 	db := NewLedgerDB(mockStub)
-	objective, err := db.GetObjective(objectiveDescriptionHash)
+	objective, err := db.GetObjective(objectiveKey)
 	assert.NoError(t, err)
 	objective.Metrics = nil
 	objBytes, err := json.Marshal(objective)
 	assert.NoError(t, err)
-	err = mockStub.PutState(objectiveDescriptionHash, objBytes)
+	err = mockStub.PutState(objectiveKey, objBytes)
 	assert.NoError(t, err)
 	// It should not panic
 	require.NotPanics(t, func() {
@@ -267,7 +267,7 @@ func TestTraintupleComposite(t *testing.T) {
 	assert.NoError(t, err, "composite traintuple should unmarshal without problem")
 	traintupleKey := res.Key
 	// Query traintuple from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(traintupleKey)}
+	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSONOld(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the composite traintuple - status %d and message %s", resp.Status, resp.Message)
 	out := outputCompositeTraintuple{}
@@ -340,7 +340,7 @@ func TestTraintupleComposite(t *testing.T) {
 	success.Key = traintupleKey
 
 	argsSlice := [][][]byte{
-		[][]byte{[]byte("logStartCompositeTrain"), keyToJSON(traintupleKey)},
+		[][]byte{[]byte("logStartCompositeTrain"), keyToJSONOld(traintupleKey)},
 		success.createDefault(),
 	}
 	traintupleStatus := []string{StatusDoing, StatusDone}
@@ -361,7 +361,7 @@ func TestTraintupleComposite(t *testing.T) {
 	}
 
 	// Query CompositeTraintuple From key
-	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(compositeTraintupleKey)}
+	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSONOld(compositeTraintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying composite traintuple with status %d and message %s", resp.Status, resp.Message)
 	endTraintuple := outputCompositeTraintuple{}
@@ -376,7 +376,7 @@ func TestTraintupleComposite(t *testing.T) {
 	assert.Exactly(t, expected, endTraintuple, "retreived CompositeTraintuple does not correspond to what is expected")
 
 	// query all traintuples related to a traintuple with the same algo
-	args = [][]byte{[]byte("queryModelDetails"), keyToJSON(traintupleKey)}
+	args = [][]byte{[]byte("queryModelDetails"), keyToJSONOld(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying model details with status %d and message %s", resp.Status, resp.Message)
 	payload := outputModelDetails{}
@@ -402,18 +402,18 @@ func TestQueryTraintupleNotFoundComposite(t *testing.T) {
 	json.Unmarshal(resp.Payload, &_key)
 
 	// queryCompositeTraintuple: normal queryCompositeTraintuple
-	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(_key.Key)}
+	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSONOld(_key.Key)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the composite traintuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryCompositeTraintuple: key does not exist
 	notFoundKey := "eedbb7c31f62244c0f34461cc168804227115793d01c270021fe3f7935482eed"
-	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(notFoundKey)}
+	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSONOld(notFoundKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the composite traintuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryCompositeTraintuple: key does not exist and use existing other asset type key
-	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(algoHash)}
+	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSONOld(algoHash)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the composite traintuple - status %d and message %s", resp.Status, resp.Message)
 }
@@ -502,8 +502,8 @@ func TestCreateCompositeTraintupleInModels(t *testing.T) {
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
 			registerItem(t, *mockStub, "trainDataset")
 
-			objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-			inpObjective := inputObjective{DescriptionHash: objHash}
+			key := strings.Replace(objectiveKey, "1", "2", 1)
+			inpObjective := inputObjective{Key: key}
 			inpObjective.createDefault()
 			inpObjective.TestDataset = inputDataset{}
 			resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -551,7 +551,7 @@ func TestCreateCompositeTraintupleInModels(t *testing.T) {
 				assert.EqualValues(t, 200, resp.Status, tt.message+": "+resp.Message)
 				traintuple := outputCompositeTraintuple{}
 				json.Unmarshal(resp.Payload, &traintuple)
-				args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(traintuple.Key)}
+				args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSONOld(traintuple.Key)}
 				resp = mockStub.MockInvoke("42", args)
 				assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
 				traintuple = outputCompositeTraintuple{}
@@ -632,7 +632,7 @@ func testCompositeTraintupleInModelTypes(t *testing.T, headType AssetType, trunk
 	json.Unmarshal(resp.Payload, &keyOnly)
 
 	// fetch it back
-	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(keyOnly.Key)}
+	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSONOld(keyOnly.Key)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error: %s", resp.Message)
 	traintuple := outputCompositeTraintuple{}
@@ -659,7 +659,7 @@ func TestCompositeTraintuplePermissions(t *testing.T) {
 
 	traintuple := outputCompositeTraintuple{}
 	json.Unmarshal(resp.Payload, &traintuple)
-	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(traintuple.Key)}
+	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSONOld(traintuple.Key)}
 	resp = mockStub.MockInvoke("42", args)
 	traintuple = outputCompositeTraintuple{}
 	json.Unmarshal(resp.Payload, &traintuple)
@@ -685,7 +685,7 @@ func TestCompositeTraintupleLogSuccessFail(t *testing.T) {
 			key := _key.Key
 
 			// start
-			resp = mockStub.MockInvoke("42", [][]byte{[]byte("logStartCompositeTrain"), keyToJSON(key)})
+			resp = mockStub.MockInvoke("42", [][]byte{[]byte("logStartCompositeTrain"), keyToJSONOld(key)})
 
 			var expectedStatus string
 
@@ -708,7 +708,7 @@ func TestCompositeTraintupleLogSuccessFail(t *testing.T) {
 			}
 
 			// fetch back
-			args := [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(key)}
+			args := [][]byte{[]byte("queryCompositeTraintuple"), keyToJSONOld(key)}
 			resp = mockStub.MockInvoke("42", args)
 			assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error: %s", resp.Message)
 			traintuple := outputCompositeTraintuple{}
@@ -749,7 +749,7 @@ func TestCorrectParent(t *testing.T) {
 	child2Key := _key.Key
 
 	// start
-	mockStub.MockInvoke("42", [][]byte{[]byte("logStartCompositeTrain"), keyToJSON(parentKey)})
+	mockStub.MockInvoke("42", [][]byte{[]byte("logStartCompositeTrain"), keyToJSONOld(parentKey)})
 	// success
 	success := inputLogSuccessCompositeTrain{}
 	success.Key = parentKey
@@ -760,11 +760,11 @@ func TestCorrectParent(t *testing.T) {
 	db := NewLedgerDB(mockStub)
 
 	// fetch aggregate child, and check its in-model is the parent's trunk out-model
-	child1, _ := queryAggregatetuple(db, assetToArgs(inputKey{Key: child1Key}))
+	child1, _ := queryAggregatetuple(db, assetToArgs(inputKeyOld{Key: child1Key}))
 	assert.Equal(t, trunkModelHash, child1.InModels[0].Hash)
 
 	// fetch composite child, and check its head in-model is the parent's head out-model
-	child2, _ := queryCompositeTraintuple(db, assetToArgs(inputKey{Key: child2Key}))
+	child2, _ := queryCompositeTraintuple(db, assetToArgs(inputKeyOld{Key: child2Key}))
 	assert.Equal(t, headModelHash, child2.InHeadModel.Hash)
 }
 

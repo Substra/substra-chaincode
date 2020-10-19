@@ -78,7 +78,7 @@ func registerAggregateAlgo(db *LedgerDB, args []string) (resp outputKey, err err
 
 // queryAggregateAlgo returns an algo of the ledger given its key
 func queryAggregateAlgo(db *LedgerDB, args []string) (out outputAggregateAlgo, err error) {
-	inp := inputKey{}
+	inp := inputKeyOld{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return

@@ -46,7 +46,7 @@ func TestAggregateAlgo(t *testing.T) {
 	assert.Equalf(t, inpAlgo.Hash, algoKey, "when adding aggregate algo, key does not corresponds to its hash - key: %s and hash %s", algoKey, inpAlgo.Hash)
 
 	// Query algo from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryAggregateAlgo"), keyToJSON(algoKey)}
+	args = [][]byte{[]byte("queryAggregateAlgo"), keyToJSONOld(algoKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying an aggregate algo with status %d and message %s", resp.Status, resp.Message)
 	algo := outputAggregateAlgo{}

@@ -273,7 +273,7 @@ func createTraintupleInternal(db *LedgerDB, inp inputTraintuple, checkComputePla
 // logStartTrain modifies a traintuple by changing its status from todo to doing
 func logStartTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 	status := StatusDoing
-	inp := inputKey{}
+	inp := inputKeyOld{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -392,7 +392,7 @@ func logFailTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 
 // queryTraintuple returns info about a traintuple given its key
 func queryTraintuple(db *LedgerDB, args []string) (outputTraintuple outputTraintuple, err error) {
-	inp := inputKey{}
+	inp := inputKeyOld{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return

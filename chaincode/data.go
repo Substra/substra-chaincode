@@ -239,7 +239,7 @@ func updateDataManager(db *LedgerDB, args []string) (resp outputKey, err error) 
 
 // queryDataManager returns dataManager and its key
 func queryDataManager(db *LedgerDB, args []string) (out outputDataManager, err error) {
-	inp := inputKey{}
+	inp := inputKeyOld{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -283,7 +283,7 @@ func queryDataManagers(db *LedgerDB, args []string) ([]outputDataManager, error)
 
 // queryDataset returns info about a dataManager and all related dataSample
 func queryDataset(db *LedgerDB, args []string) (outputDataset, error) {
-	inp := inputKey{}
+	inp := inputKeyOld{}
 	out := outputDataset{}
 	err := AssetFromJSON(args, &inp)
 	if err != nil {

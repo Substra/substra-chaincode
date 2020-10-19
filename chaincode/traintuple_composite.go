@@ -317,7 +317,7 @@ func createCompositeTraintupleInternal(db *LedgerDB, inp inputCompositeTraintupl
 // logStartCompositeTrain modifies a traintuple by changing its status from todo to doing
 func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraintuple, err error) {
 	status := StatusDoing
-	inp := inputKey{}
+	inp := inputKeyOld{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -445,7 +445,7 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 
 // queryCompositeTraintuple returns info about a composite traintuple given its key
 func queryCompositeTraintuple(db *LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
-	inp := inputKey{}
+	inp := inputKeyOld{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return

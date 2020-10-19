@@ -29,8 +29,8 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -46,7 +46,7 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding traintuple without test dataset it should work: ", resp.Message)
 
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
 }
@@ -56,8 +56,8 @@ func TestTraintupleWithSingleDatasample(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -78,7 +78,7 @@ func TestTraintupleWithSingleDatasample(t *testing.T) {
 	traintuple := outputKey{}
 	err := json.Unmarshal(resp.Payload, &traintuple)
 	assert.NoError(t, err, "should be unmarshaled")
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintuple.Key)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(traintuple.Key)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
 }
@@ -88,8 +88,8 @@ func TestTraintupleWithDuplicatedDatasamples(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -120,12 +120,12 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 
 	// Retreive and alter existing objectif to pass Metrics at nil
 	db := NewLedgerDB(mockStub)
-	objective, err := db.GetObjective(objectiveDescriptionHash)
+	objective, err := db.GetObjective(objectiveKey)
 	assert.NoError(t, err)
 	objective.Metrics = nil
 	objBytes, err := json.Marshal(objective)
 	assert.NoError(t, err)
-	err = mockStub.PutState(objectiveDescriptionHash, objBytes)
+	err = mockStub.PutState(objectiveKey, objBytes)
 	assert.NoError(t, err)
 	// It should not panic
 	require.NotPanics(t, func() {
@@ -267,7 +267,7 @@ func TestTraintuple(t *testing.T) {
 	assert.NoError(t, err, "traintuple should unmarshal without problem")
 	traintupleKey := res.Key
 	// Query traintuple from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 	out := outputTraintuple{}
@@ -333,7 +333,7 @@ func TestTraintuple(t *testing.T) {
 	success.Key = traintupleKey
 
 	argsSlice := [][][]byte{
-		[][]byte{[]byte("logStartTrain"), keyToJSON(traintupleKey)},
+		[][]byte{[]byte("logStartTrain"), keyToJSONOld(traintupleKey)},
 		success.createDefault(),
 	}
 	traintupleStatus := []string{StatusDoing, StatusDone}
@@ -354,7 +354,7 @@ func TestTraintuple(t *testing.T) {
 	}
 
 	// Query Traintuple From key
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple with status %d and message %s", resp.Status, resp.Message)
 	endTraintuple := outputTraintuple{}
@@ -367,7 +367,7 @@ func TestTraintuple(t *testing.T) {
 	assert.Exactly(t, expected, endTraintuple, "retreived Traintuple does not correspond to what is expected")
 
 	// query all traintuples related to a traintuple with the same algo
-	args = [][]byte{[]byte("queryModelDetails"), keyToJSON(traintupleKey)}
+	args = [][]byte{[]byte("queryModelDetails"), keyToJSONOld(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying model details with status %d and message %s", resp.Status, resp.Message)
 	payload := outputModelDetails{}
@@ -386,18 +386,18 @@ func TestQueryTraintupleNotFound(t *testing.T) {
 	registerItem(t, *mockStub, "traintuple")
 
 	// queryTraintuple: normal case
-	args := [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
+	args := [][]byte{[]byte("queryTraintuple"), keyToJSONOld(traintupleKey)}
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryTraintuple: key does not exist
 	notFoundKey := "eedbb7c31f62244c0f34461cc168804227115793d01c270021fe3f7935482eed"
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(notFoundKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(notFoundKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryTraintuple: key does not exist and use existing other asset type key
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(algoHash)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(algoHash)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 }

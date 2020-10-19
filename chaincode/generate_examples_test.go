@@ -70,7 +70,7 @@ func TestPipeline(t *testing.T) {
 	dataManagerKey := res.Key
 
 	fmt.Fprintln(&out, "#### ------------ Query DataManager From key ------------")
-	callAssertAndPrint("invoke", "queryDataManager", inputKey{dataManagerKey})
+	callAssertAndPrint("invoke", "queryDataManager", inputKeyOld{dataManagerKey})
 
 	fmt.Fprintln(&out, "#### ------------ Add test DataSample ------------")
 	inpDataSample := inputDataSample{
@@ -117,7 +117,7 @@ func TestPipeline(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 409, resp.Status, "when adding same traintuple with status %d and message %s", resp.Status, resp.Message)
 	// Get owner of the traintuple
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
 	traintuple := outputTraintuple{}
@@ -146,7 +146,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "queryFilter", filter)
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Training ------------")
-	callAssertAndPrint("invoke", "logStartTrain", inputKey{traintupleKey})
+	callAssertAndPrint("invoke", "logStartTrain", inputKeyOld{traintupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Training ------------")
 	inp := inputLogSuccessTrain{}
@@ -155,7 +155,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "logSuccessTrain", inp)
 
 	fmt.Fprintln(&out, "#### ------------ Query Traintuple From key ------------")
-	callAssertAndPrint("invoke", "queryTraintuple", inputKey{traintupleKey})
+	callAssertAndPrint("invoke", "queryTraintuple", inputKeyOld{traintupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Add Non-Certified Testtuple ------------")
 	inpTesttuple := inputTesttuple{
@@ -178,7 +178,7 @@ func TestPipeline(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 409, resp.Status, "when adding same testtuple with status %d and message %s", resp.Status, resp.Message)
 	// Get owner of the testtuple
-	args = [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
+	args = [][]byte{[]byte("queryTesttuple"), keyToJSONOld(testtupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	respTesttuple := resp.Payload
 	testtuple := outputTesttuple{}
@@ -201,7 +201,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "queryFilter", filter)
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Testing ------------")
-	callAssertAndPrint("invoke", "logStartTest", inputKey{testtupleKey})
+	callAssertAndPrint("invoke", "logStartTest", inputKeyOld{testtupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Testing ------------")
 	success := inputLogSuccessTest{}
@@ -210,22 +210,22 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "logSuccessTest", success)
 
 	fmt.Fprintln(&out, "#### ------------ Query Testtuple from its key ------------")
-	callAssertAndPrint("query", "queryTesttuple", inputKey{testtupleKey})
+	callAssertAndPrint("query", "queryTesttuple", inputKeyOld{testtupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Query all Testtuples ------------")
 	callAssertAndPrint("query", "queryTesttuples", nil)
 
 	fmt.Fprintln(&out, "#### ------------ Query details about a model ------------")
-	callAssertAndPrint("query", "queryModelDetails", inputKey{traintupleKey})
+	callAssertAndPrint("query", "queryModelDetails", inputKeyOld{traintupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Query all models ------------")
 	callAssertAndPrint("query", "queryModels", nil)
 
 	fmt.Fprintln(&out, "#### ------------ Query model permissions ------------")
-	callAssertAndPrint("query", "queryModelPermissions", inputKey{modelHash})
+	callAssertAndPrint("query", "queryModelPermissions", inputKeyOld{modelHash})
 
 	fmt.Fprintln(&out, "#### ------------ Query Dataset ------------")
-	callAssertAndPrint("query", "queryDataset", inputKey{dataManagerOpenerHash})
+	callAssertAndPrint("query", "queryDataset", inputKeyOld{dataManagerOpenerHash})
 
 	fmt.Fprintln(&out, "#### ------------ Query nodes ------------")
 	callAssertAndPrint("query", "queryNodes", nil)
@@ -245,7 +245,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "updateDataSample", updateData)
 
 	fmt.Fprintln(&out, "#### ------------ Query the new Dataset ------------")
-	callAssertAndPrint("query", "queryDataset", inputKey{newDataManagerKey})
+	callAssertAndPrint("query", "queryDataset", inputKeyOld{newDataManagerKey})
 
 	fmt.Fprintln(&out, "#### ------------ Create a ComputePlan ------------")
 	inputCP := inputNewComputePlan{}
@@ -271,7 +271,7 @@ func TestPipeline(t *testing.T) {
 		{
 			DataManagerKey: dataManagerOpenerHash,
 			DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
-			ObjectiveKey:   objectiveDescriptionHash,
+			ObjectiveKey:   objectiveKey,
 			TraintupleID:   "thirdTraintupleID",
 		},
 	}
@@ -279,17 +279,17 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Query an ObjectiveLeaderboard ------------")
 	inpLeaderboard := inputLeaderboard{
-		ObjectiveKey:   objectiveDescriptionHash,
+		ObjectiveKey:   objectiveKey,
 		AscendingOrder: true,
 	}
 	callAssertAndPrint("invoke", "queryObjectiveLeaderboard", inpLeaderboard)
 
 	fmt.Fprintln(&out, "#### ------------ Query Compute Plan(s) ------------")
-	callAssertAndPrint("invoke", "queryComputePlan", inputKey{outCp.ComputePlanID})
+	callAssertAndPrint("invoke", "queryComputePlan", inputKeyOld{outCp.ComputePlanID})
 	callAssertAndPrint("invoke", "queryComputePlans", nil)
 
 	fmt.Fprintln(&out, "#### ------------ Cancel a ComputePlan ------------")
-	callAssertAndPrint("invoke", "cancelComputePlan", inputKey{outCp.ComputePlanID})
+	callAssertAndPrint("invoke", "cancelComputePlan", inputKeyOld{outCp.ComputePlanID})
 
 	// Use the output to check the EXAMPLES.md file and if asked update it
 	doc := out.String()

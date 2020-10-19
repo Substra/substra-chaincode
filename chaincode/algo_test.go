@@ -44,7 +44,7 @@ func TestAlgo(t *testing.T) {
 	assert.Equalf(t, inpAlgo.Hash, algoKey, "when adding algo, key does not corresponds to its hash - key: %s and hash %s", algoKey, inpAlgo.Hash)
 
 	// Query algo from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryAlgo"), keyToJSON(algoKey)}
+	args = [][]byte{[]byte("queryAlgo"), keyToJSONOld(algoKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying an algo with status %d and message %s", resp.Status, resp.Message)
 	algo := outputAlgo{}

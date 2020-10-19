@@ -27,7 +27,7 @@ const OutputAssetPaginationHardLimit = 500
 type outputObjective struct {
 	Key         string            `json:"key"`
 	Name        string            `json:"name"`
-	Description HashDress         `json:"description"`
+	Description *HashDress        `json:"description"`
 	Metrics     *HashDressName    `json:"metrics"`
 	Owner       string            `json:"owner"`
 	TestDataset *Dataset          `json:"test_dataset"`
@@ -35,11 +35,10 @@ type outputObjective struct {
 	Metadata    map[string]string `json:"metadata"`
 }
 
-func (out *outputObjective) Fill(key string, in Objective) {
-	out.Key = key
+func (out *outputObjective) Fill(in Objective) {
+	out.Key = in.Key
 	out.Name = in.Name
-	out.Description.StorageAddress = in.DescriptionStorageAddress
-	out.Description.Hash = key
+	out.Description = in.Description
 	out.Metrics = in.Metrics
 	out.Owner = in.Owner
 	out.TestDataset = in.TestDataset

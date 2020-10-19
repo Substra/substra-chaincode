@@ -32,13 +32,13 @@ func TestLeaderBoard(t *testing.T) {
 	// Add a certified testtuple
 	inputTest := inputTesttuple{
 		TraintupleKey: traintupleKey,
-		ObjectiveKey:  objectiveDescriptionHash,
+		ObjectiveKey:  objectiveKey,
 	}
 	keyMap, err := createTesttuple(db, assetToArgs(inputTest))
 	assert.NoError(t, err)
 
 	inpLeaderboard := inputLeaderboard{
-		ObjectiveKey:   objectiveDescriptionHash,
+		ObjectiveKey:   objectiveKey,
 		AscendingOrder: true,
 	}
 	// leaderboard should be empty since there is no testtuple done
@@ -56,7 +56,7 @@ func TestLeaderBoard(t *testing.T) {
 
 	leaderboard, err = queryObjectiveLeaderboard(db, assetToArgs(inpLeaderboard))
 	assert.NoError(t, err)
-	assert.Equal(t, objectiveDescriptionHash, leaderboard.Objective.Key)
+	assert.Equal(t, objectiveKey, leaderboard.Objective.Key)
 	require.Len(t, leaderboard.Testtuples, 1)
 	assert.Equal(t, keyMap.Key, leaderboard.Testtuples[0].Key)
 	assert.Equal(t, traintupleKey, leaderboard.Testtuples[0].TraintupleKey)
@@ -133,7 +133,7 @@ func TestObjective(t *testing.T) {
 	objectiveKey := res.Key
 	assert.EqualValuesf(
 		t,
-		inpObjective.DescriptionHash,
+		inpObjective.Key,
 		objectiveKey,
 		"when adding objective: unexpected returned objective key - %s / %s",
 		objectiveKey,
@@ -155,9 +155,9 @@ func TestObjective(t *testing.T) {
 			Metadata:       map[string]string{},
 		},
 		Name: inpObjective.Name,
-		Description: HashDress{
+		Description: &HashDress{
 			StorageAddress: inpObjective.DescriptionStorageAddress,
-			Hash:           objectiveKey,
+			Hash:           objectiveDescriptionHash,
 		},
 		Permissions: outputPermissions{
 			Process: Permission{Public: true, AuthorizedIDs: []string{}},

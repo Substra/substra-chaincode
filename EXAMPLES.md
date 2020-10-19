@@ -23,7 +23,7 @@ Smart contract: `registerDataManager`
  "type": string (required,gte=1,lte=30),
  "description_hash": string (required,len=64,hexadecimal),
  "description_storage_address": string (required,url),
- "objective_key": string (omitempty),
+ "objective_key": string (omitempty,len=32,hexadecimal),
  "permissions": (required){
    "process": (required){
      "public": bool (required),
@@ -111,6 +111,7 @@ Smart contract: `registerObjective`
 ##### JSON Inputs:
 ```go
 {
+ "key": string (required,len=32),
  "name": string (required,gte=1,lte=100),
  "description_hash": string (required,len=64,hexadecimal),
  "description_storage_address": string (required,url),
@@ -132,12 +133,12 @@ Smart contract: `registerObjective`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerObjective","{\"name\":\"MSI classification\",\"description_hash\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"description_storage_address\":\"https://toto/objective/222/description\",\"metrics_name\":\"accuracy\",\"metrics_hash\":\"4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"metrics_storage_address\":\"https://toto/objective/222/metrics\",\"test_dataset\":{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"]},\"permissions\":{\"process\":{\"public\":true,\"authorized_ids\":[]}},\"metadata\":null}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerObjective","{\"key\":\"5c1d9cd1c2c1082dde0921b56d11030c\",\"name\":\"MSI classification\",\"description_hash\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"description_storage_address\":\"https://toto/objective/222/description\",\"metrics_name\":\"accuracy\",\"metrics_hash\":\"4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"metrics_storage_address\":\"https://toto/objective/222/metrics\",\"test_dataset\":{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"]},\"permissions\":{\"process\":{\"public\":true,\"authorized_ids\":[]}},\"metadata\":null}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
- "key": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
+ "key": "5c1d9cd1c2c1082dde0921b56d11030c"
 }
 ```
 #### ------------ Add Algo ------------
@@ -210,7 +211,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataManagers"]}' -C myc
   "key": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "metadata": {},
   "name": "liver slide",
-  "objective_key": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+  "objective_key": "5c1d9cd1c2c1082dde0921b56d11030c",
   "opener": {
    "hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "storage_address": "https://toto/dataManager/42234/opener"
@@ -277,7 +278,7 @@ peer chaincode query -n mycc -c '{"Args":["queryObjectives"]}' -C myc
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storage_address": "https://toto/objective/222/description"
   },
-  "key": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+  "key": "5c1d9cd1c2c1082dde0921b56d11030c",
   "metadata": {},
   "metrics": {
    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -576,7 +577,7 @@ Smart contract: `createTesttuple`
 {
  "data_manager_key": string (omitempty,len=64,hexadecimal),
  "data_sample_keys": [string] (omitempty,dive,len=64,hexadecimal),
- "objective_key": string (required,len=64,hexadecimal),
+ "objective_key": string (required,len=32,hexadecimal),
  "tag": string (omitempty,lte=64),
  "metadata": map (omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100),
  "traintuple_key": string (required,len=64,hexadecimal),
@@ -584,12 +585,12 @@ Smart contract: `createTesttuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"objective_key\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"tag\":\"\",\"metadata\":null,\"traintuple_key\":\"ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"objective_key\":\"5c1d9cd1c2c1082dde0921b56d11030c\",\"tag\":\"\",\"metadata\":null,\"traintuple_key\":\"ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
- "key": "6ad32c063f8f1ae04626987e0b15351c3a2007a417ba2bdc557b7ff4c7a9ebf8"
+ "key": "9bf0cf358539ff8ce45a76aee4c21a2d2bfd50e13368d47ae1098a3e659da734"
 }
 ```
 #### ------------ Add Certified Testtuple ------------
@@ -600,7 +601,7 @@ Smart contract: `createTesttuple`
 {
  "data_manager_key": string (omitempty,len=64,hexadecimal),
  "data_sample_keys": [string] (omitempty,dive,len=64,hexadecimal),
- "objective_key": string (required,len=64,hexadecimal),
+ "objective_key": string (required,len=32,hexadecimal),
  "tag": string (omitempty,lte=64),
  "metadata": map (omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100),
  "traintuple_key": string (required,len=64,hexadecimal),
@@ -608,12 +609,12 @@ Smart contract: `createTesttuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"data_manager_key\":\"\",\"data_sample_keys\":null,\"objective_key\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"tag\":\"\",\"metadata\":null,\"traintuple_key\":\"ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"data_manager_key\":\"\",\"data_sample_keys\":null,\"objective_key\":\"5c1d9cd1c2c1082dde0921b56d11030c\",\"tag\":\"\",\"metadata\":null,\"traintuple_key\":\"ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
- "key": "a0f368a23449ae1751ccb2335f79d8ff084bc7bb13e1e2b5252d930857bc4d2d"
+ "key": "d8ce60f50ddbfa737f1ccd71e3586168110028fdbfb895bd8058e43cc4e22404"
 }
 ```
 #### ------------ Add Testtuple with not done traintuple ------------
@@ -624,7 +625,7 @@ Smart contract: `createTesttuple`
 {
  "data_manager_key": string (omitempty,len=64,hexadecimal),
  "data_sample_keys": [string] (omitempty,dive,len=64,hexadecimal),
- "objective_key": string (required,len=64,hexadecimal),
+ "objective_key": string (required,len=32,hexadecimal),
  "tag": string (omitempty,lte=64),
  "metadata": map (omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100),
  "traintuple_key": string (required,len=64,hexadecimal),
@@ -632,12 +633,12 @@ Smart contract: `createTesttuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"data_manager_key\":\"\",\"data_sample_keys\":null,\"objective_key\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"tag\":\"\",\"metadata\":null,\"traintuple_key\":\"ed8102d4f4e19e961585a0b544c76c87c9ffeaf1bcbec57247023e240e3bde2d\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createTesttuple","{\"data_manager_key\":\"\",\"data_sample_keys\":null,\"objective_key\":\"5c1d9cd1c2c1082dde0921b56d11030c\",\"tag\":\"\",\"metadata\":null,\"traintuple_key\":\"ed8102d4f4e19e961585a0b544c76c87c9ffeaf1bcbec57247023e240e3bde2d\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
- "key": "f5515eef9906b6af129355146a648c94f390e32d0fb45a8f54fddfe3329df716"
+ "key": "56ead1cdeabefceb430ffcc0ba333a4f51f2fa2384d753dbc5844534fb4ffc94"
 }
 ```
 #### ------------ Query Testtuples of worker with todo status ------------
@@ -675,11 +676,11 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
    "perf": 0,
    "worker": "SampleOrg"
   },
-  "key": "6ad32c063f8f1ae04626987e0b15351c3a2007a417ba2bdc557b7ff4c7a9ebf8",
+  "key": "9bf0cf358539ff8ce45a76aee4c21a2d2bfd50e13368d47ae1098a3e659da734",
   "log": "",
   "metadata": {},
   "objective": {
-   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "hash": "5c1d9cd1c2c1082dde0921b56d11030c",
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
@@ -709,11 +710,11 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
    "perf": 0,
    "worker": "SampleOrg"
   },
-  "key": "a0f368a23449ae1751ccb2335f79d8ff084bc7bb13e1e2b5252d930857bc4d2d",
+  "key": "d8ce60f50ddbfa737f1ccd71e3586168110028fdbfb895bd8058e43cc4e22404",
   "log": "",
   "metadata": {},
   "objective": {
-   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "hash": "5c1d9cd1c2c1082dde0921b56d11030c",
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
@@ -738,7 +739,7 @@ Smart contract: `logStartTest`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"a0f368a23449ae1751ccb2335f79d8ff084bc7bb13e1e2b5252d930857bc4d2d\"}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"d8ce60f50ddbfa737f1ccd71e3586168110028fdbfb895bd8058e43cc4e22404\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -760,11 +761,11 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"a0f368a234
   "perf": 0,
   "worker": "SampleOrg"
  },
- "key": "a0f368a23449ae1751ccb2335f79d8ff084bc7bb13e1e2b5252d930857bc4d2d",
+ "key": "d8ce60f50ddbfa737f1ccd71e3586168110028fdbfb895bd8058e43cc4e22404",
  "log": "",
  "metadata": {},
  "objective": {
-  "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+  "hash": "5c1d9cd1c2c1082dde0921b56d11030c",
   "metrics": {
    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storage_address": "https://toto/objective/222/metrics"
@@ -790,7 +791,7 @@ Smart contract: `logSuccessTest`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"a0f368a23449ae1751ccb2335f79d8ff084bc7bb13e1e2b5252d930857bc4d2d\",\"log\":\"no error, ah ah ah\",\"perf\":0.9}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"d8ce60f50ddbfa737f1ccd71e3586168110028fdbfb895bd8058e43cc4e22404\",\"log\":\"no error, ah ah ah\",\"perf\":0.9}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -812,11 +813,11 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"a0f368a2
   "perf": 0.9,
   "worker": "SampleOrg"
  },
- "key": "a0f368a23449ae1751ccb2335f79d8ff084bc7bb13e1e2b5252d930857bc4d2d",
+ "key": "d8ce60f50ddbfa737f1ccd71e3586168110028fdbfb895bd8058e43cc4e22404",
  "log": "no error, ah ah ah",
  "metadata": {},
  "objective": {
-  "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+  "hash": "5c1d9cd1c2c1082dde0921b56d11030c",
   "metrics": {
    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storage_address": "https://toto/objective/222/metrics"
@@ -840,7 +841,7 @@ Smart contract: `queryTesttuple`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"a0f368a23449ae1751ccb2335f79d8ff084bc7bb13e1e2b5252d930857bc4d2d\"}"]}' -C myc
+peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"d8ce60f50ddbfa737f1ccd71e3586168110028fdbfb895bd8058e43cc4e22404\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -862,11 +863,11 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"a0f368a23
   "perf": 0.9,
   "worker": "SampleOrg"
  },
- "key": "a0f368a23449ae1751ccb2335f79d8ff084bc7bb13e1e2b5252d930857bc4d2d",
+ "key": "d8ce60f50ddbfa737f1ccd71e3586168110028fdbfb895bd8058e43cc4e22404",
  "log": "no error, ah ah ah",
  "metadata": {},
  "objective": {
-  "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+  "hash": "5c1d9cd1c2c1082dde0921b56d11030c",
   "metrics": {
    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storage_address": "https://toto/objective/222/metrics"
@@ -905,11 +906,11 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    "perf": 0,
    "worker": "SampleOrg"
   },
-  "key": "6ad32c063f8f1ae04626987e0b15351c3a2007a417ba2bdc557b7ff4c7a9ebf8",
+  "key": "9bf0cf358539ff8ce45a76aee4c21a2d2bfd50e13368d47ae1098a3e659da734",
   "log": "",
   "metadata": {},
   "objective": {
-   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "hash": "5c1d9cd1c2c1082dde0921b56d11030c",
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
@@ -939,11 +940,11 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    "perf": 0.9,
    "worker": "SampleOrg"
   },
-  "key": "a0f368a23449ae1751ccb2335f79d8ff084bc7bb13e1e2b5252d930857bc4d2d",
+  "key": "d8ce60f50ddbfa737f1ccd71e3586168110028fdbfb895bd8058e43cc4e22404",
   "log": "no error, ah ah ah",
   "metadata": {},
   "objective": {
-   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "hash": "5c1d9cd1c2c1082dde0921b56d11030c",
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
@@ -973,11 +974,11 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
    "perf": 0,
    "worker": "SampleOrg"
   },
-  "key": "f5515eef9906b6af129355146a648c94f390e32d0fb45a8f54fddfe3329df716",
+  "key": "56ead1cdeabefceb430ffcc0ba333a4f51f2fa2384d753dbc5844534fb4ffc94",
   "log": "",
   "metadata": {},
   "objective": {
-   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "hash": "5c1d9cd1c2c1082dde0921b56d11030c",
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
@@ -1026,11 +1027,11 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"ebbf6c
     "perf": 0,
     "worker": "SampleOrg"
    },
-   "key": "6ad32c063f8f1ae04626987e0b15351c3a2007a417ba2bdc557b7ff4c7a9ebf8",
+   "key": "9bf0cf358539ff8ce45a76aee4c21a2d2bfd50e13368d47ae1098a3e659da734",
    "log": "",
    "metadata": {},
    "objective": {
-    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "hash": "5c1d9cd1c2c1082dde0921b56d11030c",
     "metrics": {
      "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
      "storage_address": "https://toto/objective/222/metrics"
@@ -1061,11 +1062,11 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"ebbf6c
    "perf": 0.9,
    "worker": "SampleOrg"
   },
-  "key": "a0f368a23449ae1751ccb2335f79d8ff084bc7bb13e1e2b5252d930857bc4d2d",
+  "key": "d8ce60f50ddbfa737f1ccd71e3586168110028fdbfb895bd8058e43cc4e22404",
   "log": "no error, ah ah ah",
   "metadata": {},
   "objective": {
-   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "hash": "5c1d9cd1c2c1082dde0921b56d11030c",
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
@@ -1246,7 +1247,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"da1bb7c31f6
  "key": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
  "metadata": {},
  "name": "liver slide",
- "objective_key": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+ "objective_key": "5c1d9cd1c2c1082dde0921b56d11030c",
  "opener": {
   "hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "storage_address": "https://toto/dataManager/42234/opener"
@@ -1388,7 +1389,7 @@ Smart contract: `createComputePlan`
  "testtuples": (omitempty) [{
    "data_manager_key": string (omitempty,len=64,hexadecimal),
    "data_sample_keys": [string] (omitempty,dive,len=64,hexadecimal),
-   "objective_key": string (required,len=64,hexadecimal),
+   "objective_key": string (required,len=32,hexadecimal),
    "tag": string (omitempty,lte=64),
    "metadata": map (omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100),
    "traintuple_id": string (required,lte=64),
@@ -1397,7 +1398,7 @@ Smart contract: `createComputePlan`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"clean_models\":false,\"tag\":\"a tag is simply a string\",\"metadata\":null,\"traintuples\":[{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"algo_key\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"id\":\"firstTraintupleID\",\"in_models_ids\":null,\"tag\":\"\",\"metadata\":null},{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"algo_key\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"id\":\"secondTraintupleID\",\"in_models_ids\":[\"firstTraintupleID\"],\"tag\":\"\",\"metadata\":null}],\"aggregatetuples\":null,\"composite_traintuples\":null,\"testtuples\":[{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"objective_key\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"tag\":\"\",\"metadata\":null,\"traintuple_id\":\"secondTraintupleID\"}]}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"clean_models\":false,\"tag\":\"a tag is simply a string\",\"metadata\":null,\"traintuples\":[{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"algo_key\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"id\":\"firstTraintupleID\",\"in_models_ids\":null,\"tag\":\"\",\"metadata\":null},{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"algo_key\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"id\":\"secondTraintupleID\",\"in_models_ids\":[\"firstTraintupleID\"],\"tag\":\"\",\"metadata\":null}],\"aggregatetuples\":null,\"composite_traintuples\":null,\"testtuples\":[{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"objective_key\":\"5c1d9cd1c2c1082dde0921b56d11030c\",\"tag\":\"\",\"metadata\":null,\"traintuple_id\":\"secondTraintupleID\"}]}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -1415,7 +1416,7 @@ peer chaincode invoke -n mycc -c '{"Args":["createComputePlan","{\"clean_models\
  "status": "todo",
  "tag": "a tag is simply a string",
  "testtuple_keys": [
-  "1ca3227c1a1232a55e31d11d93b1fe224f454c5a4508093a15a6cae2a220f957"
+  "6937d9b7bbf4edd8b33e675fb019d5fed6613bafbcd056cc7fcd1b8e82c69358"
  ],
  "traintuple_keys": [
   "01feb56691d26983a641d29f4c2a5b7098f99eb471b7e5f03aaa78c8ae142ca9",
@@ -1467,7 +1468,7 @@ Smart contract: `updateComputePlan`
  "testtuples": (omitempty) [{
    "data_manager_key": string (omitempty,len=64,hexadecimal),
    "data_sample_keys": [string] (omitempty,dive,len=64,hexadecimal),
-   "objective_key": string (required,len=64,hexadecimal),
+   "objective_key": string (required,len=32,hexadecimal),
    "tag": string (omitempty,lte=64),
    "metadata": map (omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100),
    "traintuple_id": string (required,lte=64),
@@ -1476,7 +1477,7 @@ Smart contract: `updateComputePlan`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["updateComputePlan","{\"compute_plan_id\":\"7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17\",\"traintuples\":[{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"algo_key\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"id\":\"thirdTraintupleID\",\"in_models_ids\":[\"firstTraintupleID\",\"secondTraintupleID\"],\"tag\":\"\",\"metadata\":null}],\"aggregatetuples\":null,\"composite_traintuples\":null,\"testtuples\":[{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"objective_key\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"tag\":\"\",\"metadata\":null,\"traintuple_id\":\"thirdTraintupleID\"}]}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["updateComputePlan","{\"compute_plan_id\":\"7dd808239c1e062399449bd11b634d9bd1fd0a2b795ad345b62f95b4933bfa17\",\"traintuples\":[{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"algo_key\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"id\":\"thirdTraintupleID\",\"in_models_ids\":[\"firstTraintupleID\",\"secondTraintupleID\"],\"tag\":\"\",\"metadata\":null}],\"aggregatetuples\":null,\"composite_traintuples\":null,\"testtuples\":[{\"data_manager_key\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"data_sample_keys\":[\"bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\"],\"objective_key\":\"5c1d9cd1c2c1082dde0921b56d11030c\",\"tag\":\"\",\"metadata\":null,\"traintuple_id\":\"thirdTraintupleID\"}]}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -1493,8 +1494,8 @@ peer chaincode invoke -n mycc -c '{"Args":["updateComputePlan","{\"compute_plan_
  "status": "todo",
  "tag": "a tag is simply a string",
  "testtuple_keys": [
-  "1ca3227c1a1232a55e31d11d93b1fe224f454c5a4508093a15a6cae2a220f957",
-  "4395e03f727aa5ce5c3d8eb034e23871e57d9a6546a57b9a6f786bf1019e0b52"
+  "6937d9b7bbf4edd8b33e675fb019d5fed6613bafbcd056cc7fcd1b8e82c69358",
+  "13a0f22dd49834acc49e7e9a2510d1979b7a61eea41c67ce53d0bcde3799a5ab"
  ],
  "traintuple_keys": [
   "01feb56691d26983a641d29f4c2a5b7098f99eb471b7e5f03aaa78c8ae142ca9",
@@ -1510,13 +1511,13 @@ Smart contract: `queryObjectiveLeaderboard`
 ##### JSON Inputs:
 ```go
 {
- "objective_key": string (omitempty,len=64,hexadecimal),
+ "objective_key": string (omitempty,len=32,hexadecimal),
  "ascendingOrder": bool (required),
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objective_key\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"ascendingOrder\":true}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objective_key\":\"5c1d9cd1c2c1082dde0921b56d11030c\",\"ascendingOrder\":true}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -1526,7 +1527,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
    "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storage_address": "https://toto/objective/222/description"
   },
-  "key": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+  "key": "5c1d9cd1c2c1082dde0921b56d11030c",
   "metadata": {},
   "metrics": {
    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -1559,7 +1560,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
     "storage_address": "https://toto/algo/222/algo"
    },
    "creator": "SampleOrg",
-   "key": "a0f368a23449ae1751ccb2335f79d8ff084bc7bb13e1e2b5252d930857bc4d2d",
+   "key": "d8ce60f50ddbfa737f1ccd71e3586168110028fdbfb895bd8058e43cc4e22404",
    "perf": 0.9,
    "tag": "",
    "traintuple_key": "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
@@ -1593,8 +1594,8 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlan","{\"key\":\"7dd808
  "status": "todo",
  "tag": "a tag is simply a string",
  "testtuple_keys": [
-  "1ca3227c1a1232a55e31d11d93b1fe224f454c5a4508093a15a6cae2a220f957",
-  "4395e03f727aa5ce5c3d8eb034e23871e57d9a6546a57b9a6f786bf1019e0b52"
+  "6937d9b7bbf4edd8b33e675fb019d5fed6613bafbcd056cc7fcd1b8e82c69358",
+  "13a0f22dd49834acc49e7e9a2510d1979b7a61eea41c67ce53d0bcde3799a5ab"
  ],
  "traintuple_keys": [
   "01feb56691d26983a641d29f4c2a5b7098f99eb471b7e5f03aaa78c8ae142ca9",
@@ -1622,8 +1623,8 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
   "status": "todo",
   "tag": "a tag is simply a string",
   "testtuple_keys": [
-   "1ca3227c1a1232a55e31d11d93b1fe224f454c5a4508093a15a6cae2a220f957",
-   "4395e03f727aa5ce5c3d8eb034e23871e57d9a6546a57b9a6f786bf1019e0b52"
+   "6937d9b7bbf4edd8b33e675fb019d5fed6613bafbcd056cc7fcd1b8e82c69358",
+   "13a0f22dd49834acc49e7e9a2510d1979b7a61eea41c67ce53d0bcde3799a5ab"
   ],
   "traintuple_keys": [
    "01feb56691d26983a641d29f4c2a5b7098f99eb471b7e5f03aaa78c8ae142ca9",
@@ -1660,8 +1661,8 @@ peer chaincode invoke -n mycc -c '{"Args":["cancelComputePlan","{\"key\":\"7dd80
  "status": "canceled",
  "tag": "a tag is simply a string",
  "testtuple_keys": [
-  "1ca3227c1a1232a55e31d11d93b1fe224f454c5a4508093a15a6cae2a220f957",
-  "4395e03f727aa5ce5c3d8eb034e23871e57d9a6546a57b9a6f786bf1019e0b52"
+  "6937d9b7bbf4edd8b33e675fb019d5fed6613bafbcd056cc7fcd1b8e82c69358",
+  "13a0f22dd49834acc49e7e9a2510d1979b7a61eea41c67ce53d0bcde3799a5ab"
  ],
  "traintuple_keys": [
   "01feb56691d26983a641d29f4c2a5b7098f99eb471b7e5f03aaa78c8ae142ca9",

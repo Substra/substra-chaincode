@@ -42,14 +42,14 @@ func TestRecursiveLogFailed(t *testing.T) {
 
 	grandChildtesttuple := inputTesttuple{
 		TraintupleKey: traintupleKey,
-		ObjectiveKey:  objectiveDescriptionHash,
+		ObjectiveKey:  objectiveKey,
 	}
 	testResp, err := createTesttuple(db, assetToArgs(grandChildtesttuple))
 	assert.NoError(t, err)
 
-	_, err = logStartTrain(db, assetToArgs(inputKey{Key: traintupleKey}))
+	_, err = logStartTrain(db, assetToArgs(inputKeyOld{Key: traintupleKey}))
 	assert.NoError(t, err)
-	_, err = logFailTrain(db, assetToArgs(inputKey{Key: traintupleKey}))
+	_, err = logFailTrain(db, assetToArgs(inputKeyOld{Key: traintupleKey}))
 	assert.NoError(t, err)
 
 	train2, err := db.GetTraintuple(grandChildresp.Key)
@@ -204,7 +204,7 @@ func TestQueryHeadModelPermissions(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	_, err := logStartCompositeTrain(db, assetToArgs(inputKey{Key: compositeTraintupleKey}))
+	_, err := logStartCompositeTrain(db, assetToArgs(inputKeyOld{Key: compositeTraintupleKey}))
 	assert.NoError(t, err)
 	success := inputLogSuccessCompositeTrain{}
 	success.Key = compositeTraintupleKey

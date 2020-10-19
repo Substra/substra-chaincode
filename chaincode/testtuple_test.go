@@ -164,7 +164,7 @@ func TestQueryTesttuple(t *testing.T) {
 			testtupleKey := res["key"]
 
 			// query testtuple
-			args := [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
+			args := [][]byte{[]byte("queryTesttuple"), keyToJSONOld(testtupleKey)}
 			resp = mockStub.MockInvoke("42", args)
 			respTesttuple := resp.Payload
 			testtuple := outputTesttuple{}
@@ -179,7 +179,7 @@ func TestQueryTesttuple(t *testing.T) {
 			assert.Equal(t, tt.expectedAlgoHash, testtuple.Algo.Hash)
 			assert.Equal(t, tt.expectedAlgoStorageAddress, testtuple.Algo.StorageAddress)
 			assert.Equal(t, StatusWaiting, testtuple.Status)
-			assert.Equal(t, objectiveDescriptionHash, testtuple.Objective.Key)
+			assert.Equal(t, objectiveKey, testtuple.Objective.Key)
 			assert.Equal(t, objectiveMetricsHash, testtuple.Objective.Metrics.Hash)
 			assert.Equal(t, objectiveMetricsStorageAddress, testtuple.Objective.Metrics.StorageAddress)
 			assert.Equal(t, "", testtuple.Log)
@@ -215,7 +215,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 			// Start training
 			mockStub.MockTransactionStart("42")
 			db := NewLedgerDB(mockStub)
-			_, err := logStartCompositeTrain(db, assetToArgs(inputKey{Key: compositeTraintupleKey}))
+			_, err := logStartCompositeTrain(db, assetToArgs(inputKeyOld{Key: compositeTraintupleKey}))
 			assert.NoError(t, err)
 
 			// Succeed/fail training
@@ -238,7 +238,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 				assert.NoError(t, fmt.Errorf("Unknown status %s", status))
 			}
 
-			testTuple, err := queryTesttuple(db, assetToArgs(inputKey{Key: testTupleKey}))
+			testTuple, err := queryTesttuple(db, assetToArgs(inputKeyOld{Key: testTupleKey}))
 			assert.NoError(t, err)
 			assert.Equal(t, expectedTesttupleStatus, testTuple.Status)
 			assert.Equal(t, compositeTraintupleKey, testTuple.TraintupleKey)
@@ -255,7 +255,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 				values = map[string]string{}
 				json.Unmarshal(resp.Payload, &values)
 				testTupleKey = values["key"]
-				testTuple, err := queryTesttuple(db, assetToArgs(inputKey{Key: testTupleKey}))
+				testTuple, err := queryTesttuple(db, assetToArgs(inputKeyOld{Key: testTupleKey}))
 				assert.NoError(t, err)
 				assert.Equal(t, StatusTodo, testTuple.Status)
 			case StatusFailed:

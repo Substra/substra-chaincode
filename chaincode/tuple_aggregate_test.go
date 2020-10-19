@@ -36,8 +36,8 @@ func TestTraintupleWithNoTestDatasetAggregate(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -56,7 +56,7 @@ func TestTraintupleWithNoTestDatasetAggregate(t *testing.T) {
 
 	traintuple := outputAggregatetuple{}
 	json.Unmarshal(resp.Payload, &traintuple)
-	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(traintuple.Key)}
+	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSONOld(traintuple.Key)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the aggregate tuple without error ", resp.Message)
 }
@@ -66,8 +66,8 @@ func TestTraintupleWithSingleDatasampleAggregate(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -88,7 +88,7 @@ func TestTraintupleWithSingleDatasampleAggregate(t *testing.T) {
 	traintuple := outputKey{}
 	err := json.Unmarshal(resp.Payload, &traintuple)
 	assert.NoError(t, err, "should be unmarshaled")
-	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(traintuple.Key)}
+	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSONOld(traintuple.Key)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the aggregate tuple without error ", resp.Message)
 }
@@ -105,12 +105,12 @@ func TestNoPanicWhileQueryingIncompleteTraintupleAggregate(t *testing.T) {
 
 	// Retreive and alter existing objectif to pass Metrics at nil
 	db := NewLedgerDB(mockStub)
-	objective, err := db.GetObjective(objectiveDescriptionHash)
+	objective, err := db.GetObjective(objectiveKey)
 	assert.NoError(t, err)
 	objective.Metrics = nil
 	objBytes, err := json.Marshal(objective)
 	assert.NoError(t, err)
-	err = mockStub.PutState(objectiveDescriptionHash, objBytes)
+	err = mockStub.PutState(objectiveKey, objBytes)
 	assert.NoError(t, err)
 	// It should not panic
 	require.NotPanics(t, func() {
@@ -236,7 +236,7 @@ func TestTraintupleAggregate(t *testing.T) {
 	assert.NoError(t, err, "aggregate tuple should unmarshal without problem")
 	traintupleKey := res.Key
 	// Query traintuple from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(traintupleKey)}
+	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSONOld(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the aggregate tuple - status %d and message %s", resp.Status, resp.Message)
 	out := outputAggregatetuple{}
@@ -301,7 +301,7 @@ func TestTraintupleAggregate(t *testing.T) {
 	success.fillDefaults()
 
 	argsSlice := [][][]byte{
-		[][]byte{[]byte("logStartAggregate"), keyToJSON(traintupleKey)},
+		[][]byte{[]byte("logStartAggregate"), keyToJSONOld(traintupleKey)},
 		[][]byte{[]byte("logSuccessAggregate"), assetToJSON(success)},
 	}
 	traintupleStatus := []string{StatusDoing, StatusDone}
@@ -322,7 +322,7 @@ func TestTraintupleAggregate(t *testing.T) {
 	}
 
 	// Query Aggregatetuple From key
-	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(aggregatetupleKey)}
+	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSONOld(aggregatetupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying aggregate tuple with status %d and message %s", resp.Status, resp.Message)
 	endTraintuple := outputAggregatetuple{}
@@ -335,7 +335,7 @@ func TestTraintupleAggregate(t *testing.T) {
 	assert.Exactly(t, expected, endTraintuple, "retreived Aggregatetuple does not correspond to what is expected")
 
 	// query all traintuples related to a traintuple with the same algo
-	args = [][]byte{[]byte("queryModelDetails"), keyToJSON(traintupleKey)}
+	args = [][]byte{[]byte("queryModelDetails"), keyToJSONOld(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying model details with status %d and message %s", resp.Status, resp.Message)
 	payload := outputModelDetails{}
@@ -361,18 +361,18 @@ func TestQueryTraintupleNotFoundAggregate(t *testing.T) {
 	json.Unmarshal(resp.Payload, &_key)
 
 	// queryAggregatetuple: normal queryAggregatetuple
-	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(_key.Key)}
+	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSONOld(_key.Key)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the aggregate tuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryAggregatetuple: key does not exist
 	notFoundKey := "eedbb7c31f62244c0f34461cc168804227115793d01c270021fe3f7935482eed"
-	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(notFoundKey)}
+	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSONOld(notFoundKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the aggregate tuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryAggregatetuple: key does not exist and use existing other asset type key
-	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(algoHash)}
+	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSONOld(algoHash)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the aggregate tuple - status %d and message %s", resp.Status, resp.Message)
 }
@@ -471,7 +471,7 @@ func TestAggregatetuplePermissions(t *testing.T) {
 
 	// fetch the aggregate tuple back
 	aggr := outputAggregatetuple{}
-	args := [][]byte{[]byte("queryAggregatetuple"), keyToJSON(aggrKey)}
+	args := [][]byte{[]byte("queryAggregatetuple"), keyToJSONOld(aggrKey)}
 	resp = mockStub.MockInvoke("42", args)
 	aggr = outputAggregatetuple{}
 	json.Unmarshal(resp.Payload, &aggr)
@@ -494,7 +494,7 @@ func TestAggregatetupleLogSuccessFail(t *testing.T) {
 			key := _key.Key
 
 			// start
-			resp = mockStub.MockInvoke("42", [][]byte{[]byte("logStartAggregate"), keyToJSON(key)})
+			resp = mockStub.MockInvoke("42", [][]byte{[]byte("logStartAggregate"), keyToJSONOld(key)})
 
 			var expectedStatus string
 
@@ -517,7 +517,7 @@ func TestAggregatetupleLogSuccessFail(t *testing.T) {
 			}
 
 			// fetch back
-			args := [][]byte{[]byte("queryAggregatetuple"), keyToJSON(key)}
+			args := [][]byte{[]byte("queryAggregatetuple"), keyToJSONOld(key)}
 			resp = mockStub.MockInvoke("42", args)
 			assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error: %s", resp.Message)
 			traintuple := outputAggregatetuple{}
@@ -541,7 +541,7 @@ func TestQueryAggregatetuple(t *testing.T) {
 	var keyOnly struct{ Key string }
 	json.Unmarshal(resp.Payload, &keyOnly)
 
-	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(keyOnly.Key)}
+	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSONOld(keyOnly.Key)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the aggregate tuple: %s", resp.Message)
 	out := outputAggregatetuple{}
@@ -567,7 +567,7 @@ func TestCreateFailedAggregate(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	_, err := logStartCompositeTrain(db, assetToArgs(inputKey{Key: compositeTraintupleKey}))
+	_, err := logStartCompositeTrain(db, assetToArgs(inputKeyOld{Key: compositeTraintupleKey}))
 	assert.NoError(t, err)
 
 	_, err = logFailCompositeTrain(db, assetToArgs(inputLogFailTrain{inputLog{Key: compositeTraintupleKey}}))
@@ -579,7 +579,7 @@ func TestCreateFailedAggregate(t *testing.T) {
 	key, err := createAggregatetupleInternal(db, in, true)
 	assert.NoError(t, err)
 
-	out, err := queryAggregatetuple(db, assetToArgs(inputKey{Key: key}))
+	out, err := queryAggregatetuple(db, assetToArgs(inputKeyOld{Key: key}))
 	assert.NoError(t, err)
 	assert.Equal(t, StatusFailed, out.Status)
 }
