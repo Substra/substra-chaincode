@@ -31,7 +31,7 @@ var (
 
 // inputObjective is the representation of input args to register a Objective
 type inputObjective struct {
-	Key                       string            `validate:"required,len=32" json:"key"`
+	Key                       string            `validate:"required,len=36" json:"key"`
 	Name                      string            `validate:"required,gte=1,lte=100" json:"name"`
 	DescriptionHash           string            `validate:"required,len=64,hexadecimal" json:"description_hash"`
 	DescriptionStorageAddress string            `validate:"required,url" json:"description_storage_address"`
@@ -68,7 +68,7 @@ type inputDataManager struct {
 	Type                      string            `validate:"required,gte=1,lte=30" json:"type"`
 	DescriptionHash           string            `validate:"required,len=64,hexadecimal" json:"description_hash"`
 	DescriptionStorageAddress string            `validate:"required,url" json:"description_storage_address"`
-	ObjectiveKey              string            `validate:"omitempty,len=32,hexadecimal" json:"objective_key"` //`validate:"required"`
+	ObjectiveKey              string            `validate:"omitempty,len=36" json:"objective_key"` //`validate:"required"`
 	Permissions               inputPermissions  `validate:"required" json:"permissions"`
 	Metadata                  map[string]string `validate:"lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
@@ -76,7 +76,7 @@ type inputDataManager struct {
 // inputUpdateDataManager is the representation of input args to update a dataManager with a objective
 type inputUpdateDataManager struct {
 	DataManagerKey string `validate:"required,len=64,hexadecimal" json:"data_manager_key"`
-	ObjectiveKey   string `validate:"required,len=32,hexadecimal" json:"objective_key"`
+	ObjectiveKey   string `validate:"required,len=36" json:"objective_key"`
 }
 
 // inputDataSample is the representation of input args to register one or more dataSample
@@ -108,7 +108,7 @@ type inputTraintuple struct {
 type inputTesttuple struct {
 	DataManagerKey string            `validate:"omitempty,len=64,hexadecimal" json:"data_manager_key"`
 	DataSampleKeys []string          `validate:"omitempty,dive,len=64,hexadecimal" json:"data_sample_keys"`
-	ObjectiveKey   string            `validate:"required,len=32,hexadecimal" json:"objective_key"`
+	ObjectiveKey   string            `validate:"required,len=36" json:"objective_key"`
 	Tag            string            `validate:"omitempty,lte=64" json:"tag"`
 	Metadata       map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 	TraintupleKey  string            `validate:"required,len=64,hexadecimal" json:"traintuple_key"`
@@ -119,7 +119,7 @@ type inputKeyOld struct {
 }
 
 type inputKey struct {
-	Key string `validate:"required,len=32,hexadecimal" json:"key"`
+	Key string `validate:"required,len=36" json:"key"`
 }
 
 type inputLogSuccessTrain struct {
@@ -214,14 +214,14 @@ type inputComputePlanCompositeTraintuple struct {
 type inputComputePlanTesttuple struct {
 	DataManagerKey string            `validate:"omitempty,len=64,hexadecimal" json:"data_manager_key"`
 	DataSampleKeys []string          `validate:"omitempty,dive,len=64,hexadecimal" json:"data_sample_keys"`
-	ObjectiveKey   string            `validate:"required,len=32,hexadecimal" json:"objective_key"`
+	ObjectiveKey   string            `validate:"required,len=36" json:"objective_key"`
 	Tag            string            `validate:"omitempty,lte=64" json:"tag"`
 	Metadata       map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 	TraintupleID   string            `validate:"required,lte=64" json:"traintuple_id"`
 }
 
 type inputLeaderboard struct {
-	ObjectiveKey   string `validate:"omitempty,len=32,hexadecimal" json:"objective_key"`
+	ObjectiveKey   string `validate:"omitempty,len=36" json:"objective_key"`
 	AscendingOrder bool   `json:"ascendingOrder,required"`
 }
 
