@@ -56,20 +56,19 @@ type outputDataManager struct {
 	Key          string            `json:"key"`
 	Metadata     map[string]string `json:"metadata"`
 	Name         string            `json:"name"`
-	Opener       HashDress         `json:"opener"`
+	Opener       *HashDress        `json:"opener"`
 	Owner        string            `json:"owner"`
 	Permissions  outputPermissions `json:"permissions"`
 	Type         string            `json:"type"`
 }
 
-func (out *outputDataManager) Fill(key string, in DataManager) {
+func (out *outputDataManager) Fill(in DataManager) {
 	out.ObjectiveKey = in.ObjectiveKey
 	out.Description = in.Description
-	out.Key = key
+	out.Key = in.Key
 	out.Metadata = initMapOutput(in.Metadata)
 	out.Name = in.Name
-	out.Opener.Hash = key
-	out.Opener.StorageAddress = in.OpenerStorageAddress
+	out.Opener = in.Opener
 	out.Owner = in.Owner
 	out.Permissions.Fill(in.Permissions)
 	out.Type = in.Type
@@ -94,8 +93,8 @@ type outputDataset struct {
 	TestDataSampleKeys  []string          `json:"test_data_sample_keys"`
 }
 
-func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, testKeys []string) {
-	out.outputDataManager.Fill(key, in)
+func (out *outputDataset) Fill(in DataManager, trainKeys []string, testKeys []string) {
+	out.outputDataManager.Fill(in)
 	out.TrainDataSampleKeys = trainKeys
 	out.TestDataSampleKeys = testKeys
 	out.Metadata = initMapOutput(in.Metadata)
@@ -124,8 +123,9 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 
 // outputTtDataset is the representation of a Traintuple Dataset
 type outputTtDataset struct {
+	Key            string            `json:"key"`
 	Worker         string            `json:"worker"`
-	DataSampleKeys []string          `json:"keys"`
+	DataSampleKeys []string          `json:"keys"` // TODO: rename to 'data_sample_keys'
 	OpenerHash     string            `json:"opener_hash"`
 	Metadata       map[string]string `json:"metadata"`
 }
@@ -191,11 +191,18 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 		outputTraintuple.InModels = append(outputTraintuple.InModels, inModel)
 	}
 
+	dataManager, err := db.GetDataManager(traintuple.Dataset.DataManagerKey)
+	if err != nil {
+		err = errors.Internal("could not retrieve data manager with key %s - %s", traintuple.Dataset.DataManagerKey, err.Error())
+		return
+	}
+
 	// fill dataset
 	outputTraintuple.Dataset = &outputTtDataset{
+		Key:            dataManager.Key,
 		Worker:         traintuple.Dataset.Worker,
 		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
-		OpenerHash:     traintuple.Dataset.DataManagerKey,
+		OpenerHash:     dataManager.Opener.Hash,
 		Metadata:       initMapOutput(traintuple.Dataset.Metadata),
 	}
 

@@ -20,7 +20,7 @@ type inputCompositeTraintuple struct {
 	InHeadModelKey           string            `validate:"required_with=InTrunkModelKey,omitempty,len=64,hexadecimal" json:"in_head_model_key"`
 	InTrunkModelKey          string            `validate:"required_with=InHeadModelKey,omitempty,len=64,hexadecimal" json:"in_trunk_model_key"`
 	OutTrunkModelPermissions inputPermissions  `validate:"required" json:"out_trunk_model_permissions"`
-	DataManagerKey           string            `validate:"required,len=64,hexadecimal" json:"data_manager_key"`
+	DataManagerKey           string            `validate:"required,len=36" json:"data_manager_key"`
 	DataSampleKeys           []string          `validate:"required,unique,gt=0,dive,len=64,hexadecimal" json:"data_sample_keys"`
 	ComputePlanID            string            `validate:"omitempty" json:"compute_plan_id"`
 	Rank                     string            `validate:"omitempty" json:"rank"`
@@ -34,6 +34,6 @@ type inputCompositeAlgo struct {
 
 type inputLogSuccessCompositeTrain struct {
 	inputLog
-	OutHeadModel  inputHash `validate:"required" json:"out_head_model"`
+	OutHeadModel  inputHash      `validate:"required" json:"out_head_model"`
 	OutTrunkModel inputHashDress `validate:"required" json:"out_trunk_model"`
 }

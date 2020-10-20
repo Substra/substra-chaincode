@@ -159,7 +159,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Add Non-Certified Testtuple ------------")
 	inpTesttuple := inputTesttuple{
-		DataManagerKey: dataManagerOpenerHash,
+		DataManagerKey: dataManagerKey,
 		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 	}
 	inpTesttuple.createDefault()
@@ -225,15 +225,15 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("query", "queryModelPermissions", inputKeyOld{modelHash})
 
 	fmt.Fprintln(&out, "#### ------------ Query Dataset ------------")
-	callAssertAndPrint("query", "queryDataset", inputKeyOld{dataManagerOpenerHash})
+	callAssertAndPrint("query", "queryDataset", inputKey{dataManagerKey})
 
 	fmt.Fprintln(&out, "#### ------------ Query nodes ------------")
 	callAssertAndPrint("query", "queryNodes", nil)
 
 	// 3. add new data manager and dataSample
 	fmt.Fprintln(&out, "#### ------------ Update Data Sample with new data manager ------------")
-	newDataManagerKey := "38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee"
-	inpDataManager = inputDataManager{OpenerHash: newDataManagerKey}
+	newDataManagerKey := "38a320b2-a67c-8003-cc74-8d6666534f2b"
+	inpDataManager = inputDataManager{Key: newDataManagerKey}
 	args = inpDataManager.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding dataManager with status %d and message %s", resp.Status, resp.Message)
@@ -260,7 +260,7 @@ func TestPipeline(t *testing.T) {
 	upCP.ComputePlanID = outCp.ComputePlanID
 	upCP.Traintuples = []inputComputePlanTraintuple{
 		{
-			DataManagerKey: dataManagerOpenerHash,
+			DataManagerKey: dataManagerKey,
 			DataSampleKeys: []string{trainDataSampleHash1},
 			AlgoKey:        algoHash,
 			ID:             "thirdTraintupleID",
@@ -269,7 +269,7 @@ func TestPipeline(t *testing.T) {
 	}
 	upCP.Testtuples = []inputComputePlanTesttuple{
 		{
-			DataManagerKey: dataManagerOpenerHash,
+			DataManagerKey: dataManagerKey,
 			DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 			ObjectiveKey:   objectiveKey,
 			TraintupleID:   "thirdTraintupleID",

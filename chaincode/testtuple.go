@@ -88,9 +88,10 @@ func (testtuple *Testtuple) SetFromInput(db *LedgerDB, inp inputTesttuple) error
 		return errors.BadRequest(err, "could not retrieve dataManager with key %s", dataManagerKey)
 	}
 	testtuple.Dataset = &TtDataset{
+		Key:            dataManager.Key,
 		Worker:         dataManager.Owner,
 		DataSampleKeys: dataSampleKeys,
-		OpenerHash:     dataManagerKey,
+		OpenerHash:     dataManager.Opener.Hash,
 	}
 	return nil
 }

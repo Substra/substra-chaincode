@@ -21,6 +21,9 @@ var (
 )
 
 func (dataManager *inputDataManager) createDefault() [][]byte {
+	if dataManager.Key == "" {
+		dataManager.Key = dataManagerKey
+	}
 	if dataManager.Name == "" {
 		dataManager.Name = "liver slide"
 	}
@@ -49,7 +52,7 @@ func (dataSample *inputDataSample) createDefault() [][]byte {
 		dataSample.Hashes = []string{trainDataSampleHash1, trainDataSampleHash2}
 	}
 	if dataSample.DataManagerKeys == nil || len(dataSample.DataManagerKeys) == 0 {
-		dataSample.DataManagerKeys = []string{dataManagerOpenerHash}
+		dataSample.DataManagerKeys = []string{dataManagerKey}
 	}
 	if dataSample.TestOnly == "" {
 		dataSample.TestOnly = "false"
@@ -81,7 +84,7 @@ func (objective *inputObjective) createDefault() [][]byte {
 		objective.MetricsStorageAddress = objectiveMetricsStorageAddress
 	}
 	if objective.TestDataset.DataManagerKey == "" {
-		objective.TestDataset.DataManagerKey = dataManagerOpenerHash
+		objective.TestDataset.DataManagerKey = dataManagerKey
 	}
 	if objective.TestDataset.DataSampleKeys == nil || len(objective.TestDataset.DataSampleKeys) == 0 {
 		objective.TestDataset.DataSampleKeys = []string{testDataSampleHash1, testDataSampleHash2}
@@ -169,7 +172,7 @@ func (traintuple *inputTraintuple) createDefault() [][]byte {
 		traintuple.InModels = []string{}
 	}
 	if traintuple.DataManagerKey == "" {
-		traintuple.DataManagerKey = dataManagerOpenerHash
+		traintuple.DataManagerKey = dataManagerKey
 	}
 	if traintuple.DataSampleKeys == nil || len(traintuple.DataSampleKeys) == 0 {
 		traintuple.DataSampleKeys = []string{trainDataSampleHash1, trainDataSampleHash2}
@@ -188,7 +191,7 @@ func (traintuple *inputCompositeTraintuple) fillDefaults() {
 		traintuple.AlgoKey = compositeAlgoHash
 	}
 	if traintuple.DataManagerKey == "" {
-		traintuple.DataManagerKey = dataManagerOpenerHash
+		traintuple.DataManagerKey = dataManagerKey
 	}
 	if traintuple.DataSampleKeys == nil || len(traintuple.DataSampleKeys) == 0 {
 		traintuple.DataSampleKeys = []string{trainDataSampleHash1, trainDataSampleHash2}

@@ -282,6 +282,7 @@ func TestTraintuple(t *testing.T) {
 		},
 		Creator: worker,
 		Dataset: &outputTtDataset{
+			Key:            dataManagerKey,
 			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 			OpenerHash:     dataManagerOpenerHash,
 			Worker:         worker,

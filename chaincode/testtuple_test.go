@@ -61,7 +61,7 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 	// dataSample than the objective but explicitly pass as arguments and in disorder
 	inpTesttuple := inputTesttuple{
 		DataSampleKeys: []string{testDataSampleHash2, testDataSampleHash1},
-		DataManagerKey: dataManagerOpenerHash}
+		DataManagerKey: dataManagerKey}
 	args := inpTesttuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
@@ -99,7 +99,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	// Add an uncertified testtuple successfully
 	inpTesttuple3 := inputTesttuple{
 		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
-		DataManagerKey: dataManagerOpenerHash}
+		DataManagerKey: dataManagerKey}
 	args = inpTesttuple3.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
@@ -107,7 +107,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	// Fail to add the same testtuple with a different order for dataSampleKeys
 	inpTesttuple4 := inputTesttuple{
 		DataSampleKeys: []string{trainDataSampleHash2, trainDataSampleHash1},
-		DataManagerKey: dataManagerOpenerHash}
+		DataManagerKey: dataManagerKey}
 	args = inpTesttuple4.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 409, resp.Status)
@@ -154,7 +154,7 @@ func TestQueryTesttuple(t *testing.T) {
 			dataSampleKeys := []string{trainDataSampleHash1, trainDataSampleHash2}
 			inpTesttuple := inputTesttuple{
 				TraintupleKey:  tt.traintupleKey,
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: dataSampleKeys,
 			}
 			inpTesttuple.fillDefaults()
@@ -185,6 +185,7 @@ func TestQueryTesttuple(t *testing.T) {
 			assert.Equal(t, "", testtuple.Log)
 			assert.Equal(t, "", testtuple.Tag)
 			assert.EqualValues(t, 0, testtuple.Dataset.Perf)
+			assert.Equal(t, dataManagerKey, testtuple.Dataset.Key)
 			assert.Equal(t, dataSampleKeys, testtuple.Dataset.DataSampleKeys)
 			assert.Equal(t, dataManagerOpenerHash, testtuple.Dataset.OpenerHash)
 			assert.False(t, testtuple.Certified)
@@ -244,7 +245,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 			assert.Equal(t, compositeTraintupleKey, testTuple.TraintupleKey)
 
 			// Create a new testtuple *after* the traintuple has been set to failed/succeeded
-			inp.DataManagerKey = dataManagerOpenerHash
+			inp.DataManagerKey = dataManagerKey
 			inp.DataSampleKeys = []string{trainDataSampleHash1}
 			args = inp.createDefault()
 			resp = mockStub.MockInvoke("42", args)

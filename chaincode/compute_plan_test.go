@@ -25,13 +25,13 @@ var (
 	defaultComputePlan = inputComputePlan{
 		Traintuples: []inputComputePlanTraintuple{
 			inputComputePlanTraintuple{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        algoHash,
 				ID:             traintupleID1,
 			},
 			inputComputePlanTraintuple{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleHash2},
 				ID:             traintupleID2,
 				AlgoKey:        algoHash,
@@ -40,7 +40,7 @@ var (
 		},
 		Testtuples: []inputComputePlanTesttuple{
 			inputComputePlanTesttuple{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   traintupleID2,
@@ -81,19 +81,19 @@ var (
 		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
 			{
 				ID:             "step_1_composite_A",
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        compositeAlgoHash,
 			},
 			{
 				ID:             "step_1_composite_B",
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleHash2},
 				AlgoKey:        compositeAlgoHash,
 			},
 			{
 				ID:             "step_3_composite_A",
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        compositeAlgoHash,
 				InHeadModelID:  "step_1_composite_A",
@@ -101,7 +101,7 @@ var (
 			},
 			{
 				ID:             "step_3_composite_B",
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleHash2},
 				AlgoKey:        compositeAlgoHash,
 				InHeadModelID:  "step_1_composite_B",
@@ -121,31 +121,31 @@ var (
 		},
 		Testtuples: []inputComputePlanTesttuple{
 			inputComputePlanTesttuple{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_1_composite_A",
 			},
 			inputComputePlanTesttuple{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_1_composite_B",
 			},
 			inputComputePlanTesttuple{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_2_aggregate",
 			},
 			inputComputePlanTesttuple{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_3_composite_A",
 			},
 			inputComputePlanTesttuple{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_3_composite_B",
@@ -256,13 +256,13 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	inCP := inputComputePlan{
 		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
 			{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        compositeAlgoHash,
 				ID:             IDs[0],
 			},
 			{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        compositeAlgoHash,
 				ID:             IDs[1],
@@ -432,13 +432,13 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 	inCP := inputComputePlan{
 		Traintuples: []inputComputePlanTraintuple{
 			inputComputePlanTraintuple{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        algoHash,
 				ID:             traintupleID1,
 			},
 			inputComputePlanTraintuple{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleHash2},
 				ID:             traintupleID2,
 				AlgoKey:        algoHash,
@@ -670,7 +670,7 @@ func TestUpdateComputePlan(t *testing.T) {
 	up := inputComputePlan{
 		Traintuples: []inputComputePlanTraintuple{
 			{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        algoHash,
 				ID:             NewID,
@@ -748,7 +748,7 @@ func TestCreateSameComputePlanTwice(t *testing.T) {
 	up := inputComputePlan{
 		Traintuples: []inputComputePlanTraintuple{
 			{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        algoHash,
 				ID:             "traintuple",
@@ -756,7 +756,7 @@ func TestCreateSameComputePlanTwice(t *testing.T) {
 		},
 		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
 			{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleHash1},
 				AlgoKey:        compositeAlgoHash,
 				ID:             "CompositeTraintuple",
@@ -771,7 +771,7 @@ func TestCreateSameComputePlanTwice(t *testing.T) {
 		},
 		Testtuples: []inputComputePlanTesttuple{
 			{
-				DataManagerKey: dataManagerOpenerHash,
+				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleHash1},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "traintuple",

@@ -33,6 +33,7 @@ const objectiveDescriptionHash = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb519327
 const objectiveDescriptionStorageAddress = "https://toto/objective/222/description"
 const objectiveMetricsHash = "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 const objectiveMetricsStorageAddress = "https://toto/objective/222/metrics"
+const dataManagerKey = "da1bb7c3-1f62-244c-0f3a-761cc1688042"
 const dataManagerOpenerHash = "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const trainDataSampleHash1 = "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const trainDataSampleHash2 = "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
@@ -53,8 +54,8 @@ const headModelHash = modelHash
 const trunkModelHash = "ccdbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482ecc"
 const trunkModelAddress = "https://substrabac/model/titi"
 const worker = "SampleOrg"
-const traintupleKey = "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
-const compositeTraintupleKey = "b6f20e7ed89073d995c50d4b2bff6bb365a05b8d77f10469117d8aad81d83989"
+const traintupleKey = "5ec4813058be788b991baa236da13f875b82de6add27345ae6049ee820976765"
+const compositeTraintupleKey = "bd619f0edd6a8fc83431518e08070d333d924021ec3f1ae2b5a7e173a043ab87"
 const aggregatetupleKey = "48c17bb556e1a122138d89178d81b22469a0cae260af322de9b391086ad27b2c"
 const tag = "a tag is simply a string"
 
@@ -112,7 +113,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	// 2. add test dataSample
 	inpDataSample := inputDataSample{
 		Hashes:          []string{testDataSampleHash1, testDataSampleHash2},
-		DataManagerKeys: []string{dataManagerOpenerHash},
+		DataManagerKeys: []string{dataManagerKey},
 		TestOnly:        "true",
 	}
 	args = inpDataSample.createDefault()
@@ -166,6 +167,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
+
 	if itemType == "traintuple" {
 		return resp, inpTraintuple
 	}

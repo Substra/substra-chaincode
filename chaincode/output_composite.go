@@ -111,11 +111,18 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		}
 	}
 
+	dataManager, err := db.GetDataManager(traintuple.Dataset.DataManagerKey)
+	if err != nil {
+		err = errors.Internal("could not retrieve data manager with key %s - %s", traintuple.Dataset.DataManagerKey, err.Error())
+		return
+	}
+
 	// fill dataset
 	outputCompositeTraintuple.Dataset = &outputTtDataset{
+		Key:            dataManager.Key,
 		Worker:         traintuple.Dataset.Worker,
 		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
-		OpenerHash:     traintuple.Dataset.DataManagerKey,
+		OpenerHash:     dataManager.Opener.Hash,
 		Metadata:       initMapOutput(traintuple.Dataset.Metadata),
 	}
 

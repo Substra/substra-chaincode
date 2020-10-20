@@ -58,15 +58,16 @@ type Objective struct {
 
 // DataManager is the representation of one of the elements type stored in the ledger
 type DataManager struct {
-	Name                 string            `json:"name"`
-	AssetType            AssetType         `json:"asset_type"`
-	OpenerStorageAddress string            `json:"opener_storage_address"`
-	Type                 string            `json:"type"`
-	Description          *HashDress        `json:"description"`
-	Owner                string            `json:"owner"`
-	ObjectiveKey         string            `json:"objective_key"`
-	Permissions          Permissions       `json:"permissions"`
-	Metadata             map[string]string `json:"metadata"`
+	Key          string            `json:"key"`
+	Name         string            `json:"name"`
+	AssetType    AssetType         `json:"asset_type"`
+	Opener       *HashDress        `json:"opener"`
+	Type         string            `json:"type"`
+	Description  *HashDress        `json:"description"`
+	Owner        string            `json:"owner"`
+	ObjectiveKey string            `json:"objective_key"`
+	Permissions  Permissions       `json:"permissions"`
+	Metadata     map[string]string `json:"metadata"`
 }
 
 // DataSample is the representation of one of the element type stored in the ledger
@@ -269,8 +270,9 @@ type Dataset struct {
 
 // TtDataset stores info about dataset in a Traintyple (train or test data) and in a PredTuple (later)
 type TtDataset struct {
+	Key            string   `json:"key"`
 	Worker         string   `json:"worker"`
-	DataSampleKeys []string `json:"keys"`
+	DataSampleKeys []string `json:"keys"` // TODO: rename to 'data_sample_keys'
 	OpenerHash     string   `json:"opener_hash"`
 	Perf           float32  `json:"perf"`
 }

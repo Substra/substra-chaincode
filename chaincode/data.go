@@ -21,13 +21,16 @@ import (
 )
 
 // Set is a method of the receiver DataManager. It uses inputDataManager fields to set the DataManager
-// Returns the dataManagerKey and associated objectiveKeys
-func (dataManager *DataManager) Set(db *LedgerDB, inp inputDataManager) (string, string, error) {
-	dataManagerKey := inp.OpenerHash
+// Returns the associated objectiveKeys
+func (dataManager *DataManager) Set(db *LedgerDB, inp inputDataManager) (string, error) {
+	dataManager.Key = inp.Key
 	dataManager.ObjectiveKey = inp.ObjectiveKey
 	dataManager.AssetType = DataManagerType
 	dataManager.Name = inp.Name
-	dataManager.OpenerStorageAddress = inp.OpenerStorageAddress
+	dataManager.Opener = &HashDress{
+		Hash:           inp.OpenerHash,
+		StorageAddress: inp.OpenerStorageAddress,
+	}
 	dataManager.Type = inp.Type
 	dataManager.Metadata = inp.Metadata
 	dataManager.Description = &HashDress{
@@ -36,17 +39,17 @@ func (dataManager *DataManager) Set(db *LedgerDB, inp inputDataManager) (string,
 	}
 	owner, err := GetTxCreator(db.cc)
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 	dataManager.Owner = owner
 
 	permissions, err := NewPermissions(db, inp.Permissions)
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 
 	dataManager.Permissions = permissions
-	return dataManagerKey, dataManager.ObjectiveKey, nil
+	return dataManager.ObjectiveKey, nil
 }
 
 // setDataSample is a method checking the validity of inputDataSample to be registered in the ledger
@@ -114,27 +117,27 @@ func registerDataManager(db *LedgerDB, args []string) (resp outputKey, err error
 		}
 	}
 	dataManager := DataManager{}
-	dataManagerKey, objectiveKey, err := dataManager.Set(db, inp)
+	objectiveKey, err := dataManager.Set(db, inp)
 	if err != nil {
 		return
 	}
 	// submit to ledger
-	err = db.Add(dataManagerKey, dataManager)
+	err = db.Add(inp.Key, dataManager)
 	if err != nil {
 		return
 	}
 	// create composite keys (one for each associated objective) to find dataSample associated with a objective
 	indexName := "dataManager~objective~key"
-	err = db.CreateIndex(indexName, []string{"dataManager", objectiveKey, dataManagerKey})
+	err = db.CreateIndex(indexName, []string{"dataManager", objectiveKey, inp.Key})
 	if err != nil {
 		return
 	}
 	// create composite key to find dataManager associated with a owner
-	err = db.CreateIndex("dataManager~owner~key", []string{"dataManager", dataManager.Owner, dataManagerKey})
+	err = db.CreateIndex("dataManager~owner~key", []string{"dataManager", dataManager.Owner, inp.Key})
 	if err != nil {
 		return
 	}
-	return outputKey{Key: dataManagerKey}, nil
+	return outputKey{Key: inp.Key}, nil
 }
 
 // registerDataSample stores new dataSample in the ledger (one or more).
@@ -239,7 +242,7 @@ func updateDataManager(db *LedgerDB, args []string) (resp outputKey, err error) 
 
 // queryDataManager returns dataManager and its key
 func queryDataManager(db *LedgerDB, args []string) (out outputDataManager, err error) {
-	inp := inputKeyOld{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -252,7 +255,7 @@ func queryDataManager(db *LedgerDB, args []string) (out outputDataManager, err e
 		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
-	out.Fill(inp.Key, dataManager)
+	out.Fill(dataManager)
 	return
 }
 
@@ -261,7 +264,7 @@ func queryDataManagers(db *LedgerDB, args []string) ([]outputDataManager, error)
 	var err error
 	outDataManagers := []outputDataManager{}
 	if len(args) != 0 {
-		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
+		err = errors.BadRequest("incorrect number of arguments, expecting 0")
 		return outDataManagers, err
 	}
 	var indexName = "dataManager~owner~key"
@@ -275,7 +278,7 @@ func queryDataManagers(db *LedgerDB, args []string) ([]outputDataManager, error)
 			return outDataManagers, err
 		}
 		var out outputDataManager
-		out.Fill(key, dataManager)
+		out.Fill(dataManager)
 		outDataManagers = append(outDataManagers, out)
 	}
 	return outDataManagers, nil
@@ -283,7 +286,7 @@ func queryDataManagers(db *LedgerDB, args []string) ([]outputDataManager, error)
 
 // queryDataset returns info about a dataManager and all related dataSample
 func queryDataset(db *LedgerDB, args []string) (outputDataset, error) {
-	inp := inputKeyOld{}
+	inp := inputKey{}
 	out := outputDataset{}
 	err := AssetFromJSON(args, &inp)
 	if err != nil {
@@ -307,7 +310,7 @@ func queryDataset(db *LedgerDB, args []string) (outputDataset, error) {
 		return out, err
 	}
 
-	out.Fill(inp.Key, dataManager, trainDataSampleKeys, testDataSampleKeys)
+	out.Fill(dataManager, trainDataSampleKeys, testDataSampleKeys)
 	return out, nil
 }
 

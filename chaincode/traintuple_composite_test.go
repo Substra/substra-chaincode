@@ -282,6 +282,7 @@ func TestTraintupleComposite(t *testing.T) {
 		},
 		Creator: worker,
 		Dataset: &outputTtDataset{
+			Key:            dataManagerKey,
 			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
 			OpenerHash:     dataManagerOpenerHash,
 			Worker:         worker,
@@ -802,7 +803,7 @@ func TestHeadModelDifferentWorker(t *testing.T) {
 	registerNode(db, []string{})
 
 	// new dataset on new worker
-	inpDM := inputDataManager{}
+	inpDM := inputDataManager{Key: strings.Replace(dataManagerKey, "1", "2", 1)}
 	inpDM.createDefault()
 	inpDM.OpenerHash = GetRandomHash()
 	outDM, err := registerDataManager(db, assetToArgs(inpDM))
