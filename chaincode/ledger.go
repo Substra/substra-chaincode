@@ -272,7 +272,7 @@ type Dataset struct {
 type TtDataset struct {
 	Key            string   `json:"key"`
 	Worker         string   `json:"worker"`
-	DataSampleKeys []string `json:"keys"` // TODO: rename to 'data_sample_keys'
+	DataSampleKeys []string `json:"keys"`
 	OpenerHash     string   `json:"opener_hash"`
 	Perf           float32  `json:"perf"`
 }
