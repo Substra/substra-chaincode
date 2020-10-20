@@ -187,6 +187,7 @@ func TestQueryTesttuple(t *testing.T) {
 			assert.EqualValues(t, 0, testtuple.Dataset.Perf)
 			assert.Equal(t, dataManagerKey, testtuple.Dataset.Key)
 			assert.Equal(t, dataSampleKeys, testtuple.Dataset.DataSampleKeys)
+			assert.Equal(t, dataManagerKey, testtuple.Dataset.Key)
 			assert.Equal(t, dataManagerOpenerHash, testtuple.Dataset.OpenerHash)
 			assert.False(t, testtuple.Certified)
 		})
