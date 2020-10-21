@@ -51,9 +51,9 @@ func TestModelComposition(t *testing.T) {
 				registerItem(t, *mockStub, "aggregateAlgo")
 
 				// register parents
-				parent1Key, err := registerTraintuple(mockStub, tt.parent1)
+				parent1Key, err := registerTraintuple(t, mockStub, tt.parent1)
 				assert.NoError(t, err)
-				parent2Key, err := registerTraintuple(mockStub, tt.parent2)
+				parent2Key, err := registerTraintuple(t, mockStub, tt.parent2)
 				assert.NoError(t, err)
 
 				mockStub.MockTransactionStart("42")

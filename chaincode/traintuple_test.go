@@ -224,14 +224,14 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 	assert.NoError(t, err, "should unmarshal without problem")
 	ttkey := res.Key
 	// Add new algo to check all ComputePlan algo consistency
-	newAlgoHash := strings.Replace(algoHash, "a", "b", 1)
-	inpAlgo := inputAlgo{Hash: newAlgoHash}
+	newAlgoKey := strings.Replace(algoKey, "a", "b", 1)
+	inpAlgo := inputAlgo{Key: newAlgoKey}
 	args = inpAlgo.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 
 	inpTraintuple = inputTraintuple{
-		AlgoKey:       newAlgoHash,
+		AlgoKey:       newAlgoKey,
 		InModels:      []string{ttkey},
 		Rank:          "2",
 		ComputePlanID: tuple.ComputePlanID}

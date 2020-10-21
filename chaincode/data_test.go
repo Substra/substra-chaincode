@@ -134,8 +134,8 @@ func TestGetTestDatasetKeys(t *testing.T) {
 
 	v, ok := payload["test_data_sample_keys"]
 	assert.True(t, ok, "payload should contains the test dataSample keys")
-	assert.Contains(t, v, testDataSampleKey2, "testDataSampleKeys should contain the test dataSampleHash")
-	assert.NotContains(t, v, testDataSampleKey1, "testDataSampleKeys should not contains the train dataSampleHash")
+	assert.Contains(t, v, testDataSampleKey2, "testDataSampleKeys should contain the test dataSampleKey")
+	assert.NotContains(t, v, testDataSampleKey1, "testDataSampleKeys should not contains the train dataSampleKey")
 }
 func TestDataset(t *testing.T) {
 	scc := new(SubstraChaincode)

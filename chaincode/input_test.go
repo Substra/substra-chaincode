@@ -95,6 +95,9 @@ func (objective *inputObjective) createDefault() [][]byte {
 }
 
 func (algo *inputAlgo) createDefault() [][]byte {
+	if algo.Key == "" {
+		algo.Key = algoKey
+	}
 	if algo.Name == "" {
 		algo.Name = algoName
 	}
@@ -116,6 +119,9 @@ func (algo *inputAlgo) createDefault() [][]byte {
 }
 
 func (algo *inputCompositeAlgo) createDefault() [][]byte {
+	if algo.Key == "" {
+		algo.Key = compositeAlgoKey
+	}
 	if algo.Name == "" {
 		algo.Name = compositeAlgoName
 	}
@@ -142,6 +148,9 @@ func (algo *inputAggregateAlgo) createDefault() [][]byte {
 }
 
 func (algo *inputAggregateAlgo) fillDefaults() {
+	if algo.Key == "" {
+		algo.Key = aggregateAlgoKey
+	}
 	if algo.Name == "" {
 		algo.Name = aggregateAlgoName
 	}
@@ -166,7 +175,7 @@ func (algo *inputAggregateAlgo) getArgs() [][]byte {
 
 func (traintuple *inputTraintuple) createDefault() [][]byte {
 	if traintuple.AlgoKey == "" {
-		traintuple.AlgoKey = algoHash
+		traintuple.AlgoKey = algoKey
 	}
 	if traintuple.InModels == nil {
 		traintuple.InModels = []string{}
@@ -188,7 +197,7 @@ func (traintuple *inputCompositeTraintuple) createDefault() [][]byte {
 
 func (traintuple *inputCompositeTraintuple) fillDefaults() {
 	if traintuple.AlgoKey == "" {
-		traintuple.AlgoKey = compositeAlgoHash
+		traintuple.AlgoKey = compositeAlgoKey
 	}
 	if traintuple.DataManagerKey == "" {
 		traintuple.DataManagerKey = dataManagerKey
@@ -211,7 +220,7 @@ func (aggregatetuple *inputAggregatetuple) createDefault() [][]byte {
 
 func (aggregatetuple *inputAggregatetuple) fillDefaults() {
 	if aggregatetuple.AlgoKey == "" {
-		aggregatetuple.AlgoKey = aggregateAlgoHash
+		aggregatetuple.AlgoKey = aggregateAlgoKey
 	}
 	if aggregatetuple.Worker == "" {
 		aggregatetuple.Worker = worker

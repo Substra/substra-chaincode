@@ -16,7 +16,7 @@ package main
 
 // inputCompositeTraintuple is the representation of input args to register a composite Traintuple
 type inputCompositeTraintuple struct {
-	AlgoKey                  string            `validate:"required,len=64,hexadecimal" json:"algo_key"`
+	AlgoKey                  string            `validate:"required,len=36" json:"algo_key"`
 	InHeadModelKey           string            `validate:"required_with=InTrunkModelKey,omitempty,len=64,hexadecimal" json:"in_head_model_key"`
 	InTrunkModelKey          string            `validate:"required_with=InHeadModelKey,omitempty,len=64,hexadecimal" json:"in_trunk_model_key"`
 	OutTrunkModelPermissions inputPermissions  `validate:"required" json:"out_trunk_model_permissions"`

@@ -43,10 +43,9 @@ func TestAggregateAlgo(t *testing.T) {
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	algoKey := res.Key
-	assert.Equalf(t, inpAlgo.Hash, algoKey, "when adding aggregate algo, key does not corresponds to its hash - key: %s and hash %s", algoKey, inpAlgo.Hash)
 
 	// Query algo from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryAggregateAlgo"), keyToJSONOld(algoKey)}
+	args = [][]byte{[]byte("queryAggregateAlgo"), keyToJSON(algoKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying an aggregate algo with status %d and message %s", resp.Status, resp.Message)
 	algo := outputAggregateAlgo{}
@@ -56,8 +55,8 @@ func TestAggregateAlgo(t *testing.T) {
 		outputAlgo: outputAlgo{
 			Key:  algoKey,
 			Name: inpAlgo.Name,
-			Content: HashDress{
-				Hash:           algoKey,
+			Content: &HashDress{
+				Hash:           inpAlgo.Hash,
 				StorageAddress: inpAlgo.StorageAddress,
 			},
 			Description: &HashDress{

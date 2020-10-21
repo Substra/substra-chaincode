@@ -72,7 +72,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 	}
 	outputCompositeTraintuple.Algo = &HashDressName{
 		Name:           algo.Name,
-		Hash:           traintuple.AlgoKey,
+		Hash:           algo.Hash,
 		StorageAddress: algo.StorageAddress}
 
 	// fill in-model (head)
@@ -135,6 +135,6 @@ func getOutPermissions(in Permissions) (out outputPermissions) {
 	return out
 }
 
-func (out *outputCompositeAlgo) Fill(key string, in CompositeAlgo) {
-	out.outputAlgo.Fill(key, in.Algo)
+func (out *outputCompositeAlgo) Fill(in CompositeAlgo) {
+	out.outputAlgo.Fill(in.Algo)
 }

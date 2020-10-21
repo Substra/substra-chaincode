@@ -80,8 +80,10 @@ type DataSample struct {
 
 // Algo is the representation of one of the element type stored in the ledger
 type Algo struct {
+	Key            string            `json:"key"`
 	Name           string            `json:"name"`
 	AssetType      AssetType         `json:"asset_type"`
+	Hash           string            `json:"hash"`
 	StorageAddress string            `json:"storage_address"`
 	Description    *HashDress        `json:"description"`
 	Owner          string            `json:"owner"`

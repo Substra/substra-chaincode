@@ -70,7 +70,7 @@ func TestPipeline(t *testing.T) {
 	dataManagerKey := res.Key
 
 	fmt.Fprintln(&out, "#### ------------ Query DataManager From key ------------")
-	callAssertAndPrint("invoke", "queryDataManager", inputKeyOld{dataManagerKey})
+	callAssertAndPrint("invoke", "queryDataManager", inputKey{dataManagerKey})
 
 	fmt.Fprintln(&out, "#### ------------ Add test DataSample ------------")
 	inpDataSample := inputDataSample{
@@ -245,7 +245,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "updateDataSample", updateData)
 
 	fmt.Fprintln(&out, "#### ------------ Query the new Dataset ------------")
-	callAssertAndPrint("query", "queryDataset", inputKeyOld{newDataManagerKey})
+	callAssertAndPrint("query", "queryDataset", inputKey{newDataManagerKey})
 
 	fmt.Fprintln(&out, "#### ------------ Create a ComputePlan ------------")
 	inputCP := inputNewComputePlan{}
@@ -262,7 +262,7 @@ func TestPipeline(t *testing.T) {
 		{
 			DataManagerKey: dataManagerKey,
 			DataSampleKeys: []string{trainDataSampleKey1},
-			AlgoKey:        algoHash,
+			AlgoKey:        algoKey,
 			ID:             "thirdTraintupleID",
 			InModelsIDs:    []string{traintupleID1, traintupleID2},
 		},

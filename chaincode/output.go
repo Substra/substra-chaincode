@@ -103,18 +103,20 @@ func (out *outputDataset) Fill(in DataManager, trainKeys []string, testKeys []st
 type outputAlgo struct {
 	Key         string            `json:"key"`
 	Name        string            `json:"name"`
-	Content     HashDress         `json:"content"`
+	Content     *HashDress        `json:"content"`
 	Description *HashDress        `json:"description"`
 	Owner       string            `json:"owner"`
 	Permissions outputPermissions `json:"permissions"`
 	Metadata    map[string]string `json:"metadata"`
 }
 
-func (out *outputAlgo) Fill(key string, in Algo) {
-	out.Key = key
+func (out *outputAlgo) Fill(in Algo) {
+	out.Key = in.Key
 	out.Name = in.Name
-	out.Content.Hash = key
-	out.Content.StorageAddress = in.StorageAddress
+	out.Content = &HashDress{
+		Hash:           in.Hash,
+		StorageAddress: in.StorageAddress,
+	}
 	out.Description = in.Description
 	out.Owner = in.Owner
 	out.Permissions.Fill(in.Permissions)
@@ -169,7 +171,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 	}
 	outputTraintuple.Algo = &HashDressName{
 		Name:           algo.Name,
-		Hash:           traintuple.AlgoKey,
+		Hash:           algo.Hash,
 		StorageAddress: algo.StorageAddress}
 
 	// fill inModels
@@ -269,7 +271,7 @@ func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
 	}
 	out.Algo = &HashDressName{
 		Name:           algo.Name,
-		Hash:           in.AlgoKey,
+		Hash:           algo.Hash,
 		StorageAddress: algo.StorageAddress}
 
 	// fill objective
@@ -407,7 +409,7 @@ func (out *outputBoardTuple) Fill(db *LedgerDB, in Testtuple, testtupleKey strin
 	}
 	out.Algo = &HashDressName{
 		Name:           algo.Name,
-		Hash:           in.AlgoKey,
+		Hash:           algo.Hash,
 		StorageAddress: algo.StorageAddress,
 	}
 	out.TraintupleKey = in.TraintupleKey

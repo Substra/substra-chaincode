@@ -81,7 +81,7 @@ func TestTraintupleWithSingleDatasampleComposite(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
 	inpTraintuple := inputCompositeTraintuple{
-		AlgoKey:        compositeAlgoHash,
+		AlgoKey:        compositeAlgoKey,
 		DataSampleKeys: []string{trainDataSampleKey1},
 	}
 	args = inpTraintuple.createDefault()
@@ -610,11 +610,11 @@ func testCompositeTraintupleInModelTypes(t *testing.T, headType AssetType, trunk
 
 	inpTraintuple := inputCompositeTraintuple{}
 
-	head, err := registerTraintuple(mockStub, headType)
+	head, err := registerTraintuple(t, mockStub, headType)
 	assert.NoError(t, err)
 	inpTraintuple.InHeadModelKey = head
 
-	trunk, err := registerTraintuple(mockStub, trunkType)
+	trunk, err := registerTraintuple(t, mockStub, trunkType)
 	assert.NoError(t, err)
 	inpTraintuple.InTrunkModelKey = trunk
 

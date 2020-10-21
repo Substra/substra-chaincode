@@ -26,9 +26,9 @@ func TestGetOutModelHashDress(t *testing.T) {
 	db := NewLedgerDB(mockStub)
 
 	registerItem(t, *mockStub, "compositeAlgo")
-	regular, err := registerTraintuple(mockStub, TraintupleType)
+	regular, err := registerTraintuple(t, mockStub, TraintupleType)
 	assert.NoError(t, err)
-	composite, err := registerTraintuple(mockStub, CompositeTraintupleType)
+	composite, err := registerTraintuple(t, mockStub, CompositeTraintupleType)
 	assert.NoError(t, err)
 
 	// 1. Correct requests

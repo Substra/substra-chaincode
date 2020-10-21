@@ -27,14 +27,14 @@ var (
 			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
-				AlgoKey:        algoHash,
+				AlgoKey:        algoKey,
 				ID:             traintupleID1,
 			},
 			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey2},
 				ID:             traintupleID2,
-				AlgoKey:        algoHash,
+				AlgoKey:        algoKey,
 				InModelsIDs:    []string{traintupleID1},
 			},
 		},
@@ -83,19 +83,19 @@ var (
 				ID:             "step_1_composite_A",
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
-				AlgoKey:        compositeAlgoHash,
+				AlgoKey:        compositeAlgoKey,
 			},
 			{
 				ID:             "step_1_composite_B",
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey2},
-				AlgoKey:        compositeAlgoHash,
+				AlgoKey:        compositeAlgoKey,
 			},
 			{
 				ID:             "step_3_composite_A",
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
-				AlgoKey:        compositeAlgoHash,
+				AlgoKey:        compositeAlgoKey,
 				InHeadModelID:  "step_1_composite_A",
 				InTrunkModelID: "step_2_aggregate",
 			},
@@ -103,7 +103,7 @@ var (
 				ID:             "step_3_composite_B",
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey2},
-				AlgoKey:        compositeAlgoHash,
+				AlgoKey:        compositeAlgoKey,
 				InHeadModelID:  "step_1_composite_B",
 				InTrunkModelID: "step_2_aggregate",
 			},
@@ -111,7 +111,7 @@ var (
 		Aggregatetuples: []inputComputePlanAggregatetuple{
 			{
 				ID:      "step_2_aggregate",
-				AlgoKey: aggregateAlgoHash,
+				AlgoKey: aggregateAlgoKey,
 				InModelsIDs: []string{
 					"step_1_composite_A",
 					"step_1_composite_B",
@@ -258,13 +258,13 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 			{
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
-				AlgoKey:        compositeAlgoHash,
+				AlgoKey:        compositeAlgoKey,
 				ID:             IDs[0],
 			},
 			{
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
-				AlgoKey:        compositeAlgoHash,
+				AlgoKey:        compositeAlgoKey,
 				ID:             IDs[1],
 				InTrunkModelID: IDs[0],
 				InHeadModelID:  IDs[0],
@@ -272,12 +272,12 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 		},
 		Aggregatetuples: []inputComputePlanAggregatetuple{
 			{
-				AlgoKey: aggregateAlgoHash,
+				AlgoKey: aggregateAlgoKey,
 				ID:      IDs[2],
 				Worker:  worker,
 			},
 			{
-				AlgoKey:     aggregateAlgoHash,
+				AlgoKey:     aggregateAlgoKey,
 				ID:          IDs[3],
 				InModelsIDs: []string{IDs[2]},
 				Worker:      worker,
@@ -349,7 +349,7 @@ func TestCreateComputePlan(t *testing.T) {
 
 	// check first traintuple
 	assert.NotZero(t, first)
-	assert.Equal(t, inCP.Traintuples[0].AlgoKey, first.Algo.Hash)
+	assert.Equal(t, algoHash, first.Algo.Hash)
 	assert.Equal(t, StatusTodo, first.Status)
 
 	// check second traintuple
@@ -357,7 +357,7 @@ func TestCreateComputePlan(t *testing.T) {
 	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
 	assert.EqualValues(t, first.ComputePlanID, second.ComputePlanID)
 	assert.Len(t, second.InModels, 1)
-	assert.Equal(t, inCP.Traintuples[1].AlgoKey, second.Algo.Hash)
+	assert.Equal(t, algoHash, second.Algo.Hash)
 	assert.Equal(t, StatusWaiting, second.Status)
 
 	// Check the testtuples
@@ -434,14 +434,14 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
-				AlgoKey:        algoHash,
+				AlgoKey:        algoKey,
 				ID:             traintupleID1,
 			},
 			inputComputePlanTraintuple{
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey2},
 				ID:             traintupleID2,
-				AlgoKey:        algoHash,
+				AlgoKey:        algoKey,
 				InModelsIDs:    []string{traintupleID1},
 			},
 		},
@@ -672,7 +672,7 @@ func TestUpdateComputePlan(t *testing.T) {
 			{
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
-				AlgoKey:        algoHash,
+				AlgoKey:        algoKey,
 				ID:             NewID,
 				InModelsIDs:    []string{traintupleID1, traintupleID2},
 			},
@@ -750,7 +750,7 @@ func TestCreateSameComputePlanTwice(t *testing.T) {
 			{
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
-				AlgoKey:        algoHash,
+				AlgoKey:        algoKey,
 				ID:             "traintuple",
 			},
 		},
@@ -758,13 +758,13 @@ func TestCreateSameComputePlanTwice(t *testing.T) {
 			{
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
-				AlgoKey:        compositeAlgoHash,
+				AlgoKey:        compositeAlgoKey,
 				ID:             "CompositeTraintuple",
 			},
 		},
 		Aggregatetuples: []inputComputePlanAggregatetuple{
 			{
-				AlgoKey: aggregateAlgoHash,
+				AlgoKey: aggregateAlgoKey,
 				ID:      "Aggregatetuple",
 				Worker:  worker,
 			},

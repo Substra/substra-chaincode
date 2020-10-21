@@ -20,8 +20,7 @@ import (
 
 // Set is a method of the receiver CompositeAlgo. It uses inputCompositeAlgo fields to set the CompositeAlgo
 // Returns the compositeAlgoKey
-func (algo *CompositeAlgo) Set(db *LedgerDB, inp inputCompositeAlgo) (algoKey string, err error) {
-	algoKey = inp.Hash
+func (algo *CompositeAlgo) Set(db *LedgerDB, inp inputCompositeAlgo) (err error) {
 	// find associated owner
 	owner, err := GetTxCreator(db.cc)
 	if err != nil {
@@ -33,8 +32,10 @@ func (algo *CompositeAlgo) Set(db *LedgerDB, inp inputCompositeAlgo) (algoKey st
 		return
 	}
 
+	algo.Key = inp.Key
 	algo.AssetType = CompositeAlgoType
 	algo.Name = inp.Name
+	algo.Hash = inp.Hash
 	algo.StorageAddress = inp.StorageAddress
 	algo.Description = &HashDress{
 		Hash:           inp.DescriptionHash,
@@ -59,26 +60,26 @@ func registerCompositeAlgo(db *LedgerDB, args []string) (resp outputKey, err err
 	}
 	// check validity of input args and convert it to CompositeAlgo
 	algo := CompositeAlgo{}
-	algoKey, err := algo.Set(db, inp)
+	err = algo.Set(db, inp)
 	if err != nil {
 		return
 	}
 	// submit to ledger
-	err = db.Add(algoKey, algo)
+	err = db.Add(inp.Key, algo)
 	if err != nil {
 		return
 	}
 	// create composite key
-	err = db.CreateIndex("compositeAlgo~owner~key", []string{"compositeAlgo", algo.Owner, algoKey})
+	err = db.CreateIndex("compositeAlgo~owner~key", []string{"compositeAlgo", algo.Owner, inp.Key})
 	if err != nil {
 		return
 	}
-	return outputKey{Key: algoKey}, nil
+	return outputKey{Key: inp.Key}, nil
 }
 
 // queryCompositeAlgo returns an algo of the ledger given its key
 func queryCompositeAlgo(db *LedgerDB, args []string) (out outputCompositeAlgo, err error) {
-	inp := inputKeyOld{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -87,7 +88,7 @@ func queryCompositeAlgo(db *LedgerDB, args []string) (out outputCompositeAlgo, e
 	if err != nil {
 		return
 	}
-	out.Fill(inp.Key, algo)
+	out.Fill(algo)
 	return
 }
 
@@ -109,7 +110,7 @@ func queryCompositeAlgos(db *LedgerDB, args []string) (outAlgos []outputComposit
 			return outAlgos, err
 		}
 		var out outputCompositeAlgo
-		out.Fill(key, algo)
+		out.Fill(algo)
 		outAlgos = append(outAlgos, out)
 	}
 	return

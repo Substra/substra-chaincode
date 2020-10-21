@@ -36,8 +36,8 @@ type outputAggregateAlgo struct {
 	outputAlgo
 }
 
-func (out *outputAggregateAlgo) Fill(key string, in AggregateAlgo) {
-	out.outputAlgo.Fill(key, in.Algo)
+func (out *outputAggregateAlgo) Fill(in AggregateAlgo) {
+	out.outputAlgo.Fill(in.Algo)
 }
 
 // Fill is a method of the receiver outputAggregatetuple. It returns all elements necessary to do a training task from an aggregate trainuple stored in the ledger
@@ -58,7 +58,7 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 	}
 	outputAggregatetuple.Algo = &HashDressName{
 		Name:           algo.Name,
-		Hash:           traintuple.AlgoKey,
+		Hash:           algo.Hash,
 		StorageAddress: algo.StorageAddress}
 
 	// fill inModels

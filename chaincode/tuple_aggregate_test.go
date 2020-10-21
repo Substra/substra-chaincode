@@ -79,7 +79,7 @@ func TestTraintupleWithSingleDatasampleAggregate(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding aggregate algo it should work: ", resp.Message)
 
 	inpTraintuple := inputAggregatetuple{
-		AlgoKey: aggregateAlgoHash,
+		AlgoKey: aggregateAlgoKey,
 	}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -436,11 +436,11 @@ func TestAggregatetuplePermissions(t *testing.T) {
 	registerNode("nodeD")
 
 	// register 3 algos
-	algo1, err := registerRandomCompositeAlgo(mockStub)
+	algo1, err := registerRandomCompositeAlgo(t, mockStub)
 	assert.Nil(t, err)
-	algo2, err := registerRandomCompositeAlgo(mockStub)
+	algo2, err := registerRandomCompositeAlgo(t, mockStub)
 	assert.Nil(t, err)
-	algo3, err := registerRandomCompositeAlgo(mockStub)
+	algo3, err := registerRandomCompositeAlgo(t, mockStub)
 	assert.Nil(t, err)
 
 	// register 3 composite traintuples, with various permissions
@@ -555,7 +555,7 @@ func TestQueryAggregatetuple(t *testing.T) {
 	assert.Equal(t, traintupleKey, out.InModels[0].TraintupleKey)
 	assert.Equal(t, compositeTraintupleKey, out.InModels[1].TraintupleKey)
 	assert.Equal(t, aggregateAlgoName, out.Algo.Name)
-	assert.Equal(t, in.AlgoKey, out.Algo.Hash)
+	assert.Equal(t, aggregateAlgoHash, out.Algo.Hash)
 	assert.Equal(t, aggregateAlgoStorageAddress, out.Algo.StorageAddress)
 	assert.Equal(t, StatusWaiting, out.Status)
 }

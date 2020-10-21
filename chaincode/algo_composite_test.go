@@ -43,10 +43,9 @@ func TestCompositeAlgo(t *testing.T) {
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	algoKey := res.Key
-	assert.Equalf(t, inpAlgo.Hash, algoKey, "when adding composite algo, key does not corresponds to its hash - key: %s and hash %s", algoKey, inpAlgo.Hash)
 
 	// Query algo from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryCompositeAlgo"), keyToJSONOld(algoKey)}
+	args = [][]byte{[]byte("queryCompositeAlgo"), keyToJSON(algoKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying a composite algo with status %d and message %s", resp.Status, resp.Message)
 	algo := outputCompositeAlgo{}
@@ -56,8 +55,8 @@ func TestCompositeAlgo(t *testing.T) {
 		outputAlgo: outputAlgo{
 			Key:  algoKey,
 			Name: inpAlgo.Name,
-			Content: HashDress{
-				Hash:           algoKey,
+			Content: &HashDress{
+				Hash:           inpAlgo.Hash,
 				StorageAddress: inpAlgo.StorageAddress,
 			},
 			Description: &HashDress{
