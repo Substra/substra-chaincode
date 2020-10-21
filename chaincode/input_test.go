@@ -48,8 +48,8 @@ func (dataManager *inputDataManager) createDefault() [][]byte {
 	return args
 }
 func (dataSample *inputDataSample) createDefault() [][]byte {
-	if dataSample.Hashes == nil || len(dataSample.Hashes) == 0 {
-		dataSample.Hashes = []string{trainDataSampleHash1, trainDataSampleHash2}
+	if dataSample.Keys == nil || len(dataSample.Keys) == 0 {
+		dataSample.Keys = []string{trainDataSampleKey1, trainDataSampleKey2}
 	}
 	if dataSample.DataManagerKeys == nil || len(dataSample.DataManagerKeys) == 0 {
 		dataSample.DataManagerKeys = []string{dataManagerKey}
@@ -87,7 +87,7 @@ func (objective *inputObjective) createDefault() [][]byte {
 		objective.TestDataset.DataManagerKey = dataManagerKey
 	}
 	if objective.TestDataset.DataSampleKeys == nil || len(objective.TestDataset.DataSampleKeys) == 0 {
-		objective.TestDataset.DataSampleKeys = []string{testDataSampleHash1, testDataSampleHash2}
+		objective.TestDataset.DataSampleKeys = []string{testDataSampleKey1, testDataSampleKey2}
 	}
 	objective.Permissions = OpenPermissions
 	args := append([][]byte{[]byte("registerObjective")}, assetToJSON(objective))
@@ -175,7 +175,7 @@ func (traintuple *inputTraintuple) createDefault() [][]byte {
 		traintuple.DataManagerKey = dataManagerKey
 	}
 	if traintuple.DataSampleKeys == nil || len(traintuple.DataSampleKeys) == 0 {
-		traintuple.DataSampleKeys = []string{trainDataSampleHash1, trainDataSampleHash2}
+		traintuple.DataSampleKeys = []string{trainDataSampleKey1, trainDataSampleKey2}
 	}
 	args := append([][]byte{[]byte("createTraintuple")}, assetToJSON(traintuple))
 	return args
@@ -194,7 +194,7 @@ func (traintuple *inputCompositeTraintuple) fillDefaults() {
 		traintuple.DataManagerKey = dataManagerKey
 	}
 	if traintuple.DataSampleKeys == nil || len(traintuple.DataSampleKeys) == 0 {
-		traintuple.DataSampleKeys = []string{trainDataSampleHash1, trainDataSampleHash2}
+		traintuple.DataSampleKeys = []string{trainDataSampleKey1, trainDataSampleKey2}
 	}
 	traintuple.OutTrunkModelPermissions = OpenPermissions
 }

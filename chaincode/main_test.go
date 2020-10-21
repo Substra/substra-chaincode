@@ -35,10 +35,10 @@ const objectiveMetricsHash = "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b5
 const objectiveMetricsStorageAddress = "https://toto/objective/222/metrics"
 const dataManagerKey = "da1bb7c3-1f62-244c-0f3a-761cc1688042"
 const dataManagerOpenerHash = "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-const trainDataSampleHash1 = "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-const trainDataSampleHash2 = "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-const testDataSampleHash1 = "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-const testDataSampleHash2 = "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+const trainDataSampleKey1 = "aa1bb7c3-1f62-244c-0f3a-761cc1688042"
+const trainDataSampleKey2 = "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
+const testDataSampleKey1 = "bb1bb7c3-1f62-244c-0f3a-761cc1688042"
+const testDataSampleKey2 = "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
 const algoHash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const algoStorageAddress = "https://toto/algo/222/algo"
 const algoName = "hog + svm"
@@ -54,8 +54,8 @@ const headModelHash = modelHash
 const trunkModelHash = "ccdbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482ecc"
 const trunkModelAddress = "https://substrabac/model/titi"
 const worker = "SampleOrg"
-const traintupleKey = "5ec4813058be788b991baa236da13f875b82de6add27345ae6049ee820976765"
-const compositeTraintupleKey = "bd619f0edd6a8fc83431518e08070d333d924021ec3f1ae2b5a7e173a043ab87"
+const traintupleKey = "01e3579e5e1a09b7edb52388160d2b1af209acee31e0e7cd65fc339f54c3e265"
+const compositeTraintupleKey = "c36365f31daa8519ac1575620c876552ec30687d7a7d94963a17bf13dd0c1886"
 const aggregatetupleKey = "48c17bb556e1a122138d89178d81b22469a0cae260af322de9b391086ad27b2c"
 const tag = "a tag is simply a string"
 
@@ -112,7 +112,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	}
 	// 2. add test dataSample
 	inpDataSample := inputDataSample{
-		Hashes:          []string{testDataSampleHash1, testDataSampleHash2},
+		Keys:            []string{testDataSampleKey1, testDataSampleKey2},
 		DataManagerKeys: []string{dataManagerKey},
 		TestOnly:        "true",
 	}
@@ -166,6 +166,8 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	inpTraintuple := inputTraintuple{}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
+	var _key struct{ Key string }
+	json.Unmarshal(resp.Payload, &_key)
 	require.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
 
 	if itemType == "traintuple" {
@@ -175,6 +177,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	inpCompositeTraintuple := inputCompositeTraintuple{}
 	args = inpCompositeTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
+	json.Unmarshal(resp.Payload, &_key)
 	require.EqualValuesf(t, 200, resp.Status, "when adding composite traintuple with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "compositeTraintuple" {
 		return resp, inpCompositeTraintuple
@@ -183,6 +186,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	inpAggregatetuple := inputAggregatetuple{}
 	args = inpAggregatetuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
+	json.Unmarshal(resp.Payload, &_key)
 	require.EqualValuesf(t, 200, resp.Status, "when adding aggregate tuple with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "aggregatetuple" {
 		return resp, inpAggregatetuple

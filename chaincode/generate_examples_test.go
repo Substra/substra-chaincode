@@ -74,7 +74,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Add test DataSample ------------")
 	inpDataSample := inputDataSample{
-		Hashes:   []string{testDataSampleHash1, testDataSampleHash2},
+		Keys:     []string{testDataSampleKey1, testDataSampleKey2},
 		TestOnly: "true",
 	}
 	inpDataSample.createDefault()
@@ -160,7 +160,7 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintln(&out, "#### ------------ Add Non-Certified Testtuple ------------")
 	inpTesttuple := inputTesttuple{
 		DataManagerKey: dataManagerKey,
-		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
+		DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
 	}
 	inpTesttuple.createDefault()
 	callAssertAndPrint("invoke", "createTesttuple", inpTesttuple)
@@ -240,7 +240,7 @@ func TestPipeline(t *testing.T) {
 	// associate a data sample with the old data manager with the updateDataSample
 	updateData := inputUpdateDataSample{
 		DataManagerKeys: []string{newDataManagerKey},
-		Hashes:          []string{trainDataSampleHash1},
+		Keys:            []string{trainDataSampleKey1},
 	}
 	callAssertAndPrint("invoke", "updateDataSample", updateData)
 
@@ -261,7 +261,7 @@ func TestPipeline(t *testing.T) {
 	upCP.Traintuples = []inputComputePlanTraintuple{
 		{
 			DataManagerKey: dataManagerKey,
-			DataSampleKeys: []string{trainDataSampleHash1},
+			DataSampleKeys: []string{trainDataSampleKey1},
 			AlgoKey:        algoHash,
 			ID:             "thirdTraintupleID",
 			InModelsIDs:    []string{traintupleID1, traintupleID2},
@@ -270,7 +270,7 @@ func TestPipeline(t *testing.T) {
 	upCP.Testtuples = []inputComputePlanTesttuple{
 		{
 			DataManagerKey: dataManagerKey,
-			DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+			DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 			ObjectiveKey:   objectiveKey,
 			TraintupleID:   "thirdTraintupleID",
 		},

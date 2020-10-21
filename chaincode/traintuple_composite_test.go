@@ -82,7 +82,7 @@ func TestTraintupleWithSingleDatasampleComposite(t *testing.T) {
 
 	inpTraintuple := inputCompositeTraintuple{
 		AlgoKey:        compositeAlgoHash,
-		DataSampleKeys: []string{trainDataSampleHash1},
+		DataSampleKeys: []string{trainDataSampleKey1},
 	}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -114,7 +114,7 @@ func TestTraintupleWithDuplicatedDatasamplesComposite(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding composite algo it should work: ", resp.Message)
 
 	inpTraintuple := inputCompositeTraintuple{
-		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2, trainDataSampleHash1},
+		DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2, trainDataSampleKey1},
 	}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -283,7 +283,7 @@ func TestTraintupleComposite(t *testing.T) {
 		Creator: worker,
 		Dataset: &outputTtDataset{
 			Key:            dataManagerKey,
-			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
+			DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
 			OpenerHash:     dataManagerOpenerHash,
 			Worker:         worker,
 			Metadata:       map[string]string{},
@@ -521,7 +521,7 @@ func TestCreateCompositeTraintupleInModels(t *testing.T) {
 				// create head traintuple
 				inpHeadTraintuple := inputCompositeTraintuple{}
 				// make the traintuple unique so that it has a unique hash
-				inpHeadTraintuple.DataSampleKeys = []string{trainDataSampleHash1}
+				inpHeadTraintuple.DataSampleKeys = []string{trainDataSampleKey1}
 				args = inpHeadTraintuple.createDefault()
 				resp = mockStub.MockInvoke("42", args)
 				headTraintuple := outputCompositeTraintuple{}
@@ -535,7 +535,7 @@ func TestCreateCompositeTraintupleInModels(t *testing.T) {
 				// create trunk traintuple
 				inpTrunkTraintuple := inputCompositeTraintuple{}
 				// make the traintuple unique so that it has a unique hash
-				inpTrunkTraintuple.DataSampleKeys = []string{trainDataSampleHash2}
+				inpTrunkTraintuple.DataSampleKeys = []string{trainDataSampleKey2}
 				args = inpTrunkTraintuple.createDefault()
 				resp = mockStub.MockInvoke("42", args)
 				trunkTraintuple := outputCompositeTraintuple{}
@@ -811,7 +811,9 @@ func TestHeadModelDifferentWorker(t *testing.T) {
 
 	inpData := inputDataSample{}
 	inpData.createDefault()
-	inpData.Hashes = []string{GetRandomHash()}
+	uuid, err := GetNewUUID()
+	assert.NoError(t, err)
+	inpData.Keys = []string{uuid}
 	inpData.DataManagerKeys = []string{outDM.Key}
 	outData, err := registerDataSample(db, assetToArgs(inpData))
 	assert.NoError(t, err)

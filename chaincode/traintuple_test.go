@@ -69,7 +69,7 @@ func TestTraintupleWithSingleDatasample(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
 	inpTraintuple := inputTraintuple{
-		DataSampleKeys: []string{trainDataSampleHash1},
+		DataSampleKeys: []string{trainDataSampleKey1},
 	}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -101,7 +101,7 @@ func TestTraintupleWithDuplicatedDatasamples(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
 	inpTraintuple := inputTraintuple{
-		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2, trainDataSampleHash1},
+		DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2, trainDataSampleKey1},
 	}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -283,7 +283,7 @@ func TestTraintuple(t *testing.T) {
 		Creator: worker,
 		Dataset: &outputTtDataset{
 			Key:            dataManagerKey,
-			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
+			DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
 			OpenerHash:     dataManagerOpenerHash,
 			Worker:         worker,
 			Metadata:       map[string]string{},

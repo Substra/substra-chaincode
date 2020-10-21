@@ -18,10 +18,12 @@ import (
 	"chaincode/errors"
 	"encoding/json"
 	"fmt"
-	"gopkg.in/go-playground/validator.v9"
 	"math/rand"
 
+	"gopkg.in/go-playground/validator.v9"
+
 	"github.com/golang/protobuf/proto"
+	"github.com/google/uuid"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric/protos/msp"
 )
@@ -120,6 +122,15 @@ func GetRandomHash() string {
 		b[i] = characterRunes[rand.Intn(len(characterRunes))]
 	}
 	return string(b)
+}
+
+// GetNewUUID generates a new UUID
+func GetNewUUID() (string, error) {
+	a, err := uuid.NewRandom()
+	if err != nil {
+		return "", err
+	}
+	return a.String(), nil
 }
 
 func initMapOutput(m map[string]string) map[string]string {

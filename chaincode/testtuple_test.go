@@ -60,7 +60,7 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 	// Add a testtuple that shoulb be certified since it's the same dataManager and
 	// dataSample than the objective but explicitly pass as arguments and in disorder
 	inpTesttuple := inputTesttuple{
-		DataSampleKeys: []string{testDataSampleHash2, testDataSampleHash1},
+		DataSampleKeys: []string{testDataSampleKey2, testDataSampleKey1},
 		DataManagerKey: dataManagerKey}
 	args := inpTesttuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
@@ -90,7 +90,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status)
 
 	// Fail to add an incomplete uncertified testtuple
-	inpTesttuple2 := inputTesttuple{DataSampleKeys: []string{trainDataSampleHash1}}
+	inpTesttuple2 := inputTesttuple{DataSampleKeys: []string{trainDataSampleKey1}}
 	args = inpTesttuple2.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status)
@@ -98,7 +98,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 
 	// Add an uncertified testtuple successfully
 	inpTesttuple3 := inputTesttuple{
-		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
+		DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
 		DataManagerKey: dataManagerKey}
 	args = inpTesttuple3.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -106,7 +106,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 
 	// Fail to add the same testtuple with a different order for dataSampleKeys
 	inpTesttuple4 := inputTesttuple{
-		DataSampleKeys: []string{trainDataSampleHash2, trainDataSampleHash1},
+		DataSampleKeys: []string{trainDataSampleKey2, trainDataSampleKey1},
 		DataManagerKey: dataManagerKey}
 	args = inpTesttuple4.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -151,7 +151,7 @@ func TestQueryTesttuple(t *testing.T) {
 			registerItem(t, *mockStub, "aggregatetuple")
 
 			// create testtuple
-			dataSampleKeys := []string{trainDataSampleHash1, trainDataSampleHash2}
+			dataSampleKeys := []string{trainDataSampleKey1, trainDataSampleKey2}
 			inpTesttuple := inputTesttuple{
 				TraintupleKey:  tt.traintupleKey,
 				DataManagerKey: dataManagerKey,
@@ -247,7 +247,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 
 			// Create a new testtuple *after* the traintuple has been set to failed/succeeded
 			inp.DataManagerKey = dataManagerKey
-			inp.DataSampleKeys = []string{trainDataSampleHash1}
+			inp.DataSampleKeys = []string{trainDataSampleKey1}
 			args = inp.createDefault()
 			resp = mockStub.MockInvoke("42", args)
 

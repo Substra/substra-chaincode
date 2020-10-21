@@ -81,14 +81,14 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	args := inpDataManager.createDefault()
 	mockStub.MockInvoke("42", args)
 	inpDataSample := inputDataSample{
-		Hashes:          []string{testDataSampleHash1},
+		Keys:            []string{testDataSampleKey1},
 		DataManagerKeys: []string{dataManagerKey},
 		TestOnly:        "true",
 	}
 	args = inpDataSample.createDefault()
 	mockStub.MockInvoke("42", args)
 	inpDataSample = inputDataSample{
-		Hashes:          []string{testDataSampleHash2},
+		Keys:            []string{testDataSampleKey2},
 		DataManagerKeys: []string{dataManagerKey},
 		TestOnly:        "true",
 	}
@@ -99,8 +99,8 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	// Fail to insert the objective
 	inpObjective := inputObjective{
 		TestDataset: inputDataset{
-			DataManagerKey: testDataSampleHash1,
-			DataSampleKeys: []string{testDataSampleHash2}}}
+			DataManagerKey: testDataSampleKey1,
+			DataSampleKeys: []string{testDataSampleKey2}}}
 	args = inpObjective.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status, "status should indicate an error since the dataManager key is a dataSample key")
@@ -151,7 +151,7 @@ func TestObjective(t *testing.T) {
 		Owner: worker,
 		TestDataset: &Dataset{
 			DataManagerKey: dataManagerKey,
-			DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+			DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 			Metadata:       map[string]string{},
 		},
 		Name: inpObjective.Name,

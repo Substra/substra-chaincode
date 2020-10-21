@@ -21,7 +21,7 @@ type inputCompositeTraintuple struct {
 	InTrunkModelKey          string            `validate:"required_with=InHeadModelKey,omitempty,len=64,hexadecimal" json:"in_trunk_model_key"`
 	OutTrunkModelPermissions inputPermissions  `validate:"required" json:"out_trunk_model_permissions"`
 	DataManagerKey           string            `validate:"required,len=36" json:"data_manager_key"`
-	DataSampleKeys           []string          `validate:"required,unique,gt=0,dive,len=64,hexadecimal" json:"data_sample_keys"`
+	DataSampleKeys           []string          `validate:"required,unique,gt=0,dive,len=36" json:"data_sample_keys"`
 	ComputePlanID            string            `validate:"omitempty" json:"compute_plan_id"`
 	Rank                     string            `validate:"omitempty" json:"rank"`
 	Tag                      string            `validate:"omitempty,lte=64" json:"tag"`

@@ -53,11 +53,11 @@ func (dataManager *DataManager) Set(db *LedgerDB, inp inputDataManager) (string,
 }
 
 // setDataSample is a method checking the validity of inputDataSample to be registered in the ledger
-// and returning corresponding dataSample hashes, associated dataManagers, testOnly and errors
-func setDataSample(db *LedgerDB, inp inputDataSample) (dataSampleHashes []string, dataSample DataSample, err error) {
-	dataSampleHashes = inp.Hashes
+// and returning corresponding dataSample keys, associated dataManagers, testOnly and errors
+func setDataSample(db *LedgerDB, inp inputDataSample) (dataSampleKeys []string, dataSample DataSample, err error) {
+	dataSampleKeys = inp.Keys
 	// check dataSample is not already in the ledger
-	if existingKeys := checkDataSamplesExist(db, dataSampleHashes); existingKeys != nil {
+	if existingKeys := checkDataSamplesExist(db, dataSampleKeys); existingKeys != nil {
 		err = errors.Conflict("data samples with keys %s already exist", existingKeys).WithKeys(existingKeys)
 		return
 	}
@@ -89,13 +89,13 @@ func setDataSample(db *LedgerDB, inp inputDataSample) (dataSampleHashes []string
 
 // validateUpdateDataSample is a method checking the validity of elements sent to update
 // one or more dataSamplef
-func validateUpdateDataSample(db *LedgerDB, inp inputUpdateDataSample) (dataSampleHashes []string, dataManagerKeys []string, err error) {
+func validateUpdateDataSample(db *LedgerDB, inp inputUpdateDataSample) (dataSampleKeys []string, dataManagerKeys []string, err error) {
 	// TODO return full dataSample
 	// check dataManagers exist and are owned by the transaction requester
 	if err = checkDataManagerOwner(db, inp.DataManagerKeys); err != nil {
 		return
 	}
-	return inp.Hashes, inp.DataManagerKeys, nil
+	return inp.Keys, inp.DataManagerKeys, nil
 }
 
 // -----------------------------------------------------------------
@@ -149,13 +149,13 @@ func registerDataSample(db *LedgerDB, args []string) (dataSampleKeys map[string]
 		return
 	}
 	// check validity of input args
-	dataSampleHashes, dataSample, err := setDataSample(db, inp)
+	keys, dataSample, err := setDataSample(db, inp)
 	if err != nil {
 		return
 	}
 
 	// store dataSample in the ledger
-	for _, dataSampleHash := range dataSampleHashes {
+	for _, dataSampleHash := range keys {
 		if err = db.Add(dataSampleHash, dataSample); err != nil {
 			return
 		}
@@ -171,7 +171,7 @@ func registerDataSample(db *LedgerDB, args []string) (dataSampleKeys map[string]
 		}
 	}
 	// return added dataSample keys
-	dataSampleKeys = map[string][]string{"keys": dataSampleHashes}
+	dataSampleKeys = map[string][]string{"keys": keys}
 	return
 }
 
@@ -183,17 +183,17 @@ func updateDataSample(db *LedgerDB, args []string) (resp outputKey, err error) {
 		return
 	}
 	// check validity of input args
-	dataSampleHashes, dataManagerKeys, err := validateUpdateDataSample(db, inp)
+	dataSampleKeys, dataManagerKeys, err := validateUpdateDataSample(db, inp)
 	if err != nil {
 		return
 	}
 	// store dataSample in the ledger
-	var dataSampleKeys string
+	var keysJSON string
 	suffix := ", "
-	for _, dataSampleHash := range dataSampleHashes {
-		dataSampleKeys = dataSampleKeys + "\"" + dataSampleHash + "\"" + suffix
+	for _, dataSampleKey := range dataSampleKeys {
+		keysJSON = keysJSON + "\"" + dataSampleKey + "\"" + suffix
 		var dataSample DataSample
-		dataSample, err = db.GetDataSample(dataSampleHash)
+		dataSample, err = db.GetDataSample(dataSampleKey)
 		if err != nil {
 			return
 		}
@@ -205,24 +205,24 @@ func updateDataSample(db *LedgerDB, args []string) (resp outputKey, err error) {
 				// check data manager is not already associated with this data
 				dataSample.DataManagerKeys = append(dataSample.DataManagerKeys, dataManagerKey)
 				// create composite keys to find all dataSample associated with a dataManager and both test and train dataSample
-				if err = db.CreateIndex("dataSample~dataManager~key", []string{"dataSample", dataManagerKey, dataSampleHash}); err != nil {
+				if err = db.CreateIndex("dataSample~dataManager~key", []string{"dataSample", dataManagerKey, dataSampleKey}); err != nil {
 					return
 				}
 				// create composite keys to find all dataSample associated with a dataManager and only test or train dataSample
-				if err = db.CreateIndex("dataSample~dataManager~testOnly~key", []string{"dataSample", dataManagerKey, strconv.FormatBool(dataSample.TestOnly), dataSampleHash}); err != nil {
+				if err = db.CreateIndex("dataSample~dataManager~testOnly~key", []string{"dataSample", dataManagerKey, strconv.FormatBool(dataSample.TestOnly), dataSampleKey}); err != nil {
 					return
 				}
 			}
 		}
-		if err = db.Put(dataSampleHash, dataSample); err != nil {
+		if err = db.Put(dataSampleKey, dataSample); err != nil {
 			return
 		}
 
 	}
 	// return updated dataSample keys
 	// TODO return a json struct
-	dataSampleKeys = "{\"keys\": [" + strings.TrimSuffix(dataSampleKeys, suffix) + "]}"
-	return outputKey{Key: dataSampleKeys}, nil
+	keysJSON = "{\"keys\": [" + strings.TrimSuffix(keysJSON, suffix) + "]}"
+	return outputKey{Key: keysJSON}, nil
 }
 
 // updateDataManager associates a objectiveKey to an existing dataManager
