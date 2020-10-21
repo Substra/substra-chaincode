@@ -155,17 +155,17 @@ func registerDataSample(db *LedgerDB, args []string) (dataSampleKeys map[string]
 	}
 
 	// store dataSample in the ledger
-	for _, dataSampleHash := range keys {
-		if err = db.Add(dataSampleHash, dataSample); err != nil {
+	for _, dataSampleKey := range keys {
+		if err = db.Add(dataSampleKey, dataSample); err != nil {
 			return
 		}
 		for _, dataManagerKey := range dataSample.DataManagerKeys {
 			// create composite keys to find all dataSample associated with a dataManager and both test and train dataSample
-			if err = db.CreateIndex("dataSample~dataManager~key", []string{"dataSample", dataManagerKey, dataSampleHash}); err != nil {
+			if err = db.CreateIndex("dataSample~dataManager~key", []string{"dataSample", dataManagerKey, dataSampleKey}); err != nil {
 				return
 			}
 			// create composite keys to find all dataSample associated with a dataManager and only test or train dataSample
-			if err = db.CreateIndex("dataSample~dataManager~testOnly~key", []string{"dataSample", dataManagerKey, strconv.FormatBool(dataSample.TestOnly), dataSampleHash}); err != nil {
+			if err = db.CreateIndex("dataSample~dataManager~testOnly~key", []string{"dataSample", dataManagerKey, strconv.FormatBool(dataSample.TestOnly), dataSampleKey}); err != nil {
 				return
 			}
 		}
