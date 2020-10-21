@@ -275,7 +275,8 @@ func TestTraintupleComposite(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried composite traintuple")
 	expected := outputCompositeTraintuple{
 		Key: compositeTraintupleKey,
-		Algo: &HashDressName{
+		Algo: &HashDressNameKey{
+			Key:            compositeAlgoKey,
 			Hash:           compositeAlgoHash,
 			Name:           compositeAlgoName,
 			StorageAddress: compositeAlgoStorageAddress,

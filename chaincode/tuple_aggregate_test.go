@@ -244,7 +244,8 @@ func TestTraintupleAggregate(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried aggregate tuple")
 	expected := outputAggregatetuple{
 		Key: aggregatetupleKey,
-		Algo: &HashDressName{
+		Algo: &HashDressNameKey{
+			Key:            aggregateAlgoKey,
 			Hash:           aggregateAlgoHash,
 			Name:           aggregateAlgoName,
 			StorageAddress: aggregateAlgoStorageAddress,

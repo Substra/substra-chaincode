@@ -275,7 +275,8 @@ func TestTraintuple(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried traintuple")
 	expected := outputTraintuple{
 		Key: traintupleKey,
-		Algo: &HashDressName{
+		Algo: &HashDressNameKey{
+			Key:            algoKey,
 			Hash:           algoHash,
 			Name:           algoName,
 			StorageAddress: algoStorageAddress,

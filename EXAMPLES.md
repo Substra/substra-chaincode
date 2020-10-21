@@ -385,6 +385,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"train
  {
   "algo": {
    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
   },
@@ -435,6 +436,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"b0289ab83
 {
  "algo": {
   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
   "name": "hog + svm",
   "storage_address": "https://toto/algo/222/algo"
  },
@@ -489,6 +491,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"b0289ab
 {
  "algo": {
   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
   "name": "hog + svm",
   "storage_address": "https://toto/algo/222/algo"
  },
@@ -541,6 +544,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"b0289ab
 {
  "algo": {
   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
   "name": "hog + svm",
   "storage_address": "https://toto/algo/222/algo"
  },
@@ -667,6 +671,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
  {
   "algo": {
    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
   },
@@ -702,6 +707,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
  {
   "algo": {
    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
   },
@@ -754,6 +760,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"f908806c43
 {
  "algo": {
   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
   "name": "hog + svm",
   "storage_address": "https://toto/algo/222/algo"
  },
@@ -807,6 +814,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"f908806c
 {
  "algo": {
   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
   "name": "hog + svm",
   "storage_address": "https://toto/algo/222/algo"
  },
@@ -858,6 +866,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"f908806c4
 {
  "algo": {
   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
   "name": "hog + svm",
   "storage_address": "https://toto/algo/222/algo"
  },
@@ -902,6 +911,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
  {
   "algo": {
    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
   },
@@ -937,6 +947,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
  {
   "algo": {
    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
   },
@@ -972,6 +983,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
  {
   "algo": {
    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
   },
@@ -1026,6 +1038,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
   {
    "algo": {
     "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
     "name": "hog + svm",
     "storage_address": "https://toto/algo/222/algo"
    },
@@ -1062,6 +1075,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
  "testtuple": {
   "algo": {
    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
   },
@@ -1097,6 +1111,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
  "traintuple": {
   "algo": {
    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
   },
@@ -1144,6 +1159,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
   "traintuple": {
    "algo": {
     "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
     "name": "hog + svm",
     "storage_address": "https://toto/algo/222/algo"
    },
@@ -1185,6 +1201,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
   "traintuple": {
    "algo": {
     "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
     "name": "hog + svm",
     "storage_address": "https://toto/algo/222/algo"
    },

@@ -18,7 +18,7 @@ import "chaincode/errors"
 
 type outputAggregatetuple struct {
 	Key           string            `json:"key"`
-	Algo          *HashDressName    `json:"algo"`
+	Algo          *HashDressNameKey `json:"algo"`
 	Creator       string            `json:"creator"`
 	ComputePlanID string            `json:"compute_plan_id"`
 	Log           string            `json:"log"`
@@ -56,7 +56,8 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 		err = errors.Internal("could not retrieve aggregate algo with key %s - %s", traintuple.AlgoKey, err.Error())
 		return
 	}
-	outputAggregatetuple.Algo = &HashDressName{
+	outputAggregatetuple.Algo = &HashDressNameKey{
+		Key:            algo.Key,
 		Name:           algo.Name,
 		Hash:           algo.Hash,
 		StorageAddress: algo.StorageAddress}
