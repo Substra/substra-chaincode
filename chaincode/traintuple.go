@@ -131,7 +131,11 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 		}
 		computePlan := ComputePlan{}
 		computePlan.AddTuple(TraintupleType, traintupleKey, traintuple.Status)
-		traintuple.ComputePlanID, err = computePlan.Create(db)
+		traintuple.ComputePlanID, err = GetNewUUID()
+		if err != nil {
+			return err
+		}
+		err = computePlan.Create(db, traintuple.ComputePlanID)
 		if err != nil {
 			return err
 		}

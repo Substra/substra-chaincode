@@ -141,7 +141,11 @@ func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetu
 		}
 		computePlan := ComputePlan{}
 		computePlan.AddTuple(AggregatetupleType, traintupleKey, tuple.Status)
-		tuple.ComputePlanID, err = computePlan.Create(db)
+		tuple.ComputePlanID, err = GetNewUUID()
+		if err != nil {
+			return err
+		}
+		err = computePlan.Create(db, tuple.ComputePlanID)
 		if err != nil {
 			return err
 		}

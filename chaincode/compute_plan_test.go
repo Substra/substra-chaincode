@@ -23,14 +23,17 @@ import (
 
 var (
 	defaultComputePlan = inputComputePlan{
+		ComputePlanID: computePlanID,
 		Traintuples: []inputComputePlanTraintuple{
 			inputComputePlanTraintuple{
+				Key:            computePlanTraintupleKey1,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
 				AlgoKey:        algoKey,
 				ID:             traintupleID1,
 			},
 			inputComputePlanTraintuple{
+				Key:            computePlanTraintupleKey2,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey2},
 				ID:             traintupleID2,
@@ -40,6 +43,7 @@ var (
 		},
 		Testtuples: []inputComputePlanTesttuple{
 			inputComputePlanTesttuple{
+				Key:            computePlanTesttupleKey1,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 				ObjectiveKey:   objectiveKey,
@@ -78,20 +82,24 @@ var (
 	//
 	//
 	modelCompositionComputePlan = inputComputePlan{
+		ComputePlanID: computePlanID,
 		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
 			{
+				Key:            computePlanCompositeTraintupleKey1,
 				ID:             "step_1_composite_A",
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
 				AlgoKey:        compositeAlgoKey,
 			},
 			{
+				Key:            computePlanCompositeTraintupleKey2,
 				ID:             "step_1_composite_B",
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey2},
 				AlgoKey:        compositeAlgoKey,
 			},
 			{
+				Key:            computePlanCompositeTraintupleKey3,
 				ID:             "step_3_composite_A",
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
@@ -100,6 +108,7 @@ var (
 				InTrunkModelID: "step_2_aggregate",
 			},
 			{
+				Key:            computePlanCompositeTraintupleKey4,
 				ID:             "step_3_composite_B",
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey2},
@@ -110,6 +119,7 @@ var (
 		},
 		Aggregatetuples: []inputComputePlanAggregatetuple{
 			{
+				Key:     computePlanAggregatetupleKey1,
 				ID:      "step_2_aggregate",
 				AlgoKey: aggregateAlgoKey,
 				InModelsIDs: []string{
@@ -121,30 +131,35 @@ var (
 		},
 		Testtuples: []inputComputePlanTesttuple{
 			inputComputePlanTesttuple{
+				Key:            computePlanTesttupleKey1,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_1_composite_A",
 			},
 			inputComputePlanTesttuple{
+				Key:            computePlanTesttupleKey2,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_1_composite_B",
 			},
 			inputComputePlanTesttuple{
+				Key:            computePlanTesttupleKey3,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_2_aggregate",
 			},
 			inputComputePlanTesttuple{
+				Key:            computePlanTesttupleKey4,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_3_composite_A",
 			},
 			inputComputePlanTesttuple{
+				Key:            computePlanTesttupleKey5,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 				ObjectiveKey:   objectiveKey,
@@ -254,14 +269,17 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	IDs := []string{"compositeTraintuple1", "compositeTraintuple2", "aggregatetuple1", "aggregatetuple2"}
 
 	inCP := inputComputePlan{
+		ComputePlanID: computePlanID,
 		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
 			{
+				Key:            computePlanCompositeTraintupleKey1,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
 				AlgoKey:        compositeAlgoKey,
 				ID:             IDs[0],
 			},
 			{
+				Key:            computePlanCompositeTraintupleKey2,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
 				AlgoKey:        compositeAlgoKey,
@@ -272,11 +290,13 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 		},
 		Aggregatetuples: []inputComputePlanAggregatetuple{
 			{
+				Key:     computePlanAggregatetupleKey1,
 				AlgoKey: aggregateAlgoKey,
 				ID:      IDs[2],
 				Worker:  worker,
 			},
 			{
+				Key:         computePlanAggregatetupleKey2,
 				AlgoKey:     aggregateAlgoKey,
 				ID:          IDs[3],
 				InModelsIDs: []string{IDs[2]},
@@ -430,14 +450,17 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 	db := NewLedgerDB(mockStub)
 
 	inCP := inputComputePlan{
+		ComputePlanID: computePlanID,
 		Traintuples: []inputComputePlanTraintuple{
 			inputComputePlanTraintuple{
+				Key:            computePlanTraintupleKey1,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
 				AlgoKey:        algoKey,
 				ID:             traintupleID1,
 			},
 			inputComputePlanTraintuple{
+				Key:            computePlanTraintupleKey2,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey2},
 				ID:             traintupleID2,
@@ -591,7 +614,12 @@ func TestCreateTagedEmptyComputePlan(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlan(db, assetToArgs(inputNewComputePlan{Tag: tag}))
+	inp := inputNewComputePlan{
+		inputComputePlan: inputComputePlan{
+			ComputePlanID: computePlanID,
+		},
+		Tag: tag}
+	out, err := createComputePlan(db, assetToArgs(inp))
 	assert.NoError(t, err)
 	assert.Equal(t, tag, out.Tag)
 }
@@ -655,11 +683,13 @@ func TestUpdateComputePlan(t *testing.T) {
 	registerItem(t, *mockStub, "aggregateAlgo")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, inputComputePlan{}, tag, map[string]string{}, false)
+	out, err := createComputePlanInternal(db, inputComputePlan{ComputePlanID: computePlanID}, tag, map[string]string{}, false)
 	assert.NoError(t, err)
 	assert.Equal(t, tag, out.Tag)
 
-	out, err = updateComputePlanInternal(db, out.ComputePlanID, defaultComputePlan)
+	inp := defaultComputePlan
+	inp.ComputePlanID = out.ComputePlanID
+	out, err = updateComputePlanInternal(db, inp)
 	assert.NoError(t, err)
 	validateDefaultComputePlan(t, out)
 	for _, train := range defaultComputePlan.Traintuples {
@@ -668,8 +698,10 @@ func TestUpdateComputePlan(t *testing.T) {
 
 	NewID := "Update"
 	up := inputComputePlan{
+		ComputePlanID: out.ComputePlanID,
 		Traintuples: []inputComputePlanTraintuple{
 			{
+				Key:            computePlanTraintupleKey3,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
 				AlgoKey:        algoKey,
@@ -678,7 +710,7 @@ func TestUpdateComputePlan(t *testing.T) {
 			},
 		},
 	}
-	out, err = updateComputePlanInternal(db, out.ComputePlanID, up)
+	out, err = updateComputePlanInternal(db, up)
 	assert.NoError(t, err)
 	assert.Contains(t, out.IDToKey, NewID)
 	assert.Len(
@@ -741,13 +773,15 @@ func TestCreateSameComputePlanTwice(t *testing.T) {
 	registerItem(t, *mockStub, "aggregateAlgo")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, inputComputePlan{}, tag, map[string]string{}, false)
+	out, err := createComputePlanInternal(db, inputComputePlan{ComputePlanID: computePlanID}, tag, map[string]string{}, false)
 	assert.NoError(t, err)
 	assert.Equal(t, tag, out.Tag)
 
 	up := inputComputePlan{
+		ComputePlanID: out.ComputePlanID,
 		Traintuples: []inputComputePlanTraintuple{
 			{
+				Key:            computePlanTraintupleKey3,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
 				AlgoKey:        algoKey,
@@ -756,6 +790,7 @@ func TestCreateSameComputePlanTwice(t *testing.T) {
 		},
 		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
 			{
+				Key:            computePlanCompositeTraintupleKey1,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{trainDataSampleKey1},
 				AlgoKey:        compositeAlgoKey,
@@ -764,6 +799,7 @@ func TestCreateSameComputePlanTwice(t *testing.T) {
 		},
 		Aggregatetuples: []inputComputePlanAggregatetuple{
 			{
+				Key:     computePlanAggregatetupleKey1,
 				AlgoKey: aggregateAlgoKey,
 				ID:      "Aggregatetuple",
 				Worker:  worker,
@@ -771,6 +807,7 @@ func TestCreateSameComputePlanTwice(t *testing.T) {
 		},
 		Testtuples: []inputComputePlanTesttuple{
 			{
+				Key:            computePlanTesttupleKey2,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleKey1},
 				ObjectiveKey:   objectiveKey,
@@ -778,14 +815,16 @@ func TestCreateSameComputePlanTwice(t *testing.T) {
 			},
 		},
 	}
-	out, err = updateComputePlanInternal(db, out.ComputePlanID, up)
+	out, err = updateComputePlanInternal(db, up)
 	assert.NoError(t, err)
 
 	// Upload the same tuples inside another compute plan
-	out, err = createComputePlanInternal(db, inputComputePlan{}, tag, map[string]string{}, false)
+	out, err = createComputePlanInternal(db, inputComputePlan{ComputePlanID: computePlanID2}, tag, map[string]string{}, false)
 	assert.NoError(t, err)
 	assert.Equal(t, tag, out.Tag)
 
-	out, err = updateComputePlanInternal(db, out.ComputePlanID, defaultComputePlan)
+	inp := defaultComputePlan
+	inp.ComputePlanID = out.ComputePlanID
+	out, err = updateComputePlanInternal(db, inp)
 	assert.NoError(t, err)
 }

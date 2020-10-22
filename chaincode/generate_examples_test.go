@@ -248,7 +248,9 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("query", "queryDataset", inputKey{newDataManagerKey})
 
 	fmt.Fprintln(&out, "#### ------------ Create a ComputePlan ------------")
-	inputCP := inputNewComputePlan{}
+	inputCP := inputNewComputePlan{inputComputePlan: inputComputePlan{
+		ComputePlanID: computePlanID,
+	}}
 	inputCP.Tag = tag
 	inputCP.inputComputePlan = defaultComputePlan
 	resp = callAssertAndPrint("invoke", "createComputePlan", inputCP)
@@ -256,10 +258,11 @@ func TestPipeline(t *testing.T) {
 	err = json.Unmarshal(resp.Payload, &outCp)
 
 	fmt.Fprintln(&out, "#### ------------ Update a ComputePlan ------------")
-	upCP := inputUpdateComputePlan{}
+	upCP := inputComputePlan{}
 	upCP.ComputePlanID = outCp.ComputePlanID
 	upCP.Traintuples = []inputComputePlanTraintuple{
 		{
+			Key:            computePlanTraintupleKey3,
 			DataManagerKey: dataManagerKey,
 			DataSampleKeys: []string{trainDataSampleKey1},
 			AlgoKey:        algoKey,
@@ -269,6 +272,7 @@ func TestPipeline(t *testing.T) {
 	}
 	upCP.Testtuples = []inputComputePlanTesttuple{
 		{
+			Key:            computePlanTesttupleKey2,
 			DataManagerKey: dataManagerKey,
 			DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 			ObjectiveKey:   objectiveKey,

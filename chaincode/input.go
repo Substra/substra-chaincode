@@ -163,6 +163,7 @@ type inputQueryFilter struct {
 
 // inputConputePlan represent a coherent set of tuples uploaded together.
 type inputComputePlan struct {
+	ComputePlanID        string                                `validate:"required,len=36" json:"compute_plan_id"`
 	Traintuples          []inputComputePlanTraintuple          `validate:"omitempty" json:"traintuples"`
 	Aggregatetuples      []inputComputePlanAggregatetuple      `validate:"omitempty" json:"aggregatetuples"`
 	CompositeTraintuples []inputComputePlanCompositeTraintuple `validate:"omitempty" json:"composite_traintuples"`
@@ -178,14 +179,8 @@ type inputNewComputePlan struct {
 	inputComputePlan
 }
 
-// inputUpdateComputePlan represent the set of tuples to be added to the compute
-// plan matching the ID
-type inputUpdateComputePlan struct {
-	ComputePlanID string `validate:"required,required,len=36" json:"compute_plan_id"`
-	inputComputePlan
-}
-
 type inputComputePlanTraintuple struct {
+	Key            string            `validate:"required,len=36" json:"key"`
 	DataManagerKey string            `validate:"required,len=36" json:"data_manager_key"`
 	DataSampleKeys []string          `validate:"required,dive,len=36" json:"data_sample_keys"`
 	AlgoKey        string            `validate:"required,len=36" json:"algo_key"`
@@ -196,6 +191,7 @@ type inputComputePlanTraintuple struct {
 }
 
 type inputComputePlanAggregatetuple struct {
+	Key         string            `validate:"required,len=36" json:"key"`
 	AlgoKey     string            `validate:"required,len=36" json:"algo_key"`
 	ID          string            `validate:"required,lte=64" json:"id"`
 	InModelsIDs []string          `validate:"omitempty,dive,lte=64" json:"in_models_ids"`
@@ -205,6 +201,7 @@ type inputComputePlanAggregatetuple struct {
 }
 
 type inputComputePlanCompositeTraintuple struct {
+	Key                      string            `validate:"required,len=36" json:"key"`
 	DataManagerKey           string            `validate:"required,len=36" json:"data_manager_key"`
 	DataSampleKeys           []string          `validate:"required,dive,len=36" json:"data_sample_keys"`
 	AlgoKey                  string            `validate:"required,len=36" json:"algo_key"`
@@ -217,6 +214,7 @@ type inputComputePlanCompositeTraintuple struct {
 }
 
 type inputComputePlanTesttuple struct {
+	Key            string            `validate:"required,len=36" json:"key"`
 	DataManagerKey string            `validate:"omitempty,len=36" json:"data_manager_key"`
 	DataSampleKeys []string          `validate:"omitempty,dive,len=36" json:"data_sample_keys"`
 	ObjectiveKey   string            `validate:"required,len=36" json:"objective_key"`
