@@ -447,7 +447,7 @@ func TestInsertTraintupleTwiceComposite(t *testing.T) {
 	tuple, err := db.GetCompositeTraintuple(_key.Key)
 	assert.NoError(t, err)
 	// create a second composite traintuple in the same ComputePlan
-	inpTraintuple.Key = RandomUUID()
+	inpTraintuple.Key = traintupleKey2
 	inpTraintuple.Rank = "1"
 	inpTraintuple.ComputePlanID = tuple.ComputePlanID
 	inpTraintuple.InHeadModelKey = _key.Key

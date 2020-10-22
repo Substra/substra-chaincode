@@ -128,7 +128,7 @@ func TestPipeline(t *testing.T) {
 	trainWorker := traintuple.Dataset.Worker
 
 	fmt.Fprintln(&out, "#### ------------ Add Traintuple with inModel from previous traintuple ------------")
-	inpTraintuple = inputTraintuple{Key: RandomUUID()}
+	inpTraintuple = inputTraintuple{Key: traintupleKey2}
 	inpTraintuple.InModels = []string{traintupleKey}
 	inpTraintuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTraintuple", inpTraintuple)
@@ -166,7 +166,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "createTesttuple", inpTesttuple)
 
 	fmt.Fprintln(&out, "#### ------------ Add Certified Testtuple ------------")
-	inpTesttuple = inputTesttuple{Key: RandomUUID()}
+	inpTesttuple = inputTesttuple{Key: testtupleKey2}
 	args = inpTesttuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTesttuple", inpTesttuple)
 	// Get testtuple key from Payload
@@ -188,7 +188,7 @@ func TestPipeline(t *testing.T) {
 	testWorker := testtuple.Dataset.Worker
 
 	fmt.Fprintln(&out, "#### ------------ Add Testtuple with not done traintuple ------------")
-	inpTesttuple = inputTesttuple{Key: RandomUUID()}
+	inpTesttuple = inputTesttuple{Key: testtupleKey3}
 	inpTesttuple.TraintupleKey = todoTraintupleKey
 	inpTesttuple.createDefault()
 	callAssertAndPrint("invoke", "createTesttuple", inpTesttuple)

@@ -105,10 +105,8 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 
-	// Fail to add the same testtuple with a different order for dataSampleKeys
-	inpTesttuple4 := inputTesttuple{
-		DataSampleKeys: []string{trainDataSampleKey2, trainDataSampleKey1},
-		DataManagerKey: dataManagerKey}
+	// Fail to add the same testtuple with the same key
+	inpTesttuple4 := inputTesttuple{}
 	args = inpTesttuple4.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 409, resp.Status)
