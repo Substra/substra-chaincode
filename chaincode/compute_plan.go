@@ -17,16 +17,14 @@ package main
 import (
 	"chaincode/errors"
 	"strconv"
-
-	"github.com/google/uuid"
 )
 
 func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, IDToTrainTask map[string]TrainTask) error {
-	key, err := uuid.NewRandom()
+	key, err := GetNewUUID()
 	if err != nil {
 		return nil
 	}
-	inpTraintuple.Key = key.String()
+	inpTraintuple.Key = key
 	inpTraintuple.DataManagerKey = inpCP.DataManagerKey
 	inpTraintuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpTraintuple.AlgoKey = inpCP.AlgoKey
@@ -47,11 +45,11 @@ func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, IDT
 
 }
 func (inpAggregatetuple *inputAggregatetuple) Fill(inpCP inputComputePlanAggregatetuple, IDToTrainTask map[string]TrainTask) error {
-	key, err := uuid.NewRandom()
+	key, err := GetNewUUID()
 	if err != nil {
 		return nil
 	}
-	inpAggregatetuple.Key = key.String()
+	inpAggregatetuple.Key = key
 	inpAggregatetuple.AlgoKey = inpCP.AlgoKey
 	inpAggregatetuple.Tag = inpCP.Tag
 	inpAggregatetuple.Metadata = inpCP.Metadata
@@ -71,11 +69,11 @@ func (inpAggregatetuple *inputAggregatetuple) Fill(inpCP inputComputePlanAggrega
 
 }
 func (inpCompositeTraintuple *inputCompositeTraintuple) Fill(inpCP inputComputePlanCompositeTraintuple, IDToTrainTask map[string]TrainTask) error {
-	key, err := uuid.NewRandom()
+	key, err := GetNewUUID()
 	if err != nil {
 		return nil
 	}
-	inpCompositeTraintuple.Key = key.String()
+	inpCompositeTraintuple.Key = key
 	inpCompositeTraintuple.DataManagerKey = inpCP.DataManagerKey
 	inpCompositeTraintuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpCompositeTraintuple.AlgoKey = inpCP.AlgoKey
@@ -109,11 +107,11 @@ func (inpTesttuple *inputTesttuple) Fill(inpCP inputComputePlanTesttuple, IDToTr
 	if !ok {
 		return errors.BadRequest("traintuple ID %s not found", inpCP.TraintupleID)
 	}
-	key, err := uuid.NewRandom()
+	key, err := GetNewUUID()
 	if err != nil {
 		return nil
 	}
-	inpTesttuple.Key = key.String()
+	inpTesttuple.Key = key
 	inpTesttuple.TraintupleKey = trainTask.Key
 	inpTesttuple.DataManagerKey = inpCP.DataManagerKey
 	inpTesttuple.DataSampleKeys = inpCP.DataSampleKeys
