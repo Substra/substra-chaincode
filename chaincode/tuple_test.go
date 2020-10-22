@@ -28,28 +28,29 @@ func TestRecursiveLogFailed(t *testing.T) {
 	registerItem(t, *mockStub, "traintuple")
 	db := NewLedgerDB(mockStub)
 
-	childtraintuple := inputTraintuple{}
+	childtraintuple := inputTraintuple{Key: RandomUUID()}
 	childtraintuple.createDefault()
 	childtraintuple.InModels = []string{traintupleKey}
 	childResp, err := createTraintuple(db, assetToArgs(childtraintuple))
 	assert.NoError(t, err)
 
-	grandChildtraintuple := inputTraintuple{}
+	grandChildtraintuple := inputTraintuple{Key: RandomUUID()}
 	grandChildtraintuple.createDefault()
 	grandChildtraintuple.InModels = []string{childResp.Key}
 	grandChildresp, err := createTraintuple(db, assetToArgs(grandChildtraintuple))
 	assert.NoError(t, err)
 
 	grandChildtesttuple := inputTesttuple{
+		Key:           RandomUUID(),
 		TraintupleKey: traintupleKey,
 		ObjectiveKey:  objectiveKey,
 	}
 	testResp, err := createTesttuple(db, assetToArgs(grandChildtesttuple))
 	assert.NoError(t, err)
 
-	_, err = logStartTrain(db, assetToArgs(inputKeyOld{Key: traintupleKey}))
+	_, err = logStartTrain(db, assetToArgs(inputKey{Key: traintupleKey}))
 	assert.NoError(t, err)
-	_, err = logFailTrain(db, assetToArgs(inputKeyOld{Key: traintupleKey}))
+	_, err = logFailTrain(db, assetToArgs(inputKey{Key: traintupleKey}))
 	assert.NoError(t, err)
 
 	train2, err := db.GetTraintuple(grandChildresp.Key)
@@ -204,7 +205,7 @@ func TestQueryHeadModelPermissions(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	_, err := logStartCompositeTrain(db, assetToArgs(inputKeyOld{Key: compositeTraintupleKey}))
+	_, err := logStartCompositeTrain(db, assetToArgs(inputKey{Key: compositeTraintupleKey}))
 	assert.NoError(t, err)
 	success := inputLogSuccessCompositeTrain{}
 	success.Key = compositeTraintupleKey

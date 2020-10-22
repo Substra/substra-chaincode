@@ -35,6 +35,7 @@ func (tuple *Aggregatetuple) SetFromInput(db *LedgerDB, inp inputAggregatetuple)
 	if err != nil {
 		return err
 	}
+	tuple.Key = inp.Key
 	tuple.AssetType = AggregatetupleType
 	tuple.Creator = creator
 	tuple.Metadata = inp.Metadata
@@ -112,13 +113,6 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 	tuple.InModelKeys = inModelKeys
 	tuple.Permissions = permissions
 	return nil
-}
-
-// GetKey return the key of the aggregate tuple depending on its key parameters.
-func (tuple *Aggregatetuple) GetKey() string {
-	hashKeys := []string{tuple.Creator, tuple.AlgoKey, tuple.ComputePlanID}
-	hashKeys = append(hashKeys, tuple.InModelKeys...)
-	return HashForKey("aggregate-traintuple", hashKeys...)
 }
 
 // AddToComputePlan set the aggregate tuple's parameters that determines if it's part of on ComputePlan and how.
@@ -250,36 +244,35 @@ func createAggregatetupleInternal(db *LedgerDB, inp inputAggregatetuple, checkCo
 		return "", err
 	}
 
-	aggregatetupleKey := aggregatetuple.GetKey()
 	// Test if the key (ergo the aggregatetuple) already exists
-	tupleExists, err := db.KeyExists(aggregatetupleKey)
+	tupleExists, err := db.KeyExists(inp.Key)
 	if err != nil {
 		return "", err
 	}
 	if tupleExists {
-		return "", errors.Conflict("aggregatetuple already exists").WithKey(aggregatetupleKey)
+		return "", errors.Conflict("aggregatetuple already exists").WithKey(inp.Key)
 	}
-	err = aggregatetuple.AddToComputePlan(db, inp, aggregatetupleKey, checkComputePlanAvailability)
+	err = aggregatetuple.AddToComputePlan(db, inp, inp.Key, checkComputePlanAvailability)
 	if err != nil {
 		return "", err
 	}
-	err = aggregatetuple.Save(db, aggregatetupleKey)
-	if err != nil {
-		return "", err
-	}
-
-	err = db.AddTupleEvent(aggregatetupleKey)
+	err = aggregatetuple.Save(db, inp.Key)
 	if err != nil {
 		return "", err
 	}
 
-	return aggregatetupleKey, nil
+	err = db.AddTupleEvent(inp.Key)
+	if err != nil {
+		return "", err
+	}
+
+	return inp.Key, nil
 }
 
 // logStartAggregate modifies a aggregatetuple by changing its status from todo to doing
 func logStartAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err error) {
 	status := StatusDoing
-	inp := inputKeyOld{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -297,7 +290,7 @@ func logStartAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err
 	if err = aggregatetuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	err = o.Fill(db, aggregatetuple, inp.Key)
+	err = o.Fill(db, aggregatetuple)
 	return
 }
 
@@ -325,7 +318,7 @@ func logFailAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err 
 		return
 	}
 
-	o.Fill(db, aggregatetuple, inp.Key)
+	o.Fill(db, aggregatetuple)
 	// Do not propagate failure if we are in a compute plan
 	if aggregatetuple.ComputePlanID != "" {
 		return
@@ -388,13 +381,13 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 		return
 	}
 
-	err = o.Fill(db, aggregatetuple, inp.Key)
+	err = o.Fill(db, aggregatetuple)
 	return
 }
 
 // queryAggregatetuple returns info about an aggregate tuple given its key
 func queryAggregatetuple(db *LedgerDB, args []string) (outputAggregatetuple outputAggregatetuple, err error) {
-	inp := inputKeyOld{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -407,7 +400,7 @@ func queryAggregatetuple(db *LedgerDB, args []string) (outputAggregatetuple outp
 		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
-	outputAggregatetuple.Fill(db, aggregatetuple, inp.Key)
+	outputAggregatetuple.Fill(db, aggregatetuple)
 	return
 }
 
@@ -444,7 +437,7 @@ func getOutputAggregatetuple(db *LedgerDB, aggregatetupleKey string) (outAggreag
 	if err != nil {
 		return
 	}
-	outAggreagateTuple.Fill(db, aggregatetuple, aggregatetupleKey)
+	outAggreagateTuple.Fill(db, aggregatetuple)
 	return
 }
 

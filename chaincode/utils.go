@@ -128,9 +128,6 @@ func GetRandomHash() string {
 func GetNewUUID() (string, error) {
 	a, err := uuid.NewRandom()
 	if err != nil {
-		print("wat1")
-		print(err)
-		print("wat2")
 		return "", err
 	}
 	return a.String(), nil

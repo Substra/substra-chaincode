@@ -17,9 +17,16 @@ package main
 import (
 	"chaincode/errors"
 	"strconv"
+
+	"github.com/google/uuid"
 )
 
 func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, IDToTrainTask map[string]TrainTask) error {
+	key, err := uuid.NewRandom()
+	if err != nil {
+		return nil
+	}
+	inpTraintuple.Key = key.String()
 	inpTraintuple.DataManagerKey = inpCP.DataManagerKey
 	inpTraintuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpTraintuple.AlgoKey = inpCP.AlgoKey
@@ -40,6 +47,11 @@ func (inpTraintuple *inputTraintuple) Fill(inpCP inputComputePlanTraintuple, IDT
 
 }
 func (inpAggregatetuple *inputAggregatetuple) Fill(inpCP inputComputePlanAggregatetuple, IDToTrainTask map[string]TrainTask) error {
+	key, err := uuid.NewRandom()
+	if err != nil {
+		return nil
+	}
+	inpAggregatetuple.Key = key.String()
 	inpAggregatetuple.AlgoKey = inpCP.AlgoKey
 	inpAggregatetuple.Tag = inpCP.Tag
 	inpAggregatetuple.Metadata = inpCP.Metadata
@@ -59,6 +71,11 @@ func (inpAggregatetuple *inputAggregatetuple) Fill(inpCP inputComputePlanAggrega
 
 }
 func (inpCompositeTraintuple *inputCompositeTraintuple) Fill(inpCP inputComputePlanCompositeTraintuple, IDToTrainTask map[string]TrainTask) error {
+	key, err := uuid.NewRandom()
+	if err != nil {
+		return nil
+	}
+	inpCompositeTraintuple.Key = key.String()
 	inpCompositeTraintuple.DataManagerKey = inpCP.DataManagerKey
 	inpCompositeTraintuple.DataSampleKeys = inpCP.DataSampleKeys
 	inpCompositeTraintuple.AlgoKey = inpCP.AlgoKey
@@ -92,6 +109,11 @@ func (inpTesttuple *inputTesttuple) Fill(inpCP inputComputePlanTesttuple, IDToTr
 	if !ok {
 		return errors.BadRequest("traintuple ID %s not found", inpCP.TraintupleID)
 	}
+	key, err := uuid.NewRandom()
+	if err != nil {
+		return nil
+	}
+	inpTesttuple.Key = key.String()
 	inpTesttuple.TraintupleKey = trainTask.Key
 	inpTesttuple.DataManagerKey = inpCP.DataManagerKey
 	inpTesttuple.DataSampleKeys = inpCP.DataSampleKeys
@@ -249,7 +271,7 @@ func updateComputePlanInternal(db *LedgerDB, computePlanID string, inp inputComp
 }
 
 func queryComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
-	inp := inputKeyOld{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -288,7 +310,7 @@ func getOutComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err er
 }
 
 func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err error) {
-	inp := inputKeyOld{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -315,10 +337,13 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 // Create generate on ID for the compute plan, add it to the ledger
 // and register it in the compute plan index
 func (cp *ComputePlan) Create(db *LedgerDB) (string, error) {
-	ID := GetRandomHash()
+	ID, err := GetNewUUID()
+	if err != nil {
+		return "", err
+	}
 	cp.StateKey = GetRandomHash()
 	cp.AssetType = ComputePlanType
-	err := db.Add(ID, cp)
+	err = db.Add(ID, cp)
 	if err != nil {
 		return "", err
 	}

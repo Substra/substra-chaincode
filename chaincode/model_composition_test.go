@@ -63,7 +63,7 @@ func TestModelComposition(t *testing.T) {
 				childKey := ""
 				switch tt.child {
 				case CompositeTraintupleType:
-					child := inputCompositeTraintuple{}
+					child := inputCompositeTraintuple{Key: RandomUUID()}
 					child.createDefault()
 					child.InHeadModelKey = parent1Key
 					child.InTrunkModelKey = parent2Key
@@ -71,7 +71,7 @@ func TestModelComposition(t *testing.T) {
 					assert.NoError(t, err)
 					childKey = childResp.Key
 				case AggregatetupleType:
-					child := inputAggregatetuple{}
+					child := inputAggregatetuple{Key: RandomUUID()}
 					child.createDefault()
 					child.InModels = []string{parent1Key, parent2Key}
 					childResp, err := createAggregatetuple(db, assetToArgs(child))
@@ -82,7 +82,7 @@ func TestModelComposition(t *testing.T) {
 				}
 
 				// ... and its testtuple
-				childTesttuple := inputTesttuple{}
+				childTesttuple := inputTesttuple{Key: RandomUUID()}
 				childTesttuple.TraintupleKey = childKey
 				childTesttuple.fillDefaults()
 				childTestupleResp, err := createTesttuple(db, assetToArgs(childTesttuple))
@@ -93,6 +93,9 @@ func TestModelComposition(t *testing.T) {
 				_, err = trainStart(db, tt.parent1, parent1Key)
 				assert.NoError(t, err)
 				_, err = trainStart(db, tt.parent2, parent2Key)
+				if err != nil {
+					_, err = trainStart(db, tt.parent2, parent2Key)
+				}
 				assert.NoError(t, err)
 
 				// succeed/fail parents
@@ -153,11 +156,11 @@ func TestModelComposition(t *testing.T) {
 func trainStart(db *LedgerDB, tupleType AssetType, tupleKey string) (interface{}, error) {
 	switch tupleType {
 	case TraintupleType:
-		return logStartTrain(db, assetToArgs(inputKeyOld{Key: tupleKey}))
+		return logStartTrain(db, assetToArgs(inputKey{Key: tupleKey}))
 	case CompositeTraintupleType:
-		return logStartCompositeTrain(db, assetToArgs(inputKeyOld{Key: tupleKey}))
+		return logStartCompositeTrain(db, assetToArgs(inputKey{Key: tupleKey}))
 	case AggregatetupleType:
-		return logStartAggregate(db, assetToArgs(inputKeyOld{Key: tupleKey}))
+		return logStartAggregate(db, assetToArgs(inputKey{Key: tupleKey}))
 	default:
 		return nil, fmt.Errorf("unsupported test case %s", tupleType)
 	}

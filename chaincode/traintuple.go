@@ -39,6 +39,7 @@ func (traintuple *Traintuple) SetFromInput(db *LedgerDB, inp inputTraintuple) er
 	if err != nil {
 		return err
 	}
+	traintuple.Key = inp.Key
 	traintuple.AssetType = TraintupleType
 	traintuple.Creator = creator
 	traintuple.ComputePlanID = inp.ComputePlanID
@@ -102,19 +103,6 @@ func (traintuple *Traintuple) SetFromParents(db *LedgerDB, inModels []string) er
 	traintuple.Status = determineStatusFromInModels(parentStatuses)
 	traintuple.InModelKeys = inModelKeys
 	return nil
-}
-
-// GetKey return the key of the traintuple depending on its key parameters.
-func (traintuple *Traintuple) GetKey() string {
-	hashKeys := []string{
-		traintuple.Creator,
-		traintuple.AlgoKey,
-		traintuple.Dataset.DataManagerKey,
-		traintuple.ComputePlanID}
-	hashKeys = append(hashKeys, traintuple.Dataset.DataSampleKeys...)
-	hashKeys = append(hashKeys, traintuple.InModelKeys...)
-	return HashForKey("traintuple", hashKeys...)
-
 }
 
 // AddToComputePlan set the traintuple's parameters that determines if it's part of on ComputePlan and how.
@@ -243,37 +231,36 @@ func createTraintupleInternal(db *LedgerDB, inp inputTraintuple, checkComputePla
 	if err != nil {
 		return "", err
 	}
-	traintupleKey := traintuple.GetKey()
 	// Test if the key (ergo the traintuple) already exists
-	tupleExists, err := db.KeyExists(traintupleKey)
+	tupleExists, err := db.KeyExists(inp.Key)
 	if err != nil {
 		return "", err
 	}
 	if tupleExists {
-		return "", errors.Conflict("traintuple already exists").WithKey(traintupleKey)
+		return "", errors.Conflict("traintuple already exists").WithKey(inp.Key)
 	}
-	err = traintuple.AddToComputePlan(db, inp, traintupleKey, checkComputePlanAvailability)
+	err = traintuple.AddToComputePlan(db, inp, inp.Key, checkComputePlanAvailability)
 	if err != nil {
 		return "", err
 	}
 
-	err = traintuple.Save(db, traintupleKey)
+	err = traintuple.Save(db, inp.Key)
 	if err != nil {
 		return "", err
 	}
 
-	err = db.AddTupleEvent(traintupleKey)
+	err = db.AddTupleEvent(inp.Key)
 	if err != nil {
 		return "", err
 	}
 
-	return traintupleKey, nil
+	return inp.Key, nil
 }
 
 // logStartTrain modifies a traintuple by changing its status from todo to doing
 func logStartTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 	status := StatusDoing
-	inp := inputKeyOld{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -291,7 +278,7 @@ func logStartTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) 
 	if err = traintuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	err = o.Fill(db, traintuple, inp.Key)
+	err = o.Fill(db, traintuple)
 	return
 }
 
@@ -344,7 +331,7 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 		return
 	}
 
-	err = o.Fill(db, traintuple, inp.Key)
+	err = o.Fill(db, traintuple)
 	return
 }
 
@@ -372,7 +359,7 @@ func logFailTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 		return
 	}
 
-	if err = o.Fill(db, traintuple, inp.Key); err != nil {
+	if err = o.Fill(db, traintuple); err != nil {
 		return
 	}
 
@@ -392,7 +379,7 @@ func logFailTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 
 // queryTraintuple returns info about a traintuple given its key
 func queryTraintuple(db *LedgerDB, args []string) (outputTraintuple outputTraintuple, err error) {
-	inp := inputKeyOld{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -405,7 +392,7 @@ func queryTraintuple(db *LedgerDB, args []string) (outputTraintuple outputTraint
 		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
-	err = outputTraintuple.Fill(db, traintuple, inp.Key)
+	err = outputTraintuple.Fill(db, traintuple)
 	return
 }
 
@@ -441,7 +428,7 @@ func getOutputTraintuple(db *LedgerDB, traintupleKey string) (outTraintuple outp
 	if err != nil {
 		return
 	}
-	err = outTraintuple.Fill(db, traintuple, traintupleKey)
+	err = outTraintuple.Fill(db, traintuple)
 	return
 }
 

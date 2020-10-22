@@ -30,7 +30,6 @@ import (
 
 const objectiveKey = "5c1d9cd1-c2c1-082d-de09-21b56d11030c"
 const objectiveDescriptionHash = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
-const objectiveDescriptionStorageAddress = "https://toto/objective/222/description"
 const objectiveMetricsHash = "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 const objectiveMetricsStorageAddress = "https://toto/objective/222/metrics"
 const dataManagerKey = "da1bb7c3-1f62-244c-0f3a-761cc1688042"
@@ -57,9 +56,10 @@ const headModelHash = modelHash
 const trunkModelHash = "ccdbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482ecc"
 const trunkModelAddress = "https://substrabac/model/titi"
 const worker = "SampleOrg"
-const traintupleKey = "b0289ab83a71f01e2b720259a645224453e841ff0c3335b874b61c33344f8a75"
-const compositeTraintupleKey = "0c0d395626b4878e76d7ba8bb6fb152e135acba385f535c6a0429e7f3ab2d45a"
-const aggregatetupleKey = "7152766150f626d3fa861bf6387e3896266e5e6328c3289e17cd0fae5ddfdf72"
+const traintupleKey = "b0289ab8-3a71-f01e-2b72-0259a6452244"
+const compositeTraintupleKey = "0c0d3956-26b4-878e-76d7-ba8bb6fb152e"
+const aggregatetupleKey = "71527661-50f6-26d3-fa86-1bf6387e3896"
+const testtupleKey = "dadada11-50f6-26d3-fa86-1bf6387e3896"
 const tag = "a tag is simply a string"
 
 func TestInit(t *testing.T) {
@@ -80,7 +80,7 @@ func methodAndAssetToByte(methodName string, asset interface{}) [][]byte {
 }
 
 func methodAndKeyToByte(key string, asset interface{}) [][]byte {
-	return [][]byte{[]byte("queryAlgo"), keyToJSONOld(key)}
+	return [][]byte{[]byte("queryAlgo"), keyToJSON(key)}
 }
 
 func assetToArgs(asset interface{}) []string {
@@ -88,17 +88,12 @@ func assetToArgs(asset interface{}) []string {
 }
 
 func keyToArgs(key string) []string {
-	return []string{string(keyToJSONOld(key))}
+	return []string{string(keyToJSON(key))}
 }
 
 func assetToJSON(asset interface{}) []byte {
 	assetjson, _ := json.Marshal(asset)
 	return assetjson
-}
-
-// TODO: delete me
-func keyToJSONOld(key string) []byte {
-	return assetToJSON(inputKeyOld{Key: key})
 }
 
 func keyToJSON(key string) []byte {
@@ -196,8 +191,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 }
 
 func registerRandomCompositeAlgo(t *testing.T, mockStub *MockStub) (key string, err error) {
-	key, err = GetNewUUID()
-	assert.Nil(t, err)
+	key = RandomUUID()
 	inpAlgo := inputCompositeAlgo{inputAlgo{Key: key}}
 	args := inpAlgo.createDefault()
 	resp := mockStub.MockInvoke("42", args)
@@ -213,16 +207,16 @@ func registerTraintuple(t *testing.T, mockStub *MockStub, assetType AssetType) (
 	// 1. Generate and register random algo
 	// 2. Generate and register traintuple using that algo
 
-	var randAlgoKey string
+	randomAlgoKey := RandomUUID()
+	randomTraintupleKey := RandomUUID()
 
 	switch assetType {
 	case CompositeTraintupleType:
-		randAlgoKey, _err := registerRandomCompositeAlgo(t, mockStub)
-		if _err != nil {
-			err = _err
+		randomAlgoKey, err = registerRandomCompositeAlgo(t, mockStub)
+		if err != nil {
 			return
 		}
-		inpTraintuple := inputCompositeTraintuple{AlgoKey: randAlgoKey}
+		inpTraintuple := inputCompositeTraintuple{Key: randomTraintupleKey, AlgoKey: randomAlgoKey}
 		inpTraintuple.fillDefaults()
 		args := inpTraintuple.getArgs()
 		resp := mockStub.MockInvoke("42", args)
@@ -234,16 +228,14 @@ func registerTraintuple(t *testing.T, mockStub *MockStub, assetType AssetType) (
 		json.Unmarshal(resp.Payload, &_key)
 		return _key.Key, nil
 	case TraintupleType:
-		randAlgoKey, err = GetNewUUID()
-		assert.Nil(t, err)
-		inpAlgo := inputAlgo{Key: randAlgoKey}
+		inpAlgo := inputAlgo{Key: randomAlgoKey}
 		args := inpAlgo.createDefault()
 		resp := mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
 			err = fmt.Errorf("failed to register random algo: %s", resp.Message)
 			return
 		}
-		inpTraintuple := inputTraintuple{AlgoKey: randAlgoKey}
+		inpTraintuple := inputTraintuple{Key: randomTraintupleKey, AlgoKey: randomAlgoKey}
 		args = inpTraintuple.createDefault()
 		resp = mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
@@ -254,16 +246,14 @@ func registerTraintuple(t *testing.T, mockStub *MockStub, assetType AssetType) (
 		json.Unmarshal(resp.Payload, &_key)
 		return _key.Key, nil
 	case AggregatetupleType:
-		randAlgoKey, err = GetNewUUID()
-		assert.Nil(t, err)
-		inpAlgo := inputAggregateAlgo{inputAlgo{Key: randAlgoKey}}
+		inpAlgo := inputAggregateAlgo{inputAlgo{Key: randomAlgoKey}}
 		args := inpAlgo.createDefault()
 		resp := mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
 			err = fmt.Errorf("failed to register random algo: %s", resp.Message)
 			return
 		}
-		inpTraintuple := inputAggregatetuple{AlgoKey: randAlgoKey}
+		inpTraintuple := inputAggregatetuple{Key: randomTraintupleKey, AlgoKey: randomAlgoKey}
 		args = inpTraintuple.createDefault()
 		resp = mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
@@ -330,4 +320,12 @@ func TestQueryEmptyResponse(t *testing.T) {
 			assert.Equal(t, expectedPayload, resp.Payload, "payload is not an empty list")
 		})
 	}
+}
+
+func RandomUUID() string {
+	uuid, err := GetNewUUID()
+	if err != nil {
+		panic("GetNewUUID failed")
+	}
+	return uuid
 }

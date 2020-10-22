@@ -174,6 +174,9 @@ func (algo *inputAggregateAlgo) getArgs() [][]byte {
 }
 
 func (traintuple *inputTraintuple) createDefault() [][]byte {
+	if traintuple.Key == "" {
+		traintuple.Key = traintupleKey
+	}
 	if traintuple.AlgoKey == "" {
 		traintuple.AlgoKey = algoKey
 	}
@@ -196,6 +199,9 @@ func (traintuple *inputCompositeTraintuple) createDefault() [][]byte {
 }
 
 func (traintuple *inputCompositeTraintuple) fillDefaults() {
+	if traintuple.Key == "" {
+		traintuple.Key = compositeTraintupleKey
+	}
 	if traintuple.AlgoKey == "" {
 		traintuple.AlgoKey = compositeAlgoKey
 	}
@@ -219,6 +225,9 @@ func (aggregatetuple *inputAggregatetuple) createDefault() [][]byte {
 }
 
 func (aggregatetuple *inputAggregatetuple) fillDefaults() {
+	if aggregatetuple.Key == "" {
+		aggregatetuple.Key = aggregatetupleKey
+	}
 	if aggregatetuple.AlgoKey == "" {
 		aggregatetuple.AlgoKey = aggregateAlgoKey
 	}
@@ -338,6 +347,9 @@ func (testtuple *inputTesttuple) createDefault() [][]byte {
 }
 
 func (testtuple *inputTesttuple) fillDefaults() {
+	if testtuple.Key == "" {
+		testtuple.Key = testtupleKey
+	}
 	if testtuple.TraintupleKey == "" {
 		testtuple.TraintupleKey = traintupleKey
 	}

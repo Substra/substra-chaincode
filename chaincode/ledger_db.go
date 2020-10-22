@@ -482,7 +482,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 			return err
 		}
 		out := outputTraintuple{}
-		out.Fill(db, tuple, tupleKey)
+		out.Fill(db, tuple)
 		db.event.Traintuples = append(db.event.Traintuples, out)
 	case CompositeTraintupleType:
 		tuple, err := db.GetCompositeTraintuple(tupleKey)
@@ -490,7 +490,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 			return err
 		}
 		out := outputCompositeTraintuple{}
-		out.Fill(db, tuple, tupleKey)
+		out.Fill(db, tuple)
 		db.event.CompositeTraintuples = append(db.event.CompositeTraintuples, out)
 	case AggregatetupleType:
 		tuple, err := db.GetAggregatetuple(tupleKey)
@@ -498,7 +498,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 			return err
 		}
 		out := outputAggregatetuple{}
-		out.Fill(db, tuple, tupleKey)
+		out.Fill(db, tuple)
 		db.event.Aggregatetuples = append(db.event.Aggregatetuples, out)
 	case TesttupleType:
 		tuple, err := db.GetTesttuple(tupleKey)
@@ -506,7 +506,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 			return err
 		}
 		out := outputTesttuple{}
-		out.Fill(db, tupleKey, tuple)
+		out.Fill(db, tuple)
 		db.event.Testtuples = append(db.event.Testtuples, out)
 	}
 	return nil

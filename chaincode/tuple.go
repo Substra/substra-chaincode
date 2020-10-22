@@ -40,7 +40,7 @@ const (
 
 // queryModelDetails returns info about the testtuple and algo related to a traintuple
 func queryModelDetails(db *LedgerDB, args []string) (outModelDetails outputModelDetails, err error) {
-	inp := inputKeyOld{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -162,7 +162,7 @@ func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err erro
 
 func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, error) {
 	var out outputPermissions
-	inp := inputKeyOld{}
+	inp := inputKey64{}
 	err := AssetFromJSON(args, &inp)
 	if err != nil {
 		return out, err
@@ -173,7 +173,7 @@ func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, erro
 		return out, err
 	}
 	if len(keys) == 0 {
-		return out, errors.NotFound("Could not find a model for hash %s", modelHash)
+		return out, errors.NotFound("Could not find a model for key %s", modelHash)
 	}
 	tupleKey := keys[0]
 	tupleType, err := db.GetAssetType(tupleKey)

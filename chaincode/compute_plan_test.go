@@ -174,9 +174,9 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	validateTupleRank(t, db, 2, out.CompositeTraintupleKeys[2], CompositeTraintupleType)
 	validateTupleRank(t, db, 2, out.CompositeTraintupleKeys[3], CompositeTraintupleType)
 
-	_, err = logStartCompositeTrain(db, assetToArgs(inputKeyOld{out.CompositeTraintupleKeys[0]}))
+	_, err = logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[0]}))
 	assert.NoError(t, err)
-	_, err = logStartCompositeTrain(db, assetToArgs(inputKeyOld{out.CompositeTraintupleKeys[1]}))
+	_, err = logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[1]}))
 	assert.NoError(t, err)
 
 	db.event = &Event{}
@@ -196,7 +196,7 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	require.Len(t, db.event.Aggregatetuples, 1)
 	assert.Equal(t, StatusTodo, db.event.Aggregatetuples[0].Status)
 
-	_, err = logStartAggregate(db, assetToArgs(inputKeyOld{out.AggregatetupleKeys[0]}))
+	_, err = logStartAggregate(db, assetToArgs(inputKey{out.AggregatetupleKeys[0]}))
 	assert.NoError(t, err)
 
 	inpLogAgg := inputLogSuccessTrain{}
@@ -206,9 +206,9 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, StatusDone, agg.Status)
 
-	_, err = logStartCompositeTrain(db, assetToArgs(inputKeyOld{out.CompositeTraintupleKeys[2]}))
+	_, err = logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[2]}))
 	assert.NoError(t, err)
-	_, err = logStartCompositeTrain(db, assetToArgs(inputKeyOld{out.CompositeTraintupleKeys[3]}))
+	_, err = logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[3]}))
 	assert.NoError(t, err)
 
 	db.event = &Event{}
@@ -226,7 +226,7 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 }
 
 func validateTupleRank(t *testing.T, db *LedgerDB, expectedRank int, key string, assetType AssetType) {
-	inp := inputKeyOld{Key: key}
+	inp := inputKey{Key: key}
 	rank := -42
 	switch assetType {
 	case CompositeTraintupleType:
@@ -303,7 +303,7 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	require.Contains(t, outCP.AggregatetupleKeys, aggtuples[1].Key)
 
 	// Query the compute plan
-	cp, err := queryComputePlan(db, assetToArgs(inputKeyOld{Key: outCP.ComputePlanID}))
+	cp, err := queryComputePlan(db, assetToArgs(inputKey{Key: outCP.ComputePlanID}))
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
 	assert.NotNil(t, cp)
 	assert.Equal(t, 2, len(cp.CompositeTraintupleKeys))
@@ -384,7 +384,7 @@ func TestQueryComputePlan(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 
-	cp, err := queryComputePlan(db, assetToArgs(inputKeyOld{Key: outCP.ComputePlanID}))
+	cp, err := queryComputePlan(db, assetToArgs(inputKey{Key: outCP.ComputePlanID}))
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
 	assert.NotNil(t, cp)
 	validateDefaultComputePlan(t, cp)
@@ -453,7 +453,7 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 	assert.NotNil(t, outCP)
 	assert.Len(t, outCP.TesttupleKeys, 0)
 
-	cp, err := queryComputePlan(db, assetToArgs(inputKeyOld{Key: outCP.ComputePlanID}))
+	cp, err := queryComputePlan(db, assetToArgs(inputKey{Key: outCP.ComputePlanID}))
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
 	assert.NotNil(t, cp)
 	assert.Len(t, outCP.TesttupleKeys, 0)
@@ -490,7 +490,7 @@ func TestCancelComputePlan(t *testing.T) {
 	assert.NotNil(t, db.event)
 	assert.Len(t, db.event.CompositeTraintuples, 2)
 
-	_, err = cancelComputePlan(db, assetToArgs(inputKeyOld{Key: out.ComputePlanID}))
+	_, err = cancelComputePlan(db, assetToArgs(inputKey{Key: out.ComputePlanID}))
 	assert.NoError(t, err)
 
 	computePlan, err := getOutComputePlan(db, out.ComputePlanID)
@@ -530,11 +530,11 @@ func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
 	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, map[string]string{}, false)
 	assert.NoError(t, err)
 
-	logStartCompositeTrain(db, assetToArgs(inputKeyOld{out.CompositeTraintupleKeys[0]}))
-	logStartCompositeTrain(db, assetToArgs(inputKeyOld{out.CompositeTraintupleKeys[1]}))
-	logFailCompositeTrain(db, assetToArgs(inputKeyOld{out.CompositeTraintupleKeys[1]}))
+	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[0]}))
+	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[1]}))
+	logFailCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[1]}))
 
-	_, err = cancelComputePlan(db, assetToArgs(inputKeyOld{Key: out.ComputePlanID}))
+	_, err = cancelComputePlan(db, assetToArgs(inputKey{Key: out.ComputePlanID}))
 	assert.NoError(t, err)
 
 	computePlan, err := getOutComputePlan(db, out.ComputePlanID)
@@ -562,10 +562,10 @@ func TestLogSuccessAfterCancel(t *testing.T) {
 	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, map[string]string{}, false)
 	assert.NoError(t, err)
 
-	logStartCompositeTrain(db, assetToArgs(inputKeyOld{out.CompositeTraintupleKeys[0]}))
-	logStartCompositeTrain(db, assetToArgs(inputKeyOld{out.CompositeTraintupleKeys[1]}))
+	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[0]}))
+	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[1]}))
 
-	_, err = cancelComputePlan(db, assetToArgs(inputKeyOld{Key: out.ComputePlanID}))
+	_, err = cancelComputePlan(db, assetToArgs(inputKey{Key: out.ComputePlanID}))
 	assert.NoError(t, err)
 
 	inp := inputLogSuccessCompositeTrain{}
@@ -618,7 +618,7 @@ func TestComputePlanMetrics(t *testing.T) {
 }
 
 func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
-	_, err := logStartTrain(db, assetToArgs(inputKeyOld{Key: key}))
+	_, err := logStartTrain(db, assetToArgs(inputKey{Key: key}))
 	assert.NoError(t, err)
 	clearEvent(db)
 
@@ -630,7 +630,7 @@ func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
 	assert.NoError(t, err)
 }
 func testtupleToDone(t *testing.T, db *LedgerDB, key string) {
-	_, err := logStartTest(db, assetToArgs(inputKeyOld{Key: key}))
+	_, err := logStartTest(db, assetToArgs(inputKey{Key: key}))
 	assert.NoError(t, err)
 	clearEvent(db)
 

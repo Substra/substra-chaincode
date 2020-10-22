@@ -37,6 +37,7 @@ func (traintuple *CompositeTraintuple) SetFromInput(db *LedgerDB, inp inputCompo
 	if err != nil {
 		return err
 	}
+	traintuple.Key = inp.Key
 	traintuple.AssetType = CompositeTraintupleType
 	traintuple.Creator = creator
 	traintuple.ComputePlanID = inp.ComputePlanID
@@ -143,19 +144,6 @@ func (traintuple *CompositeTraintuple) SetFromParents(db *LedgerDB, inp inputCom
 	}
 	traintuple.Status = determineStatusFromInModels([]string{head.Status, trunk.Status})
 	return nil
-}
-
-// GetKey return the key of the traintuple depending on its key parameters.
-func (traintuple *CompositeTraintuple) GetKey() string {
-	hashKeys := []string{
-		traintuple.Creator,
-		traintuple.AlgoKey,
-		traintuple.Dataset.DataManagerKey,
-		traintuple.InHeadModel,
-		traintuple.InTrunkModel,
-		traintuple.ComputePlanID}
-	hashKeys = append(hashKeys, traintuple.Dataset.DataSampleKeys...)
-	return HashForKey("compositeTraintuple", hashKeys...)
 }
 
 // AddToComputePlan set the traintuple's parameters that determines if it's part of on ComputePlan and how.
@@ -288,36 +276,35 @@ func createCompositeTraintupleInternal(db *LedgerDB, inp inputCompositeTraintupl
 		return "", err
 	}
 
-	traintupleKey := traintuple.GetKey()
 	// Test if the key (ergo the traintuple) already exists
-	tupleExists, err := db.KeyExists(traintupleKey)
+	tupleExists, err := db.KeyExists(inp.Key)
 	if err != nil {
 		return "", err
 	}
 	if tupleExists {
-		return "", errors.Conflict("composite traintuple already exists").WithKey(traintupleKey)
+		return "", errors.Conflict("composite traintuple already exists").WithKey(inp.Key)
 	}
 
-	err = traintuple.AddToComputePlan(db, inp, traintupleKey, checkComputePlanAvailability)
+	err = traintuple.AddToComputePlan(db, inp, inp.Key, checkComputePlanAvailability)
 	if err != nil {
 		return "", err
 	}
 
-	err = traintuple.Save(db, traintupleKey)
+	err = traintuple.Save(db, inp.Key)
 	if err != nil {
 		return "", err
 	}
-	err = db.AddTupleEvent(traintupleKey)
+	err = db.AddTupleEvent(inp.Key)
 	if err != nil {
 		return "", err
 	}
-	return traintupleKey, nil
+	return inp.Key, nil
 }
 
 // logStartCompositeTrain modifies a traintuple by changing its status from todo to doing
 func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraintuple, err error) {
 	status := StatusDoing
-	inp := inputKeyOld{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -335,7 +322,7 @@ func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTrain
 	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	err = o.Fill(db, compositeTraintuple, inp.Key)
+	err = o.Fill(db, compositeTraintuple)
 	return
 }
 
@@ -397,7 +384,7 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 		return
 	}
 
-	err = o.Fill(db, compositeTraintuple, inp.Key)
+	err = o.Fill(db, compositeTraintuple)
 	return
 }
 
@@ -425,7 +412,7 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 		return
 	}
 
-	err = o.Fill(db, compositeTraintuple, inp.Key)
+	err = o.Fill(db, compositeTraintuple)
 	if err != nil {
 		return
 	}
@@ -445,7 +432,7 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 
 // queryCompositeTraintuple returns info about a composite traintuple given its key
 func queryCompositeTraintuple(db *LedgerDB, args []string) (outputTraintuple outputCompositeTraintuple, err error) {
-	inp := inputKeyOld{}
+	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
@@ -458,7 +445,7 @@ func queryCompositeTraintuple(db *LedgerDB, args []string) (outputTraintuple out
 		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	outputTraintuple.Fill(db, traintuple)
 	return
 }
 
@@ -536,7 +523,7 @@ func getOutputCompositeTraintuple(db *LedgerDB, traintupleKey string) (outTraint
 	if err != nil {
 		return
 	}
-	outTraintuple.Fill(db, traintuple, traintupleKey)
+	outTraintuple.Fill(db, traintuple)
 	return
 }
 

@@ -96,8 +96,9 @@ type inputUpdateDataSample struct {
 
 // inputTraintuple is the representation of input args to register a Traintuple
 type inputTraintuple struct {
+	Key            string            `validate:"required,len=36" json:"key"`
 	AlgoKey        string            `validate:"required,len=36" json:"algo_key"`
-	InModels       []string          `validate:"omitempty,dive,len=64,hexadecimal" json:"in_models"`
+	InModels       []string          `validate:"omitempty,dive,len=36" json:"in_models"`
 	DataManagerKey string            `validate:"required,len=36" json:"data_manager_key"`
 	DataSampleKeys []string          `validate:"required,unique,gt=0,dive,len=36" json:"data_sample_keys"`
 	ComputePlanID  string            `validate:"omitempty" json:"compute_plan_id"`
@@ -108,20 +109,22 @@ type inputTraintuple struct {
 
 // inputTestuple is the representation of input args to register a Testtuple
 type inputTesttuple struct {
+	Key            string            `validate:"required,len=36" json:"key"`
 	DataManagerKey string            `validate:"omitempty,len=36" json:"data_manager_key"`
 	DataSampleKeys []string          `validate:"omitempty,dive,len=36" json:"data_sample_keys"`
 	ObjectiveKey   string            `validate:"required,len=36" json:"objective_key"`
 	Tag            string            `validate:"omitempty,lte=64" json:"tag"`
 	Metadata       map[string]string `validate:"omitempty,lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
-	TraintupleKey  string            `validate:"required,len=64,hexadecimal" json:"traintuple_key"`
-}
-
-type inputKeyOld struct {
-	Key string `validate:"required,len=64,hexadecimal" json:"key"`
+	TraintupleKey  string            `validate:"required,len=36" json:"traintuple_key"`
 }
 
 type inputKey struct {
 	Key string `validate:"required,len=36" json:"key"`
+}
+
+// TODO: delete
+type inputKey64 struct {
+	Key string `validate:"required,len=64,hexadecimal" json:"key"`
 }
 
 type inputLogSuccessTrain struct {
@@ -139,7 +142,7 @@ type inputLogFailTest struct {
 	inputLog
 }
 type inputLog struct {
-	Key string `validate:"required,len=64,hexadecimal" json:"key"`
+	Key string `validate:"required,len=36" json:"key"`
 	Log string `validate:"lte=200" json:"log"`
 }
 
@@ -178,7 +181,7 @@ type inputNewComputePlan struct {
 // inputUpdateComputePlan represent the set of tuples to be added to the compute
 // plan matching the ID
 type inputUpdateComputePlan struct {
-	ComputePlanID string `validate:"required,required,len=64,hexadecimal" json:"compute_plan_id"`
+	ComputePlanID string `validate:"required,required,len=36" json:"compute_plan_id"`
 	inputComputePlan
 }
 

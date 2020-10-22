@@ -98,6 +98,7 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 
 	// Add an uncertified testtuple successfully
 	inpTesttuple3 := inputTesttuple{
+		Key:            RandomUUID(),
 		DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
 		DataManagerKey: dataManagerKey}
 	args = inpTesttuple3.createDefault()
@@ -164,7 +165,7 @@ func TestQueryTesttuple(t *testing.T) {
 			testtupleKey := res["key"]
 
 			// query testtuple
-			args := [][]byte{[]byte("queryTesttuple"), keyToJSONOld(testtupleKey)}
+			args := [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
 			resp = mockStub.MockInvoke("42", args)
 			respTesttuple := resp.Payload
 			testtuple := outputTesttuple{}
@@ -204,6 +205,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 			registerItem(t, *mockStub, "compositeTraintuple")
 
 			inp := inputTesttuple{
+				Key:           RandomUUID(),
 				TraintupleKey: compositeTraintupleKey,
 			}
 			// Create a testtuple before training
@@ -217,7 +219,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 			// Start training
 			mockStub.MockTransactionStart("42")
 			db := NewLedgerDB(mockStub)
-			_, err := logStartCompositeTrain(db, assetToArgs(inputKeyOld{Key: compositeTraintupleKey}))
+			_, err := logStartCompositeTrain(db, assetToArgs(inputKey{Key: compositeTraintupleKey}))
 			assert.NoError(t, err)
 
 			// Succeed/fail training
@@ -240,12 +242,13 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 				assert.NoError(t, fmt.Errorf("Unknown status %s", status))
 			}
 
-			testTuple, err := queryTesttuple(db, assetToArgs(inputKeyOld{Key: testTupleKey}))
+			testTuple, err := queryTesttuple(db, assetToArgs(inputKey{Key: testTupleKey}))
 			assert.NoError(t, err)
 			assert.Equal(t, expectedTesttupleStatus, testTuple.Status)
 			assert.Equal(t, compositeTraintupleKey, testTuple.TraintupleKey)
 
 			// Create a new testtuple *after* the traintuple has been set to failed/succeeded
+			inp.Key = RandomUUID()
 			inp.DataManagerKey = dataManagerKey
 			inp.DataSampleKeys = []string{trainDataSampleKey1}
 			args = inp.createDefault()
@@ -257,7 +260,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 				values = map[string]string{}
 				json.Unmarshal(resp.Payload, &values)
 				testTupleKey = values["key"]
-				testTuple, err := queryTesttuple(db, assetToArgs(inputKeyOld{Key: testTupleKey}))
+				testTuple, err := queryTesttuple(db, assetToArgs(inputKey{Key: testTupleKey}))
 				assert.NoError(t, err)
 				assert.Equal(t, StatusTodo, testTuple.Status)
 			case StatusFailed:

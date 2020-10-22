@@ -117,7 +117,7 @@ func TestPipeline(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 409, resp.Status, "when adding same traintuple with status %d and message %s", resp.Status, resp.Message)
 	// Get owner of the traintuple
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
 	traintuple := outputTraintuple{}
@@ -128,7 +128,7 @@ func TestPipeline(t *testing.T) {
 	trainWorker := traintuple.Dataset.Worker
 
 	fmt.Fprintln(&out, "#### ------------ Add Traintuple with inModel from previous traintuple ------------")
-	inpTraintuple = inputTraintuple{}
+	inpTraintuple = inputTraintuple{Key: RandomUUID()}
 	inpTraintuple.InModels = []string{traintupleKey}
 	inpTraintuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTraintuple", inpTraintuple)
@@ -146,7 +146,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "queryFilter", filter)
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Training ------------")
-	callAssertAndPrint("invoke", "logStartTrain", inputKeyOld{traintupleKey})
+	callAssertAndPrint("invoke", "logStartTrain", inputKey{traintupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Training ------------")
 	inp := inputLogSuccessTrain{}
@@ -155,7 +155,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "logSuccessTrain", inp)
 
 	fmt.Fprintln(&out, "#### ------------ Query Traintuple From key ------------")
-	callAssertAndPrint("invoke", "queryTraintuple", inputKeyOld{traintupleKey})
+	callAssertAndPrint("invoke", "queryTraintuple", inputKey{traintupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Add Non-Certified Testtuple ------------")
 	inpTesttuple := inputTesttuple{
@@ -166,7 +166,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "createTesttuple", inpTesttuple)
 
 	fmt.Fprintln(&out, "#### ------------ Add Certified Testtuple ------------")
-	inpTesttuple = inputTesttuple{}
+	inpTesttuple = inputTesttuple{Key: RandomUUID()}
 	args = inpTesttuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTesttuple", inpTesttuple)
 	// Get testtuple key from Payload
@@ -178,7 +178,7 @@ func TestPipeline(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 409, resp.Status, "when adding same testtuple with status %d and message %s", resp.Status, resp.Message)
 	// Get owner of the testtuple
-	args = [][]byte{[]byte("queryTesttuple"), keyToJSONOld(testtupleKey)}
+	args = [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	respTesttuple := resp.Payload
 	testtuple := outputTesttuple{}
@@ -188,7 +188,7 @@ func TestPipeline(t *testing.T) {
 	testWorker := testtuple.Dataset.Worker
 
 	fmt.Fprintln(&out, "#### ------------ Add Testtuple with not done traintuple ------------")
-	inpTesttuple = inputTesttuple{}
+	inpTesttuple = inputTesttuple{Key: RandomUUID()}
 	inpTesttuple.TraintupleKey = todoTraintupleKey
 	inpTesttuple.createDefault()
 	callAssertAndPrint("invoke", "createTesttuple", inpTesttuple)
@@ -201,7 +201,7 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "queryFilter", filter)
 
 	fmt.Fprintln(&out, "#### ------------ Log Start Testing ------------")
-	callAssertAndPrint("invoke", "logStartTest", inputKeyOld{testtupleKey})
+	callAssertAndPrint("invoke", "logStartTest", inputKey{testtupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Log Success Testing ------------")
 	success := inputLogSuccessTest{}
@@ -210,19 +210,19 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "logSuccessTest", success)
 
 	fmt.Fprintln(&out, "#### ------------ Query Testtuple from its key ------------")
-	callAssertAndPrint("query", "queryTesttuple", inputKeyOld{testtupleKey})
+	callAssertAndPrint("query", "queryTesttuple", inputKey{testtupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Query all Testtuples ------------")
 	callAssertAndPrint("query", "queryTesttuples", nil)
 
 	fmt.Fprintln(&out, "#### ------------ Query details about a model ------------")
-	callAssertAndPrint("query", "queryModelDetails", inputKeyOld{traintupleKey})
+	callAssertAndPrint("query", "queryModelDetails", inputKey{traintupleKey})
 
 	fmt.Fprintln(&out, "#### ------------ Query all models ------------")
 	callAssertAndPrint("query", "queryModels", nil)
 
 	fmt.Fprintln(&out, "#### ------------ Query model permissions ------------")
-	callAssertAndPrint("query", "queryModelPermissions", inputKeyOld{modelHash})
+	callAssertAndPrint("query", "queryModelPermissions", inputKey{modelHash})
 
 	fmt.Fprintln(&out, "#### ------------ Query Dataset ------------")
 	callAssertAndPrint("query", "queryDataset", inputKey{dataManagerKey})
@@ -285,11 +285,11 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "queryObjectiveLeaderboard", inpLeaderboard)
 
 	fmt.Fprintln(&out, "#### ------------ Query Compute Plan(s) ------------")
-	callAssertAndPrint("invoke", "queryComputePlan", inputKeyOld{outCp.ComputePlanID})
+	callAssertAndPrint("invoke", "queryComputePlan", inputKey{outCp.ComputePlanID})
 	callAssertAndPrint("invoke", "queryComputePlans", nil)
 
 	fmt.Fprintln(&out, "#### ------------ Cancel a ComputePlan ------------")
-	callAssertAndPrint("invoke", "cancelComputePlan", inputKeyOld{outCp.ComputePlanID})
+	callAssertAndPrint("invoke", "cancelComputePlan", inputKey{outCp.ComputePlanID})
 
 	// Use the output to check the EXAMPLES.md file and if asked update it
 	doc := out.String()

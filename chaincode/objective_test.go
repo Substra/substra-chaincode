@@ -34,6 +34,7 @@ func TestLeaderBoard(t *testing.T) {
 		TraintupleKey: traintupleKey,
 		ObjectiveKey:  objectiveKey,
 	}
+	inputTest.fillDefaults()
 	keyMap, err := createTesttuple(db, assetToArgs(inputTest))
 	assert.NoError(t, err)
 

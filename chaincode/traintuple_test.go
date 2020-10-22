@@ -46,7 +46,7 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "when adding traintuple without test dataset it should work: ", resp.Message)
 
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
 }
@@ -78,7 +78,7 @@ func TestTraintupleWithSingleDatasample(t *testing.T) {
 	traintuple := outputKey{}
 	err := json.Unmarshal(resp.Payload, &traintuple)
 	assert.NoError(t, err, "should be unmarshaled")
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(traintuple.Key)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintuple.Key)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
 }
@@ -196,6 +196,7 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 	assert.NoError(t, err)
 	// Failed to add a traintuple with the same rank
 	inpTraintuple = inputTraintuple{
+		Key:           RandomUUID(),
 		InModels:      []string{key},
 		Rank:          "0",
 		ComputePlanID: tuple.ComputePlanID}
@@ -205,6 +206,7 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 
 	// Failed to add a traintuple to an unexisting CommputePlan
 	inpTraintuple = inputTraintuple{
+		Key:           RandomUUID(),
 		InModels:      []string{key},
 		Rank:          "1",
 		ComputePlanID: "notarealone"}
@@ -214,6 +216,7 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 
 	// Succesfully add a traintuple to the same ComputePlanID
 	inpTraintuple = inputTraintuple{
+		Key:           RandomUUID(),
 		InModels:      []string{key},
 		Rank:          "1",
 		ComputePlanID: tuple.ComputePlanID}
@@ -231,6 +234,7 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status)
 
 	inpTraintuple = inputTraintuple{
+		Key:           RandomUUID(),
 		AlgoKey:       newAlgoKey,
 		InModels:      []string{ttkey},
 		Rank:          "2",
@@ -267,7 +271,7 @@ func TestTraintuple(t *testing.T) {
 	assert.NoError(t, err, "traintuple should unmarshal without problem")
 	traintupleKey := res.Key
 	// Query traintuple from key and check the consistency of returned arguments
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 	out := outputTraintuple{}
@@ -311,6 +315,7 @@ func TestTraintuple(t *testing.T) {
 
 	// Add traintuple with inmodel from the above-submitted traintuple
 	inpWaitingTraintuple := inputTraintuple{
+		Key:      RandomUUID(),
 		InModels: []string{string(traintupleKey)},
 	}
 	args = inpWaitingTraintuple.createDefault()
@@ -335,7 +340,7 @@ func TestTraintuple(t *testing.T) {
 	success.Key = traintupleKey
 
 	argsSlice := [][][]byte{
-		[][]byte{[]byte("logStartTrain"), keyToJSONOld(traintupleKey)},
+		[][]byte{[]byte("logStartTrain"), keyToJSON(traintupleKey)},
 		success.createDefault(),
 	}
 	traintupleStatus := []string{StatusDoing, StatusDone}
@@ -356,7 +361,7 @@ func TestTraintuple(t *testing.T) {
 	}
 
 	// Query Traintuple From key
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(traintupleKey)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple with status %d and message %s", resp.Status, resp.Message)
 	endTraintuple := outputTraintuple{}
@@ -369,7 +374,7 @@ func TestTraintuple(t *testing.T) {
 	assert.Exactly(t, expected, endTraintuple, "retreived Traintuple does not correspond to what is expected")
 
 	// query all traintuples related to a traintuple with the same algo
-	args = [][]byte{[]byte("queryModelDetails"), keyToJSONOld(traintupleKey)}
+	args = [][]byte{[]byte("queryModelDetails"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying model details with status %d and message %s", resp.Status, resp.Message)
 	payload := outputModelDetails{}
@@ -388,18 +393,18 @@ func TestQueryTraintupleNotFound(t *testing.T) {
 	registerItem(t, *mockStub, "traintuple")
 
 	// queryTraintuple: normal case
-	args := [][]byte{[]byte("queryTraintuple"), keyToJSONOld(traintupleKey)}
+	args := [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryTraintuple: key does not exist
-	notFoundKey := "eedbb7c31f62244c0f34461cc168804227115793d01c270021fe3f7935482eed"
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(notFoundKey)}
+	notFoundKey := "eedbb7c3-1f62-244c-0f34-461cc1688042"
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(notFoundKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryTraintuple: key does not exist and use existing other asset type key
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSONOld(algoHash)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(algoKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 }
@@ -421,6 +426,7 @@ func TestInsertTraintupleTwice(t *testing.T) {
 	tuple, err := db.GetTraintuple(traintupleKey)
 	assert.NoError(t, err)
 	// create a second traintuple in the same ComputePlan
+	inpTraintuple.Key = RandomUUID()
 	inpTraintuple.Rank = "1"
 	inpTraintuple.ComputePlanID = tuple.ComputePlanID
 	inpTraintuple.InModels = []string{traintupleKey}

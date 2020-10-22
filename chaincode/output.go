@@ -151,9 +151,9 @@ type outputTraintuple struct {
 }
 
 //Fill is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
-func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintuple, traintupleKey string) (err error) {
+func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintuple) (err error) {
 
-	outputTraintuple.Key = traintupleKey
+	outputTraintuple.Key = traintuple.Key
 	outputTraintuple.Creator = traintuple.Creator
 	outputTraintuple.Permissions.Fill(traintuple.Permissions)
 	outputTraintuple.Log = traintuple.Log
@@ -229,12 +229,12 @@ type outputTesttuple struct {
 	TraintupleType string            `json:"traintuple_type"`
 }
 
-func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
+func (out *outputTesttuple) Fill(db *LedgerDB, in Testtuple) error {
+	out.Key = in.Key
 	out.Certified = in.Certified
 	out.ComputePlanID = in.ComputePlanID
 	out.Creator = in.Creator
 	out.Dataset = in.Dataset
-	out.Key = key
 	out.Log = in.Log
 	out.Metadata = initMapOutput(in.Metadata)
 	out.Rank = in.Rank
