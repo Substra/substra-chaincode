@@ -130,7 +130,7 @@ type Traintuple struct {
 	Tag           string            `json:"tag"`
 	Dataset       *Dataset          `json:"dataset"`
 	InModelKeys   []string          `json:"in_models"`
-	OutModel      *HashDress        `json:"out_model"`
+	OutModel      *HashDressKey     `json:"out_model"`
 	Permissions   Permissions       `json:"permissions"`
 }
 
@@ -166,20 +166,20 @@ type Aggregatetuple struct {
 	Status        string            `json:"status"`
 	Tag           string            `json:"tag"`
 	InModelKeys   []string          `json:"in_models"`
-	OutModel      *HashDress        `json:"out_model"`
+	OutModel      *HashDressKey     `json:"out_model"`
 	Permissions   Permissions       `json:"permissions"` // TODO (aggregate): what do permissions mean here?
 	Worker        string            `json:"worker"`
 }
 
 // CompositeTraintupleOutModel is the out-model of a CompositeTraintuple
 type CompositeTraintupleOutModel struct {
-	OutModel    *HashDress  `json:"out_model"`
-	Permissions Permissions `json:"permissions"`
+	OutModel    *HashDressKey `json:"out_model"`
+	Permissions Permissions   `json:"permissions"`
 }
 
 // CompositeTraintupleOutHeadModel is the out-model of a CompositeTraintuple
 type CompositeTraintupleOutHeadModel struct {
-	OutModel    *Hash       `json:"out_model"`
+	OutModel    *HashKey    `json:"out_model"`
 	Permissions Permissions `json:"permissions"`
 }
 
@@ -242,8 +242,21 @@ type Hash struct {
 	Hash string `json:"hash"`
 }
 
+// HashKey ...
+type HashKey struct {
+	Key  string `json:"key"`
+	Hash string `json:"hash"`
+}
+
 // HashDress stores a hash and a Storage Address
 type HashDress struct {
+	Hash           string `json:"hash"`
+	StorageAddress string `json:"storage_address"`
+}
+
+// HashDressKey ...
+type HashDressKey struct {
+	Key            string `json:"key"`
 	Hash           string `json:"hash"`
 	StorageAddress string `json:"storage_address"`
 }
@@ -265,6 +278,7 @@ type HashDressNameKey struct {
 
 // Model stores the traintupleKey leading to the model, its hash and storage addressl
 type Model struct {
+	Key            string `json:"key"`
 	TraintupleKey  string `json:"traintuple_key"`
 	Hash           string `json:"hash"`
 	StorageAddress string `json:"storage_address"`

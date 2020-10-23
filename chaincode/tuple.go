@@ -162,18 +162,18 @@ func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err erro
 
 func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, error) {
 	var out outputPermissions
-	inp := inputKey64{}
+	inp := inputKey{}
 	err := AssetFromJSON(args, &inp)
 	if err != nil {
 		return out, err
 	}
-	modelHash := inp.Key
-	keys, err := db.GetIndexKeys("tuple~modelHash~key", []string{"tuple", modelHash})
+	modelKey := inp.Key
+	keys, err := db.GetIndexKeys("tuple~modelKey~key", []string{"tuple", modelKey})
 	if err != nil {
 		return out, err
 	}
 	if len(keys) == 0 {
-		return out, errors.NotFound("Could not find a model for key %s", modelHash)
+		return out, errors.NotFound("Could not find a model for key %s", modelKey)
 	}
 	tupleKey := keys[0]
 	tupleType, err := db.GetAssetType(tupleKey)
@@ -191,9 +191,9 @@ func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, erro
 		if err != nil {
 			return out, errors.Internal(err, "queryModelPermissions:")
 		}
-		// if `modelHash` refers to the head out-model, return the head out-model permissions
-		// if `modelHash` refers to the trunk out-model, do nothing (default to "public processable")
-		if tuple.OutHeadModel.OutModel.Hash == modelHash {
+		// if `modelKey` refers to the head out-model, return the head out-model permissions
+		// if `modelKey` refers to the trunk out-model, do nothing (default to "public processable")
+		if tuple.OutHeadModel.OutModel.Key == modelKey {
 			modelPermissions = tuple.OutHeadModel.Permissions
 		}
 	}
@@ -274,6 +274,6 @@ func determineTupleStatus(db *LedgerDB, tupleStatus, computePlanID string) (stri
 	return tupleStatus, nil
 }
 
-func createModelIndex(db *LedgerDB, modelHash, tupleKey string) error {
-	return db.CreateIndex("tuple~modelHash~key", []string{"tuple", modelHash, tupleKey})
+func createModelIndex(db *LedgerDB, modelKey, tupleKey string) error {
+	return db.CreateIndex("tuple~modelKey~key", []string{"tuple", modelKey, tupleKey})
 }

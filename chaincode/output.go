@@ -143,7 +143,7 @@ type outputTraintuple struct {
 	InModels      []*Model          `json:"in_models"`
 	Log           string            `json:"log"`
 	Metadata      map[string]string `json:"metadata"`
-	OutModel      *HashDress        `json:"out_model"`
+	OutModel      *HashDressKey     `json:"out_model"`
 	Permissions   outputPermissions `json:"permissions"`
 	Rank          int               `json:"rank"`
 	Status        string            `json:"status"`
@@ -188,6 +188,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 			TraintupleKey: inModelKey,
 		}
 		if parentTraintuple.OutModel != nil {
+			inModel.Key = parentTraintuple.Key
 			inModel.Hash = parentTraintuple.OutModel.Hash
 			inModel.StorageAddress = parentTraintuple.OutModel.StorageAddress
 		}

@@ -193,7 +193,7 @@ func TestQueryModelPermissions(t *testing.T) {
 	traintupleToDone(t, db, traintupleKey)
 	outTrain, err := queryTraintuple(db, keyToArgs(traintupleKey))
 	assert.NoError(t, err)
-	outPerm, err := queryModelPermissions(db, keyToArgs(outTrain.OutModel.Hash))
+	outPerm, err := queryModelPermissions(db, keyToArgs(outTrain.OutModel.Key))
 	assert.NoError(t, err)
 	assert.NotZero(t, outPerm)
 }
@@ -215,7 +215,7 @@ func TestQueryHeadModelPermissions(t *testing.T) {
 
 	outTrain, err := queryCompositeTraintuple(db, keyToArgs(compositeTraintupleKey))
 	assert.NoError(t, err)
-	outPerm, err := queryModelPermissions(db, keyToArgs(outTrain.OutHeadModel.OutModel.Hash))
+	outPerm, err := queryModelPermissions(db, keyToArgs(outTrain.OutHeadModel.OutModel.Key))
 	assert.NoError(t, err)
 	assert.NotZero(t, outPerm)
 	assert.False(t, outPerm.Process.Public)

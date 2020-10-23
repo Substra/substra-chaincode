@@ -373,9 +373,11 @@ func TestTraintupleComposite(t *testing.T) {
 	endTraintuple := outputCompositeTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutHeadModel.OutModel = &Hash{
+	expected.OutHeadModel.OutModel = &HashKey{
+		Key:  headModelKey,
 		Hash: headModelHash}
-	expected.OutTrunkModel.OutModel = &HashDress{
+	expected.OutTrunkModel.OutModel = &HashDressKey{
+		Key:            trunkModelKey,
 		Hash:           trunkModelHash,
 		StorageAddress: trunkModelAddress}
 	expected.Status = traintupleStatus[1]
@@ -768,10 +770,12 @@ func TestCorrectParent(t *testing.T) {
 
 	// fetch aggregate child, and check its in-model is the parent's trunk out-model
 	child1, _ := queryAggregatetuple(db, assetToArgs(inputKey{Key: child1Key}))
+	assert.Equal(t, trunkModelKey, child1.InModels[0].Key)
 	assert.Equal(t, trunkModelHash, child1.InModels[0].Hash)
 
 	// fetch composite child, and check its head in-model is the parent's head out-model
 	child2, _ := queryCompositeTraintuple(db, assetToArgs(inputKey{Key: child2Key}))
+	assert.Equal(t, headModelKey, child2.InHeadModel.Key)
 	assert.Equal(t, headModelHash, child2.InHeadModel.Hash)
 }
 

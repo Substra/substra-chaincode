@@ -479,6 +479,7 @@ Smart contract: `logSuccessTrain`
  "key": string (required,len=36),
  "log": string (lte=200),
  "out_model": (required){
+   "key": string (required,len=36),
    "hash": string (required,len=64,hexadecimal),
    "storage_address": string (required),
  },
@@ -486,7 +487,7 @@ Smart contract: `logSuccessTrain`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"b0289ab8-3a71-f01e-2b72-0259a6452244\",\"log\":\"no error, ah ah ah\",\"out_model\":{\"hash\":\"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed\",\"storage_address\":\"https://substrabac/model/toto\"}}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"b0289ab8-3a71-f01e-2b72-0259a6452244\",\"log\":\"no error, ah ah ah\",\"out_model\":{\"key\":\"eedbb7c3-1f62-244c-0f3a-761cc1688042\",\"hash\":\"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed\",\"storage_address\":\"https://substrabac/model/toto\"}}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -515,6 +516,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"b0289ab
  "metadata": {},
  "out_model": {
   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+  "key": "eedbb7c3-1f62-244c-0f3a-761cc1688042",
   "storage_address": "https://substrabac/model/toto"
  },
  "permissions": {
@@ -568,6 +570,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"b0289ab
  "metadata": {},
  "out_model": {
   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+  "key": "eedbb7c3-1f62-244c-0f3a-761cc1688042",
   "storage_address": "https://substrabac/model/toto"
  },
  "permissions": {
@@ -1138,6 +1141,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
   "metadata": {},
   "out_model": {
    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+   "key": "eedbb7c3-1f62-244c-0f3a-761cc1688042",
    "storage_address": "https://substrabac/model/toto"
   },
   "permissions": {
@@ -1186,6 +1190,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    "metadata": {},
    "out_model": {
     "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+    "key": "eedbb7c3-1f62-244c-0f3a-761cc1688042",
     "storage_address": "https://substrabac/model/toto"
    },
    "permissions": {
@@ -1222,6 +1227,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    "in_models": [
     {
      "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+     "key": "b0289ab8-3a71-f01e-2b72-0259a6452244",
      "storage_address": "https://substrabac/model/toto",
      "traintuple_key": "b0289ab8-3a71-f01e-2b72-0259a6452244"
     }
@@ -1254,7 +1260,7 @@ Smart contract: `queryModelPermissions`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode query -n mycc -c '{"Args":["queryModelPermissions","{\"key\":\"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed\"}"]}' -C myc
+peer chaincode query -n mycc -c '{"Args":["queryModelPermissions","{\"key\":\"eedbb7c3-1f62-244c-0f3a-761cc1688042\"}"]}' -C myc
 ```
 ##### Command output:
 ```json

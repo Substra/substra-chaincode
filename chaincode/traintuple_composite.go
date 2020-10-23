@@ -347,27 +347,29 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 		return
 	}
 
-	compositeTraintuple.OutHeadModel.OutModel = &Hash{
+	compositeTraintuple.OutHeadModel.OutModel = &HashKey{
+		Key:  inp.OutHeadModel.Key,
 		Hash: inp.OutHeadModel.Hash}
 
-	compositeTraintuple.OutTrunkModel.OutModel = &HashDress{
+	compositeTraintuple.OutTrunkModel.OutModel = &HashDressKey{
+		Key:            inp.OutTrunkModel.Key,
 		Hash:           inp.OutTrunkModel.Hash,
 		StorageAddress: inp.OutTrunkModel.StorageAddress}
 	compositeTraintuple.Log += inp.Log
 
-	err = createModelIndex(db, inp.OutHeadModel.Hash, compositeTraintupleKey)
+	err = createModelIndex(db, inp.OutHeadModel.Key, compositeTraintupleKey)
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutHeadModel.Hash)
+	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutHeadModel.Key)
 	if err != nil {
 		return
 	}
-	err = createModelIndex(db, inp.OutTrunkModel.Hash, compositeTraintupleKey)
+	err = createModelIndex(db, inp.OutTrunkModel.Key, compositeTraintupleKey)
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutTrunkModel.Hash)
+	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutTrunkModel.Key)
 	if err != nil {
 		return
 	}

@@ -763,7 +763,6 @@ func TestCleanModels(t *testing.T) {
 	assert.Len(t, db.event.ComputePlans, 1)
 	assert.Equal(t, db.event.ComputePlans[0].Status, StatusDone)
 	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 0)
-
 }
 
 func TestCreateSameComputePlanTwice(t *testing.T) {

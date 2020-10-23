@@ -122,14 +122,9 @@ type inputKey struct {
 	Key string `validate:"required,len=36" json:"key"`
 }
 
-// TODO: delete
-type inputKey64 struct {
-	Key string `validate:"required,len=64,hexadecimal" json:"key"`
-}
-
 type inputLogSuccessTrain struct {
 	inputLog
-	OutModel inputHashDress `validate:"required" json:"out_model"`
+	OutModel inputHashDressKey `validate:"required" json:"out_model"`
 }
 type inputLogSuccessTest struct {
 	inputLog
@@ -150,7 +145,18 @@ type inputHash struct {
 	Hash string `validate:"required,len=64,hexadecimal" json:"hash"`
 }
 
+type inputHashKey struct {
+	Key  string `validate:"required,len=36" json:"key"`
+	Hash string `validate:"required,len=64,hexadecimal" json:"hash"`
+}
+
 type inputHashDress struct {
+	Hash           string `validate:"required,len=64,hexadecimal" json:"hash"`
+	StorageAddress string `validate:"required" json:"storage_address"`
+}
+
+type inputHashDressKey struct {
+	Key            string `validate:"required,len=36" json:"key"`
 	Hash           string `validate:"required,len=64,hexadecimal" json:"hash"`
 	StorageAddress string `validate:"required" json:"storage_address"`
 }

@@ -367,7 +367,8 @@ func TestTraintuple(t *testing.T) {
 	endTraintuple := outputTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutModel = &HashDress{
+	expected.OutModel = &HashDressKey{
+		Key:            modelKey,
 		Hash:           modelHash,
 		StorageAddress: modelAddress}
 	expected.Status = traintupleStatus[1]

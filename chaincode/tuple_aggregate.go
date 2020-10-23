@@ -354,16 +354,17 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 		return
 	}
 
-	aggregatetuple.OutModel = &HashDress{
+	aggregatetuple.OutModel = &HashDressKey{
+		Key:            inp.OutModel.Key,
 		Hash:           inp.OutModel.Hash,
 		StorageAddress: inp.OutModel.StorageAddress}
 	aggregatetuple.Log += inp.Log
 
-	err = createModelIndex(db, inp.OutModel.Hash, aggregatetupleKey)
+	err = createModelIndex(db, inp.OutModel.Key, aggregatetupleKey)
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, aggregatetuple.ComputePlanID, aggregatetupleKey, aggregatetuple.OutModel.Hash)
+	err = TryAddIntermediaryModel(db, aggregatetuple.ComputePlanID, aggregatetupleKey, aggregatetuple.OutModel.Key)
 	if err != nil {
 		return
 	}

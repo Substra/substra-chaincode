@@ -303,16 +303,17 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 		return
 	}
 
-	traintuple.OutModel = &HashDress{
+	traintuple.OutModel = &HashDressKey{
+		Key:            inp.OutModel.Key,
 		Hash:           inp.OutModel.Hash,
 		StorageAddress: inp.OutModel.StorageAddress}
 	traintuple.Log += inp.Log
 
-	err = createModelIndex(db, inp.OutModel.Hash, traintupleKey)
+	err = createModelIndex(db, inp.OutModel.Key, traintupleKey)
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, traintuple.ComputePlanID, traintupleKey, traintuple.OutModel.Hash)
+	err = TryAddIntermediaryModel(db, traintuple.ComputePlanID, traintupleKey, traintuple.OutModel.Key)
 	if err != nil {
 		return
 	}

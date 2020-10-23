@@ -253,6 +253,9 @@ func (success *inputLogSuccessTrain) fillDefaults() {
 	if success.Log == "" {
 		success.Log = "no error, ah ah ah"
 	}
+	if success.OutModel.Key == "" {
+		success.OutModel.Key = modelKey
+	}
 	if success.OutModel.Hash == "" {
 		success.OutModel.Hash = modelHash
 	}
@@ -277,8 +280,14 @@ func (success *inputLogSuccessCompositeTrain) fillDefaults() {
 	if success.Log == "" {
 		success.Log = "no error, ah ah ah"
 	}
+	if success.OutHeadModel.Key == "" {
+		success.OutHeadModel.Key = headModelKey
+	}
 	if success.OutHeadModel.Hash == "" {
 		success.OutHeadModel.Hash = headModelHash
+	}
+	if success.OutTrunkModel.Key == "" {
+		success.OutTrunkModel.Key = trunkModelKey
 	}
 	if success.OutTrunkModel.Hash == "" {
 		success.OutTrunkModel.Hash = trunkModelHash

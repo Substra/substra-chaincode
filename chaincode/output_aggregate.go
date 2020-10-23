@@ -24,7 +24,7 @@ type outputAggregatetuple struct {
 	Log           string            `json:"log"`
 	Metadata      map[string]string `json:"metadata"`
 	InModels      []*Model          `json:"in_models"`
-	OutModel      *HashDress        `json:"out_model"`
+	OutModel      *HashDressKey     `json:"out_model"`
 	Rank          int               `json:"rank"`
 	Status        string            `json:"status"`
 	Tag           string            `json:"tag"`
@@ -67,7 +67,7 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 		if inModelKey == "" {
 			break
 		}
-		hashDress, _err := db.GetOutModelHashDress(inModelKey, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
+		hashDressKey, _err := db.GetOutModelHashDressKey(inModelKey, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
 		if _err != nil {
 			err = errors.Internal("could not fill in-model with key \"%s\": %s", inModelKey, _err.Error())
 			return
@@ -75,9 +75,10 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 		inModel := &Model{
 			TraintupleKey: inModelKey,
 		}
-		if hashDress != nil {
-			inModel.Hash = hashDress.Hash
-			inModel.StorageAddress = hashDress.StorageAddress
+		if hashDressKey != nil {
+			inModel.Key = hashDressKey.Key
+			inModel.Hash = hashDressKey.Hash
+			inModel.StorageAddress = hashDressKey.StorageAddress
 		}
 		outputAggregatetuple.InModels = append(outputAggregatetuple.InModels, inModel)
 	}

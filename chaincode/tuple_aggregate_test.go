@@ -333,7 +333,8 @@ func TestTraintupleAggregate(t *testing.T) {
 	endTraintuple := outputAggregatetuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutModel = &HashDress{
+	expected.OutModel = &HashDressKey{
+		Key:            modelKey,
 		Hash:           modelHash,
 		StorageAddress: modelAddress}
 	expected.Status = traintupleStatus[1]

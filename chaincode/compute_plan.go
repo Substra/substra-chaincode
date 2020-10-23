@@ -437,7 +437,7 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey s
 
 // TryAddIntermediaryModel will reference the hash model if the compute plan ID
 // is not empty and if it's an intermediary model meaning without any children
-func TryAddIntermediaryModel(db *LedgerDB, ComputePlanID, tupleKey, modelHash string) error {
+func TryAddIntermediaryModel(db *LedgerDB, ComputePlanID, tupleKey, modelKey string) error {
 	if ComputePlanID == "" {
 		return nil
 	}
@@ -457,7 +457,7 @@ func TryAddIntermediaryModel(db *LedgerDB, ComputePlanID, tupleKey, modelHash st
 		// listed in the index
 		return nil
 	}
-	cp.State.IntermediaryModelsInUse = append(cp.State.IntermediaryModelsInUse, modelHash)
+	cp.State.IntermediaryModelsInUse = append(cp.State.IntermediaryModelsInUse, modelKey)
 
 	return cp.SaveState(db)
 }
@@ -471,16 +471,16 @@ func (cp *ComputePlan) UpdateIntermediaryModelsInuse(db *LedgerDB) ([]string, er
 		return []string{}, nil
 	}
 	var doneModels, inUseModels []string
-	for _, hash := range cp.State.IntermediaryModelsInUse {
+	for _, modelKey := range cp.State.IntermediaryModelsInUse {
 		done := true
-		keys, err := db.GetIndexKeys("tuple~modelHash~key", []string{"tuple", hash})
+		keys, err := db.GetIndexKeys("tuple~modelKey~key", []string{"tuple", modelKey})
 		if err != nil {
 			return []string{}, err
 		}
 		if len(keys) == 0 {
 			// This occurs for the hashes added during the same transaction. But
 			// thoses models can just be added to the in use ones
-			inUseModels = append(inUseModels, hash)
+			inUseModels = append(inUseModels, modelKey)
 			continue
 		}
 		tupleKey := keys[0]
@@ -499,13 +499,13 @@ func (cp *ComputePlan) UpdateIntermediaryModelsInuse(db *LedgerDB) ([]string, er
 				return []string{}, err
 			}
 			if tuple.Status != StatusDone {
-				inUseModels = append(inUseModels, hash)
+				inUseModels = append(inUseModels, modelKey)
 				done = false
 				break
 			}
 		}
 		if done {
-			doneModels = append(doneModels, hash)
+			doneModels = append(doneModels, modelKey)
 		}
 	}
 	cp.State.IntermediaryModelsInUse = inUseModels
