@@ -228,22 +228,11 @@ func formatErrorResponse(err error) peer.Response {
 	}
 }
 
-// main function starts up the chaincode in the container during instantiate
-/*func main() {
-	// TODO use the same level as the shim or an env variable
-	logger.SetLevel(shim.LogDebug)
-	if err := shim.Start(new(SubstraChaincode)); err != nil {
-		fmt.Printf("Error starting SubstraChaincode chaincode: %s", err)
-	}
-}
-*/
-
-
 func main() {
 
 	logger.SetOutput(os.Stdout)
 	logger.SetLevel(logrus.DebugLevel)
-	logger.Infof("Start SubstraChaincode server")
+	logger.Infof("Load TLS certificates")
 
 	key, err := ioutil.ReadFile("/var/hyperledger/tls/client/pair/tls.key")
 	if err != nil {
@@ -273,6 +262,7 @@ func main() {
 	}
 
 	// Start the chaincode external server
+	logger.Infof("Start Substra ChaincodeServer")
 	err = server.Start()
 
 	if err != nil {
