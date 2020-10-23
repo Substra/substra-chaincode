@@ -292,7 +292,7 @@ func (db *LedgerDB) GetObjective(key string) (Objective, error) {
 // GetDataManager fetches a DataManager from the ledger using its unique key
 func (db *LedgerDB) GetDataManager(key string) (DataManager, error) {
 	dataManager := DataManager{}
-	if err := db.Get(key, &dataManager); err != nil {
+	if err := db.Get(keys, &dataManager); err != nil {
 		return dataManager, err
 	}
 	if dataManager.AssetType != DataManagerType {
