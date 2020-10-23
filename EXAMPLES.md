@@ -700,7 +700,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   "log": "",
   "metadata": {},
   "objective": {
-   "hash": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
@@ -736,7 +736,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   "log": "",
   "metadata": {},
   "objective": {
-   "hash": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
@@ -789,7 +789,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"bbbada11-5
  "log": "",
  "metadata": {},
  "objective": {
-  "hash": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+  "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
   "metrics": {
    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storage_address": "https://toto/objective/222/metrics"
@@ -843,7 +843,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"bbbada11
  "log": "no error, ah ah ah",
  "metadata": {},
  "objective": {
-  "hash": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+  "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
   "metrics": {
    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storage_address": "https://toto/objective/222/metrics"
@@ -895,7 +895,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"bbbada11-
  "log": "no error, ah ah ah",
  "metadata": {},
  "objective": {
-  "hash": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+  "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
   "metrics": {
    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storage_address": "https://toto/objective/222/metrics"
@@ -940,7 +940,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "log": "",
   "metadata": {},
   "objective": {
-   "hash": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
@@ -976,7 +976,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "log": "no error, ah ah ah",
   "metadata": {},
   "objective": {
-   "hash": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
@@ -1012,7 +1012,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "log": "",
   "metadata": {},
   "objective": {
-   "hash": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
@@ -1067,7 +1067,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
    "log": "",
    "metadata": {},
    "objective": {
-    "hash": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+    "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
     "metrics": {
      "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
      "storage_address": "https://toto/objective/222/metrics"
@@ -1104,7 +1104,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
   "log": "no error, ah ah ah",
   "metadata": {},
   "objective": {
-   "hash": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
    "metrics": {
     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
