@@ -307,7 +307,6 @@ type TtDataset struct {
 
 // TtObjective stores info about a objective in a Traintuple
 type TtObjective struct {
-	// TODO rename to key
 	Key     string     `json:"key"`
 	Metrics *HashDress `json:"metrics"`
 }
