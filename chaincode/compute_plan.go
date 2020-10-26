@@ -478,7 +478,7 @@ func (cp *ComputePlan) UpdateIntermediaryModelsInuse(db *LedgerDB) ([]string, er
 			return []string{}, err
 		}
 		if len(keys) == 0 {
-			// This occurs for the hashes added during the same transaction. But
+			// This occurs for the keys added during the same transaction. But
 			// thoses models can just be added to the in use ones
 			inUseModels = append(inUseModels, modelKey)
 			continue
