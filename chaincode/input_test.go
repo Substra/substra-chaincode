@@ -370,3 +370,8 @@ func (testtuple *inputTesttuple) fillDefaults() {
 func (testtuple *inputTesttuple) getArgs() [][]byte {
 	return append([][]byte{[]byte("createTesttuple")}, assetToJSON(testtuple))
 }
+
+func (computePlan *inputComputePlan) getArgs() [][]byte {
+	args := append([][]byte{[]byte("createComputePlan")}, assetToJSON(computePlan))
+	return args
+}

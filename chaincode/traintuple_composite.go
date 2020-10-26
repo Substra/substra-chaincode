@@ -161,26 +161,13 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 		}
 		return nil
 	}
+	if inp.Rank != "" && inp.ComputePlanID == "" {
+		err = errors.BadRequest("invalid inputs: non-empty 'rank' and empty 'compute_plan_key'")
+		return err
+	}
 	traintuple.Rank, err = strconv.Atoi(inp.Rank)
 	if err != nil {
 		return err
-	}
-	if inp.ComputePlanID == "" {
-		if traintuple.Rank != 0 {
-			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
-			return err
-		}
-		computePlan := ComputePlan{}
-		computePlan.AddTuple(CompositeTraintupleType, traintupleKey, traintuple.Status)
-		traintuple.ComputePlanID, err = GetNewUUID()
-		if err != nil {
-			return err
-		}
-		err = computePlan.Create(db, traintuple.ComputePlanID)
-		if err != nil {
-			return err
-		}
-		return nil
 	}
 	traintuple.ComputePlanID = inp.ComputePlanID
 	computePlan, err := db.GetComputePlan(inp.ComputePlanID)

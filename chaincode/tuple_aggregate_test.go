@@ -131,13 +131,18 @@ func TestTraintupleComputePlanCreationAggregate(t *testing.T) {
 	require.EqualValues(t, 400, resp.Status, "should failed for missing rank")
 	require.Contains(t, resp.Message, "invalid inputs, a ComputePlan should have a rank", "invalid error message")
 
+	cpKey := RandomUUID()
+	inCP := inputComputePlan{ComputePlanID: cpKey}
+	resp = mockStub.MockInvoke("42", inCP.getArgs())
+	require.EqualValues(t, 200, resp.Status)
+
 	inpTraintuple = inputAggregatetuple{Rank: "1"}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 400, resp.Status, "should failed for invalid rank")
-	require.Contains(t, resp.Message, "invalid inputs, a new ComputePlan should have a rank 0")
+	require.Contains(t, resp.Message, "invalid inputs: non-empty 'rank' and empty 'compute_plan_key'")
 
-	inpTraintuple = inputAggregatetuple{Rank: "0"}
+	inpTraintuple = inputAggregatetuple{Rank: "0", ComputePlanID: cpKey}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
@@ -147,10 +152,10 @@ func TestTraintupleComputePlanCreationAggregate(t *testing.T) {
 	key := res.Key
 	require.EqualValues(t, aggregatetupleKey, key)
 
-	inpTraintuple = inputAggregatetuple{Rank: "0"}
+	inpTraintuple = inputAggregatetuple{}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	require.EqualValues(t, 409, resp.Status, "should failed for existing ComputePlanID")
+	require.EqualValues(t, 409, resp.Status, "should failed for existing aggregatetuple key")
 	require.Contains(t, resp.Message, "already exists")
 
 	require.EqualValues(t, 409, resp.Status, "should failed for existing FLTask")
@@ -167,24 +172,30 @@ func TestTraintupleMultipleCommputePlanCreationsAggregate(t *testing.T) {
 
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "aggregateAlgo")
+	db := NewLedgerDB(mockStub)
 
-	inpTraintuple := inputAggregatetuple{Rank: "0"}
+	cpKey := RandomUUID()
+	inCP := inputComputePlan{ComputePlanID: cpKey}
+	resp := mockStub.MockInvoke("42", inCP.getArgs())
+	require.EqualValues(t, 200, resp.Status)
+
+	inpTraintuple := inputAggregatetuple{Rank: "0", ComputePlanID: cpKey}
 	args := inpTraintuple.createDefault()
-	resp := mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	key := res.Key
-	db := NewLedgerDB(mockStub)
-	tuple, err := db.GetAggregatetuple(key)
+	_, err = db.GetAggregatetuple(key)
 	assert.NoError(t, err)
+
 	// Failed to add a traintuple with the same rank
 	inpTraintuple = inputAggregatetuple{
 		Key:           RandomUUID(),
 		InModels:      []string{key},
 		Rank:          "0",
-		ComputePlanID: tuple.ComputePlanID}
+		ComputePlanID: cpKey}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add an aggregate tuple of the same rank")
@@ -204,7 +215,7 @@ func TestTraintupleMultipleCommputePlanCreationsAggregate(t *testing.T) {
 		Key:           RandomUUID(),
 		InModels:      []string{key},
 		Rank:          "1",
-		ComputePlanID: tuple.ComputePlanID}
+		ComputePlanID: cpKey}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create an aggregate tuple with the same ComputePlanID")
@@ -394,8 +405,13 @@ func TestInsertTraintupleTwiceAggregate(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
 	// create a aggregate tuple and start a ComplutePlan
+	cpKey := RandomUUID()
+	inCP := inputComputePlan{ComputePlanID: cpKey}
+	resp = mockStub.MockInvoke("42", inCP.getArgs())
+	require.EqualValues(t, 200, resp.Status)
 	inpTraintuple := inputAggregatetuple{
-		Rank: "0",
+		Rank:          "0",
+		ComputePlanID: cpKey,
 	}
 	inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", methodAndAssetToByte("createAggregatetuple", inpTraintuple))
