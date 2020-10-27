@@ -258,7 +258,7 @@ func TestTraintupleAggregate(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried aggregate tuple")
 	expected := outputAggregatetuple{
 		Key: aggregatetupleKey,
-		Algo: &HashDressNameKey{
+		Algo: &KeyHashDressName{
 			Key:            aggregateAlgoKey,
 			Hash:           aggregateAlgoHash,
 			Name:           aggregateAlgoName,
@@ -344,7 +344,7 @@ func TestTraintupleAggregate(t *testing.T) {
 	endTraintuple := outputAggregatetuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutModel = &HashDressKey{
+	expected.OutModel = &KeyHashDress{
 		Key:            modelKey,
 		Hash:           modelHash,
 		StorageAddress: modelAddress}

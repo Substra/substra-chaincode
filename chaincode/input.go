@@ -124,7 +124,7 @@ type inputKey struct {
 
 type inputLogSuccessTrain struct {
 	inputLog
-	OutModel inputHashDressKey `validate:"required" json:"out_model"`
+	OutModel inputKeyHashDress `validate:"required" json:"out_model"`
 }
 type inputLogSuccessTest struct {
 	inputLog
@@ -141,21 +141,12 @@ type inputLog struct {
 	Log string `validate:"lte=200" json:"log"`
 }
 
-type inputHash struct {
-	Hash string `validate:"required,len=64,hexadecimal" json:"hash"`
-}
-
-type inputHashKey struct {
+type inputKeyHash struct {
 	Key  string `validate:"required,len=36" json:"key"`
 	Hash string `validate:"required,len=64,hexadecimal" json:"hash"`
 }
 
-type inputHashDress struct {
-	Hash           string `validate:"required,len=64,hexadecimal" json:"hash"`
-	StorageAddress string `validate:"required" json:"storage_address"`
-}
-
-type inputHashDressKey struct {
+type inputKeyHashDress struct {
 	Key            string `validate:"required,len=36" json:"key"`
 	Hash           string `validate:"required,len=64,hexadecimal" json:"hash"`
 	StorageAddress string `validate:"required" json:"storage_address"`

@@ -22,7 +22,7 @@ type outputCompositeAlgo struct {
 
 type outputCompositeTraintuple struct {
 	Key           string                `json:"key"`
-	Algo          *HashDressNameKey     `json:"algo"`
+	Algo          *KeyHashDressName     `json:"algo"`
 	Creator       string                `json:"creator"`
 	Dataset       *outputTtDataset      `json:"dataset"`
 	ComputePlanID string                `json:"compute_plan_id"`
@@ -38,12 +38,12 @@ type outputCompositeTraintuple struct {
 }
 
 type outHeadModelComposite struct {
-	OutModel    *HashKey          `json:"out_model"`
+	OutModel    *KeyHash          `json:"out_model"`
 	Permissions outputPermissions `json:"permissions"`
 }
 
 type outModelComposite struct {
-	OutModel    *HashDressKey     `json:"out_model"`
+	OutModel    *KeyHashDress     `json:"out_model"`
 	Permissions outputPermissions `json:"permissions"`
 }
 
@@ -70,7 +70,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		err = errors.Internal("could not retrieve composite algo with key %s - %s", traintuple.AlgoKey, err.Error())
 		return
 	}
-	outputCompositeTraintuple.Algo = &HashDressNameKey{
+	outputCompositeTraintuple.Algo = &KeyHashDressName{
 		Key:            algo.Key,
 		Name:           algo.Name,
 		Hash:           algo.Hash,

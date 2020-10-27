@@ -288,7 +288,7 @@ func TestTraintupleComposite(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried composite traintuple")
 	expected := outputCompositeTraintuple{
 		Key: compositeTraintupleKey,
-		Algo: &HashDressNameKey{
+		Algo: &KeyHashDressName{
 			Key:            compositeAlgoKey,
 			Hash:           compositeAlgoHash,
 			Name:           compositeAlgoName,
@@ -383,10 +383,10 @@ func TestTraintupleComposite(t *testing.T) {
 	endTraintuple := outputCompositeTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutHeadModel.OutModel = &HashKey{
+	expected.OutHeadModel.OutModel = &KeyHash{
 		Key:  headModelKey,
 		Hash: headModelHash}
-	expected.OutTrunkModel.OutModel = &HashDressKey{
+	expected.OutTrunkModel.OutModel = &KeyHashDress{
 		Key:            trunkModelKey,
 		Hash:           trunkModelHash,
 		StorageAddress: trunkModelAddress}

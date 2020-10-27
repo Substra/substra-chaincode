@@ -373,7 +373,7 @@ func (db *LedgerDB) GetComputePlan(ID string) (ComputePlan, error) {
 // GetOutModelHashDressKey retrieves an out-Model from a tuple key.
 // In case of CompositeTraintuple it return its trunk model
 // Return an error if the tupleKey was not found.
-func (db *LedgerDB) GetOutModelHashDressKey(tupleKey string, allowedAssetTypes []AssetType) (*HashDressKey, error) {
+func (db *LedgerDB) GetOutModelHashDressKey(tupleKey string, allowedAssetTypes []AssetType) (*KeyHashDress, error) {
 	for _, assetType := range allowedAssetTypes {
 		switch assetType {
 		case CompositeTraintupleType:
@@ -405,7 +405,7 @@ func (db *LedgerDB) GetOutModelHashDressKey(tupleKey string, allowedAssetTypes [
 
 // GetOutHeadModelHashKey retrieves an out-Head-Model from a composite traintuple key.
 // Return an error if the compositeTraintupleKey was not found.
-func (db *LedgerDB) GetOutHeadModelHashKey(compositeTraintupleKey string) (*HashKey, error) {
+func (db *LedgerDB) GetOutHeadModelHashKey(compositeTraintupleKey string) (*KeyHash, error) {
 	tuple, err := db.GetCompositeTraintuple(compositeTraintupleKey)
 	if err != nil {
 		return nil, err

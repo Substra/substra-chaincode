@@ -130,7 +130,7 @@ type Traintuple struct {
 	Tag           string            `json:"tag"`
 	Dataset       *Dataset          `json:"dataset"`
 	InModelKeys   []string          `json:"in_models"`
-	OutModel      *HashDressKey     `json:"out_model"`
+	OutModel      *KeyHashDress     `json:"out_model"`
 	Permissions   Permissions       `json:"permissions"`
 }
 
@@ -166,20 +166,20 @@ type Aggregatetuple struct {
 	Status        string            `json:"status"`
 	Tag           string            `json:"tag"`
 	InModelKeys   []string          `json:"in_models"`
-	OutModel      *HashDressKey     `json:"out_model"`
+	OutModel      *KeyHashDress     `json:"out_model"`
 	Permissions   Permissions       `json:"permissions"` // TODO (aggregate): what do permissions mean here?
 	Worker        string            `json:"worker"`
 }
 
 // CompositeTraintupleOutModel is the out-model of a CompositeTraintuple
 type CompositeTraintupleOutModel struct {
-	OutModel    *HashDressKey `json:"out_model"`
+	OutModel    *KeyHashDress `json:"out_model"`
 	Permissions Permissions   `json:"permissions"`
 }
 
 // CompositeTraintupleOutHeadModel is the out-model of a CompositeTraintuple
 type CompositeTraintupleOutHeadModel struct {
-	OutModel    *HashKey    `json:"out_model"`
+	OutModel    *KeyHash    `json:"out_model"`
 	Permissions Permissions `json:"permissions"`
 }
 
@@ -237,13 +237,8 @@ type TrainTask struct {
 // Struct used in the representation of elements stored in the ledger
 // ---------------------------------------------------------------------------------
 
-// Hash stores a hash
-type Hash struct {
-	Hash string `json:"hash"`
-}
-
-// HashKey ...
-type HashKey struct {
+// KeyHash ...
+type KeyHash struct {
 	Key  string `json:"key"`
 	Hash string `json:"hash"`
 }
@@ -254,8 +249,8 @@ type HashDress struct {
 	StorageAddress string `json:"storage_address"`
 }
 
-// HashDressKey ...
-type HashDressKey struct {
+// KeyHashDress ...
+type KeyHashDress struct {
 	Key            string `json:"key"`
 	Hash           string `json:"hash"`
 	StorageAddress string `json:"storage_address"`
@@ -263,17 +258,17 @@ type HashDressKey struct {
 
 // HashDressName stores a hash, storage address and a name
 type HashDressName struct {
-	Name           string `json:"name"`
 	Hash           string `json:"hash"`
 	StorageAddress string `json:"storage_address"`
+	Name           string `json:"name"`
 }
 
-// HashDressNameKey ...
-type HashDressNameKey struct {
+// KeyHashDressName ...
+type KeyHashDressName struct {
 	Key            string `json:"key"`
-	Name           string `json:"name"`
 	Hash           string `json:"hash"`
 	StorageAddress string `json:"storage_address"`
+	Name           string `json:"name"`
 }
 
 // Model stores the traintupleKey leading to the model, its hash and storage addressl

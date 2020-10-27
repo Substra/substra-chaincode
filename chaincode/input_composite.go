@@ -35,6 +35,6 @@ type inputCompositeAlgo struct {
 
 type inputLogSuccessCompositeTrain struct {
 	inputLog
-	OutHeadModel  inputHashKey      `validate:"required" json:"out_head_model"`
-	OutTrunkModel inputHashDressKey `validate:"required" json:"out_trunk_model"`
+	OutHeadModel  inputKeyHash      `validate:"required" json:"out_head_model"`
+	OutTrunkModel inputKeyHashDress `validate:"required" json:"out_trunk_model"`
 }

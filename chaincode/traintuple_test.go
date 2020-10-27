@@ -289,7 +289,7 @@ func TestTraintuple(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried traintuple")
 	expected := outputTraintuple{
 		Key: traintupleKey,
-		Algo: &HashDressNameKey{
+		Algo: &KeyHashDressName{
 			Key:            algoKey,
 			Hash:           algoHash,
 			Name:           algoName,
@@ -377,7 +377,7 @@ func TestTraintuple(t *testing.T) {
 	endTraintuple := outputTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutModel = &HashDressKey{
+	expected.OutModel = &KeyHashDress{
 		Key:            modelKey,
 		Hash:           modelHash,
 		StorageAddress: modelAddress}

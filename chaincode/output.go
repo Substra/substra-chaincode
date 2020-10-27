@@ -136,14 +136,14 @@ type outputTtDataset struct {
 // ledger. It describes a training task occuring on the platform
 type outputTraintuple struct {
 	Key           string            `json:"key"`
-	Algo          *HashDressNameKey `json:"algo"`
+	Algo          *KeyHashDressName `json:"algo"`
 	Creator       string            `json:"creator"`
 	Dataset       *outputTtDataset  `json:"dataset"`
 	ComputePlanID string            `json:"compute_plan_id"`
 	InModels      []*Model          `json:"in_models"`
 	Log           string            `json:"log"`
 	Metadata      map[string]string `json:"metadata"`
-	OutModel      *HashDressKey     `json:"out_model"`
+	OutModel      *KeyHashDress     `json:"out_model"`
 	Permissions   outputPermissions `json:"permissions"`
 	Rank          int               `json:"rank"`
 	Status        string            `json:"status"`
@@ -169,7 +169,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 		err = errors.Internal("could not retrieve algo with key %s - %s", traintuple.AlgoKey, err.Error())
 		return
 	}
-	outputTraintuple.Algo = &HashDressNameKey{
+	outputTraintuple.Algo = &KeyHashDressName{
 		Key:            algo.Key,
 		Name:           algo.Name,
 		Hash:           algo.Hash,
@@ -214,7 +214,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 }
 
 type outputTesttuple struct {
-	Algo           *HashDressNameKey `json:"algo"`
+	Algo           *KeyHashDressName `json:"algo"`
 	Certified      bool              `json:"certified"`
 	ComputePlanID  string            `json:"compute_plan_id"`
 	Creator        string            `json:"creator"`
@@ -271,7 +271,7 @@ func (out *outputTesttuple) Fill(db *LedgerDB, in Testtuple) error {
 		}
 		algo = aggregateAlgo.Algo
 	}
-	out.Algo = &HashDressNameKey{
+	out.Algo = &KeyHashDressName{
 		Key:            algo.Key,
 		Name:           algo.Name,
 		Hash:           algo.Hash,
