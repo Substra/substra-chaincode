@@ -130,10 +130,6 @@ func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetu
 		}
 		return nil
 	}
-	if inp.Rank != "" && inp.ComputePlanID == "" {
-		err = errors.BadRequest("invalid inputs: non-empty 'rank' and empty 'compute_plan_key'")
-		return err
-	}
 	tuple.Rank, err = strconv.Atoi(inp.Rank)
 	if err != nil {
 		return err

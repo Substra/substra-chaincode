@@ -161,10 +161,6 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 		}
 		return nil
 	}
-	if inp.Rank != "" && inp.ComputePlanID == "" {
-		err = errors.BadRequest("invalid inputs: non-empty 'rank' and empty 'compute_plan_key'")
-		return err
-	}
 	traintuple.Rank, err = strconv.Atoi(inp.Rank)
 	if err != nil {
 		return err

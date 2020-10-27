@@ -318,8 +318,8 @@ Smart contract: `createTraintuple`
  "in_models": [string] (omitempty,dive,len=36),
  "data_manager_key": string (required,len=36),
  "data_sample_keys": [string] (required,unique,gt=0,dive,len=36),
- "compute_plan_id": string (omitempty),
- "rank": string (omitempty),
+ "compute_plan_id": string (required_with=Rank),
+ "rank": string (),
  "tag": string (omitempty,lte=64),
  "metadata": map (lte=100,dive,keys,lte=50,endkeys,lte=100),
 }
@@ -345,8 +345,8 @@ Smart contract: `createTraintuple`
  "in_models": [string] (omitempty,dive,len=36),
  "data_manager_key": string (required,len=36),
  "data_sample_keys": [string] (required,unique,gt=0,dive,len=36),
- "compute_plan_id": string (omitempty),
- "rank": string (omitempty),
+ "compute_plan_id": string (required_with=Rank),
+ "rank": string (),
  "tag": string (omitempty,lte=64),
  "metadata": map (lte=100,dive,keys,lte=50,endkeys,lte=100),
 }

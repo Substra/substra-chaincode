@@ -140,7 +140,7 @@ func TestTraintupleComputePlanCreationAggregate(t *testing.T) {
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 400, resp.Status, "should failed for invalid rank")
-	require.Contains(t, resp.Message, "invalid inputs: non-empty 'rank' and empty 'compute_plan_key'")
+	require.Contains(t, resp.Message, "Field validation for 'ComputePlanID' failed on the 'required_with' tag")
 
 	inpTraintuple = inputAggregatetuple{Rank: "0", ComputePlanID: cpKey}
 	args = inpTraintuple.createDefault()

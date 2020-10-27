@@ -19,9 +19,9 @@ type inputAggregatetuple struct {
 	Key           string            `validate:"required,len=36" json:"key"`
 	AlgoKey       string            `validate:"required,len=36" json:"algo_key"`
 	InModels      []string          `validate:"omitempty,dive,len=36" json:"in_models"`
-	ComputePlanID string            `validate:"omitempty" json:"compute_plan_id"`
+	ComputePlanID string            `validate:"required_with=Rank" json:"compute_plan_id"`
 	Metadata      map[string]string `validate:"lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
-	Rank          string            `validate:"omitempty" json:"rank"`
+	Rank          string            `json:"rank"`
 	Tag           string            `validate:"omitempty,lte=64" json:"tag"`
 	Worker        string            `validate:"required" json:"worker"`
 }

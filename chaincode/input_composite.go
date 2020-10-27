@@ -23,8 +23,8 @@ type inputCompositeTraintuple struct {
 	OutTrunkModelPermissions inputPermissions  `validate:"required" json:"out_trunk_model_permissions"`
 	DataManagerKey           string            `validate:"required,len=36" json:"data_manager_key"`
 	DataSampleKeys           []string          `validate:"required,unique,gt=0,dive,len=36" json:"data_sample_keys"`
-	ComputePlanID            string            `validate:"omitempty" json:"compute_plan_id"`
-	Rank                     string            `validate:"omitempty" json:"rank"`
+	ComputePlanID            string            `validate:"required_with=Rank" json:"compute_plan_id"`
+	Rank                     string            `json:"rank"`
 	Tag                      string            `validate:"omitempty,lte=64" json:"tag"`
 	Metadata                 map[string]string `validate:"lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
 }
