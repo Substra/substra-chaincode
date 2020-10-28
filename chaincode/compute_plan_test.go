@@ -369,7 +369,10 @@ func TestCreateComputePlan(t *testing.T) {
 
 	// check first traintuple
 	assert.NotZero(t, first)
-	assert.Equal(t, algoHash, first.Algo.Hash)
+	assert.Equal(t, inCP.Traintuples[0].AlgoKey, first.Algo.Key)
+	algo1, err := queryAlgo(db, assetToArgs(inputKey{Key: inCP.Traintuples[0].AlgoKey}))
+	assert.NoError(t, err)
+	assert.Equal(t, algo1.Content.Hash, first.Algo.Hash)
 	assert.Equal(t, StatusTodo, first.Status)
 
 	// check second traintuple
@@ -377,7 +380,10 @@ func TestCreateComputePlan(t *testing.T) {
 	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
 	assert.EqualValues(t, first.ComputePlanID, second.ComputePlanID)
 	assert.Len(t, second.InModels, 1)
-	assert.Equal(t, algoHash, second.Algo.Hash)
+	assert.Equal(t, inCP.Traintuples[1].AlgoKey, second.Algo.Key)
+	algo2, err := queryAlgo(db, assetToArgs(inputKey{Key: inCP.Traintuples[1].AlgoKey}))
+	assert.NoError(t, err)
+	assert.Equal(t, algo2.Content.Hash, second.Algo.Hash)
 	assert.Equal(t, StatusWaiting, second.Status)
 
 	// Check the testtuples

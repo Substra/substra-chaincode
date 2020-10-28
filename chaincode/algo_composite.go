@@ -65,16 +65,16 @@ func registerCompositeAlgo(db *LedgerDB, args []string) (resp outputKey, err err
 		return
 	}
 	// submit to ledger
-	err = db.Add(inp.Key, algo)
+	err = db.Add(algo.Key, algo)
 	if err != nil {
 		return
 	}
 	// create composite key
-	err = db.CreateIndex("compositeAlgo~owner~key", []string{"compositeAlgo", algo.Owner, inp.Key})
+	err = db.CreateIndex("compositeAlgo~owner~key", []string{"compositeAlgo", algo.Owner, algo.Key})
 	if err != nil {
 		return
 	}
-	return outputKey{Key: inp.Key}, nil
+	return outputKey{Key: algo.Key}, nil
 }
 
 // queryCompositeAlgo returns an algo of the ledger given its key

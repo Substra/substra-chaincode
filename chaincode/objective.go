@@ -88,16 +88,16 @@ func registerObjective(db *LedgerDB, args []string) (resp outputKey, err error) 
 		return
 	}
 	// submit to ledger
-	if err = db.Add(inp.Key, objective); err != nil {
+	if err = db.Add(objective.Key, objective); err != nil {
 		return
 	}
 	// create composite key
-	if err = db.CreateIndex("objective~owner~key", []string{"objective", objective.Owner, inp.Key}); err != nil {
+	if err = db.CreateIndex("objective~owner~key", []string{"objective", objective.Owner, objective.Key}); err != nil {
 		return
 	}
 	// add objective to dataManager
-	err = addObjectiveDataManager(db, dataManagerKey, inp.Key)
-	return outputKey{Key: inp.Key}, err
+	err = addObjectiveDataManager(db, dataManagerKey, objective.Key)
+	return outputKey{Key: objective.Key}, err
 }
 
 // queryObjective returns a objective of the ledger given its key

@@ -249,20 +249,20 @@ func createTesttupleInternal(db *LedgerDB, inp inputTesttuple) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	err = testtuple.AddToComputePlan(db, inp.Key)
+	err = testtuple.AddToComputePlan(db, testtuple.Key)
 	if err != nil {
 		return "", err
 	}
-	err = testtuple.Save(db, inp.Key)
+	err = testtuple.Save(db, testtuple.Key)
 	if err != nil {
 		return "", err
 	}
-	err = db.AddTupleEvent(inp.Key)
+	err = db.AddTupleEvent(testtuple.Key)
 	if err != nil {
 		return "", err
 	}
 
-	return inp.Key, nil
+	return testtuple.Key, nil
 }
 
 // logStartTest modifies a testtuple by changing its status from todo to doing

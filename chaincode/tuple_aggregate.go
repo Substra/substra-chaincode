@@ -232,28 +232,28 @@ func createAggregatetupleInternal(db *LedgerDB, inp inputAggregatetuple, checkCo
 	}
 
 	// Test if the key (ergo the aggregatetuple) already exists
-	tupleExists, err := db.KeyExists(inp.Key)
+	tupleExists, err := db.KeyExists(aggregatetuple.Key)
 	if err != nil {
 		return "", err
 	}
 	if tupleExists {
-		return "", errors.Conflict("aggregatetuple already exists").WithKey(inp.Key)
+		return "", errors.Conflict("aggregatetuple already exists").WithKey(aggregatetuple.Key)
 	}
-	err = aggregatetuple.AddToComputePlan(db, inp, inp.Key, checkComputePlanAvailability)
+	err = aggregatetuple.AddToComputePlan(db, inp, aggregatetuple.Key, checkComputePlanAvailability)
 	if err != nil {
 		return "", err
 	}
-	err = aggregatetuple.Save(db, inp.Key)
-	if err != nil {
-		return "", err
-	}
-
-	err = db.AddTupleEvent(inp.Key)
+	err = aggregatetuple.Save(db, aggregatetuple.Key)
 	if err != nil {
 		return "", err
 	}
 
-	return inp.Key, nil
+	err = db.AddTupleEvent(aggregatetuple.Key)
+	if err != nil {
+		return "", err
+	}
+
+	return aggregatetuple.Key, nil
 }
 
 // logStartAggregate modifies a aggregatetuple by changing its status from todo to doing

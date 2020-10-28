@@ -122,26 +122,26 @@ func registerDataManager(db *LedgerDB, args []string) (resp outputKey, err error
 		return
 	}
 	// submit to ledger
-	err = db.Add(inp.Key, dataManager)
+	err = db.Add(dataManager.Key, dataManager)
 	if err != nil {
 		return
 	}
 	// create composite keys (one for each associated objective) to find dataSample associated with a objective
 	indexName := "dataManager~objective~key"
-	err = db.CreateIndex(indexName, []string{"dataManager", objectiveKey, inp.Key})
+	err = db.CreateIndex(indexName, []string{"dataManager", objectiveKey, dataManager.Key})
 	if err != nil {
 		return
 	}
 	// create composite key to find dataManager associated with a owner
-	err = db.CreateIndex("dataManager~owner~key", []string{"dataManager", dataManager.Owner, inp.Key})
+	err = db.CreateIndex("dataManager~owner~key", []string{"dataManager", dataManager.Owner, dataManager.Key})
 	if err != nil {
 		return
 	}
-	return outputKey{Key: inp.Key}, nil
+	return outputKey{Key: dataManager.Key}, nil
 }
 
 // registerDataSample stores new dataSample in the ledger (one or more).
-func registerDataSample(db *LedgerDB, args []string) (dataSampleKeys map[string][]string, err error) {
+func registerDataSample(db *LedgerDB, args []string) (addedDataSampleKeys map[string][]string, err error) {
 	// convert input strings args to input struct inputDataSample
 	inp := inputDataSample{}
 	err = AssetFromJSON(args, &inp)
@@ -149,13 +149,13 @@ func registerDataSample(db *LedgerDB, args []string) (dataSampleKeys map[string]
 		return
 	}
 	// check validity of input args
-	keys, dataSample, err := setDataSample(db, inp)
+	dataSampleKeys, dataSample, err := setDataSample(db, inp)
 	if err != nil {
 		return
 	}
 
 	// store dataSample in the ledger
-	for _, dataSampleKey := range keys {
+	for _, dataSampleKey := range dataSampleKeys {
 		if err = db.Add(dataSampleKey, dataSample); err != nil {
 			return
 		}
@@ -171,7 +171,7 @@ func registerDataSample(db *LedgerDB, args []string) (dataSampleKeys map[string]
 		}
 	}
 	// return added dataSample keys
-	dataSampleKeys = map[string][]string{"keys": keys}
+	addedDataSampleKeys = map[string][]string{"keys": dataSampleKeys}
 	return
 }
 

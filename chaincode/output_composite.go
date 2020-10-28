@@ -79,7 +79,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 	// fill in-model (head)
 	if traintuple.InHeadModel != "" {
 		// Head can only be a composite traintuple's head out model
-		hash, _err := db.GetOutHeadModelHashKey(traintuple.InHeadModel)
+		outHeadModel, _err := db.GetOutHeadModelKeyHash(traintuple.InHeadModel)
 		if _err != nil {
 			err = errors.Internal("could not fill (head) in-model with key \"%s\": %s", traintuple.InHeadModel, _err.Error())
 			return
@@ -87,9 +87,9 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		outputCompositeTraintuple.InHeadModel = &Model{
 			TraintupleKey: traintuple.InHeadModel}
 
-		if hash != nil {
-			outputCompositeTraintuple.InHeadModel.Key = hash.Key
-			outputCompositeTraintuple.InHeadModel.Hash = hash.Hash
+		if outHeadModel != nil {
+			outputCompositeTraintuple.InHeadModel.Key = outHeadModel.Key
+			outputCompositeTraintuple.InHeadModel.Hash = outHeadModel.Hash
 		}
 	}
 
@@ -99,7 +99,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		// - a traintuple's out model
 		// - a composite traintuple's head out model
 		// - an aggregate tuple's out model
-		hashDress, _err := db.GetOutModelHashDressKey(traintuple.InTrunkModel, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
+		outModel, _err := db.GetOutModelKeyHashDress(traintuple.InTrunkModel, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
 		if _err != nil {
 			err = errors.Internal("could not fill (trunk) in-model with key \"%s\": %s", traintuple.InTrunkModel, _err.Error())
 			return
@@ -107,10 +107,10 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		outputCompositeTraintuple.InTrunkModel = &Model{
 			TraintupleKey: traintuple.InTrunkModel}
 
-		if hashDress != nil {
-			outputCompositeTraintuple.InTrunkModel.Key = hashDress.Key
-			outputCompositeTraintuple.InTrunkModel.Hash = hashDress.Hash
-			outputCompositeTraintuple.InTrunkModel.StorageAddress = hashDress.StorageAddress
+		if outModel != nil {
+			outputCompositeTraintuple.InTrunkModel.Key = outModel.Key
+			outputCompositeTraintuple.InTrunkModel.Hash = outModel.Hash
+			outputCompositeTraintuple.InTrunkModel.StorageAddress = outModel.StorageAddress
 		}
 	}
 

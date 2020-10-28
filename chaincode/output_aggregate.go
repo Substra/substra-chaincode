@@ -67,7 +67,7 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 		if inModelKey == "" {
 			break
 		}
-		hashDressKey, _err := db.GetOutModelHashDressKey(inModelKey, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
+		keyHashDress, _err := db.GetOutModelKeyHashDress(inModelKey, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
 		if _err != nil {
 			err = errors.Internal("could not fill in-model with key \"%s\": %s", inModelKey, _err.Error())
 			return
@@ -75,10 +75,10 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 		inModel := &Model{
 			TraintupleKey: inModelKey,
 		}
-		if hashDressKey != nil {
-			inModel.Key = hashDressKey.Key
-			inModel.Hash = hashDressKey.Hash
-			inModel.StorageAddress = hashDressKey.StorageAddress
+		if keyHashDress != nil {
+			inModel.Key = keyHashDress.Key
+			inModel.Hash = keyHashDress.Hash
+			inModel.StorageAddress = keyHashDress.StorageAddress
 		}
 		outputAggregatetuple.InModels = append(outputAggregatetuple.InModels, inModel)
 	}

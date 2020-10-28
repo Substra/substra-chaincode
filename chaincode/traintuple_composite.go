@@ -264,28 +264,28 @@ func createCompositeTraintupleInternal(db *LedgerDB, inp inputCompositeTraintupl
 	}
 
 	// Test if the key (ergo the traintuple) already exists
-	tupleExists, err := db.KeyExists(inp.Key)
+	tupleExists, err := db.KeyExists(traintuple.Key)
 	if err != nil {
 		return "", err
 	}
 	if tupleExists {
-		return "", errors.Conflict("composite traintuple already exists").WithKey(inp.Key)
+		return "", errors.Conflict("composite traintuple already exists").WithKey(traintuple.Key)
 	}
 
-	err = traintuple.AddToComputePlan(db, inp, inp.Key, checkComputePlanAvailability)
+	err = traintuple.AddToComputePlan(db, inp, traintuple.Key, checkComputePlanAvailability)
 	if err != nil {
 		return "", err
 	}
 
-	err = traintuple.Save(db, inp.Key)
+	err = traintuple.Save(db, traintuple.Key)
 	if err != nil {
 		return "", err
 	}
-	err = db.AddTupleEvent(inp.Key)
+	err = db.AddTupleEvent(traintuple.Key)
 	if err != nil {
 		return "", err
 	}
-	return inp.Key, nil
+	return traintuple.Key, nil
 }
 
 // logStartCompositeTrain modifies a traintuple by changing its status from todo to doing

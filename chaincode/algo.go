@@ -65,16 +65,16 @@ func registerAlgo(db *LedgerDB, args []string) (resp outputKey, err error) {
 		return
 	}
 	// submit to ledger
-	err = db.Add(inp.Key, algo)
+	err = db.Add(algo.Key, algo)
 	if err != nil {
 		return
 	}
 	// create composite key
-	err = db.CreateIndex("algo~owner~key", []string{"algo", algo.Owner, inp.Key})
+	err = db.CreateIndex("algo~owner~key", []string{"algo", algo.Owner, algo.Key})
 	if err != nil {
 		return
 	}
-	return outputKey{Key: inp.Key}, nil
+	return outputKey{Key: algo.Key}, nil
 }
 
 // queryAlgo returns an algo of the ledger given its key

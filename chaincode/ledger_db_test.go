@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetOutModelHashDressKey(t *testing.T) {
+func TestGetOutModelKeyHashDress(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	db := NewLedgerDB(mockStub)
@@ -33,20 +33,20 @@ func TestGetOutModelHashDressKey(t *testing.T) {
 
 	// 1. Correct requests
 
-	_, err = db.GetOutModelHashDressKey(regular, []AssetType{TraintupleType})
+	_, err = db.GetOutModelKeyHashDress(regular, []AssetType{TraintupleType})
 	assert.NoError(t, err, "the regular traintuple should be found when requesting regular traintuples")
 
-	_, err = db.GetOutHeadModelHashKey(composite)
+	_, err = db.GetOutHeadModelKeyHash(composite)
 	assert.NoError(t, err, "the composite traintuple should be found when requesting composite traintuples")
 
-	_, err = db.GetOutModelHashDressKey(composite, []AssetType{CompositeTraintupleType})
+	_, err = db.GetOutModelKeyHashDress(composite, []AssetType{CompositeTraintupleType})
 	assert.NoError(t, err, "the composite traintuple should be found when requesting composite traintuples")
 
 	// 2. Incorrect requests
 
-	_, err = db.GetOutModelHashDressKey(regular, []AssetType{CompositeTraintupleType})
+	_, err = db.GetOutModelKeyHashDress(regular, []AssetType{CompositeTraintupleType})
 	assert.Error(t, err, "the regular traintuple should not be found when requesting composite traintuples only")
 
-	_, err = db.GetOutModelHashDressKey(composite, []AssetType{TraintupleType})
+	_, err = db.GetOutModelKeyHashDress(composite, []AssetType{TraintupleType})
 	assert.Error(t, err, "the composite traintuple should be found when requesting regular traintuples only")
 }
