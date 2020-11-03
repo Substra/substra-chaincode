@@ -17,19 +17,19 @@ package main
 import "chaincode/errors"
 
 type outputAggregatetuple struct {
-	Key           string            `json:"key"`
-	Algo          *KeyHashDressName `json:"algo"`
-	Creator       string            `json:"creator"`
-	ComputePlanID string            `json:"compute_plan_id"`
-	Log           string            `json:"log"`
-	Metadata      map[string]string `json:"metadata"`
-	InModels      []*Model          `json:"in_models"`
-	OutModel      *KeyHashDress     `json:"out_model"`
-	Rank          int               `json:"rank"`
-	Status        string            `json:"status"`
-	Tag           string            `json:"tag"`
-	Permissions   outputPermissions `json:"permissions"`
-	Worker        string            `json:"worker"`
+	Key            string            `json:"key"`
+	Algo           *KeyHashDressName `json:"algo"`
+	Creator        string            `json:"creator"`
+	ComputePlanKey string            `json:"compute_plan_key"`
+	Log            string            `json:"log"`
+	Metadata       map[string]string `json:"metadata"`
+	InModels       []*Model          `json:"in_models"`
+	OutModel       *KeyHashDress     `json:"out_model"`
+	Rank           int               `json:"rank"`
+	Status         string            `json:"status"`
+	Tag            string            `json:"tag"`
+	Permissions    outputPermissions `json:"permissions"`
+	Worker         string            `json:"worker"`
 }
 
 type outputAggregateAlgo struct {
@@ -48,7 +48,7 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 	outputAggregatetuple.Metadata = initMapOutput(traintuple.Metadata)
 	outputAggregatetuple.Status = traintuple.Status
 	outputAggregatetuple.Rank = traintuple.Rank
-	outputAggregatetuple.ComputePlanID = traintuple.ComputePlanID
+	outputAggregatetuple.ComputePlanKey = traintuple.ComputePlanKey
 	outputAggregatetuple.OutModel = traintuple.OutModel
 	outputAggregatetuple.Tag = traintuple.Tag
 	algo, err := db.GetAggregateAlgo(traintuple.AlgoKey)

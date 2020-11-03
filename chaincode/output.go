@@ -135,19 +135,19 @@ type outputTtDataset struct {
 // outputTraintuple is the representation of one the element type stored in the
 // ledger. It describes a training task occuring on the platform
 type outputTraintuple struct {
-	Key           string            `json:"key"`
-	Algo          *KeyHashDressName `json:"algo"`
-	Creator       string            `json:"creator"`
-	Dataset       *outputTtDataset  `json:"dataset"`
-	ComputePlanID string            `json:"compute_plan_id"`
-	InModels      []*Model          `json:"in_models"`
-	Log           string            `json:"log"`
-	Metadata      map[string]string `json:"metadata"`
-	OutModel      *KeyHashDress     `json:"out_model"`
-	Permissions   outputPermissions `json:"permissions"`
-	Rank          int               `json:"rank"`
-	Status        string            `json:"status"`
-	Tag           string            `json:"tag"`
+	Key            string            `json:"key"`
+	Algo           *KeyHashDressName `json:"algo"`
+	Creator        string            `json:"creator"`
+	Dataset        *outputTtDataset  `json:"dataset"`
+	ComputePlanKey string            `json:"compute_plan_key"`
+	InModels       []*Model          `json:"in_models"`
+	Log            string            `json:"log"`
+	Metadata       map[string]string `json:"metadata"`
+	OutModel       *KeyHashDress     `json:"out_model"`
+	Permissions    outputPermissions `json:"permissions"`
+	Rank           int               `json:"rank"`
+	Status         string            `json:"status"`
+	Tag            string            `json:"tag"`
 }
 
 //Fill is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
@@ -160,7 +160,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 	outputTraintuple.Metadata = initMapOutput(traintuple.Metadata)
 	outputTraintuple.Status = traintuple.Status
 	outputTraintuple.Rank = traintuple.Rank
-	outputTraintuple.ComputePlanID = traintuple.ComputePlanID
+	outputTraintuple.ComputePlanKey = traintuple.ComputePlanKey
 	outputTraintuple.OutModel = traintuple.OutModel
 	outputTraintuple.Tag = traintuple.Tag
 	// fill algo
@@ -216,7 +216,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 type outputTesttuple struct {
 	Algo           *KeyHashDressName `json:"algo"`
 	Certified      bool              `json:"certified"`
-	ComputePlanID  string            `json:"compute_plan_id"`
+	ComputePlanKey string            `json:"compute_plan_key"`
 	Creator        string            `json:"creator"`
 	Dataset        *TtDataset        `json:"dataset"`
 	Key            string            `json:"key"`
@@ -233,7 +233,7 @@ type outputTesttuple struct {
 func (out *outputTesttuple) Fill(db *LedgerDB, in Testtuple) error {
 	out.Key = in.Key
 	out.Certified = in.Certified
-	out.ComputePlanID = in.ComputePlanID
+	out.ComputePlanKey = in.ComputePlanKey
 	out.Creator = in.Creator
 	out.Dataset = in.Dataset
 	out.Log = in.Log
@@ -321,13 +321,13 @@ type Event struct {
 
 type eventComputePlan struct {
 	AlgoKeys       []string `json:"algo_keys"`
-	ComputePlanID  string   `json:"compute_plan_id"`
+	ComputePlanKey string   `json:"compute_plan_key"`
 	ModelsToDelete []string `json:"models_to_delete"`
 	Status         string   `json:"status"`
 }
 
 type outputComputePlan struct {
-	ComputePlanID           string            `json:"compute_plan_id"`
+	Key                     string            `json:"key"`
 	TraintupleKeys          []string          `json:"traintuple_keys"`
 	AggregatetupleKeys      []string          `json:"aggregatetuple_keys"`
 	CompositeTraintupleKeys []string          `json:"composite_traintuple_keys"`
@@ -342,7 +342,7 @@ type outputComputePlan struct {
 }
 
 func (out *outputComputePlan) Fill(key string, in ComputePlan, newIDs []string) {
-	out.ComputePlanID = key
+	out.Key = key
 	nb := getLimitedNbSliceElements(in.TraintupleKeys)
 	out.TraintupleKeys = in.TraintupleKeys[:nb]
 	nb = getLimitedNbSliceElements(in.AggregatetupleKeys)

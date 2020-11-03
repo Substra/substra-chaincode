@@ -42,7 +42,7 @@ func (traintuple *Traintuple) SetFromInput(db *LedgerDB, inp inputTraintuple) er
 	traintuple.Key = inp.Key
 	traintuple.AssetType = TraintupleType
 	traintuple.Creator = creator
-	traintuple.ComputePlanID = inp.ComputePlanID
+	traintuple.ComputePlanKey = inp.ComputePlanKey
 	traintuple.Metadata = inp.Metadata
 	traintuple.Tag = inp.Tag
 	algo, err := db.GetAlgo(inp.AlgoKey)
@@ -107,15 +107,15 @@ func (traintuple *Traintuple) SetFromParents(db *LedgerDB, inModels []string) er
 
 // AddToComputePlan set the traintuple's parameters that determines if it's part of on ComputePlan and how.
 // It uses the inputTraintuple values as follow:
-//  - If neither ComputePlanID nor rank is set it returns immediately
-//  - If rank is 0 and ComputePlanID empty, it's start a new one using this traintuple key
-//  - If rank and ComputePlanID are set, it checks if there are coherent with previous ones and set it.
+//  - If neither ComputePlanKey nor rank is set it returns immediately
+//  - If rank is 0 and ComputePlanKey empty, it's start a new one using this traintuple key
+//  - If rank and ComputePlanKey are set, it checks if there are coherent with previous ones and set it.
 // Use checkComputePlanAvailability to ensure the compute plan exists and no other tuple is registered with the same worker/rank
 func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple, traintupleKey string, checkComputePlanAvailability bool) error {
-	// check ComputePlanID and Rank and set it when required
+	// check ComputePlanKey and Rank and set it when required
 	var err error
 	if inp.Rank == "" {
-		if inp.ComputePlanID != "" {
+		if inp.ComputePlanKey != "" {
 			return errors.BadRequest("invalid inputs, a ComputePlan should have a rank")
 		}
 		return nil
@@ -124,13 +124,13 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 	if err != nil {
 		return err
 	}
-	traintuple.ComputePlanID = inp.ComputePlanID
-	computePlan, err := db.GetComputePlan(inp.ComputePlanID)
+	traintuple.ComputePlanKey = inp.ComputePlanKey
+	computePlan, err := db.GetComputePlan(inp.ComputePlanKey)
 	if err != nil {
 		return err
 	}
 	computePlan.AddTuple(TraintupleType, traintupleKey, traintuple.Status)
-	err = computePlan.Save(db, traintuple.ComputePlanID)
+	err = computePlan.Save(db, traintuple.ComputePlanKey)
 	if err != nil {
 		return err
 	}
@@ -139,11 +139,11 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 		return nil
 	}
 	var ttKeys []string
-	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID, traintuple.Dataset.Worker, inp.Rank})
+	ttKeys, err = db.GetIndexKeys("computePlan~computeplankey~worker~rank~key", []string{"computePlan", inp.ComputePlanKey, traintuple.Dataset.Worker, inp.Rank})
 	if err != nil {
 		return err
 	} else if len(ttKeys) > 0 {
-		err = errors.BadRequest("ComputePlanID %s with worker %s rank %d already exists", inp.ComputePlanID, traintuple.Dataset.Worker, traintuple.Rank)
+		err = errors.BadRequest("ComputePlanKey %s with worker %s rank %d already exists", inp.ComputePlanKey, traintuple.Dataset.Worker, traintuple.Rank)
 		return err
 	}
 	return nil
@@ -170,11 +170,11 @@ func (traintuple *Traintuple) Save(db *LedgerDB, traintupleKey string) error {
 			return err
 		}
 	}
-	if traintuple.ComputePlanID != "" {
-		if err := db.CreateIndex("computePlan~computeplanid~worker~rank~key", []string{"computePlan", traintuple.ComputePlanID, traintuple.Dataset.Worker, strconv.Itoa(traintuple.Rank), traintupleKey}); err != nil {
+	if traintuple.ComputePlanKey != "" {
+		if err := db.CreateIndex("computePlan~computeplankey~worker~rank~key", []string{"computePlan", traintuple.ComputePlanKey, traintuple.Dataset.Worker, strconv.Itoa(traintuple.Rank), traintupleKey}); err != nil {
 			return err
 		}
-		if err := db.CreateIndex("algo~computeplanid~key", []string{"algo", traintuple.ComputePlanID, traintuple.AlgoKey}); err != nil {
+		if err := db.CreateIndex("algo~computeplankey~key", []string{"algo", traintuple.ComputePlanKey, traintuple.AlgoKey}); err != nil {
 			return err
 		}
 	}
@@ -296,7 +296,7 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, traintuple.ComputePlanID, traintupleKey, traintuple.OutModel.Key)
+	err = TryAddIntermediaryModel(db, traintuple.ComputePlanKey, traintupleKey, traintuple.OutModel.Key)
 	if err != nil {
 		return
 	}
@@ -352,7 +352,7 @@ func logFailTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 	}
 
 	// Do not propagate failure if we are in a compute plan
-	if traintuple.ComputePlanID != "" {
+	if traintuple.ComputePlanKey != "" {
 		return
 	}
 	// update depending tuples
@@ -596,7 +596,7 @@ func (traintuple *Traintuple) commitStatusUpdate(db *LedgerDB, traintupleKey str
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
-	if err := UpdateComputePlanState(db, traintuple.ComputePlanID, newStatus, traintupleKey); err != nil {
+	if err := UpdateComputePlanState(db, traintuple.ComputePlanKey, newStatus, traintupleKey); err != nil {
 		return err
 	}
 	logger.Infof("traintuple %s status updated: %s (from=%s)", traintupleKey, newStatus, oldStatus)

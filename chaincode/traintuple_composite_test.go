@@ -153,7 +153,7 @@ func TestTraintupleComputePlanCreationComposite(t *testing.T) {
 	// Add dataManager, dataSample and algo
 	registerItem(t, *mockStub, "compositeAlgo")
 
-	inpTraintuple := inputCompositeTraintuple{ComputePlanID: "someComputePlanID"}
+	inpTraintuple := inputCompositeTraintuple{ComputePlanKey: "someComputePlanKey"}
 	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 400, resp.Status, "should failed for missing rank")
@@ -163,14 +163,14 @@ func TestTraintupleComputePlanCreationComposite(t *testing.T) {
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 400, resp.Status, "should failed for invalid rank")
-	require.Contains(t, resp.Message, "Field validation for 'ComputePlanID' failed on the 'required_with' tag")
+	require.Contains(t, resp.Message, "Field validation for 'ComputePlanKey' failed on the 'required_with' tag")
 
 	cpKey := RandomUUID()
-	inCP := inputComputePlan{ComputePlanID: cpKey}
+	inCP := inputComputePlan{Key: cpKey}
 	resp = mockStub.MockInvoke("42", inCP.getArgs())
 	require.EqualValues(t, 200, resp.Status)
 
-	inpTraintuple = inputCompositeTraintuple{Rank: "0", ComputePlanID: cpKey}
+	inpTraintuple = inputCompositeTraintuple{Rank: "0", ComputePlanKey: cpKey}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
@@ -202,11 +202,11 @@ func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
 	registerItem(t, *mockStub, "compositeAlgo")
 
 	cpKey := RandomUUID()
-	inCP := inputComputePlan{ComputePlanID: cpKey}
+	inCP := inputComputePlan{Key: cpKey}
 	resp := mockStub.MockInvoke("42", inCP.getArgs())
 	require.EqualValues(t, 200, resp.Status)
 
-	inpTraintuple := inputCompositeTraintuple{Rank: "0", ComputePlanID: cpKey}
+	inpTraintuple := inputCompositeTraintuple{Rank: "0", ComputePlanKey: cpKey}
 	args := inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
@@ -223,7 +223,7 @@ func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
 		InHeadModelKey:  key,
 		InTrunkModelKey: key,
 		Rank:            "0",
-		ComputePlanID:   cpKey}
+		ComputePlanKey:  cpKey}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add a traintuple of the same rank")
@@ -234,21 +234,21 @@ func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
 		InHeadModelKey:  key,
 		InTrunkModelKey: key,
 		Rank:            "1",
-		ComputePlanID:   "notarealone"}
+		ComputePlanKey:  "notarealone"}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 404, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting ComputePlanID")
+	assert.EqualValues(t, 404, resp.Status, resp.Message, "should failed to add a traintuple to an unexisting ComputePlanKey")
 
-	// Succesfully add a traintuple to the same ComputePlanID
+	// Succesfully add a traintuple to the same ComputePlanKey
 	inpTraintuple = inputCompositeTraintuple{
 		Key:             RandomUUID(),
 		InHeadModelKey:  key,
 		InTrunkModelKey: key,
 		Rank:            "1",
-		ComputePlanID:   ct.ComputePlanID}
+		ComputePlanKey:  ct.ComputePlanKey}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same ComputePlanID")
+	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create a traintuple with the same ComputePlanKey")
 	err = json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 }
@@ -448,13 +448,13 @@ func TestInsertTraintupleTwiceComposite(t *testing.T) {
 
 	// create a composite traintuple and start a ComplutePlan
 	cpKey := RandomUUID()
-	inCP := inputComputePlan{ComputePlanID: cpKey}
+	inCP := inputComputePlan{Key: cpKey}
 	resp = mockStub.MockInvoke("42", inCP.getArgs())
 	require.EqualValues(t, 200, resp.Status)
 
 	inpTraintuple := inputCompositeTraintuple{
-		Rank:          "0",
-		ComputePlanID: cpKey,
+		Rank:           "0",
+		ComputePlanKey: cpKey,
 	}
 	inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", methodAndAssetToByte("createCompositeTraintuple", inpTraintuple))
@@ -467,7 +467,7 @@ func TestInsertTraintupleTwiceComposite(t *testing.T) {
 	// create a second composite traintuple in the same ComputePlan
 	inpTraintuple.Key = traintupleKey2
 	inpTraintuple.Rank = "1"
-	inpTraintuple.ComputePlanID = tuple.ComputePlanID
+	inpTraintuple.ComputePlanKey = tuple.ComputePlanKey
 	inpTraintuple.InHeadModelKey = _key.Key
 	inpTraintuple.InTrunkModelKey = _key.Key
 	resp = mockStub.MockInvoke("42", methodAndAssetToByte("createCompositeTraintuple", inpTraintuple))

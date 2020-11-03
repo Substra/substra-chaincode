@@ -127,7 +127,7 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 		tupleCreator = traintuple.Creator
 		status = traintuple.Status
 		testtuple.AlgoKey = traintuple.AlgoKey
-		testtuple.ComputePlanID = traintuple.ComputePlanID
+		testtuple.ComputePlanKey = traintuple.ComputePlanKey
 		testtuple.Rank = traintuple.Rank
 	case CompositeTraintupleType:
 		compositeTraintuple, err := db.GetCompositeTraintuple(traintupleKey)
@@ -138,7 +138,7 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 		tupleCreator = compositeTraintuple.Creator
 		status = compositeTraintuple.Status
 		testtuple.AlgoKey = compositeTraintuple.AlgoKey
-		testtuple.ComputePlanID = compositeTraintuple.ComputePlanID
+		testtuple.ComputePlanKey = compositeTraintuple.ComputePlanKey
 		testtuple.Rank = compositeTraintuple.Rank
 	case AggregatetupleType:
 		tuple, err := db.GetAggregatetuple(traintupleKey)
@@ -149,7 +149,7 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 		tupleCreator = tuple.Creator
 		status = tuple.Status
 		testtuple.AlgoKey = tuple.AlgoKey
-		testtuple.ComputePlanID = tuple.ComputePlanID
+		testtuple.ComputePlanKey = tuple.ComputePlanKey
 		testtuple.Rank = tuple.Rank
 	default:
 		return errors.BadRequest("key %s is not a valid traintuple", traintupleKey)
@@ -173,15 +173,15 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 
 // AddToComputePlan add the testtuple to the compute plan of it's model
 func (testtuple *Testtuple) AddToComputePlan(db *LedgerDB, testtupleKey string) error {
-	if testtuple.ComputePlanID == "" {
+	if testtuple.ComputePlanKey == "" {
 		return nil
 	}
-	computePlan, err := db.GetComputePlan(testtuple.ComputePlanID)
+	computePlan, err := db.GetComputePlan(testtuple.ComputePlanKey)
 	if err != nil {
 		return err
 	}
 	computePlan.AddTuple(TesttupleType, testtupleKey, testtuple.Status)
-	err = computePlan.Save(db, testtuple.ComputePlanID)
+	err = computePlan.Save(db, testtuple.ComputePlanKey)
 	if err != nil {
 		return err
 	}
@@ -449,7 +449,7 @@ func (testtuple *Testtuple) commitStatusUpdate(db *LedgerDB, testtupleKey string
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
-	if err := UpdateComputePlanState(db, testtuple.ComputePlanID, newStatus, testtupleKey); err != nil {
+	if err := UpdateComputePlanState(db, testtuple.ComputePlanKey, newStatus, testtupleKey); err != nil {
 		return err
 	}
 	logger.Infof("testtuple %s status updated: %s (from=%s)", testtupleKey, newStatus, oldStatus)

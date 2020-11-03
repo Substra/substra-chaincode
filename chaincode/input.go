@@ -101,7 +101,7 @@ type inputTraintuple struct {
 	InModels       []string          `validate:"omitempty,dive,len=36" json:"in_models"`
 	DataManagerKey string            `validate:"required,len=36" json:"data_manager_key"`
 	DataSampleKeys []string          `validate:"required,unique,gt=0,dive,len=36" json:"data_sample_keys"`
-	ComputePlanID  string            `validate:"required_with=Rank" json:"compute_plan_id"`
+	ComputePlanKey string            `validate:"required_with=Rank" json:"compute_plan_key"`
 	Rank           string            `json:"rank"`
 	Tag            string            `validate:"omitempty,lte=64" json:"tag"`
 	Metadata       map[string]string `validate:"lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
@@ -160,7 +160,7 @@ type inputQueryFilter struct {
 
 // inputConputePlan represent a coherent set of tuples uploaded together.
 type inputComputePlan struct {
-	ComputePlanID        string                                `validate:"required,len=36" json:"compute_plan_id"`
+	Key                  string                                `validate:"required,len=36" json:"key"`
 	Traintuples          []inputComputePlanTraintuple          `validate:"omitempty" json:"traintuples"`
 	Aggregatetuples      []inputComputePlanAggregatetuple      `validate:"omitempty" json:"aggregatetuples"`
 	CompositeTraintuples []inputComputePlanCompositeTraintuple `validate:"omitempty" json:"composite_traintuples"`

@@ -105,70 +105,70 @@ type AggregateAlgo struct {
 // that are common to Traintuple, CompositeTraintuple and
 // AggregateTuple
 type GenericTuple struct {
-	AssetType     AssetType         `json:"asset_type"`
-	AlgoKey       string            `json:"algo_key"`
-	ComputePlanID string            `json:"compute_plan_id"`
-	Creator       string            `json:"creator"`
-	Log           string            `json:"log"`
-	Metadata      map[string]string `json:"metadata"`
-	Rank          int               `json:"rank"`
-	Status        string            `json:"status"`
-	Tag           string            `json:"tag"`
+	AssetType      AssetType         `json:"asset_type"`
+	AlgoKey        string            `json:"algo_key"`
+	ComputePlanKey string            `json:"compute_plan_key"`
+	Creator        string            `json:"creator"`
+	Log            string            `json:"log"`
+	Metadata       map[string]string `json:"metadata"`
+	Rank           int               `json:"rank"`
+	Status         string            `json:"status"`
+	Tag            string            `json:"tag"`
 }
 
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
-	Key           string            `json:"key"`
-	AssetType     AssetType         `json:"asset_type"`
-	AlgoKey       string            `json:"algo_key"`
-	ComputePlanID string            `json:"compute_plan_id"`
-	Creator       string            `json:"creator"`
-	Log           string            `json:"log"`
-	Metadata      map[string]string `json:"metadata"`
-	Rank          int               `json:"rank"`
-	Status        string            `json:"status"`
-	Tag           string            `json:"tag"`
-	Dataset       *Dataset          `json:"dataset"`
-	InModelKeys   []string          `json:"in_models"`
-	OutModel      *KeyHashDress     `json:"out_model"`
-	Permissions   Permissions       `json:"permissions"`
+	Key            string            `json:"key"`
+	AssetType      AssetType         `json:"asset_type"`
+	AlgoKey        string            `json:"algo_key"`
+	ComputePlanKey string            `json:"compute_plan_key"`
+	Creator        string            `json:"creator"`
+	Log            string            `json:"log"`
+	Metadata       map[string]string `json:"metadata"`
+	Rank           int               `json:"rank"`
+	Status         string            `json:"status"`
+	Tag            string            `json:"tag"`
+	Dataset        *Dataset          `json:"dataset"`
+	InModelKeys    []string          `json:"in_models"`
+	OutModel       *KeyHashDress     `json:"out_model"`
+	Permissions    Permissions       `json:"permissions"`
 }
 
 // CompositeTraintuple is like a traintuple, but for composite model composition
 type CompositeTraintuple struct {
-	Key           string                          `json:"key"`
-	AssetType     AssetType                       `json:"asset_type"`
-	AlgoKey       string                          `json:"algo_key"`
-	ComputePlanID string                          `json:"compute_plan_id"`
-	Creator       string                          `json:"creator"`
-	Log           string                          `json:"log"`
-	Metadata      map[string]string               `json:"metadata"`
-	Rank          int                             `json:"rank"`
-	Status        string                          `json:"status"`
-	Tag           string                          `json:"tag"`
-	Dataset       *Dataset                        `json:"dataset"`
-	InHeadModel   string                          `json:"in_head_model"`
-	InTrunkModel  string                          `json:"in_trunk_model"`
-	OutHeadModel  CompositeTraintupleOutHeadModel `json:"out_head_model"`
-	OutTrunkModel CompositeTraintupleOutModel     `json:"out_trunk_model"`
+	Key            string                          `json:"key"`
+	AssetType      AssetType                       `json:"asset_type"`
+	AlgoKey        string                          `json:"algo_key"`
+	ComputePlanKey string                          `json:"compute_plan_key"`
+	Creator        string                          `json:"creator"`
+	Log            string                          `json:"log"`
+	Metadata       map[string]string               `json:"metadata"`
+	Rank           int                             `json:"rank"`
+	Status         string                          `json:"status"`
+	Tag            string                          `json:"tag"`
+	Dataset        *Dataset                        `json:"dataset"`
+	InHeadModel    string                          `json:"in_head_model"`
+	InTrunkModel   string                          `json:"in_trunk_model"`
+	OutHeadModel   CompositeTraintupleOutHeadModel `json:"out_head_model"`
+	OutTrunkModel  CompositeTraintupleOutModel     `json:"out_trunk_model"`
 }
 
 // Aggregatetuple is like a traintuple, but for aggregate model composition
 type Aggregatetuple struct {
-	Key           string            `json:"key"`
-	AssetType     AssetType         `json:"asset_type"`
-	AlgoKey       string            `json:"algo_key"`
-	ComputePlanID string            `json:"compute_plan_id"`
-	Creator       string            `json:"creator"`
-	Log           string            `json:"log"`
-	Metadata      map[string]string `json:"metadata"`
-	Rank          int               `json:"rank"`
-	Status        string            `json:"status"`
-	Tag           string            `json:"tag"`
-	InModelKeys   []string          `json:"in_models"`
-	OutModel      *KeyHashDress     `json:"out_model"`
-	Permissions   Permissions       `json:"permissions"` // TODO (aggregate): what do permissions mean here?
-	Worker        string            `json:"worker"`
+	Key            string            `json:"key"`
+	AssetType      AssetType         `json:"asset_type"`
+	AlgoKey        string            `json:"algo_key"`
+	ComputePlanKey string            `json:"compute_plan_key"`
+	Creator        string            `json:"creator"`
+	Log            string            `json:"log"`
+	Metadata       map[string]string `json:"metadata"`
+	Rank           int               `json:"rank"`
+	Status         string            `json:"status"`
+	Tag            string            `json:"tag"`
+	InModelKeys    []string          `json:"in_models"`
+	OutModel       *KeyHashDress     `json:"out_model"`
+	Permissions    Permissions       `json:"permissions"` // TODO (aggregate): what do permissions mean here?
+	Worker         string            `json:"worker"`
 }
 
 // CompositeTraintupleOutModel is the out-model of a CompositeTraintuple
@@ -185,21 +185,21 @@ type CompositeTraintupleOutHeadModel struct {
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Testtuple struct {
-	Key           string            `json:"key"`
-	AlgoKey       string            `json:"algo"`
-	AssetType     AssetType         `json:"asset_type"`
-	Certified     bool              `json:"certified"`
-	ComputePlanID string            `json:"compute_plan_id"`
-	Creator       string            `json:"creator"`
-	Dataset       *TtDataset        `json:"dataset"`
-	Log           string            `json:"log"`
-	Metadata      map[string]string `json:"metadata"`
-	TraintupleKey string            `json:"traintuple_key"`
-	ObjectiveKey  string            `json:"objective"`
-	Permissions   Permissions       `json:"permissions"`
-	Rank          int               `json:"rank"`
-	Status        string            `json:"status"`
-	Tag           string            `json:"tag"`
+	Key            string            `json:"key"`
+	AlgoKey        string            `json:"algo"`
+	AssetType      AssetType         `json:"asset_type"`
+	Certified      bool              `json:"certified"`
+	ComputePlanKey string            `json:"compute_plan_key"`
+	Creator        string            `json:"creator"`
+	Dataset        *TtDataset        `json:"dataset"`
+	Log            string            `json:"log"`
+	Metadata       map[string]string `json:"metadata"`
+	TraintupleKey  string            `json:"traintuple_key"`
+	ObjectiveKey   string            `json:"objective"`
+	Permissions    Permissions       `json:"permissions"`
+	Rank           int               `json:"rank"`
+	Status         string            `json:"status"`
+	Tag            string            `json:"tag"`
 }
 
 // ComputePlan is the ledger's representation of a compute plan.

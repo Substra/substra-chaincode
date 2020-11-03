@@ -21,20 +21,20 @@ type outputCompositeAlgo struct {
 }
 
 type outputCompositeTraintuple struct {
-	Key           string                `json:"key"`
-	Algo          *KeyHashDressName     `json:"algo"`
-	Creator       string                `json:"creator"`
-	Dataset       *outputTtDataset      `json:"dataset"`
-	ComputePlanID string                `json:"compute_plan_id"`
-	InHeadModel   *Model                `json:"in_head_model"`
-	InTrunkModel  *Model                `json:"in_trunk_model"`
-	Log           string                `json:"log"`
-	Metadata      map[string]string     `json:"metadata"`
-	OutHeadModel  outHeadModelComposite `json:"out_head_model"`
-	OutTrunkModel outModelComposite     `json:"out_trunk_model"`
-	Rank          int                   `json:"rank"`
-	Status        string                `json:"status"`
-	Tag           string                `json:"tag"`
+	Key            string                `json:"key"`
+	Algo           *KeyHashDressName     `json:"algo"`
+	Creator        string                `json:"creator"`
+	Dataset        *outputTtDataset      `json:"dataset"`
+	ComputePlanKey string                `json:"compute_plan_key"`
+	InHeadModel    *Model                `json:"in_head_model"`
+	InTrunkModel   *Model                `json:"in_trunk_model"`
+	Log            string                `json:"log"`
+	Metadata       map[string]string     `json:"metadata"`
+	OutHeadModel   outHeadModelComposite `json:"out_head_model"`
+	OutTrunkModel  outModelComposite     `json:"out_trunk_model"`
+	Rank           int                   `json:"rank"`
+	Status         string                `json:"status"`
+	Tag            string                `json:"tag"`
 }
 
 type outHeadModelComposite struct {
@@ -56,7 +56,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 	outputCompositeTraintuple.Metadata = initMapOutput(traintuple.Metadata)
 	outputCompositeTraintuple.Status = traintuple.Status
 	outputCompositeTraintuple.Rank = traintuple.Rank
-	outputCompositeTraintuple.ComputePlanID = traintuple.ComputePlanID
+	outputCompositeTraintuple.ComputePlanKey = traintuple.ComputePlanKey
 	outputCompositeTraintuple.OutHeadModel = outHeadModelComposite{
 		OutModel:    traintuple.OutHeadModel.OutModel,
 		Permissions: getOutPermissions(traintuple.OutHeadModel.Permissions)}

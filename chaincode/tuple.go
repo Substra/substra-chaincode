@@ -260,11 +260,11 @@ func determineStatusFromInModels(statuses []string) string {
 	return StatusTodo
 }
 
-func determineTupleStatus(db *LedgerDB, tupleStatus, computePlanID string) (string, error) {
-	if tupleStatus != StatusWaiting || computePlanID == "" {
+func determineTupleStatus(db *LedgerDB, tupleStatus, computePlanKey string) (string, error) {
+	if tupleStatus != StatusWaiting || computePlanKey == "" {
 		return tupleStatus, nil
 	}
-	computePlan, err := db.GetComputePlan(computePlanID)
+	computePlan, err := db.GetComputePlan(computePlanKey)
 	if err != nil {
 		return "", err
 	}
