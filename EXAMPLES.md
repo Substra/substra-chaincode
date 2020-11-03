@@ -394,11 +394,11 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"train
   "compute_plan_key": "",
   "creator": "SampleOrg",
   "dataset": {
-   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "keys": [
+   "data_sample_keys": [
     "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
     "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
+   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
    "metadata": {},
    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "worker": "SampleOrg"
@@ -445,11 +445,11 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"b0289ab8-
  "compute_plan_key": "",
  "creator": "SampleOrg",
  "dataset": {
-  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-  "keys": [
+  "data_sample_keys": [
    "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
    "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
   ],
+  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
   "metadata": {},
   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "worker": "SampleOrg"
@@ -501,11 +501,11 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"b0289ab
  "compute_plan_key": "",
  "creator": "SampleOrg",
  "dataset": {
-  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-  "keys": [
+  "data_sample_keys": [
    "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
    "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
   ],
+  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
   "metadata": {},
   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "worker": "SampleOrg"
@@ -555,11 +555,11 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"b0289ab
  "compute_plan_key": "",
  "creator": "SampleOrg",
  "dataset": {
-  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-  "keys": [
+  "data_sample_keys": [
    "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
    "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
   ],
+  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
   "metadata": {},
   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "worker": "SampleOrg"
@@ -687,11 +687,11 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   "compute_plan_key": "",
   "creator": "SampleOrg",
   "dataset": {
-   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "keys": [
+   "data_sample_keys": [
     "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
     "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
+   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0,
    "worker": "SampleOrg"
@@ -723,11 +723,11 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   "compute_plan_key": "",
   "creator": "SampleOrg",
   "dataset": {
-   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "keys": [
+   "data_sample_keys": [
     "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
     "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
+   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0,
    "worker": "SampleOrg"
@@ -776,11 +776,11 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"bbbada11-5
  "compute_plan_key": "",
  "creator": "SampleOrg",
  "dataset": {
-  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-  "keys": [
+  "data_sample_keys": [
    "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
    "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
   ],
+  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "perf": 0,
   "worker": "SampleOrg"
@@ -830,11 +830,11 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"bbbada11
  "compute_plan_key": "",
  "creator": "SampleOrg",
  "dataset": {
-  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-  "keys": [
+  "data_sample_keys": [
    "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
    "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
   ],
+  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "perf": 0.9,
   "worker": "SampleOrg"
@@ -882,11 +882,11 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"bbbada11-
  "compute_plan_key": "",
  "creator": "SampleOrg",
  "dataset": {
-  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-  "keys": [
+  "data_sample_keys": [
    "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
    "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
   ],
+  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "perf": 0.9,
   "worker": "SampleOrg"
@@ -927,11 +927,11 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "compute_plan_key": "",
   "creator": "SampleOrg",
   "dataset": {
-   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "keys": [
+   "data_sample_keys": [
     "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
     "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
+   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0,
    "worker": "SampleOrg"
@@ -963,11 +963,11 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "compute_plan_key": "",
   "creator": "SampleOrg",
   "dataset": {
-   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "keys": [
+   "data_sample_keys": [
     "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
     "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
+   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0.9,
    "worker": "SampleOrg"
@@ -999,11 +999,11 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "compute_plan_key": "",
   "creator": "SampleOrg",
   "dataset": {
-   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "keys": [
+   "data_sample_keys": [
     "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
     "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
+   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0,
    "worker": "SampleOrg"
@@ -1054,11 +1054,11 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
    "compute_plan_key": "",
    "creator": "SampleOrg",
    "dataset": {
-    "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-    "keys": [
+    "data_sample_keys": [
      "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
      "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
     ],
+    "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
     "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "perf": 0,
     "worker": "SampleOrg"
@@ -1091,11 +1091,11 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
   "compute_plan_key": "",
   "creator": "SampleOrg",
   "dataset": {
-   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "keys": [
+   "data_sample_keys": [
     "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
     "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
+   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0.9,
    "worker": "SampleOrg"
@@ -1126,11 +1126,11 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
   "compute_plan_key": "",
   "creator": "SampleOrg",
   "dataset": {
-   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "keys": [
+   "data_sample_keys": [
     "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
     "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
+   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
    "metadata": {},
    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "worker": "SampleOrg"
@@ -1175,11 +1175,11 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    "compute_plan_key": "",
    "creator": "SampleOrg",
    "dataset": {
-    "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-    "keys": [
+    "data_sample_keys": [
      "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
      "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
     ],
+    "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
     "metadata": {},
     "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "worker": "SampleOrg"
@@ -1215,11 +1215,11 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    "compute_plan_key": "",
    "creator": "SampleOrg",
    "dataset": {
-    "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-    "keys": [
+    "data_sample_keys": [
      "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
      "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
     ],
+    "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
     "metadata": {},
     "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "worker": "SampleOrg"
