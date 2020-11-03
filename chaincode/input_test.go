@@ -21,6 +21,9 @@ var (
 )
 
 func (dataManager *inputDataManager) createDefault() [][]byte {
+	if dataManager.Key == "" {
+		dataManager.Key = dataManagerKey
+	}
 	if dataManager.Name == "" {
 		dataManager.Name = "liver slide"
 	}
@@ -45,11 +48,11 @@ func (dataManager *inputDataManager) createDefault() [][]byte {
 	return args
 }
 func (dataSample *inputDataSample) createDefault() [][]byte {
-	if dataSample.Hashes == nil || len(dataSample.Hashes) == 0 {
-		dataSample.Hashes = []string{trainDataSampleHash1, trainDataSampleHash2}
+	if dataSample.Keys == nil || len(dataSample.Keys) == 0 {
+		dataSample.Keys = []string{trainDataSampleKey1, trainDataSampleKey2}
 	}
 	if dataSample.DataManagerKeys == nil || len(dataSample.DataManagerKeys) == 0 {
-		dataSample.DataManagerKeys = []string{dataManagerOpenerHash}
+		dataSample.DataManagerKeys = []string{dataManagerKey}
 	}
 	if dataSample.TestOnly == "" {
 		dataSample.TestOnly = "false"
@@ -59,6 +62,9 @@ func (dataSample *inputDataSample) createDefault() [][]byte {
 }
 
 func (objective *inputObjective) createDefault() [][]byte {
+	if objective.Key == "" {
+		objective.Key = objectiveKey
+	}
 	if objective.Name == "" {
 		objective.Name = "MSI classification"
 	}
@@ -78,10 +84,10 @@ func (objective *inputObjective) createDefault() [][]byte {
 		objective.MetricsStorageAddress = objectiveMetricsStorageAddress
 	}
 	if objective.TestDataset.DataManagerKey == "" {
-		objective.TestDataset.DataManagerKey = dataManagerOpenerHash
+		objective.TestDataset.DataManagerKey = dataManagerKey
 	}
 	if objective.TestDataset.DataSampleKeys == nil || len(objective.TestDataset.DataSampleKeys) == 0 {
-		objective.TestDataset.DataSampleKeys = []string{testDataSampleHash1, testDataSampleHash2}
+		objective.TestDataset.DataSampleKeys = []string{testDataSampleKey1, testDataSampleKey2}
 	}
 	objective.Permissions = OpenPermissions
 	args := append([][]byte{[]byte("registerObjective")}, assetToJSON(objective))
@@ -89,6 +95,9 @@ func (objective *inputObjective) createDefault() [][]byte {
 }
 
 func (algo *inputAlgo) createDefault() [][]byte {
+	if algo.Key == "" {
+		algo.Key = algoKey
+	}
 	if algo.Name == "" {
 		algo.Name = algoName
 	}
@@ -110,6 +119,9 @@ func (algo *inputAlgo) createDefault() [][]byte {
 }
 
 func (algo *inputCompositeAlgo) createDefault() [][]byte {
+	if algo.Key == "" {
+		algo.Key = compositeAlgoKey
+	}
 	if algo.Name == "" {
 		algo.Name = compositeAlgoName
 	}
@@ -136,6 +148,9 @@ func (algo *inputAggregateAlgo) createDefault() [][]byte {
 }
 
 func (algo *inputAggregateAlgo) fillDefaults() {
+	if algo.Key == "" {
+		algo.Key = aggregateAlgoKey
+	}
 	if algo.Name == "" {
 		algo.Name = aggregateAlgoName
 	}
@@ -159,17 +174,20 @@ func (algo *inputAggregateAlgo) getArgs() [][]byte {
 }
 
 func (traintuple *inputTraintuple) createDefault() [][]byte {
+	if traintuple.Key == "" {
+		traintuple.Key = traintupleKey
+	}
 	if traintuple.AlgoKey == "" {
-		traintuple.AlgoKey = algoHash
+		traintuple.AlgoKey = algoKey
 	}
 	if traintuple.InModels == nil {
 		traintuple.InModels = []string{}
 	}
 	if traintuple.DataManagerKey == "" {
-		traintuple.DataManagerKey = dataManagerOpenerHash
+		traintuple.DataManagerKey = dataManagerKey
 	}
 	if traintuple.DataSampleKeys == nil || len(traintuple.DataSampleKeys) == 0 {
-		traintuple.DataSampleKeys = []string{trainDataSampleHash1, trainDataSampleHash2}
+		traintuple.DataSampleKeys = []string{trainDataSampleKey1, trainDataSampleKey2}
 	}
 	args := append([][]byte{[]byte("createTraintuple")}, assetToJSON(traintuple))
 	return args
@@ -181,14 +199,17 @@ func (traintuple *inputCompositeTraintuple) createDefault() [][]byte {
 }
 
 func (traintuple *inputCompositeTraintuple) fillDefaults() {
+	if traintuple.Key == "" {
+		traintuple.Key = compositeTraintupleKey
+	}
 	if traintuple.AlgoKey == "" {
-		traintuple.AlgoKey = compositeAlgoHash
+		traintuple.AlgoKey = compositeAlgoKey
 	}
 	if traintuple.DataManagerKey == "" {
-		traintuple.DataManagerKey = dataManagerOpenerHash
+		traintuple.DataManagerKey = dataManagerKey
 	}
 	if traintuple.DataSampleKeys == nil || len(traintuple.DataSampleKeys) == 0 {
-		traintuple.DataSampleKeys = []string{trainDataSampleHash1, trainDataSampleHash2}
+		traintuple.DataSampleKeys = []string{trainDataSampleKey1, trainDataSampleKey2}
 	}
 	traintuple.OutTrunkModelPermissions = OpenPermissions
 }
@@ -204,8 +225,11 @@ func (aggregatetuple *inputAggregatetuple) createDefault() [][]byte {
 }
 
 func (aggregatetuple *inputAggregatetuple) fillDefaults() {
+	if aggregatetuple.Key == "" {
+		aggregatetuple.Key = aggregatetupleKey
+	}
 	if aggregatetuple.AlgoKey == "" {
-		aggregatetuple.AlgoKey = aggregateAlgoHash
+		aggregatetuple.AlgoKey = aggregateAlgoKey
 	}
 	if aggregatetuple.Worker == "" {
 		aggregatetuple.Worker = worker
@@ -228,6 +252,9 @@ func (success *inputLogSuccessTrain) fillDefaults() {
 	}
 	if success.Log == "" {
 		success.Log = "no error, ah ah ah"
+	}
+	if success.OutModel.Key == "" {
+		success.OutModel.Key = modelKey
 	}
 	if success.OutModel.Hash == "" {
 		success.OutModel.Hash = modelHash
@@ -253,8 +280,14 @@ func (success *inputLogSuccessCompositeTrain) fillDefaults() {
 	if success.Log == "" {
 		success.Log = "no error, ah ah ah"
 	}
+	if success.OutHeadModel.Key == "" {
+		success.OutHeadModel.Key = headModelKey
+	}
 	if success.OutHeadModel.Hash == "" {
 		success.OutHeadModel.Hash = headModelHash
+	}
+	if success.OutTrunkModel.Key == "" {
+		success.OutTrunkModel.Key = trunkModelKey
 	}
 	if success.OutTrunkModel.Hash == "" {
 		success.OutTrunkModel.Hash = trunkModelHash
@@ -323,14 +356,22 @@ func (testtuple *inputTesttuple) createDefault() [][]byte {
 }
 
 func (testtuple *inputTesttuple) fillDefaults() {
+	if testtuple.Key == "" {
+		testtuple.Key = testtupleKey
+	}
 	if testtuple.TraintupleKey == "" {
 		testtuple.TraintupleKey = traintupleKey
 	}
 	if testtuple.ObjectiveKey == "" {
-		testtuple.ObjectiveKey = objectiveDescriptionHash
+		testtuple.ObjectiveKey = objectiveKey
 	}
 }
 
 func (testtuple *inputTesttuple) getArgs() [][]byte {
 	return append([][]byte{[]byte("createTesttuple")}, assetToJSON(testtuple))
+}
+
+func (computePlan *inputComputePlan) getArgs() [][]byte {
+	args := append([][]byte{[]byte("createComputePlan")}, assetToJSON(computePlan))
+	return args
 }

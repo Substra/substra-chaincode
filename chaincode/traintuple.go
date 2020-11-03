@@ -39,6 +39,7 @@ func (traintuple *Traintuple) SetFromInput(db *LedgerDB, inp inputTraintuple) er
 	if err != nil {
 		return err
 	}
+	traintuple.Key = inp.Key
 	traintuple.AssetType = TraintupleType
 	traintuple.Creator = creator
 	traintuple.ComputePlanID = inp.ComputePlanID
@@ -104,19 +105,6 @@ func (traintuple *Traintuple) SetFromParents(db *LedgerDB, inModels []string) er
 	return nil
 }
 
-// GetKey return the key of the traintuple depending on its key parameters.
-func (traintuple *Traintuple) GetKey() string {
-	hashKeys := []string{
-		traintuple.Creator,
-		traintuple.AlgoKey,
-		traintuple.Dataset.DataManagerKey,
-		traintuple.ComputePlanID}
-	hashKeys = append(hashKeys, traintuple.Dataset.DataSampleKeys...)
-	hashKeys = append(hashKeys, traintuple.InModelKeys...)
-	return HashForKey("traintuple", hashKeys...)
-
-}
-
 // AddToComputePlan set the traintuple's parameters that determines if it's part of on ComputePlan and how.
 // It uses the inputTraintuple values as follow:
 //  - If neither ComputePlanID nor rank is set it returns immediately
@@ -135,19 +123,6 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 	traintuple.Rank, err = strconv.Atoi(inp.Rank)
 	if err != nil {
 		return err
-	}
-	if inp.ComputePlanID == "" {
-		if traintuple.Rank != 0 {
-			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
-			return err
-		}
-		computePlan := ComputePlan{}
-		computePlan.AddTuple(TraintupleType, traintupleKey, traintuple.Status)
-		traintuple.ComputePlanID, err = computePlan.Create(db)
-		if err != nil {
-			return err
-		}
-		return nil
 	}
 	traintuple.ComputePlanID = inp.ComputePlanID
 	computePlan, err := db.GetComputePlan(inp.ComputePlanID)
@@ -243,31 +218,30 @@ func createTraintupleInternal(db *LedgerDB, inp inputTraintuple, checkComputePla
 	if err != nil {
 		return "", err
 	}
-	traintupleKey := traintuple.GetKey()
 	// Test if the key (ergo the traintuple) already exists
-	tupleExists, err := db.KeyExists(traintupleKey)
+	tupleExists, err := db.KeyExists(traintuple.Key)
 	if err != nil {
 		return "", err
 	}
 	if tupleExists {
-		return "", errors.Conflict("traintuple already exists").WithKey(traintupleKey)
+		return "", errors.Conflict("traintuple already exists").WithKey(traintuple.Key)
 	}
-	err = traintuple.AddToComputePlan(db, inp, traintupleKey, checkComputePlanAvailability)
+	err = traintuple.AddToComputePlan(db, inp, traintuple.Key, checkComputePlanAvailability)
 	if err != nil {
 		return "", err
 	}
 
-	err = traintuple.Save(db, traintupleKey)
+	err = traintuple.Save(db, traintuple.Key)
 	if err != nil {
 		return "", err
 	}
 
-	err = db.AddTupleEvent(traintupleKey)
+	err = db.AddTupleEvent(traintuple.Key)
 	if err != nil {
 		return "", err
 	}
 
-	return traintupleKey, nil
+	return traintuple.Key, nil
 }
 
 // logStartTrain modifies a traintuple by changing its status from todo to doing
@@ -291,7 +265,7 @@ func logStartTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) 
 	if err = traintuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	err = o.Fill(db, traintuple, inp.Key)
+	err = o.Fill(db, traintuple)
 	return
 }
 
@@ -312,16 +286,17 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 		return
 	}
 
-	traintuple.OutModel = &HashDress{
+	traintuple.OutModel = &KeyHashDress{
+		Key:            inp.OutModel.Key,
 		Hash:           inp.OutModel.Hash,
 		StorageAddress: inp.OutModel.StorageAddress}
 	traintuple.Log += inp.Log
 
-	err = createModelIndex(db, inp.OutModel.Hash, traintupleKey)
+	err = createModelIndex(db, inp.OutModel.Key, traintupleKey)
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, traintuple.ComputePlanID, traintupleKey, traintuple.OutModel.Hash)
+	err = TryAddIntermediaryModel(db, traintuple.ComputePlanID, traintupleKey, traintuple.OutModel.Key)
 	if err != nil {
 		return
 	}
@@ -344,7 +319,7 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 		return
 	}
 
-	err = o.Fill(db, traintuple, inp.Key)
+	err = o.Fill(db, traintuple)
 	return
 }
 
@@ -372,7 +347,7 @@ func logFailTrain(db *LedgerDB, args []string) (o outputTraintuple, err error) {
 		return
 	}
 
-	if err = o.Fill(db, traintuple, inp.Key); err != nil {
+	if err = o.Fill(db, traintuple); err != nil {
 		return
 	}
 
@@ -405,7 +380,7 @@ func queryTraintuple(db *LedgerDB, args []string) (outputTraintuple outputTraint
 		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
-	err = outputTraintuple.Fill(db, traintuple, inp.Key)
+	err = outputTraintuple.Fill(db, traintuple)
 	return
 }
 
@@ -441,7 +416,7 @@ func getOutputTraintuple(db *LedgerDB, traintupleKey string) (outTraintuple outp
 	if err != nil {
 		return
 	}
-	err = outTraintuple.Fill(db, traintuple, traintupleKey)
+	err = outTraintuple.Fill(db, traintuple)
 	return
 }
 

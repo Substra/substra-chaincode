@@ -20,8 +20,7 @@ import (
 
 // Set is a method of the receiver Algo. It uses inputAlgo fields to set the Algo
 // Returns the algoKey
-func (algo *Algo) Set(db *LedgerDB, inp inputAlgo) (algoKey string, err error) {
-	algoKey = inp.Hash
+func (algo *Algo) Set(db *LedgerDB, inp inputAlgo) (err error) {
 	// find associated owner
 	owner, err := GetTxCreator(db.cc)
 	if err != nil {
@@ -33,8 +32,10 @@ func (algo *Algo) Set(db *LedgerDB, inp inputAlgo) (algoKey string, err error) {
 		return
 	}
 
+	algo.Key = inp.Key
 	algo.AssetType = AlgoType
 	algo.Name = inp.Name
+	algo.Hash = inp.Hash
 	algo.StorageAddress = inp.StorageAddress
 	algo.Description = &HashDress{
 		Hash:           inp.DescriptionHash,
@@ -59,21 +60,21 @@ func registerAlgo(db *LedgerDB, args []string) (resp outputKey, err error) {
 	}
 	// check validity of input args and convert it to Algo
 	algo := Algo{}
-	algoKey, err := algo.Set(db, inp)
+	err = algo.Set(db, inp)
 	if err != nil {
 		return
 	}
 	// submit to ledger
-	err = db.Add(algoKey, algo)
+	err = db.Add(algo.Key, algo)
 	if err != nil {
 		return
 	}
 	// create composite key
-	err = db.CreateIndex("algo~owner~key", []string{"algo", algo.Owner, algoKey})
+	err = db.CreateIndex("algo~owner~key", []string{"algo", algo.Owner, algo.Key})
 	if err != nil {
 		return
 	}
-	return outputKey{Key: algoKey}, nil
+	return outputKey{Key: algo.Key}, nil
 }
 
 // queryAlgo returns an algo of the ledger given its key
@@ -87,7 +88,7 @@ func queryAlgo(db *LedgerDB, args []string) (out outputAlgo, err error) {
 	if err != nil {
 		return
 	}
-	out.Fill(inp.Key, algo)
+	out.Fill(algo)
 	return
 }
 
@@ -109,7 +110,7 @@ func queryAlgos(db *LedgerDB, args []string) (outAlgos []outputAlgo, err error) 
 			return outAlgos, err
 		}
 		var out outputAlgo
-		out.Fill(key, algo)
+		out.Fill(algo)
 		outAlgos = append(outAlgos, out)
 	}
 	return

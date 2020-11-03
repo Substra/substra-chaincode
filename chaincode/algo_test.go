@@ -40,8 +40,6 @@ func TestAlgo(t *testing.T) {
 	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
-	algoKey := res.Key
-	assert.Equalf(t, inpAlgo.Hash, algoKey, "when adding algo, key does not corresponds to its hash - key: %s and hash %s", algoKey, inpAlgo.Hash)
 
 	// Query algo from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryAlgo"), keyToJSON(algoKey)}
@@ -53,8 +51,8 @@ func TestAlgo(t *testing.T) {
 	expectedAlgo := outputAlgo{
 		Key:  algoKey,
 		Name: inpAlgo.Name,
-		Content: HashDress{
-			Hash:           algoKey,
+		Content: &HashDress{
+			Hash:           inpAlgo.Hash,
 			StorageAddress: inpAlgo.StorageAddress,
 		},
 		Description: &HashDress{

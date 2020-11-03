@@ -18,13 +18,13 @@ import "chaincode/errors"
 
 type outputAggregatetuple struct {
 	Key           string            `json:"key"`
-	Algo          *HashDressName    `json:"algo"`
+	Algo          *KeyHashDressName `json:"algo"`
 	Creator       string            `json:"creator"`
 	ComputePlanID string            `json:"compute_plan_id"`
 	Log           string            `json:"log"`
 	Metadata      map[string]string `json:"metadata"`
 	InModels      []*Model          `json:"in_models"`
-	OutModel      *HashDress        `json:"out_model"`
+	OutModel      *KeyHashDress     `json:"out_model"`
 	Rank          int               `json:"rank"`
 	Status        string            `json:"status"`
 	Tag           string            `json:"tag"`
@@ -36,13 +36,13 @@ type outputAggregateAlgo struct {
 	outputAlgo
 }
 
-func (out *outputAggregateAlgo) Fill(key string, in AggregateAlgo) {
-	out.outputAlgo.Fill(key, in.Algo)
+func (out *outputAggregateAlgo) Fill(in AggregateAlgo) {
+	out.outputAlgo.Fill(in.Algo)
 }
 
 // Fill is a method of the receiver outputAggregatetuple. It returns all elements necessary to do a training task from an aggregate trainuple stored in the ledger
-func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple Aggregatetuple, traintupleKey string) (err error) {
-	outputAggregatetuple.Key = traintupleKey
+func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple Aggregatetuple) (err error) {
+	outputAggregatetuple.Key = traintuple.Key
 	outputAggregatetuple.Creator = traintuple.Creator
 	outputAggregatetuple.Log = traintuple.Log
 	outputAggregatetuple.Metadata = initMapOutput(traintuple.Metadata)
@@ -56,9 +56,10 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 		err = errors.Internal("could not retrieve aggregate algo with key %s - %s", traintuple.AlgoKey, err.Error())
 		return
 	}
-	outputAggregatetuple.Algo = &HashDressName{
+	outputAggregatetuple.Algo = &KeyHashDressName{
+		Key:            algo.Key,
 		Name:           algo.Name,
-		Hash:           traintuple.AlgoKey,
+		Hash:           algo.Hash,
 		StorageAddress: algo.StorageAddress}
 
 	// fill inModels
@@ -66,7 +67,7 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 		if inModelKey == "" {
 			break
 		}
-		hashDress, _err := db.GetOutModelHashDress(inModelKey, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
+		keyHashDress, _err := db.GetOutModelKeyHashDress(inModelKey, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
 		if _err != nil {
 			err = errors.Internal("could not fill in-model with key \"%s\": %s", inModelKey, _err.Error())
 			return
@@ -74,9 +75,10 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 		inModel := &Model{
 			TraintupleKey: inModelKey,
 		}
-		if hashDress != nil {
-			inModel.Hash = hashDress.Hash
-			inModel.StorageAddress = hashDress.StorageAddress
+		if keyHashDress != nil {
+			inModel.Key = keyHashDress.Key
+			inModel.Hash = keyHashDress.Hash
+			inModel.StorageAddress = keyHashDress.StorageAddress
 		}
 		outputAggregatetuple.InModels = append(outputAggregatetuple.InModels, inModel)
 	}

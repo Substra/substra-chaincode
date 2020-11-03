@@ -29,8 +29,8 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -56,8 +56,8 @@ func TestTraintupleWithSingleDatasample(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -69,7 +69,7 @@ func TestTraintupleWithSingleDatasample(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
 	inpTraintuple := inputTraintuple{
-		DataSampleKeys: []string{trainDataSampleHash1},
+		DataSampleKeys: []string{trainDataSampleKey1},
 	}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -88,8 +88,8 @@ func TestTraintupleWithDuplicatedDatasamples(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.Replace(objectiveDescriptionHash, "1", "2", 1)
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -101,7 +101,7 @@ func TestTraintupleWithDuplicatedDatasamples(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
 	inpTraintuple := inputTraintuple{
-		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2, trainDataSampleHash1},
+		DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2, trainDataSampleKey1},
 	}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -120,12 +120,12 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 
 	// Retreive and alter existing objectif to pass Metrics at nil
 	db := NewLedgerDB(mockStub)
-	objective, err := db.GetObjective(objectiveDescriptionHash)
+	objective, err := db.GetObjective(objectiveKey)
 	assert.NoError(t, err)
 	objective.Metrics = nil
 	objBytes, err := json.Marshal(objective)
 	assert.NoError(t, err)
-	err = mockStub.PutState(objectiveDescriptionHash, objBytes)
+	err = mockStub.PutState(objectiveKey, objBytes)
 	assert.NoError(t, err)
 	// It should not panic
 	require.NotPanics(t, func() {
@@ -146,13 +146,18 @@ func TestTraintupleComputePlanCreation(t *testing.T) {
 	require.EqualValues(t, 400, resp.Status, "should failed for missing rank")
 	require.Contains(t, resp.Message, "invalid inputs, a ComputePlan should have a rank", "invalid error message")
 
+	cpKey := RandomUUID()
+	inCP := inputComputePlan{ComputePlanID: cpKey}
+	resp = mockStub.MockInvoke("42", inCP.getArgs())
+	require.EqualValues(t, 200, resp.Status)
+
 	inpTraintuple = inputTraintuple{Rank: "1"}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 400, resp.Status, "should failed for invalid rank")
-	require.Contains(t, resp.Message, "invalid inputs, a new ComputePlan should have a rank 0")
+	require.Contains(t, resp.Message, "Field validation for 'ComputePlanID' failed on the 'required_with' tag")
 
-	inpTraintuple = inputTraintuple{Rank: "0"}
+	inpTraintuple = inputTraintuple{Rank: "0", ComputePlanID: cpKey}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
@@ -162,10 +167,10 @@ func TestTraintupleComputePlanCreation(t *testing.T) {
 	key := res.Key
 	require.EqualValues(t, key, traintupleKey)
 
-	inpTraintuple = inputTraintuple{Rank: "0"}
+	inpTraintuple = inputTraintuple{}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	require.EqualValues(t, 409, resp.Status, "should failed for existing ComputePlanID")
+	require.EqualValues(t, 409, resp.Status, "should failed for existing traintuple key")
 	require.Contains(t, resp.Message, "already exists")
 
 	require.EqualValues(t, 409, resp.Status, "should failed for existing FLTask")
@@ -183,9 +188,14 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "algo")
 
-	inpTraintuple := inputTraintuple{Rank: "0"}
+	cpKey := RandomUUID()
+	inCP := inputComputePlan{ComputePlanID: cpKey}
+	resp := mockStub.MockInvoke("42", inCP.getArgs())
+	require.EqualValues(t, 200, resp.Status)
+
+	inpTraintuple := inputTraintuple{Rank: "0", ComputePlanID: cpKey}
 	args := inpTraintuple.createDefault()
-	resp := mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
@@ -196,15 +206,17 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 	assert.NoError(t, err)
 	// Failed to add a traintuple with the same rank
 	inpTraintuple = inputTraintuple{
+		Key:           RandomUUID(),
 		InModels:      []string{key},
 		Rank:          "0",
-		ComputePlanID: tuple.ComputePlanID}
+		ComputePlanID: cpKey}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add a traintuple of the same rank")
 
 	// Failed to add a traintuple to an unexisting CommputePlan
 	inpTraintuple = inputTraintuple{
+		Key:           RandomUUID(),
 		InModels:      []string{key},
 		Rank:          "1",
 		ComputePlanID: "notarealone"}
@@ -214,6 +226,7 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 
 	// Succesfully add a traintuple to the same ComputePlanID
 	inpTraintuple = inputTraintuple{
+		Key:           RandomUUID(),
 		InModels:      []string{key},
 		Rank:          "1",
 		ComputePlanID: tuple.ComputePlanID}
@@ -224,14 +237,15 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 	assert.NoError(t, err, "should unmarshal without problem")
 	ttkey := res.Key
 	// Add new algo to check all ComputePlan algo consistency
-	newAlgoHash := strings.Replace(algoHash, "a", "b", 1)
-	inpAlgo := inputAlgo{Hash: newAlgoHash}
+	newAlgoKey := strings.Replace(algoKey, "a", "b", 1)
+	inpAlgo := inputAlgo{Key: newAlgoKey}
 	args = inpAlgo.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 
 	inpTraintuple = inputTraintuple{
-		AlgoKey:       newAlgoHash,
+		Key:           RandomUUID(),
+		AlgoKey:       newAlgoKey,
 		InModels:      []string{ttkey},
 		Rank:          "2",
 		ComputePlanID: tuple.ComputePlanID}
@@ -275,14 +289,16 @@ func TestTraintuple(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried traintuple")
 	expected := outputTraintuple{
 		Key: traintupleKey,
-		Algo: &HashDressName{
+		Algo: &KeyHashDressName{
+			Key:            algoKey,
 			Hash:           algoHash,
 			Name:           algoName,
 			StorageAddress: algoStorageAddress,
 		},
 		Creator: worker,
 		Dataset: &outputTtDataset{
-			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
+			Key:            dataManagerKey,
+			DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
 			OpenerHash:     dataManagerOpenerHash,
 			Worker:         worker,
 			Metadata:       map[string]string{},
@@ -309,6 +325,7 @@ func TestTraintuple(t *testing.T) {
 
 	// Add traintuple with inmodel from the above-submitted traintuple
 	inpWaitingTraintuple := inputTraintuple{
+		Key:      RandomUUID(),
 		InModels: []string{string(traintupleKey)},
 	}
 	args = inpWaitingTraintuple.createDefault()
@@ -360,7 +377,8 @@ func TestTraintuple(t *testing.T) {
 	endTraintuple := outputTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutModel = &HashDress{
+	expected.OutModel = &KeyHashDress{
+		Key:            modelKey,
 		Hash:           modelHash,
 		StorageAddress: modelAddress}
 	expected.Status = traintupleStatus[1]
@@ -391,13 +409,13 @@ func TestQueryTraintupleNotFound(t *testing.T) {
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryTraintuple: key does not exist
-	notFoundKey := "eedbb7c31f62244c0f34461cc168804227115793d01c270021fe3f7935482eed"
+	notFoundKey := "eedbb7c3-1f62-244c-0f34-461cc1688042"
 	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(notFoundKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryTraintuple: key does not exist and use existing other asset type key
-	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(algoHash)}
+	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(algoKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the traintuple - status %d and message %s", resp.Status, resp.Message)
 }
@@ -408,17 +426,24 @@ func TestInsertTraintupleTwice(t *testing.T) {
 	registerItem(t, *mockStub, "algo")
 
 	// create a traintuple and start a ComplutePlan
+	cpKey := RandomUUID()
+	inCP := inputComputePlan{ComputePlanID: cpKey}
+	resp := mockStub.MockInvoke("42", inCP.getArgs())
+	require.EqualValues(t, 200, resp.Status)
+
 	inpTraintuple := inputTraintuple{
-		Rank: "0",
+		Rank:          "0",
+		ComputePlanID: cpKey,
 	}
 	inpTraintuple.createDefault()
-	resp := mockStub.MockInvoke("42", methodAndAssetToByte("createTraintuple", inpTraintuple))
+	resp = mockStub.MockInvoke("42", methodAndAssetToByte("createTraintuple", inpTraintuple))
 	assert.EqualValues(t, http.StatusOK, resp.Status)
 
 	db := NewLedgerDB(mockStub)
 	tuple, err := db.GetTraintuple(traintupleKey)
 	assert.NoError(t, err)
 	// create a second traintuple in the same ComputePlan
+	inpTraintuple.Key = RandomUUID()
 	inpTraintuple.Rank = "1"
 	inpTraintuple.ComputePlanID = tuple.ComputePlanID
 	inpTraintuple.InModels = []string{traintupleKey}

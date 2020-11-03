@@ -74,7 +74,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Add test DataSample ------------")
 	inpDataSample := inputDataSample{
-		Hashes:   []string{testDataSampleHash1, testDataSampleHash2},
+		Keys:     []string{testDataSampleKey1, testDataSampleKey2},
 		TestOnly: "true",
 	}
 	inpDataSample.createDefault()
@@ -128,7 +128,7 @@ func TestPipeline(t *testing.T) {
 	trainWorker := traintuple.Dataset.Worker
 
 	fmt.Fprintln(&out, "#### ------------ Add Traintuple with inModel from previous traintuple ------------")
-	inpTraintuple = inputTraintuple{}
+	inpTraintuple = inputTraintuple{Key: traintupleKey2}
 	inpTraintuple.InModels = []string{traintupleKey}
 	inpTraintuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTraintuple", inpTraintuple)
@@ -159,14 +159,14 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Add Non-Certified Testtuple ------------")
 	inpTesttuple := inputTesttuple{
-		DataManagerKey: dataManagerOpenerHash,
-		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
+		DataManagerKey: dataManagerKey,
+		DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
 	}
 	inpTesttuple.createDefault()
 	callAssertAndPrint("invoke", "createTesttuple", inpTesttuple)
 
 	fmt.Fprintln(&out, "#### ------------ Add Certified Testtuple ------------")
-	inpTesttuple = inputTesttuple{}
+	inpTesttuple = inputTesttuple{Key: testtupleKey2}
 	args = inpTesttuple.createDefault()
 	resp = callAssertAndPrint("invoke", "createTesttuple", inpTesttuple)
 	// Get testtuple key from Payload
@@ -188,7 +188,7 @@ func TestPipeline(t *testing.T) {
 	testWorker := testtuple.Dataset.Worker
 
 	fmt.Fprintln(&out, "#### ------------ Add Testtuple with not done traintuple ------------")
-	inpTesttuple = inputTesttuple{}
+	inpTesttuple = inputTesttuple{Key: testtupleKey3}
 	inpTesttuple.TraintupleKey = todoTraintupleKey
 	inpTesttuple.createDefault()
 	callAssertAndPrint("invoke", "createTesttuple", inpTesttuple)
@@ -222,25 +222,25 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("query", "queryModels", nil)
 
 	fmt.Fprintln(&out, "#### ------------ Query model permissions ------------")
-	callAssertAndPrint("query", "queryModelPermissions", inputKey{modelHash})
+	callAssertAndPrint("query", "queryModelPermissions", inputKey{modelKey})
 
 	fmt.Fprintln(&out, "#### ------------ Query Dataset ------------")
-	callAssertAndPrint("query", "queryDataset", inputKey{dataManagerOpenerHash})
+	callAssertAndPrint("query", "queryDataset", inputKey{dataManagerKey})
 
 	fmt.Fprintln(&out, "#### ------------ Query nodes ------------")
 	callAssertAndPrint("query", "queryNodes", nil)
 
 	// 3. add new data manager and dataSample
 	fmt.Fprintln(&out, "#### ------------ Update Data Sample with new data manager ------------")
-	newDataManagerKey := "38a320b2a67c8003cc748d6666534f2b01f3f08d175440537a5bf86b7d08d5ee"
-	inpDataManager = inputDataManager{OpenerHash: newDataManagerKey}
+	newDataManagerKey := "38a320b2-a67c-8003-cc74-8d6666534f2b"
+	inpDataManager = inputDataManager{Key: newDataManagerKey}
 	args = inpDataManager.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding dataManager with status %d and message %s", resp.Status, resp.Message)
 	// associate a data sample with the old data manager with the updateDataSample
 	updateData := inputUpdateDataSample{
 		DataManagerKeys: []string{newDataManagerKey},
-		Hashes:          []string{trainDataSampleHash1},
+		Keys:            []string{trainDataSampleKey1},
 	}
 	callAssertAndPrint("invoke", "updateDataSample", updateData)
 
@@ -248,7 +248,9 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("query", "queryDataset", inputKey{newDataManagerKey})
 
 	fmt.Fprintln(&out, "#### ------------ Create a ComputePlan ------------")
-	inputCP := inputNewComputePlan{}
+	inputCP := inputNewComputePlan{inputComputePlan: inputComputePlan{
+		ComputePlanID: computePlanID,
+	}}
 	inputCP.Tag = tag
 	inputCP.inputComputePlan = defaultComputePlan
 	resp = callAssertAndPrint("invoke", "createComputePlan", inputCP)
@@ -256,22 +258,24 @@ func TestPipeline(t *testing.T) {
 	err = json.Unmarshal(resp.Payload, &outCp)
 
 	fmt.Fprintln(&out, "#### ------------ Update a ComputePlan ------------")
-	upCP := inputUpdateComputePlan{}
+	upCP := inputComputePlan{}
 	upCP.ComputePlanID = outCp.ComputePlanID
 	upCP.Traintuples = []inputComputePlanTraintuple{
 		{
-			DataManagerKey: dataManagerOpenerHash,
-			DataSampleKeys: []string{trainDataSampleHash1},
-			AlgoKey:        algoHash,
+			Key:            computePlanTraintupleKey3,
+			DataManagerKey: dataManagerKey,
+			DataSampleKeys: []string{trainDataSampleKey1},
+			AlgoKey:        algoKey,
 			ID:             "thirdTraintupleID",
 			InModelsIDs:    []string{traintupleID1, traintupleID2},
 		},
 	}
 	upCP.Testtuples = []inputComputePlanTesttuple{
 		{
-			DataManagerKey: dataManagerOpenerHash,
-			DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
-			ObjectiveKey:   objectiveDescriptionHash,
+			Key:            computePlanTesttupleKey2,
+			DataManagerKey: dataManagerKey,
+			DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
+			ObjectiveKey:   objectiveKey,
 			TraintupleID:   "thirdTraintupleID",
 		},
 	}
@@ -279,7 +283,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Query an ObjectiveLeaderboard ------------")
 	inpLeaderboard := inputLeaderboard{
-		ObjectiveKey:   objectiveDescriptionHash,
+		ObjectiveKey:   objectiveKey,
 		AscendingOrder: true,
 	}
 	callAssertAndPrint("invoke", "queryObjectiveLeaderboard", inpLeaderboard)

@@ -27,7 +27,7 @@ const OutputAssetPaginationHardLimit = 500
 type outputObjective struct {
 	Key         string            `json:"key"`
 	Name        string            `json:"name"`
-	Description HashDress         `json:"description"`
+	Description *HashDress        `json:"description"`
 	Metrics     *HashDressName    `json:"metrics"`
 	Owner       string            `json:"owner"`
 	TestDataset *Dataset          `json:"test_dataset"`
@@ -35,11 +35,10 @@ type outputObjective struct {
 	Metadata    map[string]string `json:"metadata"`
 }
 
-func (out *outputObjective) Fill(key string, in Objective) {
-	out.Key = key
+func (out *outputObjective) Fill(in Objective) {
+	out.Key = in.Key
 	out.Name = in.Name
-	out.Description.StorageAddress = in.DescriptionStorageAddress
-	out.Description.Hash = key
+	out.Description = in.Description
 	out.Metrics = in.Metrics
 	out.Owner = in.Owner
 	out.TestDataset = in.TestDataset
@@ -57,20 +56,19 @@ type outputDataManager struct {
 	Key          string            `json:"key"`
 	Metadata     map[string]string `json:"metadata"`
 	Name         string            `json:"name"`
-	Opener       HashDress         `json:"opener"`
+	Opener       *HashDress        `json:"opener"`
 	Owner        string            `json:"owner"`
 	Permissions  outputPermissions `json:"permissions"`
 	Type         string            `json:"type"`
 }
 
-func (out *outputDataManager) Fill(key string, in DataManager) {
+func (out *outputDataManager) Fill(in DataManager) {
 	out.ObjectiveKey = in.ObjectiveKey
 	out.Description = in.Description
-	out.Key = key
+	out.Key = in.Key
 	out.Metadata = initMapOutput(in.Metadata)
 	out.Name = in.Name
-	out.Opener.Hash = key
-	out.Opener.StorageAddress = in.OpenerStorageAddress
+	out.Opener = in.Opener
 	out.Owner = in.Owner
 	out.Permissions.Fill(in.Permissions)
 	out.Type = in.Type
@@ -95,8 +93,8 @@ type outputDataset struct {
 	TestDataSampleKeys  []string          `json:"test_data_sample_keys"`
 }
 
-func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, testKeys []string) {
-	out.outputDataManager.Fill(key, in)
+func (out *outputDataset) Fill(in DataManager, trainKeys []string, testKeys []string) {
+	out.outputDataManager.Fill(in)
 	out.TrainDataSampleKeys = trainKeys
 	out.TestDataSampleKeys = testKeys
 	out.Metadata = initMapOutput(in.Metadata)
@@ -105,18 +103,20 @@ func (out *outputDataset) Fill(key string, in DataManager, trainKeys []string, t
 type outputAlgo struct {
 	Key         string            `json:"key"`
 	Name        string            `json:"name"`
-	Content     HashDress         `json:"content"`
+	Content     *HashDress        `json:"content"`
 	Description *HashDress        `json:"description"`
 	Owner       string            `json:"owner"`
 	Permissions outputPermissions `json:"permissions"`
 	Metadata    map[string]string `json:"metadata"`
 }
 
-func (out *outputAlgo) Fill(key string, in Algo) {
-	out.Key = key
+func (out *outputAlgo) Fill(in Algo) {
+	out.Key = in.Key
 	out.Name = in.Name
-	out.Content.Hash = key
-	out.Content.StorageAddress = in.StorageAddress
+	out.Content = &HashDress{
+		Hash:           in.Hash,
+		StorageAddress: in.StorageAddress,
+	}
 	out.Description = in.Description
 	out.Owner = in.Owner
 	out.Permissions.Fill(in.Permissions)
@@ -125,6 +125,7 @@ func (out *outputAlgo) Fill(key string, in Algo) {
 
 // outputTtDataset is the representation of a Traintuple Dataset
 type outputTtDataset struct {
+	Key            string            `json:"key"`
 	Worker         string            `json:"worker"`
 	DataSampleKeys []string          `json:"keys"`
 	OpenerHash     string            `json:"opener_hash"`
@@ -135,14 +136,14 @@ type outputTtDataset struct {
 // ledger. It describes a training task occuring on the platform
 type outputTraintuple struct {
 	Key           string            `json:"key"`
-	Algo          *HashDressName    `json:"algo"`
+	Algo          *KeyHashDressName `json:"algo"`
 	Creator       string            `json:"creator"`
 	Dataset       *outputTtDataset  `json:"dataset"`
 	ComputePlanID string            `json:"compute_plan_id"`
 	InModels      []*Model          `json:"in_models"`
 	Log           string            `json:"log"`
 	Metadata      map[string]string `json:"metadata"`
-	OutModel      *HashDress        `json:"out_model"`
+	OutModel      *KeyHashDress     `json:"out_model"`
 	Permissions   outputPermissions `json:"permissions"`
 	Rank          int               `json:"rank"`
 	Status        string            `json:"status"`
@@ -150,9 +151,9 @@ type outputTraintuple struct {
 }
 
 //Fill is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
-func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintuple, traintupleKey string) (err error) {
+func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintuple) (err error) {
 
-	outputTraintuple.Key = traintupleKey
+	outputTraintuple.Key = traintuple.Key
 	outputTraintuple.Creator = traintuple.Creator
 	outputTraintuple.Permissions.Fill(traintuple.Permissions)
 	outputTraintuple.Log = traintuple.Log
@@ -168,9 +169,10 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 		err = errors.Internal("could not retrieve algo with key %s - %s", traintuple.AlgoKey, err.Error())
 		return
 	}
-	outputTraintuple.Algo = &HashDressName{
+	outputTraintuple.Algo = &KeyHashDressName{
+		Key:            algo.Key,
 		Name:           algo.Name,
-		Hash:           traintuple.AlgoKey,
+		Hash:           algo.Hash,
 		StorageAddress: algo.StorageAddress}
 
 	// fill inModels
@@ -186,17 +188,25 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 			TraintupleKey: inModelKey,
 		}
 		if parentTraintuple.OutModel != nil {
+			inModel.Key = parentTraintuple.Key
 			inModel.Hash = parentTraintuple.OutModel.Hash
 			inModel.StorageAddress = parentTraintuple.OutModel.StorageAddress
 		}
 		outputTraintuple.InModels = append(outputTraintuple.InModels, inModel)
 	}
 
+	dataManager, err := db.GetDataManager(traintuple.Dataset.DataManagerKey)
+	if err != nil {
+		err = errors.Internal("could not retrieve data manager with key %s - %s", traintuple.Dataset.DataManagerKey, err.Error())
+		return
+	}
+
 	// fill dataset
 	outputTraintuple.Dataset = &outputTtDataset{
+		Key:            dataManager.Key,
 		Worker:         traintuple.Dataset.Worker,
 		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
-		OpenerHash:     traintuple.Dataset.DataManagerKey,
+		OpenerHash:     dataManager.Opener.Hash,
 		Metadata:       initMapOutput(traintuple.Dataset.Metadata),
 	}
 
@@ -204,7 +214,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 }
 
 type outputTesttuple struct {
-	Algo           *HashDressName    `json:"algo"`
+	Algo           *KeyHashDressName `json:"algo"`
 	Certified      bool              `json:"certified"`
 	ComputePlanID  string            `json:"compute_plan_id"`
 	Creator        string            `json:"creator"`
@@ -220,12 +230,12 @@ type outputTesttuple struct {
 	TraintupleType string            `json:"traintuple_type"`
 }
 
-func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
+func (out *outputTesttuple) Fill(db *LedgerDB, in Testtuple) error {
+	out.Key = in.Key
 	out.Certified = in.Certified
 	out.ComputePlanID = in.ComputePlanID
 	out.Creator = in.Creator
 	out.Dataset = in.Dataset
-	out.Key = key
 	out.Log = in.Log
 	out.Metadata = initMapOutput(in.Metadata)
 	out.Rank = in.Rank
@@ -261,9 +271,10 @@ func (out *outputTesttuple) Fill(db *LedgerDB, key string, in Testtuple) error {
 		}
 		algo = aggregateAlgo.Algo
 	}
-	out.Algo = &HashDressName{
+	out.Algo = &KeyHashDressName{
+		Key:            algo.Key,
 		Name:           algo.Name,
-		Hash:           in.AlgoKey,
+		Hash:           algo.Hash,
 		StorageAddress: algo.StorageAddress}
 
 	// fill objective
@@ -401,7 +412,7 @@ func (out *outputBoardTuple) Fill(db *LedgerDB, in Testtuple, testtupleKey strin
 	}
 	out.Algo = &HashDressName{
 		Name:           algo.Name,
-		Hash:           in.AlgoKey,
+		Hash:           algo.Hash,
 		StorageAddress: algo.StorageAddress,
 	}
 	out.TraintupleKey = in.TraintupleKey

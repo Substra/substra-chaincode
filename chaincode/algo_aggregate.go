@@ -20,8 +20,7 @@ import (
 
 // Set is a method of the receiver Aggregate. It uses inputAggregateAlgo fields to set the AggregateAlgo
 // Returns the aggregateAlgoKey
-func (algo *AggregateAlgo) Set(db *LedgerDB, inp inputAggregateAlgo) (algoKey string, err error) {
-	algoKey = inp.Hash
+func (algo *AggregateAlgo) Set(db *LedgerDB, inp inputAggregateAlgo) (err error) {
 	// find associated owner
 	owner, err := GetTxCreator(db.cc)
 	if err != nil {
@@ -33,8 +32,10 @@ func (algo *AggregateAlgo) Set(db *LedgerDB, inp inputAggregateAlgo) (algoKey st
 		return
 	}
 
+	algo.Key = inp.Key
 	algo.AssetType = AggregateAlgoType
 	algo.Name = inp.Name
+	algo.Hash = inp.Hash
 	algo.StorageAddress = inp.StorageAddress
 	algo.Description = &HashDress{
 		Hash:           inp.DescriptionHash,
@@ -59,21 +60,21 @@ func registerAggregateAlgo(db *LedgerDB, args []string) (resp outputKey, err err
 	}
 	// check validity of input args and convert it to CompositeAlgo
 	algo := AggregateAlgo{}
-	algoKey, err := algo.Set(db, inp)
+	err = algo.Set(db, inp)
 	if err != nil {
 		return
 	}
 	// submit to ledger
-	err = db.Add(algoKey, algo)
+	err = db.Add(inp.Key, algo)
 	if err != nil {
 		return
 	}
 	// create aggregate key
-	err = db.CreateIndex("aggregateAlgo~owner~key", []string{"aggregateAlgo", algo.Owner, algoKey})
+	err = db.CreateIndex("aggregateAlgo~owner~key", []string{"aggregateAlgo", algo.Owner, inp.Key})
 	if err != nil {
 		return
 	}
-	return outputKey{Key: algoKey}, nil
+	return outputKey{Key: inp.Key}, nil
 }
 
 // queryAggregateAlgo returns an algo of the ledger given its key
@@ -87,7 +88,7 @@ func queryAggregateAlgo(db *LedgerDB, args []string) (out outputAggregateAlgo, e
 	if err != nil {
 		return
 	}
-	out.Fill(inp.Key, algo)
+	out.Fill(algo)
 	return
 }
 
@@ -109,7 +110,7 @@ func queryAggregateAlgos(db *LedgerDB, args []string) (outAlgos []outputAggregat
 			return outAlgos, err
 		}
 		var out outputAggregateAlgo
-		out.Fill(key, algo)
+		out.Fill(algo)
 		outAlgos = append(outAlgos, out)
 	}
 	return

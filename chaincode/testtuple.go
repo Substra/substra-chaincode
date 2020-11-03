@@ -38,6 +38,7 @@ func (testtuple *Testtuple) SetFromInput(db *LedgerDB, inp inputTesttuple) error
 	if err != nil {
 		return err
 	}
+	testtuple.Key = inp.Key
 	testtuple.Creator = creator
 	testtuple.Tag = inp.Tag
 	testtuple.Metadata = inp.Metadata
@@ -88,9 +89,10 @@ func (testtuple *Testtuple) SetFromInput(db *LedgerDB, inp inputTesttuple) error
 		return errors.BadRequest(err, "could not retrieve dataManager with key %s", dataManagerKey)
 	}
 	testtuple.Dataset = &TtDataset{
+		Key:            dataManager.Key,
 		Worker:         dataManager.Owner,
 		DataSampleKeys: dataSampleKeys,
-		OpenerHash:     dataManagerKey,
+		OpenerHash:     dataManager.Opener.Hash,
 	}
 	return nil
 }
@@ -167,20 +169,6 @@ func (testtuple *Testtuple) SetFromTraintuple(db *LedgerDB, traintupleKey string
 		testtuple.Status = StatusWaiting
 	}
 	return nil
-}
-
-// GetKey return the key of the testuple depending on its key parameters.
-func (testtuple *Testtuple) GetKey() string {
-	// create testtuple key and check if it already exists
-	hashKeys := []string{
-		testtuple.TraintupleKey,
-		testtuple.ObjectiveKey,
-		testtuple.Dataset.OpenerHash,
-		testtuple.Creator,
-		testtuple.ComputePlanID,
-	}
-	hashKeys = append(hashKeys, testtuple.Dataset.DataSampleKeys...)
-	return HashForKey("testtuple", hashKeys...)
 }
 
 // AddToComputePlan add the testtuple to the compute plan of it's model
@@ -261,21 +249,20 @@ func createTesttupleInternal(db *LedgerDB, inp inputTesttuple) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	testtupleKey := testtuple.GetKey()
-	err = testtuple.AddToComputePlan(db, testtupleKey)
+	err = testtuple.AddToComputePlan(db, testtuple.Key)
 	if err != nil {
 		return "", err
 	}
-	err = testtuple.Save(db, testtupleKey)
+	err = testtuple.Save(db, testtuple.Key)
 	if err != nil {
 		return "", err
 	}
-	err = db.AddTupleEvent(testtupleKey)
+	err = db.AddTupleEvent(testtuple.Key)
 	if err != nil {
 		return "", err
 	}
 
-	return testtupleKey, nil
+	return testtuple.Key, nil
 }
 
 // logStartTest modifies a testtuple by changing its status from todo to doing
@@ -299,7 +286,7 @@ func logStartTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	err = o.Fill(db, inp.Key, testtuple)
+	err = o.Fill(db, testtuple)
 	return
 }
 
@@ -326,7 +313,7 @@ func logSuccessTest(db *LedgerDB, args []string) (o outputTesttuple, err error) 
 	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	err = o.Fill(db, inp.Key, testtuple)
+	err = o.Fill(db, testtuple)
 	return
 }
 
@@ -353,7 +340,7 @@ func logFailTest(db *LedgerDB, args []string) (o outputTesttuple, err error) {
 	if err = testtuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	err = o.Fill(db, inp.Key, testtuple)
+	err = o.Fill(db, testtuple)
 	return
 }
 
@@ -372,7 +359,7 @@ func queryTesttuple(db *LedgerDB, args []string) (out outputTesttuple, err error
 		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
-	err = out.Fill(db, inp.Key, testtuple)
+	err = out.Fill(db, testtuple)
 	return
 }
 
@@ -410,7 +397,7 @@ func getOutputTesttuple(db *LedgerDB, testtupleKey string) (outTesttuple outputT
 	if err != nil {
 		return
 	}
-	err = outTesttuple.Fill(db, testtupleKey, testtuple)
+	err = outTesttuple.Fill(db, testtuple)
 	return
 }
 

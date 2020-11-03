@@ -370,10 +370,10 @@ func (db *LedgerDB) GetComputePlan(ID string) (ComputePlan, error) {
 	return computePlan, nil
 }
 
-// GetOutModelHashDress retrieves an out-Model from a tuple key.
+// GetOutModelKeyHashDress retrieves an out-Model from a tuple key.
 // In case of CompositeTraintuple it return its trunk model
 // Return an error if the tupleKey was not found.
-func (db *LedgerDB) GetOutModelHashDress(tupleKey string, allowedAssetTypes []AssetType) (*HashDress, error) {
+func (db *LedgerDB) GetOutModelKeyHashDress(tupleKey string, allowedAssetTypes []AssetType) (*KeyHashDress, error) {
 	for _, assetType := range allowedAssetTypes {
 		switch assetType {
 		case CompositeTraintupleType:
@@ -393,19 +393,19 @@ func (db *LedgerDB) GetOutModelHashDress(tupleKey string, allowedAssetTypes []As
 				return tuple.OutModel, nil
 			}
 		default:
-			return nil, errors.Internal("GetOutModelHashDress: Unsupported asset type %s", assetType)
+			return nil, errors.Internal("GetOutModelKeyHashDress: Unsupported asset type %s", assetType)
 		}
 	}
 
 	return nil, errors.NotFound(
-		"GetOutModelHashDress: Could not find tuple with key \"%s\". Allowed types: %v.",
+		"GetOutModelKeyHashDress: Could not find tuple with key \"%s\". Allowed types: %v.",
 		tupleKey,
 		allowedAssetTypes)
 }
 
-// GetOutHeadModelHash retrieves an out-Head-Model from a composite traintuple key.
+// GetOutHeadModelKeyHash retrieves an out-Head-Model from a composite traintuple key.
 // Return an error if the compositeTraintupleKey was not found.
-func (db *LedgerDB) GetOutHeadModelHash(compositeTraintupleKey string) (*Hash, error) {
+func (db *LedgerDB) GetOutHeadModelKeyHash(compositeTraintupleKey string) (*KeyHash, error) {
 	tuple, err := db.GetCompositeTraintuple(compositeTraintupleKey)
 	if err != nil {
 		return nil, err
@@ -482,7 +482,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 			return err
 		}
 		out := outputTraintuple{}
-		out.Fill(db, tuple, tupleKey)
+		out.Fill(db, tuple)
 		db.event.Traintuples = append(db.event.Traintuples, out)
 	case CompositeTraintupleType:
 		tuple, err := db.GetCompositeTraintuple(tupleKey)
@@ -490,7 +490,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 			return err
 		}
 		out := outputCompositeTraintuple{}
-		out.Fill(db, tuple, tupleKey)
+		out.Fill(db, tuple)
 		db.event.CompositeTraintuples = append(db.event.CompositeTraintuples, out)
 	case AggregatetupleType:
 		tuple, err := db.GetAggregatetuple(tupleKey)
@@ -498,7 +498,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 			return err
 		}
 		out := outputAggregatetuple{}
-		out.Fill(db, tuple, tupleKey)
+		out.Fill(db, tuple)
 		db.event.Aggregatetuples = append(db.event.Aggregatetuples, out)
 	case TesttupleType:
 		tuple, err := db.GetTesttuple(tupleKey)
@@ -506,7 +506,7 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 			return err
 		}
 		out := outputTesttuple{}
-		out.Fill(db, tupleKey, tuple)
+		out.Fill(db, tuple)
 		db.event.Testtuples = append(db.event.Testtuples, out)
 	}
 	return nil

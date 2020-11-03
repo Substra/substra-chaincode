@@ -38,8 +38,8 @@ func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -68,8 +68,8 @@ func TestTraintupleWithSingleDatasampleComposite(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -81,8 +81,8 @@ func TestTraintupleWithSingleDatasampleComposite(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
 	inpTraintuple := inputCompositeTraintuple{
-		AlgoKey:        compositeAlgoHash,
-		DataSampleKeys: []string{trainDataSampleHash1},
+		AlgoKey:        compositeAlgoKey,
+		DataSampleKeys: []string{trainDataSampleKey1},
 	}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -101,8 +101,8 @@ func TestTraintupleWithDuplicatedDatasamplesComposite(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -114,7 +114,7 @@ func TestTraintupleWithDuplicatedDatasamplesComposite(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding composite algo it should work: ", resp.Message)
 
 	inpTraintuple := inputCompositeTraintuple{
-		DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2, trainDataSampleHash1},
+		DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2, trainDataSampleKey1},
 	}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -133,12 +133,12 @@ func TestNoPanicWhileQueryingIncompleteTraintupleComposite(t *testing.T) {
 
 	// Retreive and alter existing objectif to pass Metrics at nil
 	db := NewLedgerDB(mockStub)
-	objective, err := db.GetObjective(objectiveDescriptionHash)
+	objective, err := db.GetObjective(objectiveKey)
 	assert.NoError(t, err)
 	objective.Metrics = nil
 	objBytes, err := json.Marshal(objective)
 	assert.NoError(t, err)
-	err = mockStub.PutState(objectiveDescriptionHash, objBytes)
+	err = mockStub.PutState(objectiveKey, objBytes)
 	assert.NoError(t, err)
 	// It should not panic
 	require.NotPanics(t, func() {
@@ -163,9 +163,14 @@ func TestTraintupleComputePlanCreationComposite(t *testing.T) {
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 400, resp.Status, "should failed for invalid rank")
-	require.Contains(t, resp.Message, "invalid inputs, a new ComputePlan should have a rank 0")
+	require.Contains(t, resp.Message, "Field validation for 'ComputePlanID' failed on the 'required_with' tag")
 
-	inpTraintuple = inputCompositeTraintuple{Rank: "0"}
+	cpKey := RandomUUID()
+	inCP := inputComputePlan{ComputePlanID: cpKey}
+	resp = mockStub.MockInvoke("42", inCP.getArgs())
+	require.EqualValues(t, 200, resp.Status)
+
+	inpTraintuple = inputCompositeTraintuple{Rank: "0", ComputePlanID: cpKey}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
@@ -175,10 +180,10 @@ func TestTraintupleComputePlanCreationComposite(t *testing.T) {
 	key := res.Key
 	require.EqualValues(t, key, compositeTraintupleKey)
 
-	inpTraintuple = inputCompositeTraintuple{Rank: "0"}
+	inpTraintuple = inputCompositeTraintuple{}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	require.EqualValues(t, 409, resp.Status, "should failed for existing ComputePlanID")
+	require.EqualValues(t, 409, resp.Status, "should failed for duplicate Key")
 	require.Contains(t, resp.Message, "already exists")
 
 	require.EqualValues(t, 409, resp.Status, "should failed for existing FLTask")
@@ -196,9 +201,14 @@ func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "compositeAlgo")
 
-	inpTraintuple := inputCompositeTraintuple{Rank: "0"}
+	cpKey := RandomUUID()
+	inCP := inputComputePlan{ComputePlanID: cpKey}
+	resp := mockStub.MockInvoke("42", inCP.getArgs())
+	require.EqualValues(t, 200, resp.Status)
+
+	inpTraintuple := inputCompositeTraintuple{Rank: "0", ComputePlanID: cpKey}
 	args := inpTraintuple.createDefault()
-	resp := mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
@@ -209,16 +219,18 @@ func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
 	assert.NoError(t, err)
 	// Failed to add a traintuple with the same rank
 	inpTraintuple = inputCompositeTraintuple{
+		Key:             RandomUUID(),
 		InHeadModelKey:  key,
 		InTrunkModelKey: key,
 		Rank:            "0",
-		ComputePlanID:   ct.ComputePlanID}
+		ComputePlanID:   cpKey}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add a traintuple of the same rank")
 
 	// Failed to add a traintuple to an unexisting CommputePlan
 	inpTraintuple = inputCompositeTraintuple{
+		Key:             RandomUUID(),
 		InHeadModelKey:  key,
 		InTrunkModelKey: key,
 		Rank:            "1",
@@ -229,6 +241,7 @@ func TestTraintupleMultipleCommputePlanCreationsComposite(t *testing.T) {
 
 	// Succesfully add a traintuple to the same ComputePlanID
 	inpTraintuple = inputCompositeTraintuple{
+		Key:             RandomUUID(),
 		InHeadModelKey:  key,
 		InTrunkModelKey: key,
 		Rank:            "1",
@@ -275,14 +288,16 @@ func TestTraintupleComposite(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried composite traintuple")
 	expected := outputCompositeTraintuple{
 		Key: compositeTraintupleKey,
-		Algo: &HashDressName{
+		Algo: &KeyHashDressName{
+			Key:            compositeAlgoKey,
 			Hash:           compositeAlgoHash,
 			Name:           compositeAlgoName,
 			StorageAddress: compositeAlgoStorageAddress,
 		},
 		Creator: worker,
 		Dataset: &outputTtDataset{
-			DataSampleKeys: []string{trainDataSampleHash1, trainDataSampleHash2},
+			Key:            dataManagerKey,
+			DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
 			OpenerHash:     dataManagerOpenerHash,
 			Worker:         worker,
 			Metadata:       map[string]string{},
@@ -317,6 +332,7 @@ func TestTraintupleComposite(t *testing.T) {
 
 	// Add traintuple with inmodel from the above-submitted traintuple
 	inpWaitingTraintuple := inputCompositeTraintuple{
+		Key:             RandomUUID(),
 		InHeadModelKey:  compositeTraintupleKey,
 		InTrunkModelKey: compositeTraintupleKey}
 	args = inpWaitingTraintuple.createDefault()
@@ -367,9 +383,11 @@ func TestTraintupleComposite(t *testing.T) {
 	endTraintuple := outputCompositeTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutHeadModel.OutModel = &Hash{
+	expected.OutHeadModel.OutModel = &KeyHash{
+		Key:  headModelKey,
 		Hash: headModelHash}
-	expected.OutTrunkModel.OutModel = &HashDress{
+	expected.OutTrunkModel.OutModel = &KeyHashDress{
+		Key:            trunkModelKey,
 		Hash:           trunkModelHash,
 		StorageAddress: trunkModelAddress}
 	expected.Status = traintupleStatus[1]
@@ -407,13 +425,13 @@ func TestQueryTraintupleNotFoundComposite(t *testing.T) {
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the composite traintuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryCompositeTraintuple: key does not exist
-	notFoundKey := "eedbb7c31f62244c0f34461cc168804227115793d01c270021fe3f7935482eed"
+	notFoundKey := "eedbb7c3-1f62-244c-0f34-461cc1688042"
 	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(notFoundKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the composite traintuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryCompositeTraintuple: key does not exist and use existing other asset type key
-	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(algoHash)}
+	args = [][]byte{[]byte("queryCompositeTraintuple"), keyToJSON(algoKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the composite traintuple - status %d and message %s", resp.Status, resp.Message)
 }
@@ -429,8 +447,14 @@ func TestInsertTraintupleTwiceComposite(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
 	// create a composite traintuple and start a ComplutePlan
+	cpKey := RandomUUID()
+	inCP := inputComputePlan{ComputePlanID: cpKey}
+	resp = mockStub.MockInvoke("42", inCP.getArgs())
+	require.EqualValues(t, 200, resp.Status)
+
 	inpTraintuple := inputCompositeTraintuple{
-		Rank: "0",
+		Rank:          "0",
+		ComputePlanID: cpKey,
 	}
 	inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", methodAndAssetToByte("createCompositeTraintuple", inpTraintuple))
@@ -441,6 +465,7 @@ func TestInsertTraintupleTwiceComposite(t *testing.T) {
 	tuple, err := db.GetCompositeTraintuple(_key.Key)
 	assert.NoError(t, err)
 	// create a second composite traintuple in the same ComputePlan
+	inpTraintuple.Key = traintupleKey2
 	inpTraintuple.Rank = "1"
 	inpTraintuple.ComputePlanID = tuple.ComputePlanID
 	inpTraintuple.InHeadModelKey = _key.Key
@@ -502,8 +527,8 @@ func TestCreateCompositeTraintupleInModels(t *testing.T) {
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
 			registerItem(t, *mockStub, "trainDataset")
 
-			objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-			inpObjective := inputObjective{DescriptionHash: objHash}
+			key := strings.Replace(objectiveKey, "1", "2", 1)
+			inpObjective := inputObjective{Key: key}
 			inpObjective.createDefault()
 			inpObjective.TestDataset = inputDataset{}
 			resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -514,13 +539,13 @@ func TestCreateCompositeTraintupleInModels(t *testing.T) {
 			resp = mockStub.MockInvoke("42", args)
 			assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
-			inpTraintuple := inputCompositeTraintuple{}
+			inpTraintuple := inputCompositeTraintuple{Key: RandomUUID()}
 
 			if tt.withInHeadModel {
 				// create head traintuple
 				inpHeadTraintuple := inputCompositeTraintuple{}
 				// make the traintuple unique so that it has a unique hash
-				inpHeadTraintuple.DataSampleKeys = []string{trainDataSampleHash1}
+				inpHeadTraintuple.DataSampleKeys = []string{trainDataSampleKey1}
 				args = inpHeadTraintuple.createDefault()
 				resp = mockStub.MockInvoke("42", args)
 				headTraintuple := outputCompositeTraintuple{}
@@ -534,7 +559,7 @@ func TestCreateCompositeTraintupleInModels(t *testing.T) {
 				// create trunk traintuple
 				inpTrunkTraintuple := inputCompositeTraintuple{}
 				// make the traintuple unique so that it has a unique hash
-				inpTrunkTraintuple.DataSampleKeys = []string{trainDataSampleHash2}
+				inpTrunkTraintuple.DataSampleKeys = []string{trainDataSampleKey2}
 				args = inpTrunkTraintuple.createDefault()
 				resp = mockStub.MockInvoke("42", args)
 				trunkTraintuple := outputCompositeTraintuple{}
@@ -609,11 +634,11 @@ func testCompositeTraintupleInModelTypes(t *testing.T, headType AssetType, trunk
 
 	inpTraintuple := inputCompositeTraintuple{}
 
-	head, err := registerTraintuple(mockStub, headType)
+	head, err := registerTraintuple(t, mockStub, headType)
 	assert.NoError(t, err)
 	inpTraintuple.InHeadModelKey = head
 
-	trunk, err := registerTraintuple(mockStub, trunkType)
+	trunk, err := registerTraintuple(t, mockStub, trunkType)
 	assert.NoError(t, err)
 	inpTraintuple.InTrunkModelKey = trunk
 
@@ -740,7 +765,7 @@ func TestCorrectParent(t *testing.T) {
 	child1Key := _key.Key
 
 	// register composite child
-	inp2 := inputCompositeTraintuple{}
+	inp2 := inputCompositeTraintuple{Key: RandomUUID()}
 	inp2.createDefault()
 	inp2.InHeadModelKey = parentKey
 	inp2.InTrunkModelKey = traintupleKey
@@ -761,10 +786,12 @@ func TestCorrectParent(t *testing.T) {
 
 	// fetch aggregate child, and check its in-model is the parent's trunk out-model
 	child1, _ := queryAggregatetuple(db, assetToArgs(inputKey{Key: child1Key}))
+	assert.Equal(t, trunkModelKey, child1.InModels[0].Key)
 	assert.Equal(t, trunkModelHash, child1.InModels[0].Hash)
 
 	// fetch composite child, and check its head in-model is the parent's head out-model
 	child2, _ := queryCompositeTraintuple(db, assetToArgs(inputKey{Key: child2Key}))
+	assert.Equal(t, headModelKey, child2.InHeadModel.Key)
 	assert.Equal(t, headModelHash, child2.InHeadModel.Hash)
 }
 
@@ -802,7 +829,7 @@ func TestHeadModelDifferentWorker(t *testing.T) {
 	registerNode(db, []string{})
 
 	// new dataset on new worker
-	inpDM := inputDataManager{}
+	inpDM := inputDataManager{Key: strings.Replace(dataManagerKey, "1", "2", 1)}
 	inpDM.createDefault()
 	inpDM.OpenerHash = GetRandomHash()
 	outDM, err := registerDataManager(db, assetToArgs(inpDM))
@@ -810,7 +837,8 @@ func TestHeadModelDifferentWorker(t *testing.T) {
 
 	inpData := inputDataSample{}
 	inpData.createDefault()
-	inpData.Hashes = []string{GetRandomHash()}
+	uuid := RandomUUID()
+	inpData.Keys = []string{uuid}
 	inpData.DataManagerKeys = []string{outDM.Key}
 	outData, err := registerDataSample(db, assetToArgs(inpData))
 	assert.NoError(t, err)

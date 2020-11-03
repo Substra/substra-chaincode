@@ -35,6 +35,7 @@ func (tuple *Aggregatetuple) SetFromInput(db *LedgerDB, inp inputAggregatetuple)
 	if err != nil {
 		return err
 	}
+	tuple.Key = inp.Key
 	tuple.AssetType = AggregatetupleType
 	tuple.Creator = creator
 	tuple.Metadata = inp.Metadata
@@ -114,13 +115,6 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 	return nil
 }
 
-// GetKey return the key of the aggregate tuple depending on its key parameters.
-func (tuple *Aggregatetuple) GetKey() string {
-	hashKeys := []string{tuple.Creator, tuple.AlgoKey, tuple.ComputePlanID}
-	hashKeys = append(hashKeys, tuple.InModelKeys...)
-	return HashForKey("aggregate-traintuple", hashKeys...)
-}
-
 // AddToComputePlan set the aggregate tuple's parameters that determines if it's part of on ComputePlan and how.
 // It uses the inputAggregatetuple values as follow:
 //  - If neither ComputePlanID nor rank is set it returns immediately
@@ -139,19 +133,6 @@ func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetu
 	tuple.Rank, err = strconv.Atoi(inp.Rank)
 	if err != nil {
 		return err
-	}
-	if inp.ComputePlanID == "" {
-		if tuple.Rank != 0 {
-			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
-			return err
-		}
-		computePlan := ComputePlan{}
-		computePlan.AddTuple(AggregatetupleType, traintupleKey, tuple.Status)
-		tuple.ComputePlanID, err = computePlan.Create(db)
-		if err != nil {
-			return err
-		}
-		return nil
 	}
 	tuple.ComputePlanID = inp.ComputePlanID
 
@@ -250,30 +231,29 @@ func createAggregatetupleInternal(db *LedgerDB, inp inputAggregatetuple, checkCo
 		return "", err
 	}
 
-	aggregatetupleKey := aggregatetuple.GetKey()
 	// Test if the key (ergo the aggregatetuple) already exists
-	tupleExists, err := db.KeyExists(aggregatetupleKey)
+	tupleExists, err := db.KeyExists(aggregatetuple.Key)
 	if err != nil {
 		return "", err
 	}
 	if tupleExists {
-		return "", errors.Conflict("aggregatetuple already exists").WithKey(aggregatetupleKey)
+		return "", errors.Conflict("aggregatetuple already exists").WithKey(aggregatetuple.Key)
 	}
-	err = aggregatetuple.AddToComputePlan(db, inp, aggregatetupleKey, checkComputePlanAvailability)
+	err = aggregatetuple.AddToComputePlan(db, inp, aggregatetuple.Key, checkComputePlanAvailability)
 	if err != nil {
 		return "", err
 	}
-	err = aggregatetuple.Save(db, aggregatetupleKey)
-	if err != nil {
-		return "", err
-	}
-
-	err = db.AddTupleEvent(aggregatetupleKey)
+	err = aggregatetuple.Save(db, aggregatetuple.Key)
 	if err != nil {
 		return "", err
 	}
 
-	return aggregatetupleKey, nil
+	err = db.AddTupleEvent(aggregatetuple.Key)
+	if err != nil {
+		return "", err
+	}
+
+	return aggregatetuple.Key, nil
 }
 
 // logStartAggregate modifies a aggregatetuple by changing its status from todo to doing
@@ -297,7 +277,7 @@ func logStartAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err
 	if err = aggregatetuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	err = o.Fill(db, aggregatetuple, inp.Key)
+	err = o.Fill(db, aggregatetuple)
 	return
 }
 
@@ -325,7 +305,7 @@ func logFailAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err 
 		return
 	}
 
-	o.Fill(db, aggregatetuple, inp.Key)
+	o.Fill(db, aggregatetuple)
 	// Do not propagate failure if we are in a compute plan
 	if aggregatetuple.ComputePlanID != "" {
 		return
@@ -357,16 +337,17 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 		return
 	}
 
-	aggregatetuple.OutModel = &HashDress{
+	aggregatetuple.OutModel = &KeyHashDress{
+		Key:            inp.OutModel.Key,
 		Hash:           inp.OutModel.Hash,
 		StorageAddress: inp.OutModel.StorageAddress}
 	aggregatetuple.Log += inp.Log
 
-	err = createModelIndex(db, inp.OutModel.Hash, aggregatetupleKey)
+	err = createModelIndex(db, inp.OutModel.Key, aggregatetupleKey)
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, aggregatetuple.ComputePlanID, aggregatetupleKey, aggregatetuple.OutModel.Hash)
+	err = TryAddIntermediaryModel(db, aggregatetuple.ComputePlanID, aggregatetupleKey, aggregatetuple.OutModel.Key)
 	if err != nil {
 		return
 	}
@@ -388,7 +369,7 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 		return
 	}
 
-	err = o.Fill(db, aggregatetuple, inp.Key)
+	err = o.Fill(db, aggregatetuple)
 	return
 }
 
@@ -407,7 +388,7 @@ func queryAggregatetuple(db *LedgerDB, args []string) (outputAggregatetuple outp
 		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
-	outputAggregatetuple.Fill(db, aggregatetuple, inp.Key)
+	outputAggregatetuple.Fill(db, aggregatetuple)
 	return
 }
 
@@ -444,7 +425,7 @@ func getOutputAggregatetuple(db *LedgerDB, aggregatetupleKey string) (outAggreag
 	if err != nil {
 		return
 	}
-	outAggreagateTuple.Fill(db, aggregatetuple, aggregatetupleKey)
+	outAggreagateTuple.Fill(db, aggregatetuple)
 	return
 }
 

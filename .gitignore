@@ -11,7 +11,7 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# fabric 
+# fabric
 *.block
 
 # OSX
@@ -20,3 +20,4 @@
 
 # IDE config files
 .idea
+.vscode

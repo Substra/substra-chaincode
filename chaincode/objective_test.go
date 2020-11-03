@@ -32,13 +32,14 @@ func TestLeaderBoard(t *testing.T) {
 	// Add a certified testtuple
 	inputTest := inputTesttuple{
 		TraintupleKey: traintupleKey,
-		ObjectiveKey:  objectiveDescriptionHash,
+		ObjectiveKey:  objectiveKey,
 	}
+	inputTest.fillDefaults()
 	keyMap, err := createTesttuple(db, assetToArgs(inputTest))
 	assert.NoError(t, err)
 
 	inpLeaderboard := inputLeaderboard{
-		ObjectiveKey:   objectiveDescriptionHash,
+		ObjectiveKey:   objectiveKey,
 		AscendingOrder: true,
 	}
 	// leaderboard should be empty since there is no testtuple done
@@ -56,7 +57,7 @@ func TestLeaderBoard(t *testing.T) {
 
 	leaderboard, err = queryObjectiveLeaderboard(db, assetToArgs(inpLeaderboard))
 	assert.NoError(t, err)
-	assert.Equal(t, objectiveDescriptionHash, leaderboard.Objective.Key)
+	assert.Equal(t, objectiveKey, leaderboard.Objective.Key)
 	require.Len(t, leaderboard.Testtuples, 1)
 	assert.Equal(t, keyMap.Key, leaderboard.Testtuples[0].Key)
 	assert.Equal(t, traintupleKey, leaderboard.Testtuples[0].TraintupleKey)
@@ -81,15 +82,15 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	args := inpDataManager.createDefault()
 	mockStub.MockInvoke("42", args)
 	inpDataSample := inputDataSample{
-		Hashes:          []string{testDataSampleHash1},
-		DataManagerKeys: []string{dataManagerOpenerHash},
+		Keys:            []string{testDataSampleKey1},
+		DataManagerKeys: []string{dataManagerKey},
 		TestOnly:        "true",
 	}
 	args = inpDataSample.createDefault()
 	mockStub.MockInvoke("42", args)
 	inpDataSample = inputDataSample{
-		Hashes:          []string{testDataSampleHash2},
-		DataManagerKeys: []string{dataManagerOpenerHash},
+		Keys:            []string{testDataSampleKey2},
+		DataManagerKeys: []string{dataManagerKey},
 		TestOnly:        "true",
 	}
 	args = inpDataSample.createDefault()
@@ -99,8 +100,8 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	// Fail to insert the objective
 	inpObjective := inputObjective{
 		TestDataset: inputDataset{
-			DataManagerKey: testDataSampleHash1,
-			DataSampleKeys: []string{testDataSampleHash2}}}
+			DataManagerKey: testDataSampleKey1,
+			DataSampleKeys: []string{testDataSampleKey2}}}
 	args = inpObjective.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status, "status should indicate an error since the dataManager key is a dataSample key")
@@ -133,7 +134,7 @@ func TestObjective(t *testing.T) {
 	objectiveKey := res.Key
 	assert.EqualValuesf(
 		t,
-		inpObjective.DescriptionHash,
+		inpObjective.Key,
 		objectiveKey,
 		"when adding objective: unexpected returned objective key - %s / %s",
 		objectiveKey,
@@ -150,14 +151,14 @@ func TestObjective(t *testing.T) {
 		Key:   objectiveKey,
 		Owner: worker,
 		TestDataset: &Dataset{
-			DataManagerKey: dataManagerOpenerHash,
-			DataSampleKeys: []string{testDataSampleHash1, testDataSampleHash2},
+			DataManagerKey: dataManagerKey,
+			DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 			Metadata:       map[string]string{},
 		},
 		Name: inpObjective.Name,
-		Description: HashDress{
+		Description: &HashDress{
 			StorageAddress: inpObjective.DescriptionStorageAddress,
-			Hash:           objectiveKey,
+			Hash:           objectiveDescriptionHash,
 		},
 		Permissions: outputPermissions{
 			Process: Permission{Public: true, AuthorizedIDs: []string{}},

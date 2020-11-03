@@ -37,6 +37,7 @@ func (traintuple *CompositeTraintuple) SetFromInput(db *LedgerDB, inp inputCompo
 	if err != nil {
 		return err
 	}
+	traintuple.Key = inp.Key
 	traintuple.AssetType = CompositeTraintupleType
 	traintuple.Creator = creator
 	traintuple.ComputePlanID = inp.ComputePlanID
@@ -145,19 +146,6 @@ func (traintuple *CompositeTraintuple) SetFromParents(db *LedgerDB, inp inputCom
 	return nil
 }
 
-// GetKey return the key of the traintuple depending on its key parameters.
-func (traintuple *CompositeTraintuple) GetKey() string {
-	hashKeys := []string{
-		traintuple.Creator,
-		traintuple.AlgoKey,
-		traintuple.Dataset.DataManagerKey,
-		traintuple.InHeadModel,
-		traintuple.InTrunkModel,
-		traintuple.ComputePlanID}
-	hashKeys = append(hashKeys, traintuple.Dataset.DataSampleKeys...)
-	return HashForKey("compositeTraintuple", hashKeys...)
-}
-
 // AddToComputePlan set the traintuple's parameters that determines if it's part of on ComputePlan and how.
 // It uses the inputCompositeTraintuple values as follow:
 //  - If neither ComputePlanID nor rank is set it returns immediately
@@ -176,19 +164,6 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 	traintuple.Rank, err = strconv.Atoi(inp.Rank)
 	if err != nil {
 		return err
-	}
-	if inp.ComputePlanID == "" {
-		if traintuple.Rank != 0 {
-			err = errors.BadRequest("invalid inputs, a new ComputePlan should have a rank 0")
-			return err
-		}
-		computePlan := ComputePlan{}
-		computePlan.AddTuple(CompositeTraintupleType, traintupleKey, traintuple.Status)
-		traintuple.ComputePlanID, err = computePlan.Create(db)
-		if err != nil {
-			return err
-		}
-		return nil
 	}
 	traintuple.ComputePlanID = inp.ComputePlanID
 	computePlan, err := db.GetComputePlan(inp.ComputePlanID)
@@ -288,30 +263,29 @@ func createCompositeTraintupleInternal(db *LedgerDB, inp inputCompositeTraintupl
 		return "", err
 	}
 
-	traintupleKey := traintuple.GetKey()
 	// Test if the key (ergo the traintuple) already exists
-	tupleExists, err := db.KeyExists(traintupleKey)
+	tupleExists, err := db.KeyExists(traintuple.Key)
 	if err != nil {
 		return "", err
 	}
 	if tupleExists {
-		return "", errors.Conflict("composite traintuple already exists").WithKey(traintupleKey)
+		return "", errors.Conflict("composite traintuple already exists").WithKey(traintuple.Key)
 	}
 
-	err = traintuple.AddToComputePlan(db, inp, traintupleKey, checkComputePlanAvailability)
+	err = traintuple.AddToComputePlan(db, inp, traintuple.Key, checkComputePlanAvailability)
 	if err != nil {
 		return "", err
 	}
 
-	err = traintuple.Save(db, traintupleKey)
+	err = traintuple.Save(db, traintuple.Key)
 	if err != nil {
 		return "", err
 	}
-	err = db.AddTupleEvent(traintupleKey)
+	err = db.AddTupleEvent(traintuple.Key)
 	if err != nil {
 		return "", err
 	}
-	return traintupleKey, nil
+	return traintuple.Key, nil
 }
 
 // logStartCompositeTrain modifies a traintuple by changing its status from todo to doing
@@ -335,7 +309,7 @@ func logStartCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTrain
 	if err = compositeTraintuple.commitStatusUpdate(db, inp.Key, status); err != nil {
 		return
 	}
-	err = o.Fill(db, compositeTraintuple, inp.Key)
+	err = o.Fill(db, compositeTraintuple)
 	return
 }
 
@@ -356,27 +330,29 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 		return
 	}
 
-	compositeTraintuple.OutHeadModel.OutModel = &Hash{
+	compositeTraintuple.OutHeadModel.OutModel = &KeyHash{
+		Key:  inp.OutHeadModel.Key,
 		Hash: inp.OutHeadModel.Hash}
 
-	compositeTraintuple.OutTrunkModel.OutModel = &HashDress{
+	compositeTraintuple.OutTrunkModel.OutModel = &KeyHashDress{
+		Key:            inp.OutTrunkModel.Key,
 		Hash:           inp.OutTrunkModel.Hash,
 		StorageAddress: inp.OutTrunkModel.StorageAddress}
 	compositeTraintuple.Log += inp.Log
 
-	err = createModelIndex(db, inp.OutHeadModel.Hash, compositeTraintupleKey)
+	err = createModelIndex(db, inp.OutHeadModel.Key, compositeTraintupleKey)
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutHeadModel.Hash)
+	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutHeadModel.Key)
 	if err != nil {
 		return
 	}
-	err = createModelIndex(db, inp.OutTrunkModel.Hash, compositeTraintupleKey)
+	err = createModelIndex(db, inp.OutTrunkModel.Key, compositeTraintupleKey)
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutTrunkModel.Hash)
+	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanID, compositeTraintupleKey, inp.OutTrunkModel.Key)
 	if err != nil {
 		return
 	}
@@ -397,7 +373,7 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 		return
 	}
 
-	err = o.Fill(db, compositeTraintuple, inp.Key)
+	err = o.Fill(db, compositeTraintuple)
 	return
 }
 
@@ -425,7 +401,7 @@ func logFailCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTraint
 		return
 	}
 
-	err = o.Fill(db, compositeTraintuple, inp.Key)
+	err = o.Fill(db, compositeTraintuple)
 	if err != nil {
 		return
 	}
@@ -458,7 +434,7 @@ func queryCompositeTraintuple(db *LedgerDB, args []string) (outputTraintuple out
 		err = errors.NotFound("no element with key %s", inp.Key)
 		return
 	}
-	outputTraintuple.Fill(db, traintuple, inp.Key)
+	outputTraintuple.Fill(db, traintuple)
 	return
 }
 
@@ -536,7 +512,7 @@ func getOutputCompositeTraintuple(db *LedgerDB, traintupleKey string) (outTraint
 	if err != nil {
 		return
 	}
-	outTraintuple.Fill(db, traintuple, traintupleKey)
+	outTraintuple.Fill(db, traintuple)
 	return
 }
 

@@ -36,8 +36,8 @@ func TestTraintupleWithNoTestDatasetAggregate(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -66,8 +66,8 @@ func TestTraintupleWithSingleDatasampleAggregate(t *testing.T) {
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
 	registerItem(t, *mockStub, "trainDataset")
 
-	objHash := strings.ReplaceAll(objectiveDescriptionHash, "1", "2")
-	inpObjective := inputObjective{DescriptionHash: objHash}
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
 	resp := mockStub.MockInvoke("42", methodAndAssetToByte("registerObjective", inpObjective))
@@ -79,7 +79,7 @@ func TestTraintupleWithSingleDatasampleAggregate(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding aggregate algo it should work: ", resp.Message)
 
 	inpTraintuple := inputAggregatetuple{
-		AlgoKey: aggregateAlgoHash,
+		AlgoKey: aggregateAlgoKey,
 	}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -105,12 +105,12 @@ func TestNoPanicWhileQueryingIncompleteTraintupleAggregate(t *testing.T) {
 
 	// Retreive and alter existing objectif to pass Metrics at nil
 	db := NewLedgerDB(mockStub)
-	objective, err := db.GetObjective(objectiveDescriptionHash)
+	objective, err := db.GetObjective(objectiveKey)
 	assert.NoError(t, err)
 	objective.Metrics = nil
 	objBytes, err := json.Marshal(objective)
 	assert.NoError(t, err)
-	err = mockStub.PutState(objectiveDescriptionHash, objBytes)
+	err = mockStub.PutState(objectiveKey, objBytes)
 	assert.NoError(t, err)
 	// It should not panic
 	require.NotPanics(t, func() {
@@ -131,13 +131,18 @@ func TestTraintupleComputePlanCreationAggregate(t *testing.T) {
 	require.EqualValues(t, 400, resp.Status, "should failed for missing rank")
 	require.Contains(t, resp.Message, "invalid inputs, a ComputePlan should have a rank", "invalid error message")
 
+	cpKey := RandomUUID()
+	inCP := inputComputePlan{ComputePlanID: cpKey}
+	resp = mockStub.MockInvoke("42", inCP.getArgs())
+	require.EqualValues(t, 200, resp.Status)
+
 	inpTraintuple = inputAggregatetuple{Rank: "1"}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValues(t, 400, resp.Status, "should failed for invalid rank")
-	require.Contains(t, resp.Message, "invalid inputs, a new ComputePlan should have a rank 0")
+	require.Contains(t, resp.Message, "Field validation for 'ComputePlanID' failed on the 'required_with' tag")
 
-	inpTraintuple = inputAggregatetuple{Rank: "0"}
+	inpTraintuple = inputAggregatetuple{Rank: "0", ComputePlanID: cpKey}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
@@ -147,10 +152,10 @@ func TestTraintupleComputePlanCreationAggregate(t *testing.T) {
 	key := res.Key
 	require.EqualValues(t, aggregatetupleKey, key)
 
-	inpTraintuple = inputAggregatetuple{Rank: "0"}
+	inpTraintuple = inputAggregatetuple{}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
-	require.EqualValues(t, 409, resp.Status, "should failed for existing ComputePlanID")
+	require.EqualValues(t, 409, resp.Status, "should failed for existing aggregatetuple key")
 	require.Contains(t, resp.Message, "already exists")
 
 	require.EqualValues(t, 409, resp.Status, "should failed for existing FLTask")
@@ -167,29 +172,37 @@ func TestTraintupleMultipleCommputePlanCreationsAggregate(t *testing.T) {
 
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "aggregateAlgo")
+	db := NewLedgerDB(mockStub)
 
-	inpTraintuple := inputAggregatetuple{Rank: "0"}
+	cpKey := RandomUUID()
+	inCP := inputComputePlan{ComputePlanID: cpKey}
+	resp := mockStub.MockInvoke("42", inCP.getArgs())
+	require.EqualValues(t, 200, resp.Status)
+
+	inpTraintuple := inputAggregatetuple{Rank: "0", ComputePlanID: cpKey}
 	args := inpTraintuple.createDefault()
-	resp := mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status)
 	res := outputKey{}
 	err := json.Unmarshal(resp.Payload, &res)
 	assert.NoError(t, err, "should unmarshal without problem")
 	key := res.Key
-	db := NewLedgerDB(mockStub)
-	tuple, err := db.GetAggregatetuple(key)
+	_, err = db.GetAggregatetuple(key)
 	assert.NoError(t, err)
+
 	// Failed to add a traintuple with the same rank
 	inpTraintuple = inputAggregatetuple{
+		Key:           RandomUUID(),
 		InModels:      []string{key},
 		Rank:          "0",
-		ComputePlanID: tuple.ComputePlanID}
+		ComputePlanID: cpKey}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 400, resp.Status, resp.Message, "should failed to add an aggregate tuple of the same rank")
 
 	// Failed to add a traintuple to an unexisting CommputePlan
 	inpTraintuple = inputAggregatetuple{
+		Key:           RandomUUID(),
 		InModels:      []string{key},
 		Rank:          "1",
 		ComputePlanID: "notarealone"}
@@ -199,9 +212,10 @@ func TestTraintupleMultipleCommputePlanCreationsAggregate(t *testing.T) {
 
 	// Succesfully add a traintuple to the same ComputePlanID
 	inpTraintuple = inputAggregatetuple{
+		Key:           RandomUUID(),
 		InModels:      []string{key},
 		Rank:          "1",
-		ComputePlanID: tuple.ComputePlanID}
+		ComputePlanID: cpKey}
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message, "should be able do create an aggregate tuple with the same ComputePlanID")
@@ -244,7 +258,8 @@ func TestTraintupleAggregate(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried aggregate tuple")
 	expected := outputAggregatetuple{
 		Key: aggregatetupleKey,
-		Algo: &HashDressName{
+		Algo: &KeyHashDressName{
+			Key:            aggregateAlgoKey,
 			Hash:           aggregateAlgoHash,
 			Name:           aggregateAlgoName,
 			StorageAddress: aggregateAlgoStorageAddress,
@@ -278,6 +293,7 @@ func TestTraintupleAggregate(t *testing.T) {
 	// Add traintuple with inmodel from the above-submitted traintuple
 	inpWaitingTraintuple := inputAggregatetuple{
 		InModels: []string{aggregatetupleKey},
+		Key:      RandomUUID(),
 	}
 	args = inpWaitingTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
@@ -328,7 +344,8 @@ func TestTraintupleAggregate(t *testing.T) {
 	endTraintuple := outputAggregatetuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutModel = &HashDress{
+	expected.OutModel = &KeyHashDress{
+		Key:            modelKey,
 		Hash:           modelHash,
 		StorageAddress: modelAddress}
 	expected.Status = traintupleStatus[1]
@@ -366,13 +383,13 @@ func TestQueryTraintupleNotFoundAggregate(t *testing.T) {
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the aggregate tuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryAggregatetuple: key does not exist
-	notFoundKey := "eedbb7c31f62244c0f34461cc168804227115793d01c270021fe3f7935482eed"
+	notFoundKey := "eedbb7c3-1f62-244c-0f34-461cc1688042"
 	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(notFoundKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the aggregate tuple - status %d and message %s", resp.Status, resp.Message)
 
 	// queryAggregatetuple: key does not exist and use existing other asset type key
-	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(algoHash)}
+	args = [][]byte{[]byte("queryAggregatetuple"), keyToJSON(algoKey)}
 	resp = mockStub.MockInvoke("42", args)
 	assert.EqualValuesf(t, 404, resp.Status, "when querying the aggregate tuple - status %d and message %s", resp.Status, resp.Message)
 }
@@ -388,8 +405,13 @@ func TestInsertTraintupleTwiceAggregate(t *testing.T) {
 	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
 
 	// create a aggregate tuple and start a ComplutePlan
+	cpKey := RandomUUID()
+	inCP := inputComputePlan{ComputePlanID: cpKey}
+	resp = mockStub.MockInvoke("42", inCP.getArgs())
+	require.EqualValues(t, 200, resp.Status)
 	inpTraintuple := inputAggregatetuple{
-		Rank: "0",
+		Rank:          "0",
+		ComputePlanID: cpKey,
 	}
 	inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", methodAndAssetToByte("createAggregatetuple", inpTraintuple))
@@ -400,6 +422,7 @@ func TestInsertTraintupleTwiceAggregate(t *testing.T) {
 	tuple, err := db.GetAggregatetuple(_key.Key)
 	assert.NoError(t, err)
 	// create a second aggregate tuple in the same ComputePlan
+	inpTraintuple.Key = RandomUUID()
 	inpTraintuple.Rank = "1"
 	inpTraintuple.ComputePlanID = tuple.ComputePlanID
 	inpTraintuple.InModels = []string{_key.Key}
@@ -436,16 +459,16 @@ func TestAggregatetuplePermissions(t *testing.T) {
 	registerNode("nodeD")
 
 	// register 3 algos
-	algo1, err := registerRandomCompositeAlgo(mockStub)
+	algo1, err := registerRandomCompositeAlgo(t, mockStub)
 	assert.Nil(t, err)
-	algo2, err := registerRandomCompositeAlgo(mockStub)
+	algo2, err := registerRandomCompositeAlgo(t, mockStub)
 	assert.Nil(t, err)
-	algo3, err := registerRandomCompositeAlgo(mockStub)
+	algo3, err := registerRandomCompositeAlgo(t, mockStub)
 	assert.Nil(t, err)
 
 	// register 3 composite traintuples, with various permissions
 	registerCompositeTraintuple := func(algoKey string, authorizedIds []string) string {
-		inp := inputCompositeTraintuple{AlgoKey: algoKey}
+		inp := inputCompositeTraintuple{Key: RandomUUID(), AlgoKey: algoKey}
 		inp.fillDefaults()
 		inp.OutTrunkModelPermissions.Process.Public = false
 		inp.OutTrunkModelPermissions.Process.AuthorizedIDs = authorizedIds
@@ -555,7 +578,7 @@ func TestQueryAggregatetuple(t *testing.T) {
 	assert.Equal(t, traintupleKey, out.InModels[0].TraintupleKey)
 	assert.Equal(t, compositeTraintupleKey, out.InModels[1].TraintupleKey)
 	assert.Equal(t, aggregateAlgoName, out.Algo.Name)
-	assert.Equal(t, in.AlgoKey, out.Algo.Hash)
+	assert.Equal(t, aggregateAlgoHash, out.Algo.Hash)
 	assert.Equal(t, aggregateAlgoStorageAddress, out.Algo.StorageAddress)
 	assert.Equal(t, StatusWaiting, out.Status)
 }

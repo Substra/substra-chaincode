@@ -28,34 +28,62 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const objectiveKey = "5c1d9cd1-c2c1-082d-de09-21b56d11030c"
 const objectiveDescriptionHash = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
-const objectiveDescriptionStorageAddress = "https://toto/objective/222/description"
 const objectiveMetricsHash = "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 const objectiveMetricsStorageAddress = "https://toto/objective/222/metrics"
+const dataManagerKey = "da1bb7c3-1f62-244c-0f3a-761cc1688042"
 const dataManagerOpenerHash = "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-const trainDataSampleHash1 = "aa1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-const trainDataSampleHash2 = "aa2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-const testDataSampleHash1 = "bb1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
-const testDataSampleHash2 = "bb2bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
+const trainDataSampleKey1 = "aa1bb7c3-1f62-244c-0f3a-761cc1688042"
+const trainDataSampleKey2 = "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
+const testDataSampleKey1 = "bb1bb7c3-1f62-244c-0f3a-761cc1688042"
+const testDataSampleKey2 = "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
+const algoKey = "fd1bb7c3-1f62-244c-0f3a-761cc1688042"
+const algoKey2 = "cccbb7c3-1f62-244c-0f3a-761cc1688042"
 const algoHash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc"
 const algoStorageAddress = "https://toto/algo/222/algo"
 const algoName = "hog + svm"
+const compositeAlgoKey = "cccbb7c3-1f62-244c-0f3a-761cc1688042"
 const compositeAlgoHash = "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcd"
 const compositeAlgoStorageAddress = "https://toto/compositeAlgo/222/algo"
 const compositeAlgoName = "hog + svm composite"
+const aggregateAlgoKey = "dddbb7c3-1f62-244c-0f3a-761cc1688042"
 const aggregateAlgoHash = "dddbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482ddd"
 const aggregateAlgoStorageAddress = "https://toto/aggregateAlgo/222/algo"
 const aggregateAlgoName = "hog + svm aggregate"
+const modelKey = "eedbb7c3-1f62-244c-0f3a-761cc1688042"
 const modelHash = "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed"
 const modelAddress = "https://substrabac/model/toto"
+const headModelKey = modelKey
 const headModelHash = modelHash
+const trunkModelKey = "ccdbb7c3-1f62-244c-0f3a-761cc1688042"
 const trunkModelHash = "ccdbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482ecc"
 const trunkModelAddress = "https://substrabac/model/titi"
 const worker = "SampleOrg"
-const traintupleKey = "ebbf6cdde286539ea9cc34214dce7acb71e72799a676e4845be1b0fea155b35c"
-const compositeTraintupleKey = "b6f20e7ed89073d995c50d4b2bff6bb365a05b8d77f10469117d8aad81d83989"
-const aggregatetupleKey = "48c17bb556e1a122138d89178d81b22469a0cae260af322de9b391086ad27b2c"
+const traintupleKey = "b0289ab8-3a71-f01e-2b72-0259a6452244"
+const traintupleKey2 = "bbb89ab8-3a71-f01e-2b72-0259a6452244"
+const compositeTraintupleKey = "0c0d3956-26b4-878e-76d7-ba8bb6fb152e"
+const aggregatetupleKey = "71527661-50f6-26d3-fa86-1bf6387e3896"
+const testtupleKey = "dadada11-50f6-26d3-fa86-1bf6387e3896"
+const testtupleKey2 = "bbbada11-50f6-26d3-fa86-1bf6387e3896"
+const testtupleKey3 = "cccada11-50f6-26d3-fa86-1bf6387e3896"
 const tag = "a tag is simply a string"
+const computePlanID = "00000000-50f6-26d3-fa86-1bf6387e3896"
+const computePlanID2 = "11111111-50f6-26d3-fa86-1bf6387e3896"
+const computePlanTraintupleKey1 = "11000000-50f6-26d3-fa86-1bf6387e3896"
+const computePlanTraintupleKey2 = "22000000-50f6-26d3-fa86-1bf6387e3896"
+const computePlanTraintupleKey3 = "33000000-50f6-26d3-fa86-1bf6387e3896"
+const computePlanCompositeTraintupleKey1 = "11000011-50f6-26d3-fa86-1bf6387e3896"
+const computePlanCompositeTraintupleKey2 = "22000011-50f6-26d3-fa86-1bf6387e3896"
+const computePlanCompositeTraintupleKey3 = "33000011-50f6-26d3-fa86-1bf6387e3896"
+const computePlanCompositeTraintupleKey4 = "44000011-50f6-26d3-fa86-1bf6387e3896"
+const computePlanAggregatetupleKey1 = "11000022-50f6-26d3-fa86-1bf6387e3896"
+const computePlanAggregatetupleKey2 = "22000022-50f6-26d3-fa86-1bf6387e3896"
+const computePlanTesttupleKey1 = "11000033-50f6-26d3-fa86-1bf6387e3896"
+const computePlanTesttupleKey2 = "22000033-50f6-26d3-fa86-1bf6387e3896"
+const computePlanTesttupleKey3 = "33000033-50f6-26d3-fa86-1bf6387e3896"
+const computePlanTesttupleKey4 = "44000033-50f6-26d3-fa86-1bf6387e3896"
+const computePlanTesttupleKey5 = "55000033-50f6-26d3-fa86-1bf6387e3896"
 
 func TestInit(t *testing.T) {
 	scc := new(SubstraChaincode)
@@ -106,8 +134,8 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	}
 	// 2. add test dataSample
 	inpDataSample := inputDataSample{
-		Hashes:          []string{testDataSampleHash1, testDataSampleHash2},
-		DataManagerKeys: []string{dataManagerOpenerHash},
+		Keys:            []string{testDataSampleKey1, testDataSampleKey2},
+		DataManagerKeys: []string{dataManagerKey},
 		TestOnly:        "true",
 	}
 	args = inpDataSample.createDefault()
@@ -161,6 +189,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	args = inpTraintuple.createDefault()
 	resp = mockStub.MockInvoke("42", args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
+
 	if itemType == "traintuple" {
 		return resp, inpTraintuple
 	}
@@ -184,9 +213,9 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	return resp, inpAggregatetuple
 }
 
-func registerRandomCompositeAlgo(mockStub *MockStub) (key string, err error) {
-	key = GetRandomHash()
-	inpAlgo := inputCompositeAlgo{inputAlgo{Hash: key}}
+func registerRandomCompositeAlgo(t *testing.T, mockStub *MockStub) (key string, err error) {
+	key = RandomUUID()
+	inpAlgo := inputCompositeAlgo{inputAlgo{Key: key}}
 	args := inpAlgo.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	if resp.Status != 200 {
@@ -196,19 +225,21 @@ func registerRandomCompositeAlgo(mockStub *MockStub) (key string, err error) {
 	return
 }
 
-func registerTraintuple(mockStub *MockStub, assetType AssetType) (key string, err error) {
+func registerTraintuple(t *testing.T, mockStub *MockStub, assetType AssetType) (key string, err error) {
 
 	// 1. Generate and register random algo
 	// 2. Generate and register traintuple using that algo
 
+	randomAlgoKey := RandomUUID()
+	randomTraintupleKey := RandomUUID()
+
 	switch assetType {
 	case CompositeTraintupleType:
-		randAlgoKey, _err := registerRandomCompositeAlgo(mockStub)
-		if _err != nil {
-			err = _err
+		randomAlgoKey, err = registerRandomCompositeAlgo(t, mockStub)
+		if err != nil {
 			return
 		}
-		inpTraintuple := inputCompositeTraintuple{AlgoKey: randAlgoKey}
+		inpTraintuple := inputCompositeTraintuple{Key: randomTraintupleKey, AlgoKey: randomAlgoKey}
 		inpTraintuple.fillDefaults()
 		args := inpTraintuple.getArgs()
 		resp := mockStub.MockInvoke("42", args)
@@ -220,15 +251,14 @@ func registerTraintuple(mockStub *MockStub, assetType AssetType) (key string, er
 		json.Unmarshal(resp.Payload, &_key)
 		return _key.Key, nil
 	case TraintupleType:
-		randAlgoKey := GetRandomHash()
-		inpAlgo := inputAlgo{Hash: randAlgoKey}
+		inpAlgo := inputAlgo{Key: randomAlgoKey}
 		args := inpAlgo.createDefault()
 		resp := mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
 			err = fmt.Errorf("failed to register random algo: %s", resp.Message)
 			return
 		}
-		inpTraintuple := inputTraintuple{AlgoKey: randAlgoKey}
+		inpTraintuple := inputTraintuple{Key: randomTraintupleKey, AlgoKey: randomAlgoKey}
 		args = inpTraintuple.createDefault()
 		resp = mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
@@ -239,15 +269,14 @@ func registerTraintuple(mockStub *MockStub, assetType AssetType) (key string, er
 		json.Unmarshal(resp.Payload, &_key)
 		return _key.Key, nil
 	case AggregatetupleType:
-		randAlgoKey := GetRandomHash()
-		inpAlgo := inputAggregateAlgo{inputAlgo{Hash: randAlgoKey}}
+		inpAlgo := inputAggregateAlgo{inputAlgo{Key: randomAlgoKey}}
 		args := inpAlgo.createDefault()
 		resp := mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
 			err = fmt.Errorf("failed to register random algo: %s", resp.Message)
 			return
 		}
-		inpTraintuple := inputAggregatetuple{AlgoKey: randAlgoKey}
+		inpTraintuple := inputAggregatetuple{Key: randomTraintupleKey, AlgoKey: randomAlgoKey}
 		args = inpTraintuple.createDefault()
 		resp = mockStub.MockInvoke("42", args)
 		if resp.Status != 200 {
@@ -314,4 +343,12 @@ func TestQueryEmptyResponse(t *testing.T) {
 			assert.Equal(t, expectedPayload, resp.Payload, "payload is not an empty list")
 		})
 	}
+}
+
+func RandomUUID() string {
+	uuid, err := GetNewUUID()
+	if err != nil {
+		panic("GetNewUUID failed")
+	}
+	return uuid
 }

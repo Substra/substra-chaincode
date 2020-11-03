@@ -45,27 +45,29 @@ type StatusUpdater interface {
 
 // Objective is the representation of one of the element type stored in the ledger
 type Objective struct {
-	Name                      string            `json:"name"`
-	AssetType                 AssetType         `json:"asset_type"`
-	DescriptionStorageAddress string            `json:"description_storage_address"`
-	Metrics                   *HashDressName    `json:"metrics"`
-	Owner                     string            `json:"owner"`
-	TestDataset               *Dataset          `json:"test_dataset"`
-	Permissions               Permissions       `json:"permissions"`
-	Metadata                  map[string]string `json:"metadata"`
+	Key         string            `json:"key"`
+	Name        string            `json:"name"`
+	AssetType   AssetType         `json:"asset_type"`
+	Description *HashDress        `json:"description"`
+	Metrics     *HashDressName    `json:"metrics"`
+	Owner       string            `json:"owner"`
+	TestDataset *Dataset          `json:"test_dataset"`
+	Permissions Permissions       `json:"permissions"`
+	Metadata    map[string]string `json:"metadata"`
 }
 
 // DataManager is the representation of one of the elements type stored in the ledger
 type DataManager struct {
-	Name                 string            `json:"name"`
-	AssetType            AssetType         `json:"asset_type"`
-	OpenerStorageAddress string            `json:"opener_storage_address"`
-	Type                 string            `json:"type"`
-	Description          *HashDress        `json:"description"`
-	Owner                string            `json:"owner"`
-	ObjectiveKey         string            `json:"objective_key"`
-	Permissions          Permissions       `json:"permissions"`
-	Metadata             map[string]string `json:"metadata"`
+	Key          string            `json:"key"`
+	Name         string            `json:"name"`
+	AssetType    AssetType         `json:"asset_type"`
+	Opener       *HashDress        `json:"opener"`
+	Type         string            `json:"type"`
+	Description  *HashDress        `json:"description"`
+	Owner        string            `json:"owner"`
+	ObjectiveKey string            `json:"objective_key"`
+	Permissions  Permissions       `json:"permissions"`
+	Metadata     map[string]string `json:"metadata"`
 }
 
 // DataSample is the representation of one of the element type stored in the ledger
@@ -78,8 +80,10 @@ type DataSample struct {
 
 // Algo is the representation of one of the element type stored in the ledger
 type Algo struct {
+	Key            string            `json:"key"`
 	Name           string            `json:"name"`
 	AssetType      AssetType         `json:"asset_type"`
+	Hash           string            `json:"hash"`
 	StorageAddress string            `json:"storage_address"`
 	Description    *HashDress        `json:"description"`
 	Owner          string            `json:"owner"`
@@ -114,6 +118,7 @@ type GenericTuple struct {
 
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
+	Key           string            `json:"key"`
 	AssetType     AssetType         `json:"asset_type"`
 	AlgoKey       string            `json:"algo_key"`
 	ComputePlanID string            `json:"compute_plan_id"`
@@ -125,12 +130,13 @@ type Traintuple struct {
 	Tag           string            `json:"tag"`
 	Dataset       *Dataset          `json:"dataset"`
 	InModelKeys   []string          `json:"in_models"`
-	OutModel      *HashDress        `json:"out_model"`
+	OutModel      *KeyHashDress     `json:"out_model"`
 	Permissions   Permissions       `json:"permissions"`
 }
 
 // CompositeTraintuple is like a traintuple, but for composite model composition
 type CompositeTraintuple struct {
+	Key           string                          `json:"key"`
 	AssetType     AssetType                       `json:"asset_type"`
 	AlgoKey       string                          `json:"algo_key"`
 	ComputePlanID string                          `json:"compute_plan_id"`
@@ -149,6 +155,7 @@ type CompositeTraintuple struct {
 
 // Aggregatetuple is like a traintuple, but for aggregate model composition
 type Aggregatetuple struct {
+	Key           string            `json:"key"`
 	AssetType     AssetType         `json:"asset_type"`
 	AlgoKey       string            `json:"algo_key"`
 	ComputePlanID string            `json:"compute_plan_id"`
@@ -159,25 +166,26 @@ type Aggregatetuple struct {
 	Status        string            `json:"status"`
 	Tag           string            `json:"tag"`
 	InModelKeys   []string          `json:"in_models"`
-	OutModel      *HashDress        `json:"out_model"`
+	OutModel      *KeyHashDress     `json:"out_model"`
 	Permissions   Permissions       `json:"permissions"` // TODO (aggregate): what do permissions mean here?
 	Worker        string            `json:"worker"`
 }
 
 // CompositeTraintupleOutModel is the out-model of a CompositeTraintuple
 type CompositeTraintupleOutModel struct {
-	OutModel    *HashDress  `json:"out_model"`
-	Permissions Permissions `json:"permissions"`
+	OutModel    *KeyHashDress `json:"out_model"`
+	Permissions Permissions   `json:"permissions"`
 }
 
 // CompositeTraintupleOutHeadModel is the out-model of a CompositeTraintuple
 type CompositeTraintupleOutHeadModel struct {
-	OutModel    *Hash       `json:"out_model"`
+	OutModel    *KeyHash    `json:"out_model"`
 	Permissions Permissions `json:"permissions"`
 }
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Testtuple struct {
+	Key           string            `json:"key"`
 	AlgoKey       string            `json:"algo"`
 	AssetType     AssetType         `json:"asset_type"`
 	Certified     bool              `json:"certified"`
@@ -229,8 +237,9 @@ type TrainTask struct {
 // Struct used in the representation of elements stored in the ledger
 // ---------------------------------------------------------------------------------
 
-// Hash stores a hash
-type Hash struct {
+// KeyHash ...
+type KeyHash struct {
+	Key  string `json:"key"`
 	Hash string `json:"hash"`
 }
 
@@ -240,15 +249,31 @@ type HashDress struct {
 	StorageAddress string `json:"storage_address"`
 }
 
-// HashDressName stores a hash, storage address and a name
-type HashDressName struct {
-	Name           string `json:"name"`
+// KeyHashDress ...
+type KeyHashDress struct {
+	Key            string `json:"key"`
 	Hash           string `json:"hash"`
 	StorageAddress string `json:"storage_address"`
 }
 
+// HashDressName stores a hash, storage address and a name
+type HashDressName struct {
+	Hash           string `json:"hash"`
+	StorageAddress string `json:"storage_address"`
+	Name           string `json:"name"`
+}
+
+// KeyHashDressName ...
+type KeyHashDressName struct {
+	Key            string `json:"key"`
+	Hash           string `json:"hash"`
+	StorageAddress string `json:"storage_address"`
+	Name           string `json:"name"`
+}
+
 // Model stores the traintupleKey leading to the model, its hash and storage addressl
 type Model struct {
+	Key            string `json:"key"`
 	TraintupleKey  string `json:"traintuple_key"`
 	Hash           string `json:"hash"`
 	StorageAddress string `json:"storage_address"`
@@ -256,10 +281,10 @@ type Model struct {
 
 // Dataset stores info about a dataManagerKey and a list of associated dataSample
 type Dataset struct {
-	DataManagerKey string   `json:"data_manager_key"`
-	DataSampleKeys []string `json:"data_sample_keys"`
-	Metadata      map[string]string `json:"metadata"`
-	Worker         string   `json:"worker"`
+	DataManagerKey string            `json:"data_manager_key"`
+	DataSampleKeys []string          `json:"data_sample_keys"`
+	Metadata       map[string]string `json:"metadata"`
+	Worker         string            `json:"worker"`
 }
 
 // ---------------------------------------------------------------------------------
@@ -268,6 +293,7 @@ type Dataset struct {
 
 // TtDataset stores info about dataset in a Traintyple (train or test data) and in a PredTuple (later)
 type TtDataset struct {
+	Key            string   `json:"key"`
 	Worker         string   `json:"worker"`
 	DataSampleKeys []string `json:"keys"`
 	OpenerHash     string   `json:"opener_hash"`
@@ -276,7 +302,7 @@ type TtDataset struct {
 
 // TtObjective stores info about a objective in a Traintuple
 type TtObjective struct {
-	Key     string     `json:"hash"`
+	Key     string     `json:"key"`
 	Metrics *HashDress `json:"metrics"`
 }
 
