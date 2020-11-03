@@ -127,7 +127,7 @@ func (out *outputAlgo) Fill(in Algo) {
 type outputTtDataset struct {
 	Key            string            `json:"key"`
 	Worker         string            `json:"worker"`
-	DataSampleKeys []string          `json:"keys"`
+	DataSampleKeys []string          `json:"data_sample_keys"`
 	OpenerChecksum string            `json:"opener_checksum"`
 	Metadata       map[string]string `json:"metadata"`
 }
