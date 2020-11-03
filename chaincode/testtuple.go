@@ -92,7 +92,7 @@ func (testtuple *Testtuple) SetFromInput(db *LedgerDB, inp inputTesttuple) error
 		Key:            dataManager.Key,
 		Worker:         dataManager.Owner,
 		DataSampleKeys: dataSampleKeys,
-		OpenerHash:     dataManager.Opener.Hash,
+		OpenerChecksum: dataManager.Opener.Checksum,
 	}
 	return nil
 }

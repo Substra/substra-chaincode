@@ -27,8 +27,8 @@ func (dataManager *inputDataManager) createDefault() [][]byte {
 	if dataManager.Name == "" {
 		dataManager.Name = "liver slide"
 	}
-	if dataManager.OpenerHash == "" {
-		dataManager.OpenerHash = dataManagerOpenerHash
+	if dataManager.OpenerChecksum == "" {
+		dataManager.OpenerChecksum = dataManagerOpenerChecksum
 	}
 	if dataManager.OpenerStorageAddress == "" {
 		dataManager.OpenerStorageAddress = "https://toto/dataManager/42234/opener"
@@ -36,8 +36,8 @@ func (dataManager *inputDataManager) createDefault() [][]byte {
 	if dataManager.Type == "" {
 		dataManager.Type = "images"
 	}
-	if dataManager.DescriptionHash == "" {
-		dataManager.DescriptionHash = "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee"
+	if dataManager.DescriptionChecksum == "" {
+		dataManager.DescriptionChecksum = "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee"
 	}
 	if dataManager.DescriptionStorageAddress == "" {
 		dataManager.DescriptionStorageAddress = "https://toto/dataManager/42234/description"
@@ -68,8 +68,8 @@ func (objective *inputObjective) createDefault() [][]byte {
 	if objective.Name == "" {
 		objective.Name = "MSI classification"
 	}
-	if objective.DescriptionHash == "" {
-		objective.DescriptionHash = objectiveDescriptionHash
+	if objective.DescriptionChecksum == "" {
+		objective.DescriptionChecksum = objectiveDescriptionChecksum
 	}
 	if objective.DescriptionStorageAddress == "" {
 		objective.DescriptionStorageAddress = "https://toto/objective/222/description"
@@ -77,8 +77,8 @@ func (objective *inputObjective) createDefault() [][]byte {
 	if objective.MetricsName == "" {
 		objective.MetricsName = "accuracy"
 	}
-	if objective.MetricsHash == "" {
-		objective.MetricsHash = objectiveMetricsHash
+	if objective.MetricsChecksum == "" {
+		objective.MetricsChecksum = objectiveMetricsChecksum
 	}
 	if objective.MetricsStorageAddress == "" {
 		objective.MetricsStorageAddress = objectiveMetricsStorageAddress
@@ -101,14 +101,14 @@ func (algo *inputAlgo) createDefault() [][]byte {
 	if algo.Name == "" {
 		algo.Name = algoName
 	}
-	if algo.Hash == "" {
-		algo.Hash = algoHash
+	if algo.Checksum == "" {
+		algo.Checksum = algoChecksum
 	}
 	if algo.StorageAddress == "" {
 		algo.StorageAddress = algoStorageAddress
 	}
-	if algo.DescriptionHash == "" {
-		algo.DescriptionHash = "e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dca"
+	if algo.DescriptionChecksum == "" {
+		algo.DescriptionChecksum = "e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dca"
 	}
 	if algo.DescriptionStorageAddress == "" {
 		algo.DescriptionStorageAddress = "https://toto/algo/222/description"
@@ -125,14 +125,14 @@ func (algo *inputCompositeAlgo) createDefault() [][]byte {
 	if algo.Name == "" {
 		algo.Name = compositeAlgoName
 	}
-	if algo.Hash == "" {
-		algo.Hash = compositeAlgoHash
+	if algo.Checksum == "" {
+		algo.Checksum = compositeAlgoChecksum
 	}
 	if algo.StorageAddress == "" {
 		algo.StorageAddress = compositeAlgoStorageAddress
 	}
-	if algo.DescriptionHash == "" {
-		algo.DescriptionHash = "e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcb"
+	if algo.DescriptionChecksum == "" {
+		algo.DescriptionChecksum = "e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcb"
 	}
 	if algo.DescriptionStorageAddress == "" {
 		algo.DescriptionStorageAddress = "https://toto/compositeAlgo/222/description"
@@ -154,14 +154,14 @@ func (algo *inputAggregateAlgo) fillDefaults() {
 	if algo.Name == "" {
 		algo.Name = aggregateAlgoName
 	}
-	if algo.Hash == "" {
-		algo.Hash = aggregateAlgoHash
+	if algo.Checksum == "" {
+		algo.Checksum = aggregateAlgoChecksum
 	}
 	if algo.StorageAddress == "" {
 		algo.StorageAddress = aggregateAlgoStorageAddress
 	}
-	if algo.DescriptionHash == "" {
-		algo.DescriptionHash = "e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcb"
+	if algo.DescriptionChecksum == "" {
+		algo.DescriptionChecksum = "e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcb"
 	}
 	if algo.DescriptionStorageAddress == "" {
 		algo.DescriptionStorageAddress = "https://toto/aggregateAlgo/222/description"
@@ -256,8 +256,8 @@ func (success *inputLogSuccessTrain) fillDefaults() {
 	if success.OutModel.Key == "" {
 		success.OutModel.Key = modelKey
 	}
-	if success.OutModel.Hash == "" {
-		success.OutModel.Hash = modelHash
+	if success.OutModel.Checksum == "" {
+		success.OutModel.Checksum = modelChecksum
 	}
 	if success.OutModel.StorageAddress == "" {
 		success.OutModel.StorageAddress = modelAddress
@@ -283,14 +283,14 @@ func (success *inputLogSuccessCompositeTrain) fillDefaults() {
 	if success.OutHeadModel.Key == "" {
 		success.OutHeadModel.Key = headModelKey
 	}
-	if success.OutHeadModel.Hash == "" {
-		success.OutHeadModel.Hash = headModelHash
+	if success.OutHeadModel.Checksum == "" {
+		success.OutHeadModel.Checksum = headModelChecksum
 	}
 	if success.OutTrunkModel.Key == "" {
 		success.OutTrunkModel.Key = trunkModelKey
 	}
-	if success.OutTrunkModel.Hash == "" {
-		success.OutTrunkModel.Hash = trunkModelHash
+	if success.OutTrunkModel.Checksum == "" {
+		success.OutTrunkModel.Checksum = trunkModelChecksum
 	}
 	if success.OutTrunkModel.StorageAddress == "" {
 		success.OutTrunkModel.StorageAddress = trunkModelAddress

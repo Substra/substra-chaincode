@@ -19,10 +19,10 @@ Smart contract: `registerDataManager`
 {
  "key": string (required,len=36),
  "name": string (required,gte=1,lte=100),
- "opener_hash": string (required,len=64,hexadecimal),
+ "opener_checksum": string (required,len=64,hexadecimal),
  "opener_storage_address": string (required,url),
  "type": string (required,gte=1,lte=30),
- "description_hash": string (required,len=64,hexadecimal),
+ "description_checksum": string (required,len=64,hexadecimal),
  "description_storage_address": string (required,url),
  "objective_key": string (omitempty,len=36),
  "permissions": (required){
@@ -36,7 +36,7 @@ Smart contract: `registerDataManager`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerDataManager","{\"key\":\"da1bb7c3-1f62-244c-0f3a-761cc1688042\",\"name\":\"liver slide\",\"opener_hash\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"opener_storage_address\":\"https://toto/dataManager/42234/opener\",\"type\":\"images\",\"description_hash\":\"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee\",\"description_storage_address\":\"https://toto/dataManager/42234/description\",\"objective_key\":\"\",\"permissions\":{\"process\":{\"public\":true,\"authorized_ids\":[]}},\"metadata\":null}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerDataManager","{\"key\":\"da1bb7c3-1f62-244c-0f3a-761cc1688042\",\"name\":\"liver slide\",\"opener_checksum\":\"da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"opener_storage_address\":\"https://toto/dataManager/42234/opener\",\"type\":\"images\",\"description_checksum\":\"8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee\",\"description_storage_address\":\"https://toto/dataManager/42234/description\",\"objective_key\":\"\",\"permissions\":{\"process\":{\"public\":true,\"authorized_ids\":[]}},\"metadata\":null}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -61,7 +61,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryDataManager","{\"key\":\"da1bb7
 ```json
 {
  "description": {
-  "hash": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
+  "checksum": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
   "storage_address": "https://toto/dataManager/42234/description"
  },
  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
@@ -69,7 +69,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryDataManager","{\"key\":\"da1bb7
  "name": "liver slide",
  "objective_key": "",
  "opener": {
-  "hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "storage_address": "https://toto/dataManager/42234/opener"
  },
  "owner": "SampleOrg",
@@ -114,10 +114,10 @@ Smart contract: `registerObjective`
 {
  "key": string (required,len=36),
  "name": string (required,gte=1,lte=100),
- "description_hash": string (required,len=64,hexadecimal),
+ "description_checksum": string (required,len=64,hexadecimal),
  "description_storage_address": string (required,url),
  "metrics_name": string (required,gte=1,lte=100),
- "metrics_hash": string (required,len=64,hexadecimal),
+ "metrics_checksum": string (required,len=64,hexadecimal),
  "metrics_storage_address": string (required,url),
  "test_dataset": (omitempty){
    "data_manager_key": string (omitempty,len=36),
@@ -134,7 +134,7 @@ Smart contract: `registerObjective`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerObjective","{\"key\":\"5c1d9cd1-c2c1-082d-de09-21b56d11030c\",\"name\":\"MSI classification\",\"description_hash\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"description_storage_address\":\"https://toto/objective/222/description\",\"metrics_name\":\"accuracy\",\"metrics_hash\":\"4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"metrics_storage_address\":\"https://toto/objective/222/metrics\",\"test_dataset\":{\"data_manager_key\":\"da1bb7c3-1f62-244c-0f3a-761cc1688042\",\"data_sample_keys\":[\"bb1bb7c3-1f62-244c-0f3a-761cc1688042\",\"bb2bb7c3-1f62-244c-0f3a-761cc1688042\"]},\"permissions\":{\"process\":{\"public\":true,\"authorized_ids\":[]}},\"metadata\":null}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerObjective","{\"key\":\"5c1d9cd1-c2c1-082d-de09-21b56d11030c\",\"name\":\"MSI classification\",\"description_checksum\":\"5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"description_storage_address\":\"https://toto/objective/222/description\",\"metrics_name\":\"accuracy\",\"metrics_checksum\":\"4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379\",\"metrics_storage_address\":\"https://toto/objective/222/metrics\",\"test_dataset\":{\"data_manager_key\":\"da1bb7c3-1f62-244c-0f3a-761cc1688042\",\"data_sample_keys\":[\"bb1bb7c3-1f62-244c-0f3a-761cc1688042\",\"bb2bb7c3-1f62-244c-0f3a-761cc1688042\"]},\"permissions\":{\"process\":{\"public\":true,\"authorized_ids\":[]}},\"metadata\":null}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -150,9 +150,9 @@ Smart contract: `registerAlgo`
 {
  "key": string (required,len=36),
  "name": string (required,gte=1,lte=100),
- "hash": string (required,len=64,hexadecimal),
+ "checksum": string (required,len=64,hexadecimal),
  "storage_address": string (required,url),
- "description_hash": string (required,len=64,hexadecimal),
+ "description_checksum": string (required,len=64,hexadecimal),
  "description_storage_address": string (required,url),
  "permissions": (required){
    "process": (required){
@@ -165,7 +165,7 @@ Smart contract: `registerAlgo`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["registerAlgo","{\"key\":\"fd1bb7c3-1f62-244c-0f3a-761cc1688042\",\"name\":\"hog + svm\",\"hash\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"storage_address\":\"https://toto/algo/222/algo\",\"description_hash\":\"e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dca\",\"description_storage_address\":\"https://toto/algo/222/description\",\"permissions\":{\"process\":{\"public\":true,\"authorized_ids\":[]}},\"metadata\":null}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["registerAlgo","{\"key\":\"fd1bb7c3-1f62-244c-0f3a-761cc1688042\",\"name\":\"hog + svm\",\"checksum\":\"fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc\",\"storage_address\":\"https://toto/algo/222/algo\",\"description_checksum\":\"e2dbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dca\",\"description_storage_address\":\"https://toto/algo/222/description\",\"permissions\":{\"process\":{\"public\":true,\"authorized_ids\":[]}},\"metadata\":null}"]}' -C myc
 ```
 ##### Command output:
 ```json
@@ -207,7 +207,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataManagers"]}' -C myc
 [
  {
   "description": {
-   "hash": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
+   "checksum": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
    "storage_address": "https://toto/dataManager/42234/description"
   },
   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
@@ -215,7 +215,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataManagers"]}' -C myc
   "name": "liver slide",
   "objective_key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
   "opener": {
-   "hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "storage_address": "https://toto/dataManager/42234/opener"
   },
   "owner": "SampleOrg",
@@ -277,13 +277,13 @@ peer chaincode query -n mycc -c '{"Args":["queryObjectives"]}' -C myc
 [
  {
   "description": {
-   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "checksum": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storage_address": "https://toto/objective/222/description"
   },
   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
   "metadata": {},
   "metrics": {
-   "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "name": "accuracy",
    "storage_address": "https://toto/objective/222/metrics"
   },
@@ -386,7 +386,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"train
 [
  {
   "algo": {
-   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
@@ -400,7 +400,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"train
     "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
    "metadata": {},
-   "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "worker": "SampleOrg"
   },
   "in_models": null,
@@ -437,7 +437,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"b0289ab8-
 ```json
 {
  "algo": {
-  "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
   "name": "hog + svm",
   "storage_address": "https://toto/algo/222/algo"
@@ -451,7 +451,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTrain","{\"key\":\"b0289ab8-
    "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
   ],
   "metadata": {},
-  "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "worker": "SampleOrg"
  },
  "in_models": null,
@@ -480,20 +480,20 @@ Smart contract: `logSuccessTrain`
  "log": string (lte=200),
  "out_model": (required){
    "key": string (required,len=36),
-   "hash": string (required,len=64,hexadecimal),
+   "checksum": string (required,len=64,hexadecimal),
    "storage_address": string (required),
  },
 }
 ```
 ##### Command peer example:
 ```bash
-peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"b0289ab8-3a71-f01e-2b72-0259a6452244\",\"log\":\"no error, ah ah ah\",\"out_model\":{\"key\":\"eedbb7c3-1f62-244c-0f3a-761cc1688042\",\"hash\":\"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed\",\"storage_address\":\"https://substrabac/model/toto\"}}"]}' -C myc
+peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"b0289ab8-3a71-f01e-2b72-0259a6452244\",\"log\":\"no error, ah ah ah\",\"out_model\":{\"key\":\"eedbb7c3-1f62-244c-0f3a-761cc1688042\",\"checksum\":\"eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed\",\"storage_address\":\"https://substrabac/model/toto\"}}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
  "algo": {
-  "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
   "name": "hog + svm",
   "storage_address": "https://toto/algo/222/algo"
@@ -507,7 +507,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"b0289ab
    "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
   ],
   "metadata": {},
-  "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "worker": "SampleOrg"
  },
  "in_models": null,
@@ -515,7 +515,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTrain","{\"key\":\"b0289ab
  "log": "no error, ah ah ah",
  "metadata": {},
  "out_model": {
-  "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+  "checksum": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
   "key": "eedbb7c3-1f62-244c-0f3a-761cc1688042",
   "storage_address": "https://substrabac/model/toto"
  },
@@ -547,7 +547,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"b0289ab
 ```json
 {
  "algo": {
-  "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
   "name": "hog + svm",
   "storage_address": "https://toto/algo/222/algo"
@@ -561,7 +561,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"b0289ab
    "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
   ],
   "metadata": {},
-  "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "worker": "SampleOrg"
  },
  "in_models": null,
@@ -569,7 +569,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryTraintuple","{\"key\":\"b0289ab
  "log": "no error, ah ah ah",
  "metadata": {},
  "out_model": {
-  "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+  "checksum": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
   "key": "eedbb7c3-1f62-244c-0f3a-761cc1688042",
   "storage_address": "https://substrabac/model/toto"
  },
@@ -678,7 +678,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
 [
  {
   "algo": {
-   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
@@ -692,7 +692,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
     "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
     "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
-   "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0,
    "worker": "SampleOrg"
   },
@@ -702,7 +702,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   "objective": {
    "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
    "metrics": {
-    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
    }
   },
@@ -714,7 +714,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
  },
  {
   "algo": {
-   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
@@ -728,7 +728,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
     "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
     "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
-   "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0,
    "worker": "SampleOrg"
   },
@@ -738,7 +738,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryFilter","{\"indexName\":\"testt
   "objective": {
    "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
    "metrics": {
-    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
    }
   },
@@ -767,7 +767,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"bbbada11-5
 ```json
 {
  "algo": {
-  "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
   "name": "hog + svm",
   "storage_address": "https://toto/algo/222/algo"
@@ -781,7 +781,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"bbbada11-5
    "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
    "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
   ],
-  "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "perf": 0,
   "worker": "SampleOrg"
  },
@@ -791,7 +791,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logStartTest","{\"key\":\"bbbada11-5
  "objective": {
   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
   "metrics": {
-   "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storage_address": "https://toto/objective/222/metrics"
   }
  },
@@ -821,7 +821,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"bbbada11
 ```json
 {
  "algo": {
-  "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
   "name": "hog + svm",
   "storage_address": "https://toto/algo/222/algo"
@@ -835,7 +835,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"bbbada11
    "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
    "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
   ],
-  "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "perf": 0.9,
   "worker": "SampleOrg"
  },
@@ -845,7 +845,7 @@ peer chaincode invoke -n mycc -c '{"Args":["logSuccessTest","{\"key\":\"bbbada11
  "objective": {
   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
   "metrics": {
-   "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storage_address": "https://toto/objective/222/metrics"
   }
  },
@@ -873,7 +873,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"bbbada11-
 ```json
 {
  "algo": {
-  "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
   "name": "hog + svm",
   "storage_address": "https://toto/algo/222/algo"
@@ -887,7 +887,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"bbbada11-
    "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
    "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
   ],
-  "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "perf": 0.9,
   "worker": "SampleOrg"
  },
@@ -897,7 +897,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuple","{\"key\":\"bbbada11-
  "objective": {
   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
   "metrics": {
-   "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storage_address": "https://toto/objective/222/metrics"
   }
  },
@@ -918,7 +918,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
 [
  {
   "algo": {
-   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
@@ -932,7 +932,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
     "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
     "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
-   "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0,
    "worker": "SampleOrg"
   },
@@ -942,7 +942,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "objective": {
    "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
    "metrics": {
-    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
    }
   },
@@ -954,7 +954,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
  },
  {
   "algo": {
-   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
@@ -968,7 +968,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
     "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
     "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
-   "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0.9,
    "worker": "SampleOrg"
   },
@@ -978,7 +978,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "objective": {
    "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
    "metrics": {
-    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
    }
   },
@@ -990,7 +990,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
  },
  {
   "algo": {
-   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
@@ -1004,7 +1004,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
     "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
     "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
-   "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0,
    "worker": "SampleOrg"
   },
@@ -1014,7 +1014,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
   "objective": {
    "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
    "metrics": {
-    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
    }
   },
@@ -1045,7 +1045,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
  "non_certified_testtuples": [
   {
    "algo": {
-    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
     "name": "hog + svm",
     "storage_address": "https://toto/algo/222/algo"
@@ -1059,7 +1059,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
      "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
      "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
     ],
-    "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "perf": 0,
     "worker": "SampleOrg"
    },
@@ -1069,7 +1069,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
    "objective": {
     "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
     "metrics": {
-     "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+     "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
      "storage_address": "https://toto/objective/222/metrics"
     }
    },
@@ -1082,7 +1082,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
  ],
  "testtuple": {
   "algo": {
-   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
@@ -1096,7 +1096,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
     "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
     "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
-   "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "perf": 0.9,
    "worker": "SampleOrg"
   },
@@ -1106,7 +1106,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
   "objective": {
    "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
    "metrics": {
-    "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
     "storage_address": "https://toto/objective/222/metrics"
    }
   },
@@ -1118,7 +1118,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
  },
  "traintuple": {
   "algo": {
-   "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
    "name": "hog + svm",
    "storage_address": "https://toto/algo/222/algo"
@@ -1132,7 +1132,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
     "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
    ],
    "metadata": {},
-   "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
    "worker": "SampleOrg"
   },
   "in_models": null,
@@ -1140,7 +1140,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModelDetails","{\"key\":\"b0289a
   "log": "no error, ah ah ah",
   "metadata": {},
   "out_model": {
-   "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+   "checksum": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
    "key": "eedbb7c3-1f62-244c-0f3a-761cc1688042",
    "storage_address": "https://substrabac/model/toto"
   },
@@ -1167,7 +1167,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
  {
   "traintuple": {
    "algo": {
-    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
     "name": "hog + svm",
     "storage_address": "https://toto/algo/222/algo"
@@ -1181,7 +1181,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
      "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
     ],
     "metadata": {},
-    "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "worker": "SampleOrg"
    },
    "in_models": null,
@@ -1189,7 +1189,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
    "log": "no error, ah ah ah",
    "metadata": {},
    "out_model": {
-    "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+    "checksum": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
     "key": "eedbb7c3-1f62-244c-0f3a-761cc1688042",
     "storage_address": "https://substrabac/model/toto"
    },
@@ -1207,7 +1207,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
  {
   "traintuple": {
    "algo": {
-    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
     "name": "hog + svm",
     "storage_address": "https://toto/algo/222/algo"
@@ -1221,12 +1221,12 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
      "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
     ],
     "metadata": {},
-    "opener_hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "worker": "SampleOrg"
    },
    "in_models": [
     {
-     "hash": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+     "checksum": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
      "key": "b0289ab8-3a71-f01e-2b72-0259a6452244",
      "storage_address": "https://substrabac/model/toto",
      "traintuple_key": "b0289ab8-3a71-f01e-2b72-0259a6452244"
@@ -1288,7 +1288,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"da1bb7c3-1f
 ```json
 {
  "description": {
-  "hash": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
+  "checksum": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
   "storage_address": "https://toto/dataManager/42234/description"
  },
  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
@@ -1296,7 +1296,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"da1bb7c3-1f
  "name": "liver slide",
  "objective_key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
  "opener": {
-  "hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "storage_address": "https://toto/dataManager/42234/opener"
  },
  "owner": "SampleOrg",
@@ -1367,7 +1367,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"38a320b2-a6
 ```json
 {
  "description": {
-  "hash": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
+  "checksum": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
   "storage_address": "https://toto/dataManager/42234/description"
  },
  "key": "38a320b2-a67c-8003-cc74-8d6666534f2b",
@@ -1375,7 +1375,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataset","{\"key\":\"38a320b2-a6
  "name": "liver slide",
  "objective_key": "",
  "opener": {
-  "hash": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+  "checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
   "storage_address": "https://toto/dataManager/42234/opener"
  },
  "owner": "SampleOrg",
@@ -1580,13 +1580,13 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
 {
  "objective": {
   "description": {
-   "hash": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "checksum": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "storage_address": "https://toto/objective/222/description"
   },
   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
   "metadata": {},
   "metrics": {
-   "hash": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+   "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
    "name": "accuracy",
    "storage_address": "https://toto/objective/222/metrics"
   },
@@ -1611,7 +1611,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
  "testtuples": [
   {
    "algo": {
-    "hash": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
     "name": "hog + svm",
     "storage_address": "https://toto/algo/222/algo"
    },

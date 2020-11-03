@@ -264,7 +264,7 @@ func TestTraintuple(t *testing.T) {
 	}
 	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with invalid key, status %d and message %s", resp.Status, resp.Message)
 
 	// Add traintuple with unexisting algo
 	inpTraintuple = inputTraintuple{}
@@ -289,9 +289,9 @@ func TestTraintuple(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried traintuple")
 	expected := outputTraintuple{
 		Key: traintupleKey,
-		Algo: &KeyHashDressName{
+		Algo: &KeyChecksumAddressName{
 			Key:            algoKey,
-			Hash:           algoHash,
+			Checksum:       algoChecksum,
 			Name:           algoName,
 			StorageAddress: algoStorageAddress,
 		},
@@ -299,7 +299,7 @@ func TestTraintuple(t *testing.T) {
 		Dataset: &outputTtDataset{
 			Key:            dataManagerKey,
 			DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
-			OpenerHash:     dataManagerOpenerHash,
+			OpenerChecksum: dataManagerOpenerChecksum,
 			Worker:         worker,
 			Metadata:       map[string]string{},
 		},
@@ -377,9 +377,9 @@ func TestTraintuple(t *testing.T) {
 	endTraintuple := outputTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutModel = &KeyHashDress{
+	expected.OutModel = &KeyChecksumAddress{
 		Key:            modelKey,
-		Hash:           modelHash,
+		Checksum:       modelChecksum,
 		StorageAddress: modelAddress}
 	expected.Status = traintupleStatus[1]
 	assert.Exactly(t, expected, endTraintuple, "retreived Traintuple does not correspond to what is expected")

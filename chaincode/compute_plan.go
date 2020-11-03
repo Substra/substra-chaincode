@@ -434,7 +434,7 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanKey, tupleStatus, tupleKey 
 	return nil
 }
 
-// TryAddIntermediaryModel will reference the hash model if the compute plan key
+// TryAddIntermediaryModel will reference the model key if the compute plan key
 // is not empty and if it's an intermediary model meaning without any children
 func TryAddIntermediaryModel(db *LedgerDB, ComputePlanKey, tupleKey, modelKey string) error {
 	if ComputePlanKey == "" {
@@ -463,7 +463,7 @@ func TryAddIntermediaryModel(db *LedgerDB, ComputePlanKey, tupleKey, modelKey st
 
 // UpdateIntermediaryModelsInuse check all models listed as intermediary. If any of
 // them are 'done', meaning that there is no train like tuples or testtuples
-// planned to use this model. If that the case its hash will be added to the
+// planned to use this model. If that the case its key will be added to the
 // returned slice and remove from the compute plan's one.
 func (cp *ComputePlan) UpdateIntermediaryModelsInuse(db *LedgerDB) ([]string, error) {
 	if !cp.CleanModels {

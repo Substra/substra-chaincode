@@ -44,13 +44,13 @@ func (objective *Objective) Set(db *LedgerDB, inp inputObjective) (dataManagerKe
 	objective.Key = inp.Key
 	objective.AssetType = ObjectiveType
 	objective.Name = inp.Name
-	objective.Description = &HashDress{
-		Hash:           inp.DescriptionHash,
+	objective.Description = &ChecksumAddress{
+		Checksum:       inp.DescriptionChecksum,
 		StorageAddress: inp.DescriptionStorageAddress,
 	}
-	objective.Metrics = &HashDressName{
+	objective.Metrics = &ChecksumAddressName{
 		Name:           inp.MetricsName,
-		Hash:           inp.MetricsHash,
+		Checksum:       inp.MetricsChecksum,
 		StorageAddress: inp.MetricsStorageAddress,
 	}
 	objective.Metadata = inp.Metadata

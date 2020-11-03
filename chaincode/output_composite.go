@@ -21,30 +21,30 @@ type outputCompositeAlgo struct {
 }
 
 type outputCompositeTraintuple struct {
-	Key            string                `json:"key"`
-	Algo           *KeyHashDressName     `json:"algo"`
-	Creator        string                `json:"creator"`
-	Dataset        *outputTtDataset      `json:"dataset"`
-	ComputePlanKey string                `json:"compute_plan_key"`
-	InHeadModel    *Model                `json:"in_head_model"`
-	InTrunkModel   *Model                `json:"in_trunk_model"`
-	Log            string                `json:"log"`
-	Metadata       map[string]string     `json:"metadata"`
-	OutHeadModel   outHeadModelComposite `json:"out_head_model"`
-	OutTrunkModel  outModelComposite     `json:"out_trunk_model"`
-	Rank           int                   `json:"rank"`
-	Status         string                `json:"status"`
-	Tag            string                `json:"tag"`
+	Key            string                  `json:"key"`
+	Algo           *KeyChecksumAddressName `json:"algo"`
+	Creator        string                  `json:"creator"`
+	Dataset        *outputTtDataset        `json:"dataset"`
+	ComputePlanKey string                  `json:"compute_plan_key"`
+	InHeadModel    *Model                  `json:"in_head_model"`
+	InTrunkModel   *Model                  `json:"in_trunk_model"`
+	Log            string                  `json:"log"`
+	Metadata       map[string]string       `json:"metadata"`
+	OutHeadModel   outHeadModelComposite   `json:"out_head_model"`
+	OutTrunkModel  outModelComposite       `json:"out_trunk_model"`
+	Rank           int                     `json:"rank"`
+	Status         string                  `json:"status"`
+	Tag            string                  `json:"tag"`
 }
 
 type outHeadModelComposite struct {
-	OutModel    *KeyHash          `json:"out_model"`
+	OutModel    *KeyChecksum      `json:"out_model"`
 	Permissions outputPermissions `json:"permissions"`
 }
 
 type outModelComposite struct {
-	OutModel    *KeyHashDress     `json:"out_model"`
-	Permissions outputPermissions `json:"permissions"`
+	OutModel    *KeyChecksumAddress `json:"out_model"`
+	Permissions outputPermissions   `json:"permissions"`
 }
 
 //Fill is a method of the receiver outputCompositeTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
@@ -70,16 +70,16 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		err = errors.Internal("could not retrieve composite algo with key %s - %s", traintuple.AlgoKey, err.Error())
 		return
 	}
-	outputCompositeTraintuple.Algo = &KeyHashDressName{
+	outputCompositeTraintuple.Algo = &KeyChecksumAddressName{
 		Key:            algo.Key,
 		Name:           algo.Name,
-		Hash:           algo.Hash,
+		Checksum:       algo.Checksum,
 		StorageAddress: algo.StorageAddress}
 
 	// fill in-model (head)
 	if traintuple.InHeadModel != "" {
 		// Head can only be a composite traintuple's head out model
-		outHeadModel, _err := db.GetOutHeadModelKeyHash(traintuple.InHeadModel)
+		outHeadModel, _err := db.GetOutHeadModelKeyChecksum(traintuple.InHeadModel)
 		if _err != nil {
 			err = errors.Internal("could not fill (head) in-model with key \"%s\": %s", traintuple.InHeadModel, _err.Error())
 			return
@@ -89,7 +89,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 
 		if outHeadModel != nil {
 			outputCompositeTraintuple.InHeadModel.Key = outHeadModel.Key
-			outputCompositeTraintuple.InHeadModel.Hash = outHeadModel.Hash
+			outputCompositeTraintuple.InHeadModel.Checksum = outHeadModel.Checksum
 		}
 	}
 
@@ -99,7 +99,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		// - a traintuple's out model
 		// - a composite traintuple's head out model
 		// - an aggregate tuple's out model
-		outModel, _err := db.GetOutModelKeyHashDress(traintuple.InTrunkModel, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
+		outModel, _err := db.GetOutModelKeyChecksumAddress(traintuple.InTrunkModel, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
 		if _err != nil {
 			err = errors.Internal("could not fill (trunk) in-model with key \"%s\": %s", traintuple.InTrunkModel, _err.Error())
 			return
@@ -109,7 +109,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 
 		if outModel != nil {
 			outputCompositeTraintuple.InTrunkModel.Key = outModel.Key
-			outputCompositeTraintuple.InTrunkModel.Hash = outModel.Hash
+			outputCompositeTraintuple.InTrunkModel.Checksum = outModel.Checksum
 			outputCompositeTraintuple.InTrunkModel.StorageAddress = outModel.StorageAddress
 		}
 	}
@@ -125,7 +125,7 @@ func (outputCompositeTraintuple *outputCompositeTraintuple) Fill(db *LedgerDB, t
 		Key:            dataManager.Key,
 		Worker:         traintuple.Dataset.Worker,
 		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
-		OpenerHash:     dataManager.Opener.Hash,
+		OpenerChecksum: dataManager.Opener.Checksum,
 		Metadata:       initMapOutput(traintuple.Dataset.Metadata),
 	}
 

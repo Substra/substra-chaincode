@@ -233,7 +233,7 @@ func TestTraintupleAggregate(t *testing.T) {
 	}
 	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with invalid key, status %d and message %s", resp.Status, resp.Message)
 
 	// Add traintuple with unexisting algo
 	inpTraintuple = inputAggregatetuple{}
@@ -258,9 +258,9 @@ func TestTraintupleAggregate(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried aggregate tuple")
 	expected := outputAggregatetuple{
 		Key: aggregatetupleKey,
-		Algo: &KeyHashDressName{
+		Algo: &KeyChecksumAddressName{
 			Key:            aggregateAlgoKey,
-			Hash:           aggregateAlgoHash,
+			Checksum:       aggregateAlgoChecksum,
 			Name:           aggregateAlgoName,
 			StorageAddress: aggregateAlgoStorageAddress,
 		},
@@ -344,9 +344,9 @@ func TestTraintupleAggregate(t *testing.T) {
 	endTraintuple := outputAggregatetuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutModel = &KeyHashDress{
+	expected.OutModel = &KeyChecksumAddress{
 		Key:            modelKey,
-		Hash:           modelHash,
+		Checksum:       modelChecksum,
 		StorageAddress: modelAddress}
 	expected.Status = traintupleStatus[1]
 	assert.Exactly(t, expected, endTraintuple, "retreived Aggregatetuple does not correspond to what is expected")
@@ -578,7 +578,7 @@ func TestQueryAggregatetuple(t *testing.T) {
 	assert.Equal(t, traintupleKey, out.InModels[0].TraintupleKey)
 	assert.Equal(t, compositeTraintupleKey, out.InModels[1].TraintupleKey)
 	assert.Equal(t, aggregateAlgoName, out.Algo.Name)
-	assert.Equal(t, aggregateAlgoHash, out.Algo.Hash)
+	assert.Equal(t, aggregateAlgoChecksum, out.Algo.Checksum)
 	assert.Equal(t, aggregateAlgoStorageAddress, out.Algo.StorageAddress)
 	assert.Equal(t, StatusWaiting, out.Status)
 }

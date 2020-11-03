@@ -286,9 +286,9 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 		return
 	}
 
-	traintuple.OutModel = &KeyHashDress{
+	traintuple.OutModel = &KeyChecksumAddress{
 		Key:            inp.OutModel.Key,
-		Hash:           inp.OutModel.Hash,
+		Checksum:       inp.OutModel.Checksum,
 		StorageAddress: inp.OutModel.StorageAddress}
 	traintuple.Log += inp.Log
 

@@ -337,9 +337,9 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 		return
 	}
 
-	aggregatetuple.OutModel = &KeyHashDress{
+	aggregatetuple.OutModel = &KeyChecksumAddress{
 		Key:            inp.OutModel.Key,
-		Hash:           inp.OutModel.Hash,
+		Checksum:       inp.OutModel.Checksum,
 		StorageAddress: inp.OutModel.StorageAddress}
 	aggregatetuple.Log += inp.Log
 

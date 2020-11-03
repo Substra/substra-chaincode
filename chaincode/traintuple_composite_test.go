@@ -263,7 +263,7 @@ func TestTraintupleComposite(t *testing.T) {
 	}
 	args := inpTraintuple.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with invalid key, status %d and message %s", resp.Status, resp.Message)
 
 	// Add traintuple with unexisting algo
 	inpTraintuple = inputCompositeTraintuple{}
@@ -288,9 +288,9 @@ func TestTraintupleComposite(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried composite traintuple")
 	expected := outputCompositeTraintuple{
 		Key: compositeTraintupleKey,
-		Algo: &KeyHashDressName{
+		Algo: &KeyChecksumAddressName{
 			Key:            compositeAlgoKey,
-			Hash:           compositeAlgoHash,
+			Checksum:       compositeAlgoChecksum,
 			Name:           compositeAlgoName,
 			StorageAddress: compositeAlgoStorageAddress,
 		},
@@ -298,7 +298,7 @@ func TestTraintupleComposite(t *testing.T) {
 		Dataset: &outputTtDataset{
 			Key:            dataManagerKey,
 			DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
-			OpenerHash:     dataManagerOpenerHash,
+			OpenerChecksum: dataManagerOpenerChecksum,
 			Worker:         worker,
 			Metadata:       map[string]string{},
 		},
@@ -383,12 +383,12 @@ func TestTraintupleComposite(t *testing.T) {
 	endTraintuple := outputCompositeTraintuple{}
 	assert.NoError(t, json.Unmarshal(resp.Payload, &endTraintuple))
 	expected.Log = success.Log
-	expected.OutHeadModel.OutModel = &KeyHash{
-		Key:  headModelKey,
-		Hash: headModelHash}
-	expected.OutTrunkModel.OutModel = &KeyHashDress{
+	expected.OutHeadModel.OutModel = &KeyChecksum{
+		Key:      headModelKey,
+		Checksum: headModelChecksum}
+	expected.OutTrunkModel.OutModel = &KeyChecksumAddress{
 		Key:            trunkModelKey,
-		Hash:           trunkModelHash,
+		Checksum:       trunkModelChecksum,
 		StorageAddress: trunkModelAddress}
 	expected.Status = traintupleStatus[1]
 	assert.Exactly(t, expected, endTraintuple, "retreived CompositeTraintuple does not correspond to what is expected")
@@ -544,7 +544,6 @@ func TestCreateCompositeTraintupleInModels(t *testing.T) {
 			if tt.withInHeadModel {
 				// create head traintuple
 				inpHeadTraintuple := inputCompositeTraintuple{}
-				// make the traintuple unique so that it has a unique hash
 				inpHeadTraintuple.DataSampleKeys = []string{trainDataSampleKey1}
 				args = inpHeadTraintuple.createDefault()
 				resp = mockStub.MockInvoke("42", args)
@@ -558,7 +557,6 @@ func TestCreateCompositeTraintupleInModels(t *testing.T) {
 			if tt.withInTrunkModel {
 				// create trunk traintuple
 				inpTrunkTraintuple := inputCompositeTraintuple{}
-				// make the traintuple unique so that it has a unique hash
 				inpTrunkTraintuple.DataSampleKeys = []string{trainDataSampleKey2}
 				args = inpTrunkTraintuple.createDefault()
 				resp = mockStub.MockInvoke("42", args)
@@ -787,12 +785,12 @@ func TestCorrectParent(t *testing.T) {
 	// fetch aggregate child, and check its in-model is the parent's trunk out-model
 	child1, _ := queryAggregatetuple(db, assetToArgs(inputKey{Key: child1Key}))
 	assert.Equal(t, trunkModelKey, child1.InModels[0].Key)
-	assert.Equal(t, trunkModelHash, child1.InModels[0].Hash)
+	assert.Equal(t, trunkModelChecksum, child1.InModels[0].Checksum)
 
 	// fetch composite child, and check its head in-model is the parent's head out-model
 	child2, _ := queryCompositeTraintuple(db, assetToArgs(inputKey{Key: child2Key}))
 	assert.Equal(t, headModelKey, child2.InHeadModel.Key)
-	assert.Equal(t, headModelHash, child2.InHeadModel.Hash)
+	assert.Equal(t, headModelChecksum, child2.InHeadModel.Checksum)
 }
 
 func TestCreateTesttuplePermissions(t *testing.T) {
@@ -831,7 +829,7 @@ func TestHeadModelDifferentWorker(t *testing.T) {
 	// new dataset on new worker
 	inpDM := inputDataManager{Key: strings.Replace(dataManagerKey, "1", "2", 1)}
 	inpDM.createDefault()
-	inpDM.OpenerHash = GetRandomHash()
+	inpDM.OpenerChecksum = GetRandomHash()
 	outDM, err := registerDataManager(db, assetToArgs(inpDM))
 	assert.NoError(t, err)
 

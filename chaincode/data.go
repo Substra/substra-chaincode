@@ -27,14 +27,14 @@ func (dataManager *DataManager) Set(db *LedgerDB, inp inputDataManager) (string,
 	dataManager.ObjectiveKey = inp.ObjectiveKey
 	dataManager.AssetType = DataManagerType
 	dataManager.Name = inp.Name
-	dataManager.Opener = &HashDress{
-		Hash:           inp.OpenerHash,
+	dataManager.Opener = &ChecksumAddress{
+		Checksum:       inp.OpenerChecksum,
 		StorageAddress: inp.OpenerStorageAddress,
 	}
 	dataManager.Type = inp.Type
 	dataManager.Metadata = inp.Metadata
-	dataManager.Description = &HashDress{
-		Hash:           inp.DescriptionHash,
+	dataManager.Description = &ChecksumAddress{
+		Checksum:       inp.DescriptionChecksum,
 		StorageAddress: inp.DescriptionStorageAddress,
 	}
 	owner, err := GetTxCreator(db.cc)

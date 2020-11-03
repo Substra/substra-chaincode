@@ -118,28 +118,28 @@ func TestQueryTesttuple(t *testing.T) {
 		traintupleKey              string
 		expectedTypeString         string
 		expectedAlgoName           string
-		expectedAlgoHash           string
+		expectedAlgoChecksum       string
 		expectedAlgoStorageAddress string
 	}{
 		{
 			traintupleKey:              traintupleKey,
 			expectedTypeString:         "traintuple",
 			expectedAlgoName:           algoName,
-			expectedAlgoHash:           algoHash,
+			expectedAlgoChecksum:       algoChecksum,
 			expectedAlgoStorageAddress: algoStorageAddress,
 		},
 		{
 			traintupleKey:              compositeTraintupleKey,
 			expectedTypeString:         "composite_traintuple",
 			expectedAlgoName:           compositeAlgoName,
-			expectedAlgoHash:           compositeAlgoHash,
+			expectedAlgoChecksum:       compositeAlgoChecksum,
 			expectedAlgoStorageAddress: compositeAlgoStorageAddress,
 		},
 		{
 			traintupleKey:              aggregatetupleKey,
 			expectedTypeString:         "aggregatetuple",
 			expectedAlgoName:           aggregateAlgoName,
-			expectedAlgoHash:           aggregateAlgoHash,
+			expectedAlgoChecksum:       aggregateAlgoChecksum,
 			expectedAlgoStorageAddress: aggregateAlgoStorageAddress,
 		},
 	}
@@ -175,11 +175,11 @@ func TestQueryTesttuple(t *testing.T) {
 			assert.Equal(t, inpTesttuple.TraintupleKey, testtuple.TraintupleKey)
 			assert.Equal(t, tt.expectedTypeString, testtuple.TraintupleType)
 			assert.Equal(t, tt.expectedAlgoName, testtuple.Algo.Name)
-			assert.Equal(t, tt.expectedAlgoHash, testtuple.Algo.Hash)
+			assert.Equal(t, tt.expectedAlgoChecksum, testtuple.Algo.Checksum)
 			assert.Equal(t, tt.expectedAlgoStorageAddress, testtuple.Algo.StorageAddress)
 			assert.Equal(t, StatusWaiting, testtuple.Status)
 			assert.Equal(t, objectiveKey, testtuple.Objective.Key)
-			assert.Equal(t, objectiveMetricsHash, testtuple.Objective.Metrics.Hash)
+			assert.Equal(t, objectiveMetricsChecksum, testtuple.Objective.Metrics.Checksum)
 			assert.Equal(t, objectiveMetricsStorageAddress, testtuple.Objective.Metrics.StorageAddress)
 			assert.Equal(t, "", testtuple.Log)
 			assert.Equal(t, "", testtuple.Tag)
@@ -187,7 +187,7 @@ func TestQueryTesttuple(t *testing.T) {
 			assert.Equal(t, dataManagerKey, testtuple.Dataset.Key)
 			assert.Equal(t, dataSampleKeys, testtuple.Dataset.DataSampleKeys)
 			assert.Equal(t, dataManagerKey, testtuple.Dataset.Key)
-			assert.Equal(t, dataManagerOpenerHash, testtuple.Dataset.OpenerHash)
+			assert.Equal(t, dataManagerOpenerChecksum, testtuple.Dataset.OpenerChecksum)
 			assert.False(t, testtuple.Certified)
 		})
 	}

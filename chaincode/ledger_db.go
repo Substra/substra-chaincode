@@ -370,10 +370,10 @@ func (db *LedgerDB) GetComputePlan(key string) (ComputePlan, error) {
 	return computePlan, nil
 }
 
-// GetOutModelKeyHashDress retrieves an out-Model from a tuple key.
+// GetOutModelKeyChecksumAddress retrieves an out-Model from a tuple key.
 // In case of CompositeTraintuple it return its trunk model
 // Return an error if the tupleKey was not found.
-func (db *LedgerDB) GetOutModelKeyHashDress(tupleKey string, allowedAssetTypes []AssetType) (*KeyHashDress, error) {
+func (db *LedgerDB) GetOutModelKeyChecksumAddress(tupleKey string, allowedAssetTypes []AssetType) (*KeyChecksumAddress, error) {
 	for _, assetType := range allowedAssetTypes {
 		switch assetType {
 		case CompositeTraintupleType:
@@ -393,19 +393,19 @@ func (db *LedgerDB) GetOutModelKeyHashDress(tupleKey string, allowedAssetTypes [
 				return tuple.OutModel, nil
 			}
 		default:
-			return nil, errors.Internal("GetOutModelKeyHashDress: Unsupported asset type %s", assetType)
+			return nil, errors.Internal("GetOutModelKeyChecksumAddress: Unsupported asset type %s", assetType)
 		}
 	}
 
 	return nil, errors.NotFound(
-		"GetOutModelKeyHashDress: Could not find tuple with key \"%s\". Allowed types: %v.",
+		"GetOutModelKeyChecksumAddress: Could not find tuple with key \"%s\". Allowed types: %v.",
 		tupleKey,
 		allowedAssetTypes)
 }
 
-// GetOutHeadModelKeyHash retrieves an out-Head-Model from a composite traintuple key.
+// GetOutHeadModelKeyChecksum retrieves an out-Head-Model from a composite traintuple key.
 // Return an error if the compositeTraintupleKey was not found.
-func (db *LedgerDB) GetOutHeadModelKeyHash(compositeTraintupleKey string) (*KeyHash, error) {
+func (db *LedgerDB) GetOutHeadModelKeyChecksum(compositeTraintupleKey string) (*KeyChecksum, error) {
 	tuple, err := db.GetCompositeTraintuple(compositeTraintupleKey)
 	if err != nil {
 		return nil, err

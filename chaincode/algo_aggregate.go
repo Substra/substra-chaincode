@@ -35,10 +35,10 @@ func (algo *AggregateAlgo) Set(db *LedgerDB, inp inputAggregateAlgo) (err error)
 	algo.Key = inp.Key
 	algo.AssetType = AggregateAlgoType
 	algo.Name = inp.Name
-	algo.Hash = inp.Hash
+	algo.Checksum = inp.Checksum
 	algo.StorageAddress = inp.StorageAddress
-	algo.Description = &HashDress{
-		Hash:           inp.DescriptionHash,
+	algo.Description = &ChecksumAddress{
+		Checksum:       inp.DescriptionChecksum,
 		StorageAddress: inp.DescriptionStorageAddress,
 	}
 	algo.Owner = owner

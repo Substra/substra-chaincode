@@ -16,9 +16,6 @@ package main
 
 import (
 	"chaincode/errors"
-	"crypto/sha256"
-	"encoding/hex"
-	"sort"
 )
 
 // List of the possible tuple's status
@@ -230,17 +227,6 @@ func checkUpdateTuple(db *LedgerDB, worker string, oldStatus string, newStatus s
 		return errors.BadRequest("cannot change status from %s to %s", oldStatus, newStatus)
 	}
 	return nil
-}
-
-// HashForKey to generate key for an asset
-func HashForKey(objectType string, hashElements ...string) string {
-	toHash := objectType
-	sort.Strings(hashElements)
-	for _, element := range hashElements {
-		toHash += "," + element
-	}
-	sum := sha256.Sum256([]byte(toHash))
-	return hex.EncodeToString(sum[:])
 }
 
 func determineStatusFromInModels(statuses []string) string {
