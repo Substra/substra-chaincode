@@ -234,17 +234,17 @@ func main() {
 	logger.SetLevel(logrus.DebugLevel)
 	logger.Infof("Load TLS certificates")
 
-	key, err := ioutil.ReadFile("/var/hyperledger/tls/client/pair/tls.key")
+	key, err := ioutil.ReadFile(os.Getenv("TLS_KEY_FILE"))
 	if err != nil {
 		logger.Errorf("Cannot read key file: %s", err)
 	}
 
-	cert, err := ioutil.ReadFile("/var/hyperledger/tls/client/pair/tls.crt")
+	cert, err := ioutil.ReadFile(os.Getenv("TLS_CERT_FILE"))
 	if err != nil {
 		logger.Errorf("Cannot read cert file: %s", err)
 	}
 
-	ca, err := ioutil.ReadFile("/var/hyperledger/tls/client/cert/cacert.pem")
+	ca, err := ioutil.ReadFile(os.Getenv("TLS_ROOTCERT_FILE"))
 	if err != nil {
 		logger.Errorf("Cannot read ca cert file: %s", err)
 	}
