@@ -1612,6 +1612,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryObjectiveLeaderboard","{\"objec
   {
    "algo": {
     "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
     "name": "hog + svm",
     "storage_address": "https://toto/algo/222/algo"
    },

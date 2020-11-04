@@ -395,12 +395,12 @@ func (out outputBoardTuples) Less(i, j int) bool {
 }
 
 type outputBoardTuple struct {
-	Algo          *ChecksumAddressName `json:"algo"`
-	Creator       string               `json:"creator"`
-	Key           string               `json:"key"`
-	TraintupleKey string               `json:"traintuple_key"`
-	Perf          float32              `json:"perf"`
-	Tag           string               `json:"tag"`
+	Algo          *KeyChecksumAddressName `json:"algo"`
+	Creator       string                  `json:"creator"`
+	Key           string                  `json:"key"`
+	TraintupleKey string                  `json:"traintuple_key"`
+	Perf          float32                 `json:"perf"`
+	Tag           string                  `json:"tag"`
 }
 
 func (out *outputBoardTuple) Fill(db *LedgerDB, in Testtuple, testtupleKey string) error {
@@ -410,7 +410,8 @@ func (out *outputBoardTuple) Fill(db *LedgerDB, in Testtuple, testtupleKey strin
 	if err != nil {
 		return err
 	}
-	out.Algo = &ChecksumAddressName{
+	out.Algo = &KeyChecksumAddressName{
+		Key:            algo.Key,
 		Name:           algo.Name,
 		Checksum:       algo.Checksum,
 		StorageAddress: algo.StorageAddress,
