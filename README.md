@@ -21,10 +21,6 @@ cd chaincode
 go test
 ```
 
-## Devmode
-
-See [chaincode-docker-devmode](./chaincode-docker-devmode/README.rst)
-
 ## Documentation
 
 ### Implemented smart contracts
