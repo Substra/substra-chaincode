@@ -61,6 +61,10 @@ func TestLeaderBoard(t *testing.T) {
 	require.Len(t, leaderboard.Testtuples, 1)
 	assert.Equal(t, keyMap.Key, leaderboard.Testtuples[0].Key)
 	assert.Equal(t, traintupleKey, leaderboard.Testtuples[0].TraintupleKey)
+	assert.Equal(t, algoKey, leaderboard.Testtuples[0].Algo.Key)
+	assert.Equal(t, algoChecksum, leaderboard.Testtuples[0].Algo.Checksum)
+	assert.Equal(t, algoName, leaderboard.Testtuples[0].Algo.Name)
+	assert.Equal(t, algoStorageAddress, leaderboard.Testtuples[0].Algo.StorageAddress)
 }
 func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
@@ -112,11 +116,11 @@ func TestObjective(t *testing.T) {
 
 	// Add objective with invalid field
 	inpObjective := inputObjective{
-		DescriptionHash: "aaa",
+		DescriptionChecksum: "aaa",
 	}
 	args := inpObjective.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with invalid hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with invalid checksum, status %d and message %s", resp.Status, resp.Message)
 
 	// Add objective with unexisting test dataSample
 	inpObjective = inputObjective{}
@@ -138,7 +142,7 @@ func TestObjective(t *testing.T) {
 		objectiveKey,
 		"when adding objective: unexpected returned objective key - %s / %s",
 		objectiveKey,
-		inpObjective.DescriptionHash)
+		inpObjective.DescriptionChecksum)
 
 	// Query objective from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryObjective"), keyToJSON(objectiveKey)}
@@ -156,15 +160,15 @@ func TestObjective(t *testing.T) {
 			Metadata:       map[string]string{},
 		},
 		Name: inpObjective.Name,
-		Description: &HashDress{
+		Description: &ChecksumAddress{
 			StorageAddress: inpObjective.DescriptionStorageAddress,
-			Hash:           objectiveDescriptionHash,
+			Checksum:       objectiveDescriptionChecksum,
 		},
 		Permissions: outputPermissions{
 			Process: Permission{Public: true, AuthorizedIDs: []string{}},
 		},
-		Metrics: &HashDressName{
-			Hash:           inpObjective.MetricsHash,
+		Metrics: &ChecksumAddressName{
+			Checksum:       inpObjective.MetricsChecksum,
 			Name:           inpObjective.MetricsName,
 			StorageAddress: inpObjective.MetricsStorageAddress,
 		},

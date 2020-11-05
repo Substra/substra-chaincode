@@ -249,7 +249,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Create a ComputePlan ------------")
 	inputCP := inputNewComputePlan{inputComputePlan: inputComputePlan{
-		ComputePlanID: computePlanID,
+		Key: computePlanKey,
 	}}
 	inputCP.Tag = tag
 	inputCP.inputComputePlan = defaultComputePlan
@@ -259,7 +259,7 @@ func TestPipeline(t *testing.T) {
 
 	fmt.Fprintln(&out, "#### ------------ Update a ComputePlan ------------")
 	upCP := inputComputePlan{}
-	upCP.ComputePlanID = outCp.ComputePlanID
+	upCP.Key = outCp.Key
 	upCP.Traintuples = []inputComputePlanTraintuple{
 		{
 			Key:            computePlanTraintupleKey3,
@@ -289,11 +289,11 @@ func TestPipeline(t *testing.T) {
 	callAssertAndPrint("invoke", "queryObjectiveLeaderboard", inpLeaderboard)
 
 	fmt.Fprintln(&out, "#### ------------ Query Compute Plan(s) ------------")
-	callAssertAndPrint("invoke", "queryComputePlan", inputKey{outCp.ComputePlanID})
+	callAssertAndPrint("invoke", "queryComputePlan", inputKey{outCp.Key})
 	callAssertAndPrint("invoke", "queryComputePlans", nil)
 
 	fmt.Fprintln(&out, "#### ------------ Cancel a ComputePlan ------------")
-	callAssertAndPrint("invoke", "cancelComputePlan", inputKey{outCp.ComputePlanID})
+	callAssertAndPrint("invoke", "cancelComputePlan", inputKey{outCp.Key})
 
 	// Use the output to check the EXAMPLES.md file and if asked update it
 	doc := out.String()

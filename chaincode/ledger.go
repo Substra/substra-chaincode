@@ -45,15 +45,15 @@ type StatusUpdater interface {
 
 // Objective is the representation of one of the element type stored in the ledger
 type Objective struct {
-	Key         string            `json:"key"`
-	Name        string            `json:"name"`
-	AssetType   AssetType         `json:"asset_type"`
-	Description *HashDress        `json:"description"`
-	Metrics     *HashDressName    `json:"metrics"`
-	Owner       string            `json:"owner"`
-	TestDataset *Dataset          `json:"test_dataset"`
-	Permissions Permissions       `json:"permissions"`
-	Metadata    map[string]string `json:"metadata"`
+	Key         string               `json:"key"`
+	Name        string               `json:"name"`
+	AssetType   AssetType            `json:"asset_type"`
+	Description *ChecksumAddress     `json:"description"`
+	Metrics     *ChecksumAddressName `json:"metrics"`
+	Owner       string               `json:"owner"`
+	TestDataset *Dataset             `json:"test_dataset"`
+	Permissions Permissions          `json:"permissions"`
+	Metadata    map[string]string    `json:"metadata"`
 }
 
 // DataManager is the representation of one of the elements type stored in the ledger
@@ -61,9 +61,9 @@ type DataManager struct {
 	Key          string            `json:"key"`
 	Name         string            `json:"name"`
 	AssetType    AssetType         `json:"asset_type"`
-	Opener       *HashDress        `json:"opener"`
+	Opener       *ChecksumAddress  `json:"opener"`
 	Type         string            `json:"type"`
-	Description  *HashDress        `json:"description"`
+	Description  *ChecksumAddress  `json:"description"`
 	Owner        string            `json:"owner"`
 	ObjectiveKey string            `json:"objective_key"`
 	Permissions  Permissions       `json:"permissions"`
@@ -83,9 +83,9 @@ type Algo struct {
 	Key            string            `json:"key"`
 	Name           string            `json:"name"`
 	AssetType      AssetType         `json:"asset_type"`
-	Hash           string            `json:"hash"`
+	Checksum       string            `json:"checksum"`
 	StorageAddress string            `json:"storage_address"`
-	Description    *HashDress        `json:"description"`
+	Description    *ChecksumAddress  `json:"description"`
 	Owner          string            `json:"owner"`
 	Permissions    Permissions       `json:"permissions"`
 	Metadata       map[string]string `json:"metadata"`
@@ -105,101 +105,101 @@ type AggregateAlgo struct {
 // that are common to Traintuple, CompositeTraintuple and
 // AggregateTuple
 type GenericTuple struct {
-	AssetType     AssetType         `json:"asset_type"`
-	AlgoKey       string            `json:"algo_key"`
-	ComputePlanID string            `json:"compute_plan_id"`
-	Creator       string            `json:"creator"`
-	Log           string            `json:"log"`
-	Metadata      map[string]string `json:"metadata"`
-	Rank          int               `json:"rank"`
-	Status        string            `json:"status"`
-	Tag           string            `json:"tag"`
+	AssetType      AssetType         `json:"asset_type"`
+	AlgoKey        string            `json:"algo_key"`
+	ComputePlanKey string            `json:"compute_plan_key"`
+	Creator        string            `json:"creator"`
+	Log            string            `json:"log"`
+	Metadata       map[string]string `json:"metadata"`
+	Rank           int               `json:"rank"`
+	Status         string            `json:"status"`
+	Tag            string            `json:"tag"`
 }
 
 // Traintuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Traintuple struct {
-	Key           string            `json:"key"`
-	AssetType     AssetType         `json:"asset_type"`
-	AlgoKey       string            `json:"algo_key"`
-	ComputePlanID string            `json:"compute_plan_id"`
-	Creator       string            `json:"creator"`
-	Log           string            `json:"log"`
-	Metadata      map[string]string `json:"metadata"`
-	Rank          int               `json:"rank"`
-	Status        string            `json:"status"`
-	Tag           string            `json:"tag"`
-	Dataset       *Dataset          `json:"dataset"`
-	InModelKeys   []string          `json:"in_models"`
-	OutModel      *KeyHashDress     `json:"out_model"`
-	Permissions   Permissions       `json:"permissions"`
+	Key            string              `json:"key"`
+	AssetType      AssetType           `json:"asset_type"`
+	AlgoKey        string              `json:"algo_key"`
+	ComputePlanKey string              `json:"compute_plan_key"`
+	Creator        string              `json:"creator"`
+	Log            string              `json:"log"`
+	Metadata       map[string]string   `json:"metadata"`
+	Rank           int                 `json:"rank"`
+	Status         string              `json:"status"`
+	Tag            string              `json:"tag"`
+	Dataset        *Dataset            `json:"dataset"`
+	InModelKeys    []string            `json:"in_models"`
+	OutModel       *KeyChecksumAddress `json:"out_model"`
+	Permissions    Permissions         `json:"permissions"`
 }
 
 // CompositeTraintuple is like a traintuple, but for composite model composition
 type CompositeTraintuple struct {
-	Key           string                          `json:"key"`
-	AssetType     AssetType                       `json:"asset_type"`
-	AlgoKey       string                          `json:"algo_key"`
-	ComputePlanID string                          `json:"compute_plan_id"`
-	Creator       string                          `json:"creator"`
-	Log           string                          `json:"log"`
-	Metadata      map[string]string               `json:"metadata"`
-	Rank          int                             `json:"rank"`
-	Status        string                          `json:"status"`
-	Tag           string                          `json:"tag"`
-	Dataset       *Dataset                        `json:"dataset"`
-	InHeadModel   string                          `json:"in_head_model"`
-	InTrunkModel  string                          `json:"in_trunk_model"`
-	OutHeadModel  CompositeTraintupleOutHeadModel `json:"out_head_model"`
-	OutTrunkModel CompositeTraintupleOutModel     `json:"out_trunk_model"`
+	Key            string                          `json:"key"`
+	AssetType      AssetType                       `json:"asset_type"`
+	AlgoKey        string                          `json:"algo_key"`
+	ComputePlanKey string                          `json:"compute_plan_key"`
+	Creator        string                          `json:"creator"`
+	Log            string                          `json:"log"`
+	Metadata       map[string]string               `json:"metadata"`
+	Rank           int                             `json:"rank"`
+	Status         string                          `json:"status"`
+	Tag            string                          `json:"tag"`
+	Dataset        *Dataset                        `json:"dataset"`
+	InHeadModel    string                          `json:"in_head_model"`
+	InTrunkModel   string                          `json:"in_trunk_model"`
+	OutHeadModel   CompositeTraintupleOutHeadModel `json:"out_head_model"`
+	OutTrunkModel  CompositeTraintupleOutModel     `json:"out_trunk_model"`
 }
 
 // Aggregatetuple is like a traintuple, but for aggregate model composition
 type Aggregatetuple struct {
-	Key           string            `json:"key"`
-	AssetType     AssetType         `json:"asset_type"`
-	AlgoKey       string            `json:"algo_key"`
-	ComputePlanID string            `json:"compute_plan_id"`
-	Creator       string            `json:"creator"`
-	Log           string            `json:"log"`
-	Metadata      map[string]string `json:"metadata"`
-	Rank          int               `json:"rank"`
-	Status        string            `json:"status"`
-	Tag           string            `json:"tag"`
-	InModelKeys   []string          `json:"in_models"`
-	OutModel      *KeyHashDress     `json:"out_model"`
-	Permissions   Permissions       `json:"permissions"` // TODO (aggregate): what do permissions mean here?
-	Worker        string            `json:"worker"`
+	Key            string              `json:"key"`
+	AssetType      AssetType           `json:"asset_type"`
+	AlgoKey        string              `json:"algo_key"`
+	ComputePlanKey string              `json:"compute_plan_key"`
+	Creator        string              `json:"creator"`
+	Log            string              `json:"log"`
+	Metadata       map[string]string   `json:"metadata"`
+	Rank           int                 `json:"rank"`
+	Status         string              `json:"status"`
+	Tag            string              `json:"tag"`
+	InModelKeys    []string            `json:"in_models"`
+	OutModel       *KeyChecksumAddress `json:"out_model"`
+	Permissions    Permissions         `json:"permissions"` // TODO (aggregate): what do permissions mean here?
+	Worker         string              `json:"worker"`
 }
 
 // CompositeTraintupleOutModel is the out-model of a CompositeTraintuple
 type CompositeTraintupleOutModel struct {
-	OutModel    *KeyHashDress `json:"out_model"`
-	Permissions Permissions   `json:"permissions"`
+	OutModel    *KeyChecksumAddress `json:"out_model"`
+	Permissions Permissions         `json:"permissions"`
 }
 
 // CompositeTraintupleOutHeadModel is the out-model of a CompositeTraintuple
 type CompositeTraintupleOutHeadModel struct {
-	OutModel    *KeyHash    `json:"out_model"`
-	Permissions Permissions `json:"permissions"`
+	OutModel    *KeyChecksum `json:"out_model"`
+	Permissions Permissions  `json:"permissions"`
 }
 
 // Testtuple is the representation of one the element type stored in the ledger. It describes a training task occuring on the platform
 type Testtuple struct {
-	Key           string            `json:"key"`
-	AlgoKey       string            `json:"algo"`
-	AssetType     AssetType         `json:"asset_type"`
-	Certified     bool              `json:"certified"`
-	ComputePlanID string            `json:"compute_plan_id"`
-	Creator       string            `json:"creator"`
-	Dataset       *TtDataset        `json:"dataset"`
-	Log           string            `json:"log"`
-	Metadata      map[string]string `json:"metadata"`
-	TraintupleKey string            `json:"traintuple_key"`
-	ObjectiveKey  string            `json:"objective"`
-	Permissions   Permissions       `json:"permissions"`
-	Rank          int               `json:"rank"`
-	Status        string            `json:"status"`
-	Tag           string            `json:"tag"`
+	Key            string            `json:"key"`
+	AlgoKey        string            `json:"algo"`
+	AssetType      AssetType         `json:"asset_type"`
+	Certified      bool              `json:"certified"`
+	ComputePlanKey string            `json:"compute_plan_key"`
+	Creator        string            `json:"creator"`
+	Dataset        *TtDataset        `json:"dataset"`
+	Log            string            `json:"log"`
+	Metadata       map[string]string `json:"metadata"`
+	TraintupleKey  string            `json:"traintuple_key"`
+	ObjectiveKey   string            `json:"objective"`
+	Permissions    Permissions       `json:"permissions"`
+	Rank           int               `json:"rank"`
+	Status         string            `json:"status"`
+	Tag            string            `json:"tag"`
 }
 
 // ComputePlan is the ledger's representation of a compute plan.
@@ -237,45 +237,45 @@ type TrainTask struct {
 // Struct used in the representation of elements stored in the ledger
 // ---------------------------------------------------------------------------------
 
-// KeyHash ...
-type KeyHash struct {
-	Key  string `json:"key"`
-	Hash string `json:"hash"`
+// KeyChecksum ...
+type KeyChecksum struct {
+	Key      string `json:"key"`
+	Checksum string `json:"checksum"`
 }
 
-// HashDress stores a hash and a Storage Address
-type HashDress struct {
-	Hash           string `json:"hash"`
+// ChecksumAddress stores a checksum and a Storage Address
+type ChecksumAddress struct {
+	Checksum       string `json:"checksum"`
 	StorageAddress string `json:"storage_address"`
 }
 
-// KeyHashDress ...
-type KeyHashDress struct {
+// KeyChecksumAddress ...
+type KeyChecksumAddress struct {
 	Key            string `json:"key"`
-	Hash           string `json:"hash"`
+	Checksum       string `json:"checksum"`
 	StorageAddress string `json:"storage_address"`
 }
 
-// HashDressName stores a hash, storage address and a name
-type HashDressName struct {
-	Hash           string `json:"hash"`
+// ChecksumAddressName stores a checksum, a storage address, and a name
+type ChecksumAddressName struct {
+	Checksum       string `json:"checksum"`
 	StorageAddress string `json:"storage_address"`
 	Name           string `json:"name"`
 }
 
-// KeyHashDressName ...
-type KeyHashDressName struct {
+// KeyChecksumAddressName ...
+type KeyChecksumAddressName struct {
 	Key            string `json:"key"`
-	Hash           string `json:"hash"`
+	Checksum       string `json:"checksum"`
 	StorageAddress string `json:"storage_address"`
 	Name           string `json:"name"`
 }
 
-// Model stores the traintupleKey leading to the model, its hash and storage addressl
+// Model stores the traintupleKey leading to the model, its checksum and storage address
 type Model struct {
 	Key            string `json:"key"`
 	TraintupleKey  string `json:"traintuple_key"`
-	Hash           string `json:"hash"`
+	Checksum       string `json:"checksum"`
 	StorageAddress string `json:"storage_address"`
 }
 
@@ -295,15 +295,15 @@ type Dataset struct {
 type TtDataset struct {
 	Key            string   `json:"key"`
 	Worker         string   `json:"worker"`
-	DataSampleKeys []string `json:"keys"`
-	OpenerHash     string   `json:"opener_hash"`
+	DataSampleKeys []string `json:"data_sample_keys"`
+	OpenerChecksum string   `json:"opener_checksum"`
 	Perf           float32  `json:"perf"`
 }
 
 // TtObjective stores info about a objective in a Traintuple
 type TtObjective struct {
-	Key     string     `json:"key"`
-	Metrics *HashDress `json:"metrics"`
+	Key     string           `json:"key"`
+	Metrics *ChecksumAddress `json:"metrics"`
 }
 
 // Node stores informations about node registered into the network,

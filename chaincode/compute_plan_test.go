@@ -23,7 +23,7 @@ import (
 
 var (
 	defaultComputePlan = inputComputePlan{
-		ComputePlanID: computePlanID,
+		Key: computePlanKey,
 		Traintuples: []inputComputePlanTraintuple{
 			inputComputePlanTraintuple{
 				Key:            computePlanTraintupleKey1,
@@ -82,7 +82,7 @@ var (
 	//
 	//
 	modelCompositionComputePlan = inputComputePlan{
-		ComputePlanID: computePlanID,
+		Key: computePlanKey,
 		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
 			{
 				Key:            computePlanCompositeTraintupleKey1,
@@ -269,7 +269,7 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	IDs := []string{"compositeTraintuple1", "compositeTraintuple2", "aggregatetuple1", "aggregatetuple2"}
 
 	inCP := inputComputePlan{
-		ComputePlanID: computePlanID,
+		Key: computePlanKey,
 		CompositeTraintuples: []inputComputePlanCompositeTraintuple{
 			{
 				Key:            computePlanCompositeTraintupleKey1,
@@ -323,7 +323,7 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	require.Contains(t, outCP.AggregatetupleKeys, aggtuples[1].Key)
 
 	// Query the compute plan
-	cp, err := queryComputePlan(db, assetToArgs(inputKey{Key: outCP.ComputePlanID}))
+	cp, err := queryComputePlan(db, assetToArgs(inputKey{Key: outCP.Key}))
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
 	assert.NotNil(t, cp)
 	assert.Equal(t, 2, len(cp.CompositeTraintupleKeys))
@@ -372,18 +372,18 @@ func TestCreateComputePlan(t *testing.T) {
 	assert.Equal(t, inCP.Traintuples[0].AlgoKey, first.Algo.Key)
 	algo1, err := queryAlgo(db, assetToArgs(inputKey{Key: inCP.Traintuples[0].AlgoKey}))
 	assert.NoError(t, err)
-	assert.Equal(t, algo1.Content.Hash, first.Algo.Hash)
+	assert.Equal(t, algo1.Content.Checksum, first.Algo.Checksum)
 	assert.Equal(t, StatusTodo, first.Status)
 
 	// check second traintuple
 	assert.NotZero(t, second)
 	assert.EqualValues(t, first.Key, second.InModels[0].TraintupleKey)
-	assert.EqualValues(t, first.ComputePlanID, second.ComputePlanID)
+	assert.EqualValues(t, first.ComputePlanKey, second.ComputePlanKey)
 	assert.Len(t, second.InModels, 1)
 	assert.Equal(t, inCP.Traintuples[1].AlgoKey, second.Algo.Key)
 	algo2, err := queryAlgo(db, assetToArgs(inputKey{Key: inCP.Traintuples[1].AlgoKey}))
 	assert.NoError(t, err)
-	assert.Equal(t, algo2.Content.Hash, second.Algo.Hash)
+	assert.Equal(t, algo2.Content.Checksum, second.Algo.Checksum)
 	assert.Equal(t, StatusWaiting, second.Status)
 
 	// Check the testtuples
@@ -410,7 +410,7 @@ func TestQueryComputePlan(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 
-	cp, err := queryComputePlan(db, assetToArgs(inputKey{Key: outCP.ComputePlanID}))
+	cp, err := queryComputePlan(db, assetToArgs(inputKey{Key: outCP.Key}))
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
 	assert.NotNil(t, cp)
 	validateDefaultComputePlan(t, cp)
@@ -456,7 +456,7 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 	db := NewLedgerDB(mockStub)
 
 	inCP := inputComputePlan{
-		ComputePlanID: computePlanID,
+		Key: computePlanKey,
 		Traintuples: []inputComputePlanTraintuple{
 			inputComputePlanTraintuple{
 				Key:            computePlanTraintupleKey1,
@@ -482,7 +482,7 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 	assert.NotNil(t, outCP)
 	assert.Len(t, outCP.TesttupleKeys, 0)
 
-	cp, err := queryComputePlan(db, assetToArgs(inputKey{Key: outCP.ComputePlanID}))
+	cp, err := queryComputePlan(db, assetToArgs(inputKey{Key: outCP.Key}))
 	assert.NoError(t, err, "calling queryComputePlan should succeed")
 	assert.NotNil(t, cp)
 	assert.Len(t, outCP.TesttupleKeys, 0)
@@ -519,10 +519,10 @@ func TestCancelComputePlan(t *testing.T) {
 	assert.NotNil(t, db.event)
 	assert.Len(t, db.event.CompositeTraintuples, 2)
 
-	_, err = cancelComputePlan(db, assetToArgs(inputKey{Key: out.ComputePlanID}))
+	_, err = cancelComputePlan(db, assetToArgs(inputKey{Key: out.Key}))
 	assert.NoError(t, err)
 
-	computePlan, err := getOutComputePlan(db, out.ComputePlanID)
+	computePlan, err := getOutComputePlan(db, out.Key)
 	assert.Equal(t, StatusCanceled, computePlan.Status)
 
 	tuples, err := queryCompositeTraintuples(db, []string{})
@@ -563,10 +563,10 @@ func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
 	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[1]}))
 	logFailCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[1]}))
 
-	_, err = cancelComputePlan(db, assetToArgs(inputKey{Key: out.ComputePlanID}))
+	_, err = cancelComputePlan(db, assetToArgs(inputKey{Key: out.Key}))
 	assert.NoError(t, err)
 
-	computePlan, err := getOutComputePlan(db, out.ComputePlanID)
+	computePlan, err := getOutComputePlan(db, out.Key)
 	assert.Equal(t, StatusCanceled, computePlan.Status)
 
 	tuples, err := queryCompositeTraintuples(db, []string{})
@@ -594,7 +594,7 @@ func TestLogSuccessAfterCancel(t *testing.T) {
 	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[0]}))
 	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[1]}))
 
-	_, err = cancelComputePlan(db, assetToArgs(inputKey{Key: out.ComputePlanID}))
+	_, err = cancelComputePlan(db, assetToArgs(inputKey{Key: out.Key}))
 	assert.NoError(t, err)
 
 	inp := inputLogSuccessCompositeTrain{}
@@ -603,7 +603,7 @@ func TestLogSuccessAfterCancel(t *testing.T) {
 	_, err = logSuccessCompositeTrain(db, assetToArgs(inp))
 	assert.NoError(t, err)
 
-	computePlan, err := getOutComputePlan(db, out.ComputePlanID)
+	computePlan, err := getOutComputePlan(db, out.Key)
 	assert.Equal(t, StatusCanceled, computePlan.Status)
 
 	expected := []string{StatusDoing, StatusDone, StatusAborted, StatusAborted}
@@ -622,7 +622,7 @@ func TestCreateTagedEmptyComputePlan(t *testing.T) {
 
 	inp := inputNewComputePlan{
 		inputComputePlan: inputComputePlan{
-			ComputePlanID: computePlanID,
+			Key: computePlanKey,
 		},
 		Tag: tag}
 	out, err := createComputePlan(db, assetToArgs(inp))
@@ -639,16 +639,16 @@ func TestComputePlanMetrics(t *testing.T) {
 
 	out, err := createComputePlanInternal(db, defaultComputePlan, tag, map[string]string{}, false)
 	assert.NoError(t, err)
-	checkComputePlanMetrics(t, db, out.ComputePlanID, 0, 3)
+	checkComputePlanMetrics(t, db, out.Key, 0, 3)
 
 	traintupleToDone(t, db, out.TraintupleKeys[0])
-	checkComputePlanMetrics(t, db, out.ComputePlanID, 1, 3)
+	checkComputePlanMetrics(t, db, out.Key, 1, 3)
 
 	traintupleToDone(t, db, out.TraintupleKeys[1])
-	checkComputePlanMetrics(t, db, out.ComputePlanID, 2, 3)
+	checkComputePlanMetrics(t, db, out.Key, 2, 3)
 
 	testtupleToDone(t, db, out.TesttupleKeys[0])
-	checkComputePlanMetrics(t, db, out.ComputePlanID, 3, 3)
+	checkComputePlanMetrics(t, db, out.Key, 3, 3)
 }
 
 func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
@@ -658,7 +658,7 @@ func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
 
 	success := inputLogSuccessTrain{}
 	success.Key = key
-	success.OutModel.Hash = GetRandomHash()
+	success.OutModel.Checksum = GetRandomHash()
 	success.fillDefaults()
 	_, err = logSuccessTrain(db, assetToArgs(success))
 	assert.NoError(t, err)
@@ -675,8 +675,8 @@ func testtupleToDone(t *testing.T, db *LedgerDB, key string) {
 	assert.NoError(t, err)
 }
 
-func checkComputePlanMetrics(t *testing.T, db *LedgerDB, cpID string, doneCount, tupleCount int) {
-	out, err := getOutComputePlan(db, cpID)
+func checkComputePlanMetrics(t *testing.T, db *LedgerDB, cpKey string, doneCount, tupleCount int) {
+	out, err := getOutComputePlan(db, cpKey)
 	assert.NoError(t, err)
 	assert.Equal(t, doneCount, out.DoneCount)
 	assert.Equal(t, tupleCount, out.TupleCount)
@@ -689,12 +689,12 @@ func TestUpdateComputePlan(t *testing.T) {
 	registerItem(t, *mockStub, "aggregateAlgo")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, inputComputePlan{ComputePlanID: computePlanID}, tag, map[string]string{}, false)
+	out, err := createComputePlanInternal(db, inputComputePlan{Key: computePlanKey}, tag, map[string]string{}, false)
 	assert.NoError(t, err)
 	assert.Equal(t, tag, out.Tag)
 
 	inp := defaultComputePlan
-	inp.ComputePlanID = out.ComputePlanID
+	inp.Key = out.Key
 	out, err = updateComputePlanInternal(db, inp)
 	assert.NoError(t, err)
 	validateDefaultComputePlan(t, out)
@@ -704,7 +704,7 @@ func TestUpdateComputePlan(t *testing.T) {
 
 	NewID := "Update"
 	up := inputComputePlan{
-		ComputePlanID: out.ComputePlanID,
+		Key: out.Key,
 		Traintuples: []inputComputePlanTraintuple{
 			{
 				Key:            computePlanTraintupleKey3,
@@ -778,12 +778,12 @@ func TestCreateSameComputePlanTwice(t *testing.T) {
 	registerItem(t, *mockStub, "aggregateAlgo")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, inputComputePlan{ComputePlanID: computePlanID}, tag, map[string]string{}, false)
+	out, err := createComputePlanInternal(db, inputComputePlan{Key: computePlanKey}, tag, map[string]string{}, false)
 	assert.NoError(t, err)
 	assert.Equal(t, tag, out.Tag)
 
 	up := inputComputePlan{
-		ComputePlanID: out.ComputePlanID,
+		Key: out.Key,
 		Traintuples: []inputComputePlanTraintuple{
 			{
 				Key:            computePlanTraintupleKey3,
@@ -824,12 +824,12 @@ func TestCreateSameComputePlanTwice(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Upload the same tuples inside another compute plan
-	out, err = createComputePlanInternal(db, inputComputePlan{ComputePlanID: computePlanID2}, tag, map[string]string{}, false)
+	out, err = createComputePlanInternal(db, inputComputePlan{Key: computePlanKey2}, tag, map[string]string{}, false)
 	assert.NoError(t, err)
 	assert.Equal(t, tag, out.Tag)
 
 	inp := defaultComputePlan
-	inp.ComputePlanID = out.ComputePlanID
+	inp.Key = out.Key
 	out, err = updateComputePlanInternal(db, inp)
 	assert.NoError(t, err)
 }

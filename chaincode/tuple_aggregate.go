@@ -40,7 +40,7 @@ func (tuple *Aggregatetuple) SetFromInput(db *LedgerDB, inp inputAggregatetuple)
 	tuple.Creator = creator
 	tuple.Metadata = inp.Metadata
 	tuple.Tag = inp.Tag
-	tuple.ComputePlanID = inp.ComputePlanID
+	tuple.ComputePlanKey = inp.ComputePlanKey
 	algo, err := db.GetAggregateAlgo(inp.AlgoKey)
 	if err != nil {
 		return errors.BadRequest(err, "could not retrieve algo with key %s", inp.AlgoKey)
@@ -117,15 +117,15 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 
 // AddToComputePlan set the aggregate tuple's parameters that determines if it's part of on ComputePlan and how.
 // It uses the inputAggregatetuple values as follow:
-//  - If neither ComputePlanID nor rank is set it returns immediately
-//  - If rank is 0 and ComputePlanID empty, it's start a new one using this traintuple key
-//  - If rank and ComputePlanID are set, it checks if there are coherent with previous ones and set it.
+//  - If neither ComputePlanKey nor rank is set it returns immediately
+//  - If rank is 0 and ComputePlanKey empty, it's start a new one using this traintuple key
+//  - If rank and ComputePlanKey are set, it checks if there are coherent with previous ones and set it.
 // Use checkComputePlanAvailability to ensure the compute plan exists and no other tuple is registered with the same worker/rank
 func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetuple, traintupleKey string, checkComputePlanAvailability bool) error {
-	// check ComputePlanID and Rank and set it when required
+	// check ComputePlanKey and Rank and set it when required
 	var err error
 	if inp.Rank == "" {
-		if inp.ComputePlanID != "" {
+		if inp.ComputePlanKey != "" {
 			return errors.BadRequest("invalid inputs, a ComputePlan should have a rank")
 		}
 		return nil
@@ -134,14 +134,14 @@ func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetu
 	if err != nil {
 		return err
 	}
-	tuple.ComputePlanID = inp.ComputePlanID
+	tuple.ComputePlanKey = inp.ComputePlanKey
 
-	computePlan, err := db.GetComputePlan(inp.ComputePlanID)
+	computePlan, err := db.GetComputePlan(inp.ComputePlanKey)
 	if err != nil {
 		return err
 	}
 	computePlan.AddTuple(AggregatetupleType, traintupleKey, tuple.Status)
-	err = computePlan.Save(db, tuple.ComputePlanID)
+	err = computePlan.Save(db, tuple.ComputePlanKey)
 	if err != nil {
 		return err
 	}
@@ -150,11 +150,11 @@ func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetu
 		return nil
 	}
 	var ttKeys []string
-	ttKeys, err = db.GetIndexKeys("computePlan~computeplanid~worker~rank~key", []string{"computePlan", inp.ComputePlanID, tuple.Worker, inp.Rank})
+	ttKeys, err = db.GetIndexKeys("computePlan~computeplankey~worker~rank~key", []string{"computePlan", inp.ComputePlanKey, tuple.Worker, inp.Rank})
 	if err != nil {
 		return err
 	} else if len(ttKeys) > 0 {
-		err = errors.BadRequest("ComputePlanID %s with worker %s rank %d already exists", inp.ComputePlanID, tuple.Worker, tuple.Rank)
+		err = errors.BadRequest("ComputePlanKey %s with worker %s rank %d already exists", inp.ComputePlanKey, tuple.Worker, tuple.Rank)
 		return err
 	}
 
@@ -182,11 +182,11 @@ func (tuple *Aggregatetuple) Save(db *LedgerDB, aggregatetupleKey string) error 
 			return err
 		}
 	}
-	if tuple.ComputePlanID != "" {
-		if err := db.CreateIndex("computePlan~computeplanid~worker~rank~key", []string{"computePlan", tuple.ComputePlanID, tuple.Worker, strconv.Itoa(tuple.Rank), aggregatetupleKey}); err != nil {
+	if tuple.ComputePlanKey != "" {
+		if err := db.CreateIndex("computePlan~computeplankey~worker~rank~key", []string{"computePlan", tuple.ComputePlanKey, tuple.Worker, strconv.Itoa(tuple.Rank), aggregatetupleKey}); err != nil {
 			return err
 		}
-		if err := db.CreateIndex("algo~computeplanid~key", []string{"algo", tuple.ComputePlanID, tuple.AlgoKey}); err != nil {
+		if err := db.CreateIndex("algo~computeplankey~key", []string{"algo", tuple.ComputePlanKey, tuple.AlgoKey}); err != nil {
 			return err
 		}
 	}
@@ -307,7 +307,7 @@ func logFailAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, err 
 
 	o.Fill(db, aggregatetuple)
 	// Do not propagate failure if we are in a compute plan
-	if aggregatetuple.ComputePlanID != "" {
+	if aggregatetuple.ComputePlanKey != "" {
 		return
 	}
 	// update depending tuples
@@ -337,9 +337,9 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 		return
 	}
 
-	aggregatetuple.OutModel = &KeyHashDress{
+	aggregatetuple.OutModel = &KeyChecksumAddress{
 		Key:            inp.OutModel.Key,
-		Hash:           inp.OutModel.Hash,
+		Checksum:       inp.OutModel.Checksum,
 		StorageAddress: inp.OutModel.StorageAddress}
 	aggregatetuple.Log += inp.Log
 
@@ -347,7 +347,7 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, aggregatetuple.ComputePlanID, aggregatetupleKey, aggregatetuple.OutModel.Key)
+	err = TryAddIntermediaryModel(db, aggregatetuple.ComputePlanKey, aggregatetupleKey, aggregatetuple.OutModel.Key)
 	if err != nil {
 		return
 	}
@@ -514,7 +514,7 @@ func (tuple *Aggregatetuple) commitStatusUpdate(db *LedgerDB, aggregatetupleKey 
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
-	if err := UpdateComputePlanState(db, tuple.ComputePlanID, newStatus, aggregatetupleKey); err != nil {
+	if err := UpdateComputePlanState(db, tuple.ComputePlanKey, newStatus, aggregatetupleKey); err != nil {
 		return err
 	}
 	logger.Infof("aggregatetuple %s status updated: %s (from=%s)", aggregatetupleKey, newStatus, oldStatus)

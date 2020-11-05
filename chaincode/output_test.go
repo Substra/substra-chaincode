@@ -43,5 +43,4 @@ func TestLeaderboardSort(t *testing.T) {
 	for i, boardTuple := range boardTuples {
 		assert.EqualValues(t, float32(unOrderedPerf[i]), boardTuple.Perf)
 	}
-
 }

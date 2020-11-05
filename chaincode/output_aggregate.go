@@ -17,19 +17,19 @@ package main
 import "chaincode/errors"
 
 type outputAggregatetuple struct {
-	Key           string            `json:"key"`
-	Algo          *KeyHashDressName `json:"algo"`
-	Creator       string            `json:"creator"`
-	ComputePlanID string            `json:"compute_plan_id"`
-	Log           string            `json:"log"`
-	Metadata      map[string]string `json:"metadata"`
-	InModels      []*Model          `json:"in_models"`
-	OutModel      *KeyHashDress     `json:"out_model"`
-	Rank          int               `json:"rank"`
-	Status        string            `json:"status"`
-	Tag           string            `json:"tag"`
-	Permissions   outputPermissions `json:"permissions"`
-	Worker        string            `json:"worker"`
+	Key            string                  `json:"key"`
+	Algo           *KeyChecksumAddressName `json:"algo"`
+	Creator        string                  `json:"creator"`
+	ComputePlanKey string                  `json:"compute_plan_key"`
+	Log            string                  `json:"log"`
+	Metadata       map[string]string       `json:"metadata"`
+	InModels       []*Model                `json:"in_models"`
+	OutModel       *KeyChecksumAddress     `json:"out_model"`
+	Rank           int                     `json:"rank"`
+	Status         string                  `json:"status"`
+	Tag            string                  `json:"tag"`
+	Permissions    outputPermissions       `json:"permissions"`
+	Worker         string                  `json:"worker"`
 }
 
 type outputAggregateAlgo struct {
@@ -48,7 +48,7 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 	outputAggregatetuple.Metadata = initMapOutput(traintuple.Metadata)
 	outputAggregatetuple.Status = traintuple.Status
 	outputAggregatetuple.Rank = traintuple.Rank
-	outputAggregatetuple.ComputePlanID = traintuple.ComputePlanID
+	outputAggregatetuple.ComputePlanKey = traintuple.ComputePlanKey
 	outputAggregatetuple.OutModel = traintuple.OutModel
 	outputAggregatetuple.Tag = traintuple.Tag
 	algo, err := db.GetAggregateAlgo(traintuple.AlgoKey)
@@ -56,10 +56,10 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 		err = errors.Internal("could not retrieve aggregate algo with key %s - %s", traintuple.AlgoKey, err.Error())
 		return
 	}
-	outputAggregatetuple.Algo = &KeyHashDressName{
+	outputAggregatetuple.Algo = &KeyChecksumAddressName{
 		Key:            algo.Key,
 		Name:           algo.Name,
-		Hash:           algo.Hash,
+		Checksum:       algo.Checksum,
 		StorageAddress: algo.StorageAddress}
 
 	// fill inModels
@@ -67,7 +67,7 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 		if inModelKey == "" {
 			break
 		}
-		keyHashDress, _err := db.GetOutModelKeyHashDress(inModelKey, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
+		keyChecksumAddress, _err := db.GetOutModelKeyChecksumAddress(inModelKey, []AssetType{TraintupleType, CompositeTraintupleType, AggregatetupleType})
 		if _err != nil {
 			err = errors.Internal("could not fill in-model with key \"%s\": %s", inModelKey, _err.Error())
 			return
@@ -75,10 +75,10 @@ func (outputAggregatetuple *outputAggregatetuple) Fill(db *LedgerDB, traintuple 
 		inModel := &Model{
 			TraintupleKey: inModelKey,
 		}
-		if keyHashDress != nil {
-			inModel.Key = keyHashDress.Key
-			inModel.Hash = keyHashDress.Hash
-			inModel.StorageAddress = keyHashDress.StorageAddress
+		if keyChecksumAddress != nil {
+			inModel.Key = keyChecksumAddress.Key
+			inModel.Checksum = keyChecksumAddress.Checksum
+			inModel.StorageAddress = keyChecksumAddress.StorageAddress
 		}
 		outputAggregatetuple.InModels = append(outputAggregatetuple.InModels, inModel)
 	}

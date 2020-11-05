@@ -200,7 +200,7 @@ func (db *LedgerDB) GetGenericTuple(key string) (GenericTuple, error) {
 	if err != nil {
 		return asset, err
 	}
-	asset.Status, err = determineTupleStatus(db, asset.Status, asset.ComputePlanID)
+	asset.Status, err = determineTupleStatus(db, asset.Status, asset.ComputePlanKey)
 	return asset, nil
 }
 
@@ -323,7 +323,7 @@ func (db *LedgerDB) GetTraintuple(key string) (Traintuple, error) {
 	if traintuple.AssetType != TraintupleType {
 		return traintuple, errors.NotFound("traintuple %s not found", key)
 	}
-	traintuple.Status, err = determineTupleStatus(db, traintuple.Status, traintuple.ComputePlanID)
+	traintuple.Status, err = determineTupleStatus(db, traintuple.Status, traintuple.ComputePlanKey)
 	return traintuple, err
 }
 
@@ -337,7 +337,7 @@ func (db *LedgerDB) GetCompositeTraintuple(key string) (CompositeTraintuple, err
 	if traintuple.AssetType != CompositeTraintupleType {
 		return traintuple, errors.NotFound("composite traintuple %s not found", key)
 	}
-	traintuple.Status, err = determineTupleStatus(db, traintuple.Status, traintuple.ComputePlanID)
+	traintuple.Status, err = determineTupleStatus(db, traintuple.Status, traintuple.ComputePlanKey)
 	return traintuple, err
 }
 
@@ -351,18 +351,18 @@ func (db *LedgerDB) GetAggregatetuple(key string) (Aggregatetuple, error) {
 	if aggregatetuple.AssetType != AggregatetupleType {
 		return aggregatetuple, errors.NotFound("aggregatetuple %s not found", key)
 	}
-	aggregatetuple.Status, err = determineTupleStatus(db, aggregatetuple.Status, aggregatetuple.ComputePlanID)
+	aggregatetuple.Status, err = determineTupleStatus(db, aggregatetuple.Status, aggregatetuple.ComputePlanKey)
 	return aggregatetuple, err
 }
 
 // GetComputePlan fetches a ComputePlan from the ledger using its unique ID
-func (db *LedgerDB) GetComputePlan(ID string) (ComputePlan, error) {
+func (db *LedgerDB) GetComputePlan(key string) (ComputePlan, error) {
 	computePlan := ComputePlan{}
-	if err := db.Get(ID, &computePlan); err != nil {
+	if err := db.Get(key, &computePlan); err != nil {
 		return computePlan, err
 	}
 	if computePlan.AssetType != ComputePlanType {
-		return computePlan, errors.NotFound("compute plan %s not found", ID)
+		return computePlan, errors.NotFound("compute plan %s not found", key)
 	}
 	if err := db.Get(computePlan.StateKey, &(computePlan.State)); err != nil {
 		return computePlan, err
@@ -370,10 +370,10 @@ func (db *LedgerDB) GetComputePlan(ID string) (ComputePlan, error) {
 	return computePlan, nil
 }
 
-// GetOutModelKeyHashDress retrieves an out-Model from a tuple key.
+// GetOutModelKeyChecksumAddress retrieves an out-Model from a tuple key.
 // In case of CompositeTraintuple it return its trunk model
 // Return an error if the tupleKey was not found.
-func (db *LedgerDB) GetOutModelKeyHashDress(tupleKey string, allowedAssetTypes []AssetType) (*KeyHashDress, error) {
+func (db *LedgerDB) GetOutModelKeyChecksumAddress(tupleKey string, allowedAssetTypes []AssetType) (*KeyChecksumAddress, error) {
 	for _, assetType := range allowedAssetTypes {
 		switch assetType {
 		case CompositeTraintupleType:
@@ -393,19 +393,19 @@ func (db *LedgerDB) GetOutModelKeyHashDress(tupleKey string, allowedAssetTypes [
 				return tuple.OutModel, nil
 			}
 		default:
-			return nil, errors.Internal("GetOutModelKeyHashDress: Unsupported asset type %s", assetType)
+			return nil, errors.Internal("GetOutModelKeyChecksumAddress: Unsupported asset type %s", assetType)
 		}
 	}
 
 	return nil, errors.NotFound(
-		"GetOutModelKeyHashDress: Could not find tuple with key \"%s\". Allowed types: %v.",
+		"GetOutModelKeyChecksumAddress: Could not find tuple with key \"%s\". Allowed types: %v.",
 		tupleKey,
 		allowedAssetTypes)
 }
 
-// GetOutHeadModelKeyHash retrieves an out-Head-Model from a composite traintuple key.
+// GetOutHeadModelKeyChecksum retrieves an out-Head-Model from a composite traintuple key.
 // Return an error if the compositeTraintupleKey was not found.
-func (db *LedgerDB) GetOutHeadModelKeyHash(compositeTraintupleKey string) (*KeyHash, error) {
+func (db *LedgerDB) GetOutHeadModelKeyChecksum(compositeTraintupleKey string) (*KeyChecksum, error) {
 	tuple, err := db.GetCompositeTraintuple(compositeTraintupleKey)
 	if err != nil {
 		return nil, err
@@ -423,7 +423,7 @@ func (db *LedgerDB) GetTesttuple(key string) (Testtuple, error) {
 	if testtuple.AssetType != TesttupleType {
 		return testtuple, errors.NotFound("testtuple %s not found", key)
 	}
-	testtuple.Status, err = determineTupleStatus(db, testtuple.Status, testtuple.ComputePlanID)
+	testtuple.Status, err = determineTupleStatus(db, testtuple.Status, testtuple.ComputePlanKey)
 	return testtuple, err
 }
 
@@ -513,15 +513,15 @@ func (db *LedgerDB) AddTupleEvent(tupleKey string) error {
 }
 
 // AddComputePlanEvent add the compute plan matching the ID to the event struct
-func (db *LedgerDB) AddComputePlanEvent(ComputePlanID, status string, ModelsToDelete []string) error {
+func (db *LedgerDB) AddComputePlanEvent(ComputePlanKey, status string, ModelsToDelete []string) error {
 	if db.event == nil {
 		db.event = &Event{}
 	}
 	cp := eventComputePlan{
-		ComputePlanID: ComputePlanID,
-		Status:        status,
+		ComputePlanKey: ComputePlanKey,
+		Status:         status,
 	}
-	algokeys, err := db.GetIndexKeys("algo~computeplanid~key", []string{"algo", ComputePlanID})
+	algokeys, err := db.GetIndexKeys("algo~computeplankey~key", []string{"algo", ComputePlanKey})
 	if err != nil {
 		return err
 	}

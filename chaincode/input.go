@@ -33,10 +33,10 @@ var (
 type inputObjective struct {
 	Key                       string            `validate:"required,len=36" json:"key"`
 	Name                      string            `validate:"required,gte=1,lte=100" json:"name"`
-	DescriptionHash           string            `validate:"required,len=64,hexadecimal" json:"description_hash"`
+	DescriptionChecksum       string            `validate:"required,len=64,hexadecimal" json:"description_checksum"`
 	DescriptionStorageAddress string            `validate:"required,url" json:"description_storage_address"`
 	MetricsName               string            `validate:"required,gte=1,lte=100" json:"metrics_name"`
-	MetricsHash               string            `validate:"required,len=64,hexadecimal" json:"metrics_hash"`
+	MetricsChecksum           string            `validate:"required,len=64,hexadecimal" json:"metrics_checksum"`
 	MetricsStorageAddress     string            `validate:"required,url" json:"metrics_storage_address"`
 	TestDataset               inputDataset      `validate:"omitempty" json:"test_dataset"`
 	Permissions               inputPermissions  `validate:"required" json:"permissions"`
@@ -53,9 +53,9 @@ type inputDataset struct {
 type inputAlgo struct {
 	Key                       string            `validate:"required,len=36" json:"key"`
 	Name                      string            `validate:"required,gte=1,lte=100" json:"name"`
-	Hash                      string            `validate:"required,len=64,hexadecimal" json:"hash"`
+	Checksum                  string            `validate:"required,len=64,hexadecimal" json:"checksum"`
 	StorageAddress            string            `validate:"required,url" json:"storage_address"`
-	DescriptionHash           string            `validate:"required,len=64,hexadecimal" json:"description_hash"`
+	DescriptionChecksum       string            `validate:"required,len=64,hexadecimal" json:"description_checksum"`
 	DescriptionStorageAddress string            `validate:"required,url" json:"description_storage_address"`
 	Permissions               inputPermissions  `validate:"required" json:"permissions"`
 	Metadata                  map[string]string `validate:"lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
@@ -65,10 +65,10 @@ type inputAlgo struct {
 type inputDataManager struct {
 	Key                       string            `validate:"required,len=36" json:"key"`
 	Name                      string            `validate:"required,gte=1,lte=100" json:"name"`
-	OpenerHash                string            `validate:"required,len=64,hexadecimal" json:"opener_hash"`
+	OpenerChecksum            string            `validate:"required,len=64,hexadecimal" json:"opener_checksum"`
 	OpenerStorageAddress      string            `validate:"required,url" json:"opener_storage_address"`
 	Type                      string            `validate:"required,gte=1,lte=30" json:"type"`
-	DescriptionHash           string            `validate:"required,len=64,hexadecimal" json:"description_hash"`
+	DescriptionChecksum       string            `validate:"required,len=64,hexadecimal" json:"description_checksum"`
 	DescriptionStorageAddress string            `validate:"required,url" json:"description_storage_address"`
 	ObjectiveKey              string            `validate:"omitempty,len=36" json:"objective_key"` //`validate:"required"`
 	Permissions               inputPermissions  `validate:"required" json:"permissions"`
@@ -101,7 +101,7 @@ type inputTraintuple struct {
 	InModels       []string          `validate:"omitempty,dive,len=36" json:"in_models"`
 	DataManagerKey string            `validate:"required,len=36" json:"data_manager_key"`
 	DataSampleKeys []string          `validate:"required,unique,gt=0,dive,len=36" json:"data_sample_keys"`
-	ComputePlanID  string            `validate:"required_with=Rank" json:"compute_plan_id"`
+	ComputePlanKey string            `validate:"required_with=Rank" json:"compute_plan_key"`
 	Rank           string            `json:"rank"`
 	Tag            string            `validate:"omitempty,lte=64" json:"tag"`
 	Metadata       map[string]string `validate:"lte=100,dive,keys,lte=50,endkeys,lte=100" json:"metadata"`
@@ -124,7 +124,7 @@ type inputKey struct {
 
 type inputLogSuccessTrain struct {
 	inputLog
-	OutModel inputKeyHashDress `validate:"required" json:"out_model"`
+	OutModel inputKeyChecksumAddress `validate:"required" json:"out_model"`
 }
 type inputLogSuccessTest struct {
 	inputLog
@@ -141,14 +141,14 @@ type inputLog struct {
 	Log string `validate:"lte=200" json:"log"`
 }
 
-type inputKeyHash struct {
-	Key  string `validate:"required,len=36" json:"key"`
-	Hash string `validate:"required,len=64,hexadecimal" json:"hash"`
+type inputKeyChecksum struct {
+	Key      string `validate:"required,len=36" json:"key"`
+	Checksum string `validate:"required,len=64,hexadecimal" json:"checksum"`
 }
 
-type inputKeyHashDress struct {
+type inputKeyChecksumAddress struct {
 	Key            string `validate:"required,len=36" json:"key"`
-	Hash           string `validate:"required,len=64,hexadecimal" json:"hash"`
+	Checksum       string `validate:"required,len=64,hexadecimal" json:"checksum"`
 	StorageAddress string `validate:"required" json:"storage_address"`
 }
 
@@ -160,7 +160,7 @@ type inputQueryFilter struct {
 
 // inputConputePlan represent a coherent set of tuples uploaded together.
 type inputComputePlan struct {
-	ComputePlanID        string                                `validate:"required,len=36" json:"compute_plan_id"`
+	Key                  string                                `validate:"required,len=36" json:"key"`
 	Traintuples          []inputComputePlanTraintuple          `validate:"omitempty" json:"traintuples"`
 	Aggregatetuples      []inputComputePlanAggregatetuple      `validate:"omitempty" json:"aggregatetuples"`
 	CompositeTraintuples []inputComputePlanCompositeTraintuple `validate:"omitempty" json:"composite_traintuples"`

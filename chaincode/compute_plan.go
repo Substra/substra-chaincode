@@ -128,7 +128,7 @@ func updateComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 		len(inp.CompositeTraintuples) +
 		len(inp.Testtuples)
 	if count == 0 {
-		return resp, errors.BadRequest("empty update for compute plan %s", inp.ComputePlanID)
+		return resp, errors.BadRequest("empty update for compute plan %s", inp.Key)
 	}
 	return updateComputePlanInternal(db, inp)
 }
@@ -139,7 +139,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string, m
 	computePlan.Tag = tag
 	computePlan.Metadata = metadata
 	computePlan.CleanModels = cleanModels
-	err = computePlan.Create(db, inp.ComputePlanID)
+	err = computePlan.Create(db, inp.Key)
 	if err != nil {
 		return resp, err
 	}
@@ -148,7 +148,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string, m
 		len(inp.CompositeTraintuples) +
 		len(inp.Testtuples)
 	if count == 0 {
-		resp.Fill(inp.ComputePlanID, computePlan, []string{})
+		resp.Fill(inp.Key, computePlan, []string{})
 		return resp, nil
 	}
 	return updateComputePlanInternal(db, inp)
@@ -156,7 +156,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string, m
 
 func updateComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputComputePlan, err error) {
 	var tupleKey string
-	computePlan, err := db.GetComputePlan(inp.ComputePlanID)
+	computePlan, err := db.GetComputePlan(inp.Key)
 	if err != nil {
 		return resp, err
 	}
@@ -176,7 +176,7 @@ func updateComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 			inpTraintuple := inputTraintuple{
 				Rank: strconv.Itoa(task.Depth),
 			}
-			inpTraintuple.ComputePlanID = inp.ComputePlanID
+			inpTraintuple.ComputePlanKey = inp.Key
 			err = inpTraintuple.Fill(computeTraintuple, IDToTrainTask)
 			if err != nil {
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeTraintuple.ID)
@@ -193,7 +193,7 @@ func updateComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 			inpCompositeTraintuple := inputCompositeTraintuple{
 				Rank: strconv.Itoa(task.Depth),
 			}
-			inpCompositeTraintuple.ComputePlanID = inp.ComputePlanID
+			inpCompositeTraintuple.ComputePlanKey = inp.Key
 			err = inpCompositeTraintuple.Fill(computeCompositeTraintuple, IDToTrainTask)
 			if err != nil {
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeCompositeTraintuple.ID)
@@ -209,7 +209,7 @@ func updateComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 			inpAggregatetuple := inputAggregatetuple{
 				Rank: strconv.Itoa(task.Depth),
 			}
-			inpAggregatetuple.ComputePlanID = inp.ComputePlanID
+			inpAggregatetuple.ComputePlanKey = inp.Key
 			err = inpAggregatetuple.Fill(computeAggregatetuple, IDToTrainTask)
 			if err != nil {
 				return resp, errors.BadRequest("traintuple ID %s: "+err.Error(), computeAggregatetuple.ID)
@@ -239,16 +239,16 @@ func updateComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 
 	}
 
-	computePlan, err = db.GetComputePlan(inp.ComputePlanID)
+	computePlan, err = db.GetComputePlan(inp.Key)
 	if err != nil {
 		return resp, err
 	}
 	computePlan.IDToTrainTask = IDToTrainTask
-	err = computePlan.Save(db, inp.ComputePlanID)
+	err = computePlan.Save(db, inp.Key)
 	if err != nil {
 		return resp, err
 	}
-	resp.Fill(inp.ComputePlanID, computePlan, NewIDs)
+	resp.Fill(inp.Key, computePlan, NewIDs)
 	return resp, err
 }
 
@@ -263,11 +263,11 @@ func queryComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err 
 
 func queryComputePlans(db *LedgerDB, args []string) (resp []outputComputePlan, err error) {
 	resp = []outputComputePlan{}
-	computePlanIDs, err := db.GetIndexKeys("computePlan~id", []string{"computePlan"})
+	computePlanKeys, err := db.GetIndexKeys("computePlan~key", []string{"computePlan"})
 	if err != nil {
 		return
 	}
-	for _, key := range computePlanIDs {
+	for _, key := range computePlanKeys {
 		var computePlan outputComputePlan
 		computePlan, err = getOutComputePlan(db, key)
 		if err != nil {
@@ -278,7 +278,7 @@ func queryComputePlans(db *LedgerDB, args []string) (resp []outputComputePlan, e
 	return resp, err
 }
 
-// getComputePlan returns details for a compute plan id.
+// getComputePlan returns details for a compute plan key.
 // Traintuples, CompositeTraintuples and Aggregatetuples are ordered by ascending rank.
 func getOutComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err error) {
 
@@ -316,12 +316,11 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 	return resp, nil
 }
 
-// Create generate on ID for the compute plan, add it to the ledger
-// and register it in the compute plan index
-func (cp *ComputePlan) Create(db *LedgerDB, ID string) error {
+// Create adds a Compute Plan to the ledger and registers it in the compute plan index
+func (cp *ComputePlan) Create(db *LedgerDB, key string) error {
 	cp.StateKey = GetRandomHash()
 	cp.AssetType = ComputePlanType
-	err := db.Add(ID, cp)
+	err := db.Add(key, cp)
 	if err != nil {
 		return err
 	}
@@ -329,15 +328,15 @@ func (cp *ComputePlan) Create(db *LedgerDB, ID string) error {
 	if err != nil {
 		return err
 	}
-	if err := db.CreateIndex("computePlan~id", []string{"computePlan", ID}); err != nil {
+	if err := db.CreateIndex("computePlan~key", []string{"computePlan", key}); err != nil {
 		return err
 	}
 	return nil
 }
 
 // Save add or update the compute plan in the ledger
-func (cp *ComputePlan) Save(db *LedgerDB, ID string) error {
-	err := db.Put(ID, cp)
+func (cp *ComputePlan) Save(db *LedgerDB, key string) error {
+	err := db.Put(key, cp)
 	if err != nil {
 		return err
 	}
@@ -408,11 +407,11 @@ func (cp *ComputePlan) AddTuple(tupleType AssetType, key, status string) {
 
 // UpdateComputePlanState retreive the compute plan if the ID is not empty,
 // check if the updated status change anything and save it if it's the case
-func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey string) error {
-	if ComputePlanID == "" {
+func UpdateComputePlanState(db *LedgerDB, ComputePlanKey, tupleStatus, tupleKey string) error {
+	if ComputePlanKey == "" {
 		return nil
 	}
-	cp, err := db.GetComputePlan(ComputePlanID)
+	cp, err := db.GetComputePlan(ComputePlanKey)
 	if err != nil {
 		return err
 	}
@@ -426,7 +425,7 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey s
 		return err
 	}
 	if stateUpdated || len(doneModels) != 0 {
-		err = db.AddComputePlanEvent(ComputePlanID, cp.State.Status, doneModels)
+		err = db.AddComputePlanEvent(ComputePlanKey, cp.State.Status, doneModels)
 		if err != nil {
 			return err
 		}
@@ -435,13 +434,13 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanID, tupleStatus, tupleKey s
 	return nil
 }
 
-// TryAddIntermediaryModel will reference the hash model if the compute plan ID
+// TryAddIntermediaryModel will reference the model key if the compute plan key
 // is not empty and if it's an intermediary model meaning without any children
-func TryAddIntermediaryModel(db *LedgerDB, ComputePlanID, tupleKey, modelKey string) error {
-	if ComputePlanID == "" {
+func TryAddIntermediaryModel(db *LedgerDB, ComputePlanKey, tupleKey, modelKey string) error {
+	if ComputePlanKey == "" {
 		return nil
 	}
-	cp, err := db.GetComputePlan(ComputePlanID)
+	cp, err := db.GetComputePlan(ComputePlanKey)
 	if err != nil {
 		return err
 	}
@@ -464,7 +463,7 @@ func TryAddIntermediaryModel(db *LedgerDB, ComputePlanID, tupleKey, modelKey str
 
 // UpdateIntermediaryModelsInuse check all models listed as intermediary. If any of
 // them are 'done', meaning that there is no train like tuples or testtuples
-// planned to use this model. If that the case its hash will be added to the
+// planned to use this model. If that the case its key will be added to the
 // returned slice and remove from the compute plan's one.
 func (cp *ComputePlan) UpdateIntermediaryModelsInuse(db *LedgerDB) ([]string, error) {
 	if !cp.CleanModels {

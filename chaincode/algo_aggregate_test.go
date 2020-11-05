@@ -28,12 +28,12 @@ func TestAggregateAlgo(t *testing.T) {
 	// Add algo with invalid field
 	inpAlgo := inputAggregateAlgo{
 		inputAlgo: inputAlgo{
-			DescriptionHash: "aaa",
+			DescriptionChecksum: "aaa",
 		},
 	}
 	args := inpAlgo.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 400, resp.Status, "when adding algo with invalid hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding algo with invalid checksum, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add algo
 	resp, tt := registerItem(t, *mockStub, "aggregateAlgo")
@@ -55,12 +55,12 @@ func TestAggregateAlgo(t *testing.T) {
 		outputAlgo: outputAlgo{
 			Key:  algoKey,
 			Name: inpAlgo.Name,
-			Content: &HashDress{
-				Hash:           inpAlgo.Hash,
+			Content: &ChecksumAddress{
+				Checksum:       inpAlgo.Checksum,
 				StorageAddress: inpAlgo.StorageAddress,
 			},
-			Description: &HashDress{
-				Hash:           inpAlgo.DescriptionHash,
+			Description: &ChecksumAddress{
+				Checksum:       inpAlgo.DescriptionChecksum,
 				StorageAddress: inpAlgo.DescriptionStorageAddress,
 			},
 			Owner: worker,

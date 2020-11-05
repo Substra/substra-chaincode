@@ -39,11 +39,11 @@ func TestDataManager(t *testing.T) {
 
 	// Add dataManager with invalid field
 	inpDataManager := inputDataManager{
-		OpenerHash: "aaa",
+		OpenerChecksum: "aaa",
 	}
 	args := inpDataManager.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 400, resp.Status, "when adding dataManager with invalid opener hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding dataManager with invalid opener checksum, status %d and message %s", resp.Status, resp.Message)
 	// Properly add dataManager
 	resp, tt := registerItem(t, *mockStub, "dataManager")
 
@@ -70,15 +70,15 @@ func TestDataManager(t *testing.T) {
 		Key:          dataManagerKey,
 		Owner:        worker,
 		Name:         inpDataManager.Name,
-		Description: &HashDress{
+		Description: &ChecksumAddress{
 			StorageAddress: inpDataManager.DescriptionStorageAddress,
-			Hash:           inpDataManager.DescriptionHash,
+			Checksum:       inpDataManager.DescriptionChecksum,
 		},
 		Permissions: outputPermissions{
 			Process: Permission{Public: true, AuthorizedIDs: []string{}},
 		},
-		Opener: &HashDress{
-			Hash:           inpDataManager.OpenerHash,
+		Opener: &ChecksumAddress{
+			Checksum:       inpDataManager.OpenerChecksum,
 			StorageAddress: inpDataManager.OpenerStorageAddress,
 		},
 		Type:     inpDataManager.Type,
@@ -147,7 +147,7 @@ func TestDataset(t *testing.T) {
 	}
 	args := inpDataSample.createDefault()
 	resp := mockStub.MockInvoke("42", args)
-	assert.EqualValuesf(t, 400, resp.Status, "when adding dataSample with invalid hash, status %d and message %s", resp.Status, resp.Message)
+	assert.EqualValuesf(t, 400, resp.Status, "when adding dataSample with invalid key, status %d and message %s", resp.Status, resp.Message)
 
 	// Add dataSample with unexiting dataManager
 	inpDataSample = inputDataSample{}

@@ -25,14 +25,14 @@ const OutputAssetPaginationHardLimit = 500
 // Struct use as output representation of ledger data
 
 type outputObjective struct {
-	Key         string            `json:"key"`
-	Name        string            `json:"name"`
-	Description *HashDress        `json:"description"`
-	Metrics     *HashDressName    `json:"metrics"`
-	Owner       string            `json:"owner"`
-	TestDataset *Dataset          `json:"test_dataset"`
-	Permissions outputPermissions `json:"permissions"`
-	Metadata    map[string]string `json:"metadata"`
+	Key         string               `json:"key"`
+	Name        string               `json:"name"`
+	Description *ChecksumAddress     `json:"description"`
+	Metrics     *ChecksumAddressName `json:"metrics"`
+	Owner       string               `json:"owner"`
+	TestDataset *Dataset             `json:"test_dataset"`
+	Permissions outputPermissions    `json:"permissions"`
+	Metadata    map[string]string    `json:"metadata"`
 }
 
 func (out *outputObjective) Fill(in Objective) {
@@ -52,11 +52,11 @@ func (out *outputObjective) Fill(in Objective) {
 // outputDataManager is the return representation of the DataManager type stored in the ledger
 type outputDataManager struct {
 	ObjectiveKey string            `json:"objective_key"`
-	Description  *HashDress        `json:"description"`
+	Description  *ChecksumAddress  `json:"description"`
 	Key          string            `json:"key"`
 	Metadata     map[string]string `json:"metadata"`
 	Name         string            `json:"name"`
-	Opener       *HashDress        `json:"opener"`
+	Opener       *ChecksumAddress  `json:"opener"`
 	Owner        string            `json:"owner"`
 	Permissions  outputPermissions `json:"permissions"`
 	Type         string            `json:"type"`
@@ -103,8 +103,8 @@ func (out *outputDataset) Fill(in DataManager, trainKeys []string, testKeys []st
 type outputAlgo struct {
 	Key         string            `json:"key"`
 	Name        string            `json:"name"`
-	Content     *HashDress        `json:"content"`
-	Description *HashDress        `json:"description"`
+	Content     *ChecksumAddress  `json:"content"`
+	Description *ChecksumAddress  `json:"description"`
 	Owner       string            `json:"owner"`
 	Permissions outputPermissions `json:"permissions"`
 	Metadata    map[string]string `json:"metadata"`
@@ -113,8 +113,8 @@ type outputAlgo struct {
 func (out *outputAlgo) Fill(in Algo) {
 	out.Key = in.Key
 	out.Name = in.Name
-	out.Content = &HashDress{
-		Hash:           in.Hash,
+	out.Content = &ChecksumAddress{
+		Checksum:       in.Checksum,
 		StorageAddress: in.StorageAddress,
 	}
 	out.Description = in.Description
@@ -127,27 +127,27 @@ func (out *outputAlgo) Fill(in Algo) {
 type outputTtDataset struct {
 	Key            string            `json:"key"`
 	Worker         string            `json:"worker"`
-	DataSampleKeys []string          `json:"keys"`
-	OpenerHash     string            `json:"opener_hash"`
+	DataSampleKeys []string          `json:"data_sample_keys"`
+	OpenerChecksum string            `json:"opener_checksum"`
 	Metadata       map[string]string `json:"metadata"`
 }
 
 // outputTraintuple is the representation of one the element type stored in the
 // ledger. It describes a training task occuring on the platform
 type outputTraintuple struct {
-	Key           string            `json:"key"`
-	Algo          *KeyHashDressName `json:"algo"`
-	Creator       string            `json:"creator"`
-	Dataset       *outputTtDataset  `json:"dataset"`
-	ComputePlanID string            `json:"compute_plan_id"`
-	InModels      []*Model          `json:"in_models"`
-	Log           string            `json:"log"`
-	Metadata      map[string]string `json:"metadata"`
-	OutModel      *KeyHashDress     `json:"out_model"`
-	Permissions   outputPermissions `json:"permissions"`
-	Rank          int               `json:"rank"`
-	Status        string            `json:"status"`
-	Tag           string            `json:"tag"`
+	Key            string                  `json:"key"`
+	Algo           *KeyChecksumAddressName `json:"algo"`
+	Creator        string                  `json:"creator"`
+	Dataset        *outputTtDataset        `json:"dataset"`
+	ComputePlanKey string                  `json:"compute_plan_key"`
+	InModels       []*Model                `json:"in_models"`
+	Log            string                  `json:"log"`
+	Metadata       map[string]string       `json:"metadata"`
+	OutModel       *KeyChecksumAddress     `json:"out_model"`
+	Permissions    outputPermissions       `json:"permissions"`
+	Rank           int                     `json:"rank"`
+	Status         string                  `json:"status"`
+	Tag            string                  `json:"tag"`
 }
 
 //Fill is a method of the receiver outputTraintuple. It returns all elements necessary to do a training task from a trainuple stored in the ledger
@@ -160,7 +160,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 	outputTraintuple.Metadata = initMapOutput(traintuple.Metadata)
 	outputTraintuple.Status = traintuple.Status
 	outputTraintuple.Rank = traintuple.Rank
-	outputTraintuple.ComputePlanID = traintuple.ComputePlanID
+	outputTraintuple.ComputePlanKey = traintuple.ComputePlanKey
 	outputTraintuple.OutModel = traintuple.OutModel
 	outputTraintuple.Tag = traintuple.Tag
 	// fill algo
@@ -169,10 +169,10 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 		err = errors.Internal("could not retrieve algo with key %s - %s", traintuple.AlgoKey, err.Error())
 		return
 	}
-	outputTraintuple.Algo = &KeyHashDressName{
+	outputTraintuple.Algo = &KeyChecksumAddressName{
 		Key:            algo.Key,
 		Name:           algo.Name,
-		Hash:           algo.Hash,
+		Checksum:       algo.Checksum,
 		StorageAddress: algo.StorageAddress}
 
 	// fill inModels
@@ -189,7 +189,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 		}
 		if parentTraintuple.OutModel != nil {
 			inModel.Key = parentTraintuple.Key
-			inModel.Hash = parentTraintuple.OutModel.Hash
+			inModel.Checksum = parentTraintuple.OutModel.Checksum
 			inModel.StorageAddress = parentTraintuple.OutModel.StorageAddress
 		}
 		outputTraintuple.InModels = append(outputTraintuple.InModels, inModel)
@@ -206,7 +206,7 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 		Key:            dataManager.Key,
 		Worker:         traintuple.Dataset.Worker,
 		DataSampleKeys: traintuple.Dataset.DataSampleKeys,
-		OpenerHash:     dataManager.Opener.Hash,
+		OpenerChecksum: dataManager.Opener.Checksum,
 		Metadata:       initMapOutput(traintuple.Dataset.Metadata),
 	}
 
@@ -214,26 +214,26 @@ func (outputTraintuple *outputTraintuple) Fill(db *LedgerDB, traintuple Traintup
 }
 
 type outputTesttuple struct {
-	Algo           *KeyHashDressName `json:"algo"`
-	Certified      bool              `json:"certified"`
-	ComputePlanID  string            `json:"compute_plan_id"`
-	Creator        string            `json:"creator"`
-	Dataset        *TtDataset        `json:"dataset"`
-	Key            string            `json:"key"`
-	Log            string            `json:"log"`
-	Metadata       map[string]string `json:"metadata"`
-	Objective      *TtObjective      `json:"objective"`
-	Rank           int               `json:"rank"`
-	Status         string            `json:"status"`
-	Tag            string            `json:"tag"`
-	TraintupleKey  string            `json:"traintuple_key"`
-	TraintupleType string            `json:"traintuple_type"`
+	Algo           *KeyChecksumAddressName `json:"algo"`
+	Certified      bool                    `json:"certified"`
+	ComputePlanKey string                  `json:"compute_plan_key"`
+	Creator        string                  `json:"creator"`
+	Dataset        *TtDataset              `json:"dataset"`
+	Key            string                  `json:"key"`
+	Log            string                  `json:"log"`
+	Metadata       map[string]string       `json:"metadata"`
+	Objective      *TtObjective            `json:"objective"`
+	Rank           int                     `json:"rank"`
+	Status         string                  `json:"status"`
+	Tag            string                  `json:"tag"`
+	TraintupleKey  string                  `json:"traintuple_key"`
+	TraintupleType string                  `json:"traintuple_type"`
 }
 
 func (out *outputTesttuple) Fill(db *LedgerDB, in Testtuple) error {
 	out.Key = in.Key
 	out.Certified = in.Certified
-	out.ComputePlanID = in.ComputePlanID
+	out.ComputePlanKey = in.ComputePlanKey
 	out.Creator = in.Creator
 	out.Dataset = in.Dataset
 	out.Log = in.Log
@@ -271,10 +271,10 @@ func (out *outputTesttuple) Fill(db *LedgerDB, in Testtuple) error {
 		}
 		algo = aggregateAlgo.Algo
 	}
-	out.Algo = &KeyHashDressName{
+	out.Algo = &KeyChecksumAddressName{
 		Key:            algo.Key,
 		Name:           algo.Name,
-		Hash:           algo.Hash,
+		Checksum:       algo.Checksum,
 		StorageAddress: algo.StorageAddress}
 
 	// fill objective
@@ -285,8 +285,8 @@ func (out *outputTesttuple) Fill(db *LedgerDB, in Testtuple) error {
 	if objective.Metrics == nil {
 		return errors.Internal("objective %s is missing metrics values", in.ObjectiveKey)
 	}
-	metrics := HashDress{
-		Hash:           objective.Metrics.Hash,
+	metrics := ChecksumAddress{
+		Checksum:       objective.Metrics.Checksum,
 		StorageAddress: objective.Metrics.StorageAddress,
 	}
 	out.Objective = &TtObjective{
@@ -321,13 +321,13 @@ type Event struct {
 
 type eventComputePlan struct {
 	AlgoKeys       []string `json:"algo_keys"`
-	ComputePlanID  string   `json:"compute_plan_id"`
+	ComputePlanKey string   `json:"compute_plan_key"`
 	ModelsToDelete []string `json:"models_to_delete"`
 	Status         string   `json:"status"`
 }
 
 type outputComputePlan struct {
-	ComputePlanID           string            `json:"compute_plan_id"`
+	Key                     string            `json:"key"`
 	TraintupleKeys          []string          `json:"traintuple_keys"`
 	AggregatetupleKeys      []string          `json:"aggregatetuple_keys"`
 	CompositeTraintupleKeys []string          `json:"composite_traintuple_keys"`
@@ -342,7 +342,7 @@ type outputComputePlan struct {
 }
 
 func (out *outputComputePlan) Fill(key string, in ComputePlan, newIDs []string) {
-	out.ComputePlanID = key
+	out.Key = key
 	nb := getLimitedNbSliceElements(in.TraintupleKeys)
 	out.TraintupleKeys = in.TraintupleKeys[:nb]
 	nb = getLimitedNbSliceElements(in.AggregatetupleKeys)
@@ -395,12 +395,12 @@ func (out outputBoardTuples) Less(i, j int) bool {
 }
 
 type outputBoardTuple struct {
-	Algo          *HashDressName `json:"algo"`
-	Creator       string         `json:"creator"`
-	Key           string         `json:"key"`
-	TraintupleKey string         `json:"traintuple_key"`
-	Perf          float32        `json:"perf"`
-	Tag           string         `json:"tag"`
+	Algo          *KeyChecksumAddressName `json:"algo"`
+	Creator       string                  `json:"creator"`
+	Key           string                  `json:"key"`
+	TraintupleKey string                  `json:"traintuple_key"`
+	Perf          float32                 `json:"perf"`
+	Tag           string                  `json:"tag"`
 }
 
 func (out *outputBoardTuple) Fill(db *LedgerDB, in Testtuple, testtupleKey string) error {
@@ -410,9 +410,10 @@ func (out *outputBoardTuple) Fill(db *LedgerDB, in Testtuple, testtupleKey strin
 	if err != nil {
 		return err
 	}
-	out.Algo = &HashDressName{
+	out.Algo = &KeyChecksumAddressName{
+		Key:            algo.Key,
 		Name:           algo.Name,
-		Hash:           algo.Hash,
+		Checksum:       algo.Checksum,
 		StorageAddress: algo.StorageAddress,
 	}
 	out.TraintupleKey = in.TraintupleKey
