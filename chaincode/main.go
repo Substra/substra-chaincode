@@ -17,12 +17,14 @@ package main
 import (
 	"chaincode/errors"
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"time"
+	"os"
+	"io/ioutil"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/hyperledger/fabric/protos/peer"
+	"github.com/hyperledger/fabric-chaincode-go/shim"
+	"github.com/hyperledger/fabric-protos-go/peer"
+	"github.com/sirupsen/logrus"
 )
 
 // SubstraChaincode is a Receiver for Chaincode shim functions
@@ -30,7 +32,7 @@ type SubstraChaincode struct {
 }
 
 // Create a global logger for the chaincode. Its default level is Info
-var logger = shim.NewLogger("substra-chaincode")
+var logger = logrus.New()
 
 // Init is called during chaincode instantiation to initialize any
 // data. Note that chaincode upgrade also calls this function to reset
@@ -226,11 +228,45 @@ func formatErrorResponse(err error) peer.Response {
 	}
 }
 
-// main function starts up the chaincode in the container during instantiate
 func main() {
-	// TODO use the same level as the shim or an env variable
-	logger.SetLevel(shim.LogDebug)
-	if err := shim.Start(new(SubstraChaincode)); err != nil {
-		fmt.Printf("Error starting SubstraChaincode chaincode: %s", err)
+
+	logger.SetOutput(os.Stdout)
+	logger.SetLevel(logrus.DebugLevel)
+	logger.Infof("Load TLS certificates")
+
+	key, err := ioutil.ReadFile(os.Getenv("TLS_KEY_FILE"))
+	if err != nil {
+		logger.Errorf("Cannot read key file: %s", err)
+	}
+
+	cert, err := ioutil.ReadFile(os.Getenv("TLS_CERT_FILE"))
+	if err != nil {
+		logger.Errorf("Cannot read cert file: %s", err)
+	}
+
+	ca, err := ioutil.ReadFile(os.Getenv("TLS_ROOTCERT_FILE"))
+	if err != nil {
+		logger.Errorf("Cannot read ca cert file: %s", err)
+	}
+
+	server := &shim.ChaincodeServer{
+		CCID:    os.Getenv("CHAINCODE_CCID"),
+		Address: os.Getenv("CHAINCODE_ADDRESS"),
+		CC:      new(SubstraChaincode),
+		TLSProps: shim.TLSProperties{
+				Disabled: false,
+				Key: key,
+				Cert: cert,
+				ClientCACerts: ca,
+		},
+	}
+
+	// Start the chaincode external server
+	logger.Infof("Start Substra ChaincodeServer")
+	err = server.Start()
+
+	if err != nil {
+		logger.Errorf("Error starting SubstraChaincode chaincode: %s", err)
 	}
 }
+

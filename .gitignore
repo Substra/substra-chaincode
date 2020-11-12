@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+chaincode/chaincode
 
 # Test binary, build with `go test -c`
 *.test
@@ -16,7 +17,6 @@
 
 # OSX
 .DS_Store
-
 
 # IDE config files
 .idea
