@@ -52,7 +52,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 
 	start := time.Now()
 	// Log all input for potential debug later on.
-	logger.Infof("Args received by the chaincode on channel '%s': %#v", stub.GetChannelID(), stub.GetStringArgs())
+	logger.Infof("[%s][%s] Args received: '%s'", stub.GetChannelID(), stub.GetTxID()[:10], stub.GetStringArgs())
 
 	// Seed with a timestamp from the channel header so the chaincode's output
 	// stay determinist for each transaction. It's necessary because endorsers
@@ -186,24 +186,34 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	default:
 		err = errors.BadRequest("function \"%s\" not implemented", fn)
 	}
+
 	// Invoke duration
 	duration := int(time.Since(start).Nanoseconds()) / 1e6
-	logger.Infof("Response from chaincode on channel '%s' (in %dms): %#v, error: %s", stub.GetChannelID(), duration, result, err)
+
 	// Return the result as success payload
 	if err != nil {
+		logger.Errorf("[%s][%s] Response (%dms): '%#v' - Error: '%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, err)
 		return formatErrorResponse(err)
 	}
+
+	// Marshal to json the smartcontract result
+	resp, err := json.Marshal(result)
+	if err != nil {
+		logger.Infof("[%s][%s] Response (%dms): '%#v'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result)
+		return formatErrorResponse(errors.Internal("could not format response: %s", err.Error()))
+	}
+
+	// Log with no errors
+	logger.Infof("[%s][%s] Response (%dms): '%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, resp)
+
 	// Send event if there is any. It's done in one batch since we can only send
 	// one event per call
 	err = db.SendEvent()
 	if err != nil {
 		return formatErrorResponse(errors.Internal("could not send event: %s", err.Error()))
 	}
-	// Marshal to json the smartcontract result
-	resp, err := json.Marshal(result)
-	if err != nil {
-		return formatErrorResponse(errors.Internal("could not format response: %s", err.Error()))
-	}
+
+
 	return shim.Success(resp)
 }
 
@@ -230,6 +240,10 @@ func formatErrorResponse(err error) peer.Response {
 }
 
 func main() {
+	logger.SetFormatter(&logrus.TextFormatter{
+		ForceColors: true,
+		FullTimestamp: true,
+	})
 
 	logger.SetOutput(os.Stdout)
 	logger.SetLevel(logrus.DebugLevel)
