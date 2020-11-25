@@ -49,9 +49,10 @@ func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response 
 
 // Invoke is called per transaction on the chaincode.
 func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
+
 	start := time.Now()
 	// Log all input for potential debug later on.
-	logger.Infof("Args received by the chaincode: %#v", stub.GetStringArgs())
+	logger.Infof("Args received by the chaincode on channel '%s': %#v", stub.GetChannelID(), stub.GetStringArgs())
 
 	// Seed with a timestamp from the channel header so the chaincode's output
 	// stay determinist for each transaction. It's necessary because endorsers
@@ -187,7 +188,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	}
 	// Invoke duration
 	duration := int(time.Since(start).Nanoseconds()) / 1e6
-	logger.Infof("Response from chaincode (in %dms): %#v, error: %s", duration, result, err)
+	logger.Infof("Response from chaincode on channel '%s' (in %dms): %#v, error: %s", stub.GetChannelID(), duration, result, err)
 	// Return the result as success payload
 	if err != nil {
 		return formatErrorResponse(err)
