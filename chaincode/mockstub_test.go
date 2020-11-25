@@ -490,7 +490,7 @@ func NewMockStub(name string, cc shim.Chaincode) *MockStub {
 
 func NewMockStubWithRegisterNode(name string, cc shim.Chaincode) *MockStub {
 	s := NewMockStub(name, cc)
-	s.MockInvoke("42", [][]byte{[]byte("registerNode")})
+	s.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", [][]byte{[]byte("registerNode")})
 
 	return s
 }
