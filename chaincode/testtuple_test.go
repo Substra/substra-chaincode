@@ -26,6 +26,7 @@ import (
 func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add a some dataManager, dataSample and traintuple
 	resp, _ := registerItem(t, *mockStub, "traintuple")
@@ -39,13 +40,13 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	fail := inputLogFailTrain{}
 	fail.Key = traintupleKey
 	args := fail.createDefault()
-	resp = mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp = mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValues(t, 200, resp.Status, "should be able to log traintuple as failed")
 
 	// Fail to add a testtuple to this failed traintuple
 	inpTesttuple := inputTesttuple{}
 	args = inpTesttuple.createDefault()
-	resp = mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp = mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValues(t, 400, resp.Status, "status should show an error since the traintuple is failed")
 	assert.Contains(t, resp.Message, "could not register this testtuple")
 }
@@ -53,6 +54,7 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 func TestCertifiedExplicitTesttuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "traintuple")
@@ -63,11 +65,11 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 		DataSampleKeys: []string{testDataSampleKey2, testDataSampleKey1},
 		DataManagerKey: dataManagerKey}
 	args := inpTesttuple.createDefault()
-	resp := mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp := mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValues(t, 200, resp.Status)
 
 	args = [][]byte{[]byte("queryTesttuples")}
-	resp = mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp = mockStub.MockInvoke(mockTxID, args)
 	testtuples := [](map[string]interface{}){}
 	err := json.Unmarshal(resp.Payload, &testtuples)
 	assert.NoError(t, err, "should be unmarshaled")
@@ -79,6 +81,7 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "traintuple")
@@ -86,13 +89,13 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	// Add a certified testtuple
 	inpTesttuple1 := inputTesttuple{}
 	args := inpTesttuple1.createDefault()
-	resp := mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp := mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValues(t, 200, resp.Status)
 
 	// Fail to add an incomplete uncertified testtuple
 	inpTesttuple2 := inputTesttuple{DataSampleKeys: []string{trainDataSampleKey1}}
 	args = inpTesttuple2.createDefault()
-	resp = mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp = mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValues(t, 400, resp.Status)
 	assert.Contains(t, resp.Message, "invalid input: dataManagerKey and dataSampleKey should be provided together")
 
@@ -102,13 +105,13 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 		DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
 		DataManagerKey: dataManagerKey}
 	args = inpTesttuple3.createDefault()
-	resp = mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp = mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValues(t, 200, resp.Status)
 
 	// Fail to add the same testtuple with the same key
 	inpTesttuple4 := inputTesttuple{}
 	args = inpTesttuple4.createDefault()
-	resp = mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp = mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValues(t, 409, resp.Status)
 	assert.Contains(t, resp.Message, "already exists")
 }
@@ -147,6 +150,7 @@ func TestQueryTesttuple(t *testing.T) {
 		t.Run("TestQueryTesttuple"+tt.expectedTypeString, func(t *testing.T) {
 			scc := new(SubstraChaincode)
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
+			mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 			registerItem(t, *mockStub, "aggregatetuple")
 
 			// create testtuple
@@ -157,14 +161,14 @@ func TestQueryTesttuple(t *testing.T) {
 				DataSampleKeys: dataSampleKeys,
 			}
 			inpTesttuple.fillDefaults()
-			resp := mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", inpTesttuple.getArgs())
+			resp := mockStub.MockInvoke(mockTxID, inpTesttuple.getArgs())
 			res := map[string]string{}
 			json.Unmarshal(resp.Payload, &res)
 			testtupleKey := res["key"]
 
 			// query testtuple
 			args := [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
-			resp = mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+			resp = mockStub.MockInvoke(mockTxID, args)
 			respTesttuple := resp.Payload
 			testtuple := outputTesttuple{}
 			json.Unmarshal(respTesttuple, &testtuple)
@@ -199,6 +203,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			scc := new(SubstraChaincode)
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
+			mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 			registerItem(t, *mockStub, "compositeTraintuple")
 
@@ -208,7 +213,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 			}
 			// Create a testtuple before training
 			args := inp.createDefault()
-			resp := mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+			resp := mockStub.MockInvoke(mockTxID, args)
 			assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
 			values := map[string]string{}
 			json.Unmarshal(resp.Payload, &values)
@@ -250,7 +255,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 			inp.DataManagerKey = dataManagerKey
 			inp.DataSampleKeys = []string{trainDataSampleKey1}
 			args = inp.createDefault()
-			resp = mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+			resp = mockStub.MockInvoke(mockTxID, args)
 
 			switch status {
 			case StatusDone:

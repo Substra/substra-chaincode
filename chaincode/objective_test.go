@@ -69,36 +69,38 @@ func TestLeaderBoard(t *testing.T) {
 func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	inpObjective := inputObjective{}
 	inpObjective.createDefault()
 	inpObjective.TestDataset = inputDataset{}
-	resp := mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", methodAndAssetToByte("registerObjective", inpObjective))
+	resp := mockStub.MockInvoke(mockTxID, methodAndAssetToByte("registerObjective", inpObjective))
 	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
 }
 func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", [][]byte{[]byte("registerNode")})
+	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
+	mockStub.MockInvoke(mockTxID, [][]byte{[]byte("registerNode")})
 
 	// Add a dataManager and some dataSample successfuly
 	inpDataManager := inputDataManager{}
 	args := inpDataManager.createDefault()
-	mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	mockStub.MockInvoke(mockTxID, args)
 	inpDataSample := inputDataSample{
 		Keys:            []string{testDataSampleKey1},
 		DataManagerKeys: []string{dataManagerKey},
 		TestOnly:        "true",
 	}
 	args = inpDataSample.createDefault()
-	mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	mockStub.MockInvoke(mockTxID, args)
 	inpDataSample = inputDataSample{
 		Keys:            []string{testDataSampleKey2},
 		DataManagerKeys: []string{dataManagerKey},
 		TestOnly:        "true",
 	}
 	args = inpDataSample.createDefault()
-	r := mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	r := mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValues(t, 200, r.Status)
 
 	// Fail to insert the objective
@@ -107,25 +109,26 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 			DataManagerKey: testDataSampleKey1,
 			DataSampleKeys: []string{testDataSampleKey2}}}
 	args = inpObjective.createDefault()
-	resp := mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp := mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValues(t, 400, resp.Status, "status should indicate an error since the dataManager key is a dataSample key")
 }
 func TestObjective(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add objective with invalid field
 	inpObjective := inputObjective{
 		DescriptionChecksum: "aaa",
 	}
 	args := inpObjective.createDefault()
-	resp := mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp := mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with invalid checksum, status %d and message %s", resp.Status, resp.Message)
 
 	// Add objective with unexisting test dataSample
 	inpObjective = inputObjective{}
 	args = inpObjective.createDefault()
-	resp = mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp = mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValuesf(t, 400, resp.Status, "when adding objective with unexisting test dataSample, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add objective
@@ -146,7 +149,7 @@ func TestObjective(t *testing.T) {
 
 	// Query objective from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryObjective"), keyToJSON(objectiveKey)}
-	resp = mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp = mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying a dataManager with status %d and message %s", resp.Status, resp.Message)
 	objective := outputObjective{}
 	err = json.Unmarshal(resp.Payload, &objective)
@@ -178,7 +181,7 @@ func TestObjective(t *testing.T) {
 
 	// Query all objectives and check consistency
 	args = [][]byte{[]byte("queryObjectives")}
-	resp = mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp = mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying objectives - status %d and message %s", resp.Status, resp.Message)
 	var objectives []outputObjective
 	err = json.Unmarshal(resp.Payload, &objectives)

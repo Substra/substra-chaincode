@@ -24,6 +24,7 @@ import (
 func TestCompositeAlgo(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add algo with invalid field
 	inpAlgo := inputCompositeAlgo{
@@ -32,7 +33,7 @@ func TestCompositeAlgo(t *testing.T) {
 		},
 	}
 	args := inpAlgo.createDefault()
-	resp := mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp := mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValuesf(t, 400, resp.Status, "when adding algo with invalid checksum, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add algo
@@ -46,7 +47,7 @@ func TestCompositeAlgo(t *testing.T) {
 
 	// Query algo from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryCompositeAlgo"), keyToJSON(algoKey)}
-	resp = mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp = mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying a composite algo with status %d and message %s", resp.Status, resp.Message)
 	algo := outputCompositeAlgo{}
 	err = json.Unmarshal(resp.Payload, &algo)
@@ -74,7 +75,7 @@ func TestCompositeAlgo(t *testing.T) {
 
 	// Query all algo and check consistency
 	args = [][]byte{[]byte("queryCompositeAlgos")}
-	resp = mockStub.MockInvoke("fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f", args)
+	resp = mockStub.MockInvoke(mockTxID, args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying composite algos - status %d and message %s", resp.Status, resp.Message)
 	var algos []outputCompositeAlgo
 	err = json.Unmarshal(resp.Payload, &algos)
