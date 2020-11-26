@@ -20,7 +20,7 @@ import (
 )
 
 // OutputAssetPaginationHardLimit is a used to avoid issues listing assets
-const OutputAssetPaginationHardLimit = 500
+const OutputAssetPaginationHardLimit = 5 // 500
 
 // Struct use as output representation of ledger data
 

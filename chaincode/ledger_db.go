@@ -181,6 +181,16 @@ func (db *LedgerDB) GetIndexKeys(index string, attributes []string) ([]string, e
 func (db *LedgerDB) GetIndexKeysWithPagination(index string, attributes []string, pageSize int32, bookmark string) ([]string, string, error) {
 	keys := make([]string, 0)
 
+	if bookmark != "" {
+		inp := inputBookmark{}
+		err := AssetFromJSON([]string{bookmark}, &inp)
+		if err != nil {
+			return nil, "", err
+		}
+		bookmark = inp.Bookmark
+	}
+
+
 	// replace composite key substra delimiter "/" by couchDB delimiter "\x00"
 	bookmark = strings.Replace(bookmark, "/", "\x00", -1)
 
