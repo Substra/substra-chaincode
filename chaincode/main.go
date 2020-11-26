@@ -70,6 +70,8 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	db := NewLedgerDB(stub)
 
 	var result interface{}
+	var bookmark string
+
 	switch fn {
 	case "createComputePlan":
 		result, err = createComputePlan(db, args)
@@ -110,21 +112,21 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	case "queryAlgo":
 		result, err = queryAlgo(db, args)
 	case "queryAlgos":
-		result, err = queryAlgos(db, args)
+		result, bookmark, err = queryAlgos(db, args)
 	case "queryCompositeAlgo":
 		result, err = queryCompositeAlgo(db, args)
 	case "queryCompositeAlgos":
-		result, err = queryCompositeAlgos(db, args)
+		result, bookmark, err = queryCompositeAlgos(db, args)
 	case "queryAggregateAlgo":
 		result, err = queryAggregateAlgo(db, args)
 	case "queryAggregateAlgos":
-		result, err = queryAggregateAlgos(db, args)
+		result, bookmark, err = queryAggregateAlgos(db, args)
 	case "queryDataManager":
 		result, err = queryDataManager(db, args)
 	case "queryDataManagers":
-		result, err = queryDataManagers(db, args)
+		result, bookmark, err = queryDataManagers(db, args)
 	case "queryDataSamples":
-		result, err = queryDataSamples(db, args)
+		result, bookmark, err = queryDataSamples(db, args)
 	case "queryDataset":
 		result, err = queryDataset(db, args)
 	case "queryFilter":
@@ -134,17 +136,17 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	case "queryModelPermissions":
 		result, err = queryModelPermissions(db, args)
 	case "queryModels":
-		result, err = queryModels(db, args)
+		result, bookmark, err = queryModels(db, args)
 	case "queryObjective":
 		result, err = queryObjective(db, args)
 	case "queryObjectiveLeaderboard":
 		result, err = queryObjectiveLeaderboard(db, args)
 	case "queryObjectives":
-		result, err = queryObjectives(db, args)
+		result, bookmark, err = queryObjectives(db, args)
 	case "queryTesttuple":
 		result, err = queryTesttuple(db, args)
 	case "queryTesttuples":
-		result, err = queryTesttuples(db, args)
+		result, bookmark, err = queryTesttuples(db, args)
 	case "queryTraintuple":
 		result, err = queryTraintuple(db, args)
 	case "queryCompositeTraintuple":
@@ -152,15 +154,15 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	case "queryAggregatetuple":
 		result, err = queryAggregatetuple(db, args)
 	case "queryTraintuples":
-		result, err = queryTraintuples(db, args)
+		result, bookmark, err = queryTraintuples(db, args)
 	case "queryCompositeTraintuples":
-		result, err = queryCompositeTraintuples(db, args)
+		result, bookmark, err = queryCompositeTraintuples(db, args)
 	case "queryAggregatetuples":
-		result, err = queryAggregatetuples(db, args)
+		result, bookmark, err = queryAggregatetuples(db, args)
 	case "queryComputePlan":
 		result, err = queryComputePlan(db, args)
 	case "queryComputePlans":
-		result, err = queryComputePlans(db, args)
+		result, bookmark, err = queryComputePlans(db, args)
 	case "registerAlgo":
 		result, err = registerAlgo(db, args)
 	case "registerCompositeAlgo":
@@ -189,17 +191,27 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 
 	// Invoke duration
 	duration := int(time.Since(start).Nanoseconds()) / 1e6
-
 	// Return the result as success payload
 	if err != nil {
-		logger.Errorf("[%s][%s] Response (%dms): '%#v' - Error: '%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, err)
+		logger.Errorf("[%s][%s] Response (%dms): '%#v','%s' - Error: '%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, bookmark, err)
 		return formatErrorResponse(err)
 	}
 
 	// Marshal to json the smartcontract result
-	resp, err := json.Marshal(result)
+	var resp []byte
+
+	if bookmark != "" {
+		// Marshal to json the smartcontract result + bookmark
+		resp, err = json.Marshal(map[string]interface{}{
+			"response": result,
+			"bookmark": bookmark})
+	} else {
+		// Marshal to json the smartcontract result
+		resp, err = json.Marshal(result)
+	}
+
 	if err != nil {
-		logger.Infof("[%s][%s] Response (%dms): '%#v'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result)
+		logger.Infof("[%s][%s] Response (%dms): '%#v','%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, bookmark)
 		return formatErrorResponse(errors.Internal("could not format response: %s", err.Error()))
 	}
 
@@ -212,7 +224,6 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	if err != nil {
 		return formatErrorResponse(errors.Internal("could not send event: %s", err.Error()))
 	}
-
 
 	return shim.Success(resp)
 }

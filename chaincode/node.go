@@ -14,6 +14,10 @@
 
 package main
 
+import (
+	"chaincode/errors"
+)
+
 func registerNode(db *LedgerDB, args []string) (Node, error) {
 	txCreator, err := GetTxCreator(db.cc)
 	if err != nil {
@@ -46,21 +50,28 @@ func registerNode(db *LedgerDB, args []string) (Node, error) {
 	return node, nil
 }
 
-func queryNodes(db *LedgerDB, args []string) (resp []Node, err error) {
+func queryNodes(db *LedgerDB, args []string) (nodes []Node, err error) {
+	nodes = []Node{}
+
 	elementsKeys, err := db.GetIndexKeys("node~key", []string{"node"})
-	if err != nil {
-		return nil, err
+
+	if len(args) != 0 {
+		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
+		return
 	}
 
-	nodes := []Node{}
+	if err != nil {
+		return
+	}
+
 	for _, key := range elementsKeys {
 		node, err := db.GetNode(key)
 		if err != nil {
-			return nil, err
+			return nodes, err
 		}
 
 		nodes = append(nodes, node)
 	}
 
-	return nodes, nil
+	return
 }

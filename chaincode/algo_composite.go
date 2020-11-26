@@ -93,21 +93,27 @@ func queryCompositeAlgo(db *LedgerDB, args []string) (out outputCompositeAlgo, e
 }
 
 // queryCompositeAlgos returns all algos of the ledger
-func queryCompositeAlgos(db *LedgerDB, args []string) (outAlgos []outputCompositeAlgo, err error) {
+func queryCompositeAlgos(db *LedgerDB, args []string) (outAlgos []outputCompositeAlgo, bookmark string, err error) {
 	outAlgos = []outputCompositeAlgo{}
-	if len(args) != 0 {
-		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
+
+	if len(args) > 1 {
+		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
 		return
 	}
-	elementsKeys, err := db.GetIndexKeys("compositeAlgo~owner~key", []string{"compositeAlgo"})
+
+	if len(args) == 1 {
+		bookmark = args[0]
+	}
+
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("compositeAlgo~owner~key", []string{"compositeAlgo"}, OutputAssetPaginationHardLimit, bookmark)
 	if err != nil {
 		return
 	}
-	nb := getLimitedNbSliceElements(elementsKeys)
-	for _, key := range elementsKeys[:nb] {
+
+	for _, key := range elementsKeys {
 		algo, err := db.GetCompositeAlgo(key)
 		if err != nil {
-			return outAlgos, err
+			return outAlgos, bookmark, err
 		}
 		var out outputCompositeAlgo
 		out.Fill(algo)

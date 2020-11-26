@@ -93,21 +93,28 @@ func queryAlgo(db *LedgerDB, args []string) (out outputAlgo, err error) {
 }
 
 // queryAlgos returns all algos of the ledger
-func queryAlgos(db *LedgerDB, args []string) (outAlgos []outputAlgo, err error) {
+func queryAlgos(db *LedgerDB, args []string) (outAlgos []outputAlgo, bookmark string, err error) {
 	outAlgos = []outputAlgo{}
-	if len(args) != 0 {
-		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
+
+	if len(args) > 1 {
+		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
 		return
 	}
-	elementsKeys, err := db.GetIndexKeys("algo~owner~key", []string{"algo"})
+
+	if len(args) == 1 {
+		bookmark = args[0]
+	}
+
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("algo~owner~key", []string{"algo"}, OutputAssetPaginationHardLimit, bookmark)
+
 	if err != nil {
 		return
 	}
-	nb := getLimitedNbSliceElements(elementsKeys)
-	for _, key := range elementsKeys[:nb] {
+
+	for _, key := range elementsKeys {
 		algo, err := db.GetAlgo(key)
 		if err != nil {
-			return outAlgos, err
+			return outAlgos, bookmark, err
 		}
 		var out outputAlgo
 		out.Fill(algo)

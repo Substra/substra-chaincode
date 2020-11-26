@@ -439,27 +439,32 @@ func queryCompositeTraintuple(db *LedgerDB, args []string) (outputTraintuple out
 }
 
 // queryCompositeTraintuples returns all composite traintuples
-func queryCompositeTraintuples(db *LedgerDB, args []string) ([]outputCompositeTraintuple, error) {
-	outTraintuples := []outputCompositeTraintuple{}
+func queryCompositeTraintuples(db *LedgerDB, args []string) (outTraintuples[]outputCompositeTraintuple, bookmark string, err error) {
+	outTraintuples = []outputCompositeTraintuple{}
 
-	if len(args) != 0 {
-		err := errors.BadRequest("incorrect number of arguments, expecting nothing")
-		return outTraintuples, err
+	if len(args) > 1 {
+		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
+		return
 	}
-	elementsKeys, err := db.GetIndexKeys("compositeTraintuple~algo~key", []string{"compositeTraintuple"})
+
+	if len(args) == 1 {
+		bookmark = args[0]
+	}
+
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("compositeTraintuple~algo~key", []string{"compositeTraintuple"}, OutputAssetPaginationHardLimit, bookmark)
+
 	if err != nil {
-		return outTraintuples, err
+		return
 	}
 
-	nb := getLimitedNbSliceElements(elementsKeys)
-	for _, key := range elementsKeys[:nb] {
+	for _, key := range elementsKeys {
 		outputTraintuple, err := getOutputCompositeTraintuple(db, key)
 		if err != nil {
-			return outTraintuples, err
+			return outTraintuples, bookmark, err
 		}
 		outTraintuples = append(outTraintuples, outputTraintuple)
 	}
-	return outTraintuples, nil
+	return
 }
 
 // ----------------------------------------------------------

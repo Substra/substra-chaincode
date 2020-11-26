@@ -393,26 +393,31 @@ func queryAggregatetuple(db *LedgerDB, args []string) (outputAggregatetuple outp
 }
 
 // queryAggregatetuples returns all aggregate tuples
-func queryAggregatetuples(db *LedgerDB, args []string) ([]outputAggregatetuple, error) {
-	outputAggregatetuples := []outputAggregatetuple{}
+func queryAggregatetuples(db *LedgerDB, args []string) (outputAggregatetuples[]outputAggregatetuple, bookmark string, err error) {
+	outputAggregatetuples = []outputAggregatetuple{}
 
-	if len(args) != 0 {
-		err := errors.BadRequest("incorrect number of arguments, expecting nothing")
-		return outputAggregatetuples, err
+	if len(args) > 1 {
+		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
+		return
 	}
-	elementsKeys, err := db.GetIndexKeys("aggregatetuple~algo~key", []string{"aggregatetuple"})
+
+	if len(args) == 1 {
+		bookmark = args[0]
+	}
+
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("aggregatetuple~algo~key", []string{"aggregatetuple"}, OutputAssetPaginationHardLimit, bookmark)
+
 	if err != nil {
-		return outputAggregatetuples, err
+		return
 	}
-	nb := getLimitedNbSliceElements(elementsKeys)
-	for _, key := range elementsKeys[:nb] {
+	for _, key := range elementsKeys {
 		outputAggregatetuple, err := getOutputAggregatetuple(db, key)
 		if err != nil {
-			return outputAggregatetuples, err
+			return outputAggregatetuples, bookmark, err
 		}
 		outputAggregatetuples = append(outputAggregatetuples, outputAggregatetuple)
 	}
-	return outputAggregatetuples, nil
+	return
 }
 
 // ----------------------------------------------------------

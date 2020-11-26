@@ -364,27 +364,33 @@ func queryTesttuple(db *LedgerDB, args []string) (out outputTesttuple, err error
 }
 
 // queryTesttuples returns all testtuples of the ledger
-func queryTesttuples(db *LedgerDB, args []string) ([]outputTesttuple, error) {
-	outTesttuples := []outputTesttuple{}
+func queryTesttuples(db *LedgerDB, args []string) (outTesttuples[]outputTesttuple, bookmark string, err error) {
+	outTesttuples = []outputTesttuple{}
 
-	if len(args) != 0 {
-		err := errors.BadRequest("incorrect number of arguments, expecting nothing")
-		return outTesttuples, err
+	if len(args) > 1 {
+		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
+		return
 	}
-	elementsKeys, err := db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple"})
+
+	if len(args) == 1 {
+		bookmark = args[0]
+	}
+
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("testtuple~traintuple~certified~key", []string{"testtuple"}, OutputAssetPaginationHardLimit, bookmark)
+
 	if err != nil {
-		return outTesttuples, err
+		return
 	}
-	nb := getLimitedNbSliceElements(elementsKeys)
-	for _, key := range elementsKeys[:nb] {
+
+	for _, key := range elementsKeys {
 		var out outputTesttuple
 		out, err = getOutputTesttuple(db, key)
 		if err != nil {
-			return outTesttuples, err
+			return outTesttuples, bookmark, err
 		}
 		outTesttuples = append(outTesttuples, out)
 	}
-	return outTesttuples, nil
+	return
 }
 
 // -----------------------------------------------
