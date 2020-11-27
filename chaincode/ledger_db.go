@@ -181,6 +181,13 @@ func (db *LedgerDB) GetIndexKeys(index string, attributes []string) ([]string, e
 func (db *LedgerDB) GetIndexKeysWithPagination(index string, attributes []string, pageSize int32, bookmark string) ([]string, string, error) {
 	keys := make([]string, 0)
 
+
+	/*
+	compositeKeyNamespace = "\x00"
+	minUnicodeRuneValue   = 0            //U+0000
+	maxUnicodeRuneValue   = utf8.MaxRune //U+10FFFF - maximum (and unallocated) code point
+	*/
+
 	if bookmark != "" {
 		// replace composite key substra delimiters "/" by couchDB delimiters
 		bookmark = strings.Replace(bookmark, "/", "\x00", -1)
