@@ -393,19 +393,27 @@ func queryAggregatetuple(db *LedgerDB, args []string) (outputAggregatetuple outp
 }
 
 // queryAggregatetuples returns all aggregate tuples
-func queryAggregatetuples(db *LedgerDB, args []string) (outputAggregatetuples[]outputAggregatetuple, bookmark string, err error) {
+func queryAggregatetuples(db *LedgerDB, args []string) (outputAggregatetuples[]outputAggregatetuple, bookmarks map[string]string, err error) {
 	outputAggregatetuples = []outputAggregatetuple{}
+	index := "aggregatetuple~algo~key"
+	bookmarks = map[string]string{index: ""}
 
 	if len(args) > 1 {
 		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
 		return
 	}
 
-	if len(args) == 1 {
-		bookmark = args[0]
+	if len(args) == 1 && args[0] != "" {
+		inp := inputBookmarks{}
+		err := AssetFromJSON(args, &inp)
+		if err != nil {
+			return nil, bookmarks, err
+		}
+		bookmarks = inp.Bookmarks
 	}
 
-	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("aggregatetuple~algo~key", []string{"aggregatetuple"}, OutputAssetPaginationHardLimit, bookmark)
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination(index, []string{"aggregatetuple"}, OutputAssetPaginationHardLimit, bookmarks[index])
+	bookmarks[index] = bookmark
 
 	if err != nil {
 		return
@@ -413,7 +421,7 @@ func queryAggregatetuples(db *LedgerDB, args []string) (outputAggregatetuples[]o
 	for _, key := range elementsKeys {
 		outputAggregatetuple, err := getOutputAggregatetuple(db, key)
 		if err != nil {
-			return outputAggregatetuples, bookmark, err
+			return outputAggregatetuples, bookmarks, err
 		}
 		outputAggregatetuples = append(outputAggregatetuples, outputAggregatetuple)
 	}

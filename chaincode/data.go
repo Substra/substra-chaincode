@@ -260,19 +260,28 @@ func queryDataManager(db *LedgerDB, args []string) (out outputDataManager, err e
 }
 
 // queryDataManagers returns all DataManagers of the ledger
-func queryDataManagers(db *LedgerDB, args []string) (outDataManagers []outputDataManager, bookmark string, err error) {
+func queryDataManagers(db *LedgerDB, args []string) (outDataManagers []outputDataManager, bookmarks map[string]string, err error) {
 	outDataManagers = []outputDataManager{}
+	index := "dataManager~owner~key"
+	bookmarks = map[string]string{index: ""}
 
 	if len(args) > 1 {
 		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
 		return
 	}
 
-	if len(args) == 1 {
-		bookmark = args[0]
+	if len(args) == 1 && args[0] != "" {
+		inp := inputBookmarks{}
+		err := AssetFromJSON(args, &inp)
+		if err != nil {
+			return nil, bookmarks, err
+		}
+		bookmarks = inp.Bookmarks
 	}
 
-	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("dataManager~owner~key", []string{"dataManager"}, OutputAssetPaginationHardLimit, bookmark)
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination(index, []string{"dataManager"}, OutputAssetPaginationHardLimit, bookmarks[index])
+	bookmarks[index] = bookmark
+
 	if err != nil {
 		return
 	}
@@ -280,7 +289,7 @@ func queryDataManagers(db *LedgerDB, args []string) (outDataManagers []outputDat
 	for _, key := range elementsKeys {
 		dataManager, err := db.GetDataManager(key)
 		if err != nil {
-			return outDataManagers, bookmark, err
+			return outDataManagers, bookmarks, err
 		}
 		var out outputDataManager
 		out.Fill(dataManager)
@@ -319,19 +328,27 @@ func queryDataset(db *LedgerDB, args []string) (outputDataset, error) {
 	return out, nil
 }
 
-func queryDataSamples(db *LedgerDB, args []string) (outDataSamples []outputDataSample, bookmark string, err error) {
+func queryDataSamples(db *LedgerDB, args []string) (outDataSamples []outputDataSample, bookmarks map[string]string, err error) {
 	outDataSamples = []outputDataSample{}
+	index := "dataSample~dataManager~key"
+	bookmarks = map[string]string{index: ""}
 
 	if len(args) > 1 {
 		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
 		return
 	}
 
-	if len(args) == 1 {
-		bookmark = args[0]
+	if len(args) == 1 && args[0] != "" {
+		inp := inputBookmarks{}
+		err := AssetFromJSON(args, &inp)
+		if err != nil {
+			return nil, bookmarks, err
+		}
+		bookmarks = inp.Bookmarks
 	}
 
-	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("dataSample~dataManager~key", []string{"dataSample"}, OutputAssetPaginationHardLimit, bookmark)
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination(index, []string{"dataSample"}, OutputAssetPaginationHardLimit, bookmarks[index])
+	bookmarks[index] = bookmark
 
 	if err != nil {
 		return
@@ -340,7 +357,7 @@ func queryDataSamples(db *LedgerDB, args []string) (outDataSamples []outputDataS
 	for _, key := range elementsKeys {
 		dataSample, err := db.GetDataSample(key)
 		if err != nil {
-			return outDataSamples, bookmark, err
+			return outDataSamples, bookmarks, err
 		}
 		var out outputDataSample
 		out.Fill(key, dataSample)

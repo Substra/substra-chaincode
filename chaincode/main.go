@@ -70,7 +70,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	db := NewLedgerDB(stub)
 
 	var result interface{}
-	var bookmark string
+	var bookmarks map[string]string
 
 	switch fn {
 	case "createComputePlan":
@@ -112,21 +112,21 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	case "queryAlgo":
 		result, err = queryAlgo(db, args)
 	case "queryAlgos":
-		result, bookmark, err = queryAlgos(db, args)
+		result, bookmarks, err = queryAlgos(db, args)
 	case "queryCompositeAlgo":
 		result, err = queryCompositeAlgo(db, args)
 	case "queryCompositeAlgos":
-		result, bookmark, err = queryCompositeAlgos(db, args)
+		result, bookmarks, err = queryCompositeAlgos(db, args)
 	case "queryAggregateAlgo":
 		result, err = queryAggregateAlgo(db, args)
 	case "queryAggregateAlgos":
-		result, bookmark, err = queryAggregateAlgos(db, args)
+		result, bookmarks, err = queryAggregateAlgos(db, args)
 	case "queryDataManager":
 		result, err = queryDataManager(db, args)
 	case "queryDataManagers":
-		result, bookmark, err = queryDataManagers(db, args)
+		result, bookmarks, err = queryDataManagers(db, args)
 	case "queryDataSamples":
-		result, bookmark, err = queryDataSamples(db, args)
+		result, bookmarks, err = queryDataSamples(db, args)
 	case "queryDataset":
 		result, err = queryDataset(db, args)
 	case "queryFilter":
@@ -136,17 +136,17 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	case "queryModelPermissions":
 		result, err = queryModelPermissions(db, args)
 	case "queryModels":
-		result, bookmark, err = queryModels(db, args)
+		result, bookmarks, err = queryModels(db, args)
 	case "queryObjective":
 		result, err = queryObjective(db, args)
 	case "queryObjectiveLeaderboard":
 		result, err = queryObjectiveLeaderboard(db, args)
 	case "queryObjectives":
-		result, bookmark, err = queryObjectives(db, args)
+		result, bookmarks, err = queryObjectives(db, args)
 	case "queryTesttuple":
 		result, err = queryTesttuple(db, args)
 	case "queryTesttuples":
-		result, bookmark, err = queryTesttuples(db, args)
+		result, bookmarks, err = queryTesttuples(db, args)
 	case "queryTraintuple":
 		result, err = queryTraintuple(db, args)
 	case "queryCompositeTraintuple":
@@ -154,15 +154,15 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	case "queryAggregatetuple":
 		result, err = queryAggregatetuple(db, args)
 	case "queryTraintuples":
-		result, bookmark, err = queryTraintuples(db, args)
+		result, bookmarks, err = queryTraintuples(db, args)
 	case "queryCompositeTraintuples":
-		result, bookmark, err = queryCompositeTraintuples(db, args)
+		result, bookmarks, err = queryCompositeTraintuples(db, args)
 	case "queryAggregatetuples":
-		result, bookmark, err = queryAggregatetuples(db, args)
+		result, bookmarks, err = queryAggregatetuples(db, args)
 	case "queryComputePlan":
 		result, err = queryComputePlan(db, args)
 	case "queryComputePlans":
-		result, bookmark, err = queryComputePlans(db, args)
+		result, bookmarks, err = queryComputePlans(db, args)
 	case "registerAlgo":
 		result, err = registerAlgo(db, args)
 	case "registerCompositeAlgo":
@@ -193,25 +193,24 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	duration := int(time.Since(start).Nanoseconds()) / 1e6
 	// Return the result as success payload
 	if err != nil {
-		logger.Errorf("[%s][%s] Response (%dms): '%#v','%s' - Error: '%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, bookmark, err)
+		logger.Errorf("[%s][%s] Response (%dms): '%#v','%s' - Error: '%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, bookmarks, err)
 		return formatErrorResponse(err)
 	}
 
 	// Marshal to json the smartcontract result
 	var resp []byte
-
-	if bookmark != "" {
-		// Marshal to json the smartcontract result + bookmark
+	if len(bookmarks) != 0 {
+		// Marshal to json the smartcontract result + bookmarks
 		resp, err = json.Marshal(map[string]interface{}{
-			"response": result,
-			"bookmark": bookmark})
+			"result": result,
+			"bookmarks": bookmarks})
 	} else {
 		// Marshal to json the smartcontract result
 		resp, err = json.Marshal(result)
 	}
 
 	if err != nil {
-		logger.Infof("[%s][%s] Response (%dms): '%#v','%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, bookmark)
+		logger.Infof("[%s][%s] Response (%dms): '%#v','%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, bookmarks)
 		return formatErrorResponse(errors.Internal("could not format response: %s", err.Error()))
 	}
 

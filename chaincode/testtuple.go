@@ -364,19 +364,27 @@ func queryTesttuple(db *LedgerDB, args []string) (out outputTesttuple, err error
 }
 
 // queryTesttuples returns all testtuples of the ledger
-func queryTesttuples(db *LedgerDB, args []string) (outTesttuples[]outputTesttuple, bookmark string, err error) {
+func queryTesttuples(db *LedgerDB, args []string) (outTesttuples[]outputTesttuple, bookmarks map[string]string, err error) {
 	outTesttuples = []outputTesttuple{}
+	index := "testtuple~traintuple~certified~key"
+	bookmarks = map[string]string{index: ""}
 
 	if len(args) > 1 {
 		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
 		return
 	}
 
-	if len(args) == 1 {
-		bookmark = args[0]
+	if len(args) == 1 && args[0] != "" {
+		inp := inputBookmarks{}
+		err := AssetFromJSON(args, &inp)
+		if err != nil {
+			return nil, bookmarks, err
+		}
+		bookmarks = inp.Bookmarks
 	}
 
-	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("testtuple~traintuple~certified~key", []string{"testtuple"}, OutputAssetPaginationHardLimit, bookmark)
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination(index, []string{"testtuple"}, OutputAssetPaginationHardLimit, bookmarks[index])
+	bookmarks[index] = bookmark
 
 	if err != nil {
 		return
@@ -386,7 +394,7 @@ func queryTesttuples(db *LedgerDB, args []string) (outTesttuples[]outputTesttupl
 		var out outputTesttuple
 		out, err = getOutputTesttuple(db, key)
 		if err != nil {
-			return outTesttuples, bookmark, err
+			return outTesttuples, bookmarks, err
 		}
 		outTesttuples = append(outTesttuples, out)
 	}

@@ -116,19 +116,27 @@ func queryObjective(db *LedgerDB, args []string) (out outputObjective, err error
 }
 
 // queryObjectives returns all objectives of the ledger
-func queryObjectives(db *LedgerDB, args []string) (outObjectives []outputObjective, bookmark string, err error) {
+func queryObjectives(db *LedgerDB, args []string) (outObjectives []outputObjective, bookmarks map[string]string, err error) {
 	outObjectives = []outputObjective{}
+	index := "objective~owner~key"
+	bookmarks = map[string]string{index: ""}
 
 	if len(args) > 1 {
 		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
 		return
 	}
 
-	if len(args) == 1 {
-		bookmark = args[0]
+	if len(args) == 1 && args[0] != "" {
+		inp := inputBookmarks{}
+		err := AssetFromJSON(args, &inp)
+		if err != nil {
+			return nil, bookmarks, err
+		}
+		bookmarks = inp.Bookmarks
 	}
 
-	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("objective~owner~key", []string{"objective"}, OutputAssetPaginationHardLimit, bookmark)
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination(index, []string{"objective"}, OutputAssetPaginationHardLimit, bookmarks[index])
+	bookmarks[index] = bookmark
 
 	if err != nil {
 		return
@@ -136,7 +144,7 @@ func queryObjectives(db *LedgerDB, args []string) (outObjectives []outputObjecti
 	for _, key := range elementsKeys {
 		objective, err := db.GetObjective(key)
 		if err != nil {
-			return outObjectives, bookmark, err
+			return outObjectives, bookmarks, err
 		}
 		var out outputObjective
 		out.Fill(objective)

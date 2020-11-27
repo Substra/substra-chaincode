@@ -93,19 +93,29 @@ func queryAggregateAlgo(db *LedgerDB, args []string) (out outputAggregateAlgo, e
 }
 
 // queryAggregateAlgos returns all algos of the ledger
-func queryAggregateAlgos(db *LedgerDB, args []string) (outAlgos []outputAggregateAlgo, bookmark string, err error) {
+func queryAggregateAlgos(db *LedgerDB, args []string) (outAlgos []outputAggregateAlgo, bookmarks map[string]string, err error) {
 	outAlgos = []outputAggregateAlgo{}
+	index := "aggregateAlgo~owner~key"
+	bookmarks = map[string]string{index: ""}
 
 	if len(args) > 1 {
 		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
 		return
 	}
 
-	if len(args) == 1 {
-		bookmark = args[0]
+	if len(args) == 1 && args[0] != "" {
+		inp := inputBookmarks{}
+		err := AssetFromJSON(args, &inp)
+		if err != nil {
+			return nil, bookmarks, err
+		}
+		bookmarks = inp.Bookmarks
 	}
 
-	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("aggregateAlgo~owner~key", []string{"aggregateAlgo"}, OutputAssetPaginationHardLimit, bookmark)
+
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination(index, []string{"aggregateAlgo"}, OutputAssetPaginationHardLimit, bookmarks[index])
+	bookmarks[index] = bookmark
+
 	if err != nil {
 		return
 	}
@@ -113,7 +123,7 @@ func queryAggregateAlgos(db *LedgerDB, args []string) (outAlgos []outputAggregat
 	for _, key := range elementsKeys {
 		algo, err := db.GetAggregateAlgo(key)
 		if err != nil {
-			return outAlgos, bookmark, err
+			return outAlgos, bookmarks, err
 		}
 		var out outputAggregateAlgo
 		out.Fill(algo)
