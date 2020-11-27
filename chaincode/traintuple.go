@@ -385,10 +385,9 @@ func queryTraintuple(db *LedgerDB, args []string) (outputTraintuple outputTraint
 }
 
 // queryTraintuples returns all traintuples
-func queryTraintuples(db *LedgerDB, args []string) (outTraintuples []outputTraintuple, bookmarks map[string]string, err error) {
+func queryTraintuples(db *LedgerDB, args []string) (outTraintuples []outputTraintuple, bookmark string, err error) {
+	inp := inputBookmark{}
 	outTraintuples = []outputTraintuple{}
-	index := "traintuple~algo~key"
-	bookmarks = map[string]string{index: ""}
 
 	if len(args) > 1 {
 		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
@@ -396,16 +395,13 @@ func queryTraintuples(db *LedgerDB, args []string) (outTraintuples []outputTrain
 	}
 
 	if len(args) == 1 && args[0] != "" {
-		inp := inputBookmarks{}
-		err := AssetFromJSON(args, &inp)
+		err = AssetFromJSON(args, &inp)
 		if err != nil {
-			return nil, bookmarks, err
+			return
 		}
-		bookmarks = inp.Bookmarks
 	}
 
-	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination(index, []string{"traintuple"}, OutputAssetPaginationHardLimit, bookmarks[index])
-	bookmarks[index] = bookmark
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("traintuple~algo~key", []string{"traintuple"}, OutputPageSize, inp.Bookmark)
 
 	if err != nil {
 		return
@@ -414,7 +410,7 @@ func queryTraintuples(db *LedgerDB, args []string) (outTraintuples []outputTrain
 	for _, key := range elementsKeys {
 		outputTraintuple, err := getOutputTraintuple(db, key)
 		if err != nil {
-			return outTraintuples, bookmarks, err
+			return outTraintuples, bookmark, err
 		}
 		outTraintuples = append(outTraintuples, outputTraintuple)
 	}

@@ -23,8 +23,8 @@ import (
 )
 
 type ObjectiveResponse struct {
-	Result  []outputObjective `json:"results"`
-	Author map[string]string `json:"bookmarks"`
+	Results  []outputObjective `json:"results"`
+	Bookmark string            `json:"bookmark"`
 }
 
 func TestLeaderBoard(t *testing.T) {
@@ -188,6 +188,6 @@ func TestObjective(t *testing.T) {
 	var objectives ObjectiveResponse
 	err = json.Unmarshal(resp.Payload, &objectives)
 	assert.NoError(t, err, "while unmarshalling objectives")
-	assert.Len(t, objectives.Result, 1)
-	assert.Exactly(t, expectedObjective, objectives.Result[0], "return objective different from registered one")
+	assert.Len(t, objectives.Results, 1)
+	assert.Exactly(t, expectedObjective, objectives.Results[0], "return objective different from registered one")
 }

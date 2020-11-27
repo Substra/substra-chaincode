@@ -31,10 +31,9 @@ import (
 //
 /////////////////////////////////////////////////////////////
 type AggregatetupleResponse struct {
-	Result  []outputAggregatetuple `json:"results"`
-	Author map[string]string `json:"bookmarks"`
+	Results  []outputAggregatetuple `json:"results"`
+	Bookmark string                 `json:"bookmark"`
 }
-
 
 func TestTraintupleWithNoTestDatasetAggregate(t *testing.T) {
 	scc := new(SubstraChaincode)
@@ -293,7 +292,7 @@ func TestTraintupleAggregate(t *testing.T) {
 	err = json.Unmarshal(resp.Payload, &queryTraintuples)
 	assert.NoError(t, err, "aggregate tuples should unmarshal without problem")
 	require.NotZero(t, queryTraintuples)
-	assert.Exactly(t, out, queryTraintuples.Result[0])
+	assert.Exactly(t, out, queryTraintuples.Results[0])
 
 	// Add traintuple with inmodel from the above-submitted traintuple
 	inpWaitingTraintuple := inputAggregatetuple{

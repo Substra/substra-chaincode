@@ -177,19 +177,12 @@ func (db *LedgerDB) GetIndexKeys(index string, attributes []string) ([]string, e
 	return keys, nil
 }
 
-// GetIndexKeys returns keys matching composite key values from the chaincode db
+// GetIndexKeysWithPagination returns keys matching composite key values from the chaincode db
 func (db *LedgerDB) GetIndexKeysWithPagination(index string, attributes []string, pageSize int32, bookmark string) ([]string, string, error) {
 	keys := make([]string, 0)
 
-
-	/*
-	compositeKeyNamespace = "\x00"
-	minUnicodeRuneValue   = 0            //U+0000
-	maxUnicodeRuneValue   = utf8.MaxRune //U+10FFFF - maximum (and unallocated) code point
-	*/
-
 	if bookmark != "" {
-		// replace composite key substra delimiters "/" by couchDB delimiters
+		// Transform bookmark from JSON-friendly format to CouchDB format
 		bookmark = strings.Replace(bookmark, "/", "\x00", -1)
 		bookmark = strings.Replace(bookmark, "#", "\\u0000", -1)
 		bookmark = strings.Replace(bookmark, "END", "\U0010ffff", -1)
@@ -213,7 +206,7 @@ func (db *LedgerDB) GetIndexKeysWithPagination(index string, attributes []string
 	}
 
 	if metadata != nil {
-		// replace composite key couchDB delimiters by substra delimiters
+		// Transform bookmark from CouchDB format to JSON-friendly format
 		bookmark = strings.Replace(metadata.Bookmark, "\x00", "/", -1)
 		bookmark = strings.Replace(bookmark, "\\u0000", "#", -1)
 		bookmark = strings.Replace(bookmark, "\U0010ffff", "END", -1)
@@ -221,7 +214,6 @@ func (db *LedgerDB) GetIndexKeysWithPagination(index string, attributes []string
 
 	return keys, bookmark, nil
 }
-
 
 // ----------------------------------------------
 // High-level functions

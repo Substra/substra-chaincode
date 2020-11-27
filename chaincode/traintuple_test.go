@@ -24,10 +24,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
 type TraintupleResponse struct {
-	Result []outputTraintuple  `json:"results"`
-	Author map[string]string `json:"bookmarks"`
+	Results  []outputTraintuple `json:"results"`
+	Bookmark string             `json:"bookmark"`
 }
 
 func TestTraintupleWithNoTestDataset(t *testing.T) {
@@ -327,7 +326,7 @@ func TestTraintuple(t *testing.T) {
 	var queryTraintuples TraintupleResponse
 	err = json.Unmarshal(resp.Payload, &queryTraintuples)
 	assert.NoError(t, err, "traintuples should unmarshal without problem")
-	assert.Exactly(t, out, queryTraintuples.Result[0])
+	assert.Exactly(t, out, queryTraintuples.Results[0])
 
 	// Add traintuple with inmodel from the above-submitted traintuple
 	inpWaitingTraintuple := inputTraintuple{

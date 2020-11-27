@@ -24,8 +24,8 @@ import (
 )
 
 type TesttupleResponse struct {
-	Result []outputTesttuple `json:"results"`
-	Author map[string]string `json:"bookmarks"`
+	Results  []outputTesttuple `json:"results"`
+	Bookmark string            `json:"bookmark"`
 }
 
 func TestTesttupleOnFailedTraintuple(t *testing.T) {
@@ -76,8 +76,8 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 	var testtuples TesttupleResponse
 	err := json.Unmarshal(resp.Payload, &testtuples)
 	assert.NoError(t, err, "should be unmarshaled")
-	assert.Len(t, testtuples.Result, 1, "there should be only one testtuple...")
-	assert.True(t, testtuples.Result[0].Certified, "... and it should be certified")
+	assert.Len(t, testtuples.Results, 1, "there should be only one testtuple...")
+	assert.True(t, testtuples.Results[0].Certified, "... and it should be certified")
 
 }
 

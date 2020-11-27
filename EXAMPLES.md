@@ -205,9 +205,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataManagers"]}' -C myc
 ##### Command output:
 ```json
 {
- "bookmarks": {
-  "dataManager~owner~key": ""
- },
+ "bookmark": "",
  "results": [
   {
    "description": {
@@ -242,9 +240,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataSamples"]}' -C myc
 ##### Command output:
 ```json
 {
- "bookmarks": {
-  "dataSample~dataManager~key": ""
- },
+ "bookmark": "",
  "results": [
   {
    "data_manager_keys": [
@@ -285,9 +281,7 @@ peer chaincode query -n mycc -c '{"Args":["queryObjectives"]}' -C myc
 ##### Command output:
 ```json
 {
- "bookmarks": {
-  "objective~owner~key": ""
- },
+ "bookmark": "",
  "results": [
   {
    "description": {
@@ -931,9 +925,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
 ##### Command output:
 ```json
 {
- "bookmarks": {
-  "testtuple~traintuple~certified~key": ""
- },
+ "bookmark": "",
  "results": [
   {
    "algo": {
@@ -1184,11 +1176,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
 ##### Command output:
 ```json
 {
- "bookmarks": {
-  "aggregatetuple~algo~key": "",
-  "compositeTraintuple~algo~key": "",
-  "traintuple~algo~key": ""
- },
+ "bookmark": "",
  "results": [
   {
    "traintuple": {
@@ -1696,9 +1684,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
 ##### Command output:
 ```json
 {
- "bookmarks": {
-  "computePlan~key": ""
- },
+ "bookmark": "",
  "results": [
   {
    "aggregatetuple_keys": null,

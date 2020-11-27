@@ -22,8 +22,8 @@ import (
 )
 
 type AggregateAlgoResponse struct {
-	Result  []outputAggregateAlgo `json:"results"`
-	Author map[string]string `json:"bookmarks"`
+	Results  []outputAggregateAlgo `json:"results"`
+	Bookmark string                `json:"bookmark"`
 }
 
 func TestAggregateAlgo(t *testing.T) {
@@ -84,6 +84,6 @@ func TestAggregateAlgo(t *testing.T) {
 	var algos AggregateAlgoResponse
 	err = json.Unmarshal(resp.Payload, &algos)
 	assert.NoError(t, err, "while unmarshalling aggregate algos")
-	assert.Len(t, algos.Result, 1)
-	assert.Exactly(t, expectedAlgo, algos.Result[0], "return aggregate algo different from registered one")
+	assert.Len(t, algos.Results, 1)
+	assert.Exactly(t, expectedAlgo, algos.Results[0], "return aggregate algo different from registered one")
 }

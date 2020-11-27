@@ -22,8 +22,8 @@ import (
 )
 
 type CompositeAlgoResponse struct {
-	Result  []outputCompositeAlgo `json:"results"`
-	Author map[string]string `json:"bookmarks"`
+	Results []outputCompositeAlgo `json:"results"`
+	Author  map[string]string     `json:"bookmarks"`
 }
 
 func TestCompositeAlgo(t *testing.T) {
@@ -84,6 +84,6 @@ func TestCompositeAlgo(t *testing.T) {
 	var algos CompositeAlgoResponse
 	err = json.Unmarshal(resp.Payload, &algos)
 	assert.NoError(t, err, "while unmarshalling composite algos")
-	assert.Len(t, algos.Result, 1)
-	assert.Exactly(t, expectedAlgo, algos.Result[0], "return composite algo different from registered one")
+	assert.Len(t, algos.Results, 1)
+	assert.Exactly(t, expectedAlgo, algos.Results[0], "return composite algo different from registered one")
 }

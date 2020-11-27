@@ -19,8 +19,8 @@ import (
 	"math"
 )
 
-// OutputAssetPaginationHardLimit is a used to avoid issues listing assets
-const OutputAssetPaginationHardLimit = 5 // 500
+// OutputPageSize is a used to avoid issues listing assets
+const OutputPageSize = 5 // 500
 
 // Struct use as output representation of ledger data
 
@@ -424,7 +424,7 @@ func (out *outputBoardTuple) Fill(db *LedgerDB, in Testtuple, testtupleKey strin
 }
 
 func getLimitedNbSliceElements(s []string) int {
-	return int(math.Min(float64(len(s)), OutputAssetPaginationHardLimit))
+	return int(math.Min(float64(len(s)), OutputPageSize))
 }
 
 type outputKey struct {

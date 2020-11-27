@@ -34,10 +34,9 @@ import (
 /////////////////////////////////////////////////////////////
 
 type CompositeTraintupleResponse struct {
-	Result []outputCompositeTraintuple  `json:"results"`
-	Author map[string]string `json:"bookmarks"`
+	Results  []outputCompositeTraintuple `json:"results"`
+	Bookmark string                      `json:"bookmark"`
 }
-
 
 func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 	scc := new(SubstraChaincode)
@@ -334,7 +333,7 @@ func TestTraintupleComposite(t *testing.T) {
 	err = json.Unmarshal(resp.Payload, &queryTraintuples)
 	assert.NoError(t, err, "composite traintuples should unmarshal without problem")
 	require.NotZero(t, queryTraintuples)
-	assert.Exactly(t, out, queryTraintuples.Result[0])
+	assert.Exactly(t, out, queryTraintuples.Results[0])
 
 	// Add traintuple with inmodel from the above-submitted traintuple
 	inpWaitingTraintuple := inputCompositeTraintuple{

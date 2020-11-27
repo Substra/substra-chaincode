@@ -153,8 +153,8 @@ func TestTagTuple(t *testing.T) {
 	err := json.Unmarshal(resp.Payload, &traintuples)
 
 	assert.NoError(t, err, "should be unmarshaled")
-	assert.Len(t, traintuples.Result, 1, "there should be one traintuple")
-	assert.EqualValues(t, tag, traintuples.Result[0].Tag)
+	assert.Len(t, traintuples.Results, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, traintuples.Results[0].Tag)
 
 	inpTesttuple := inputTesttuple{Tag: tag}
 	args = inpTesttuple.createDefault()
@@ -166,8 +166,8 @@ func TestTagTuple(t *testing.T) {
 	var testtuples TesttupleResponse
 	err = json.Unmarshal(resp.Payload, &testtuples)
 	assert.NoError(t, err, "should be unmarshaled")
-	assert.Len(t, testtuples.Result, 1, "there should be one traintuple")
-	assert.EqualValues(t, tag, testtuples.Result[0].Tag)
+	assert.Len(t, testtuples.Results, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, testtuples.Results[0].Tag)
 
 	filter := inputQueryFilter{
 		IndexName:  "testtuple~tag",
@@ -179,8 +179,8 @@ func TestTagTuple(t *testing.T) {
 	filtertuples := []outputTesttuple{}
 	err = json.Unmarshal(resp.Payload, &filtertuples)
 	assert.NoError(t, err, "should be unmarshaled")
-	assert.Len(t, testtuples.Result, 1, "there should be one traintuple")
-	assert.EqualValues(t, tag, testtuples.Result[0].Tag)
+	assert.Len(t, testtuples.Results, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, testtuples.Results[0].Tag)
 
 }
 

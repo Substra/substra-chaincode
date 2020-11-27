@@ -93,10 +93,9 @@ func queryCompositeAlgo(db *LedgerDB, args []string) (out outputCompositeAlgo, e
 }
 
 // queryCompositeAlgos returns all algos of the ledger
-func queryCompositeAlgos(db *LedgerDB, args []string) (outAlgos []outputCompositeAlgo, bookmarks map[string]string, err error) {
+func queryCompositeAlgos(db *LedgerDB, args []string) (outAlgos []outputCompositeAlgo, bookmark string, err error) {
+	inp := inputBookmark{}
 	outAlgos = []outputCompositeAlgo{}
-	index := "compositeAlgo~owner~key"
-	bookmarks = map[string]string{index: ""}
 
 	if len(args) > 1 {
 		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
@@ -104,16 +103,13 @@ func queryCompositeAlgos(db *LedgerDB, args []string) (outAlgos []outputComposit
 	}
 
 	if len(args) == 1 && args[0] != "" {
-		inp := inputBookmarks{}
-		err := AssetFromJSON(args, &inp)
+		err = AssetFromJSON(args, &inp)
 		if err != nil {
-			return nil, bookmarks, err
+			return
 		}
-		bookmarks = inp.Bookmarks
 	}
 
-	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination(index, []string{"compositeAlgo"}, OutputAssetPaginationHardLimit, bookmarks[index])
-	bookmarks[index] = bookmark
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("compositeAlgo~owner~key", []string{"compositeAlgo"}, OutputPageSize, inp.Bookmark)
 
 	if err != nil {
 		return
@@ -122,7 +118,7 @@ func queryCompositeAlgos(db *LedgerDB, args []string) (outAlgos []outputComposit
 	for _, key := range elementsKeys {
 		algo, err := db.GetCompositeAlgo(key)
 		if err != nil {
-			return outAlgos, bookmarks, err
+			return outAlgos, bookmark, err
 		}
 		var out outputCompositeAlgo
 		out.Fill(algo)

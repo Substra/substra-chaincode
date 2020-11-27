@@ -261,10 +261,9 @@ func queryComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err 
 	return getOutComputePlan(db, inp.Key)
 }
 
-func queryComputePlans(db *LedgerDB, args []string) (outComputePlans []outputComputePlan, bookmarks map[string]string, err error) {
+func queryComputePlans(db *LedgerDB, args []string) (outComputePlans []outputComputePlan, bookmark string, err error) {
+	inp := inputBookmark{}
 	outComputePlans = []outputComputePlan{}
-	index := "computePlan~key"
-	bookmarks = map[string]string{index: ""}
 
 	if len(args) > 1 {
 		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
@@ -272,16 +271,13 @@ func queryComputePlans(db *LedgerDB, args []string) (outComputePlans []outputCom
 	}
 
 	if len(args) == 1 && args[0] != "" {
-		inp := inputBookmarks{}
-		err := AssetFromJSON(args, &inp)
+		err = AssetFromJSON(args, &inp)
 		if err != nil {
-			return nil, bookmarks, err
+			return
 		}
-		bookmarks = inp.Bookmarks
 	}
 
-	computePlanKeys, bookmark, err := db.GetIndexKeysWithPagination(index, []string{"computePlan"}, OutputAssetPaginationHardLimit, bookmarks[index])
-	bookmarks[index] = bookmark
+	computePlanKeys, bookmark, err := db.GetIndexKeysWithPagination("computePlan~key", []string{"computePlan"}, OutputPageSize, inp.Bookmark)
 
 	if err != nil {
 		return
@@ -291,7 +287,7 @@ func queryComputePlans(db *LedgerDB, args []string) (outComputePlans []outputCom
 		var computePlan outputComputePlan
 		computePlan, err = getOutComputePlan(db, key)
 		if err != nil {
-			return outComputePlans, bookmarks, err
+			return
 		}
 		outComputePlans = append(outComputePlans, computePlan)
 	}

@@ -122,8 +122,8 @@ type inputKey struct {
 	Key string `validate:"required,len=36" json:"key"`
 }
 
-type inputBookmarks struct {
-	Bookmarks map[string]string `validate:"required,dive,keys,endkeys" json:"bookmarks"`
+type inputBookmark struct {
+	Bookmark string `validate:"required" json:"bookmark"`
 }
 
 type inputLogSuccessTrain struct {
