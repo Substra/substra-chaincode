@@ -69,7 +69,6 @@ func TestLeaderBoard(t *testing.T) {
 func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	inpObjective := inputObjective{}
 	inpObjective.createDefault()
@@ -80,7 +79,6 @@ func TestRegisterObjectiveWhitoutDataset(t *testing.T) {
 func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 	mockStub.MockInvoke(mockTxID, [][]byte{[]byte("registerNode")})
 
 	// Add a dataManager and some dataSample successfuly
@@ -115,7 +113,6 @@ func TestRegisterObjectiveWithDataSampleKeyNotDataManagerKey(t *testing.T) {
 func TestObjective(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add objective with invalid field
 	inpObjective := inputObjective{

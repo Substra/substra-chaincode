@@ -24,7 +24,6 @@ import (
 func TestCompositeAlgo(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add algo with invalid field
 	inpAlgo := inputCompositeAlgo{

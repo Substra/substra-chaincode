@@ -24,7 +24,6 @@ import (
 func TestJsonInputsDataManager(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	inpDataManager := inputDataManager{}
 	inpDataManager.createDefault()
@@ -37,7 +36,6 @@ func TestJsonInputsDataManager(t *testing.T) {
 func TestDataManager(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add dataManager with invalid field
 	inpDataManager := inputDataManager{
@@ -111,7 +109,6 @@ func TestDataManager(t *testing.T) {
 func TestGetTestDatasetKeys(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Input DataManager
 	inpDataManager := inputDataManager{}
@@ -143,7 +140,6 @@ func TestGetTestDatasetKeys(t *testing.T) {
 func TestDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add dataSample with invalid field
 	inpDataSample := inputDataSample{

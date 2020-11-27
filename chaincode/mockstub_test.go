@@ -21,11 +21,11 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/hyperledger/fabric/common/util"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-protos-go/ledger/queryresult"
 	"github.com/hyperledger/fabric-protos-go/msp"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
+	"github.com/hyperledger/fabric/common/util"
 	"github.com/pkg/errors"
 )
 
@@ -490,7 +490,6 @@ func NewMockStub(name string, cc shim.Chaincode) *MockStub {
 
 func NewMockStubWithRegisterNode(name string, cc shim.Chaincode) *MockStub {
 	s := NewMockStub(name, cc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 	s.MockInvoke(mockTxID, [][]byte{[]byte("registerNode")})
 
 	return s

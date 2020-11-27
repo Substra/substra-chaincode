@@ -23,7 +23,6 @@ import (
 func TestNode(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStub("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	args := append([][]byte{[]byte("registerNode")}, []byte{})
 
@@ -39,7 +38,6 @@ func TestNode(t *testing.T) {
 func TestQueryNodes(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	response := mockStub.MockInvoke(mockTxID, [][]byte{[]byte("queryNodes")})
 

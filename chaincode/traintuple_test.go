@@ -27,7 +27,6 @@ import (
 func TestTraintupleWithNoTestDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 	registerItem(t, *mockStub, "trainDataset")
 
 	key := strings.Replace(objectiveKey, "1", "2", 1)
@@ -55,7 +54,6 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 func TestTraintupleWithSingleDatasample(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 	registerItem(t, *mockStub, "trainDataset")
 
 	key := strings.Replace(objectiveKey, "1", "2", 1)
@@ -88,7 +86,6 @@ func TestTraintupleWithSingleDatasample(t *testing.T) {
 func TestTraintupleWithDuplicatedDatasamples(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 	registerItem(t, *mockStub, "trainDataset")
 
 	key := strings.Replace(objectiveKey, "1", "2", 1)
@@ -139,7 +136,6 @@ func TestNoPanicWhileQueryingIncompleteTraintuple(t *testing.T) {
 func TestTraintupleComputePlanCreation(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add dataManager, dataSample and algo
 	registerItem(t, *mockStub, "algo")
@@ -188,7 +184,6 @@ func TestTraintupleComputePlanCreation(t *testing.T) {
 func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "algo")
@@ -262,7 +257,6 @@ func TestTraintupleMultipleCommputePlanCreations(t *testing.T) {
 func TestTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add traintuple with invalid field
 	inpTraintuple := inputTraintuple{
@@ -407,7 +401,6 @@ func TestTraintuple(t *testing.T) {
 func TestQueryTraintupleNotFound(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 	registerItem(t, *mockStub, "traintuple")
 
 	// queryTraintuple: normal case
@@ -430,7 +423,6 @@ func TestQueryTraintupleNotFound(t *testing.T) {
 func TestInsertTraintupleTwice(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 	registerItem(t, *mockStub, "algo")
 
 	// create a traintuple and start a ComplutePlan

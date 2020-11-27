@@ -40,7 +40,6 @@ var (
 func TestPipeline(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStub("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	var out strings.Builder
 	callAssertAndPrint := func(peerCmd, smartContract string, inputAsset interface{}) peer.Response {

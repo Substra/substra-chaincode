@@ -26,7 +26,6 @@ import (
 func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add a some dataManager, dataSample and traintuple
 	resp, _ := registerItem(t, *mockStub, "traintuple")
@@ -54,7 +53,6 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 func TestCertifiedExplicitTesttuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "traintuple")
@@ -81,7 +79,6 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	// Add a some dataManager, dataSample and traintuple
 	registerItem(t, *mockStub, "traintuple")
@@ -150,7 +147,6 @@ func TestQueryTesttuple(t *testing.T) {
 		t.Run("TestQueryTesttuple"+tt.expectedTypeString, func(t *testing.T) {
 			scc := new(SubstraChaincode)
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
-			mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 			registerItem(t, *mockStub, "aggregatetuple")
 
 			// create testtuple
@@ -203,7 +199,6 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			scc := new(SubstraChaincode)
 			mockStub := NewMockStubWithRegisterNode("substra", scc)
-			mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 			registerItem(t, *mockStub, "compositeTraintuple")
 

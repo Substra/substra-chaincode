@@ -29,6 +29,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const mockTxID = "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 const objectiveKey = "5c1d9cd1-c2c1-082d-de09-21b56d11030c"
 const objectiveDescriptionChecksum = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 const objectiveMetricsChecksum = "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
@@ -126,8 +127,6 @@ func keyToJSON(key string) []byte {
 
 func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Response, interface{}) {
 
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
-
 	// 1. add dataManager
 	inpDataManager := inputDataManager{}
 	args := inpDataManager.createDefault()
@@ -218,7 +217,6 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 }
 
 func registerRandomCompositeAlgo(t *testing.T, mockStub *MockStub) (key string, err error) {
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 	key = RandomUUID()
 	inpAlgo := inputCompositeAlgo{inputAlgo{Key: key}}
 	args := inpAlgo.createDefault()
@@ -237,7 +235,6 @@ func registerTraintuple(t *testing.T, mockStub *MockStub, assetType AssetType) (
 
 	randomAlgoKey := RandomUUID()
 	randomTraintupleKey := RandomUUID()
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 
 	switch assetType {
 	case CompositeTraintupleType:
@@ -321,7 +318,6 @@ func TestMain(m *testing.M) {
 }
 
 func initializeMockStateDB(t *testing.T, stub *MockStub) {
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 	stub.MockTransactionStart(mockTxID)
 	stub.PutState("key", []byte("value"))
 }
@@ -329,9 +325,7 @@ func initializeMockStateDB(t *testing.T, stub *MockStub) {
 func TestQueryEmptyResponse(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	mockTxID := "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 	initializeMockStateDB(t, mockStub)
-
 
 	smartContracts := []string{
 		"queryAlgos",
