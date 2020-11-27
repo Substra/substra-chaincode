@@ -20,7 +20,7 @@ import (
 )
 
 // OutputPageSize is a used to avoid issues listing assets
-const OutputPageSize = 5 // 500
+const OutputPageSize = 500
 
 // Struct use as output representation of ledger data
 

@@ -222,3 +222,57 @@ func TestQueryHeadModelPermissions(t *testing.T) {
 	assert.Len(t, outPerm.Process.AuthorizedIDs, 1)
 	assert.Contains(t, outPerm.Process.AuthorizedIDs, worker)
 }
+
+type ModelsResponse struct {
+	Results  []outputModel `json:"results"`
+	Bookmark string        `json:"bookmark"`
+}
+
+func TestQueryModelsPagination(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+
+	resp, _ := registerItem(t, *mockStub, "algo")
+
+	// Add N + 1 traintuples
+	for i := 0; i < OutputPageSize/3+1; i++ {
+		uuid, _ := GetNewUUID()
+		inpTraintuple := inputTraintuple{Key: uuid}
+		args := inpTraintuple.createDefault()
+		resp = mockStub.MockInvoke(args)
+		assert.EqualValues(t, 200, resp.Status, resp.Message)
+
+		args = [][]byte{[]byte("logStartTrain"), keyToJSON(inpTraintuple.Key)}
+		resp = mockStub.MockInvoke(args)
+
+		success := inputLogSuccessTrain{}
+		success.Key = traintupleKey
+		success.OutModel.Key, _ = GetNewUUID()
+		args = append([][]byte{[]byte("logSuccessTrain")}, assetToJSON(success))
+		resp = mockStub.MockInvoke(args)
+	}
+
+	var models ModelsResponse
+
+	// 1st query (no bookmark) should return OutputPageSize/3 results
+	args := [][]byte{[]byte("queryModels")}
+	resp = mockStub.MockInvoke(args)
+	assert.EqualValues(t, 200, resp.Status, "It should find the models without error ", resp.Message)
+	err := json.Unmarshal(resp.Payload, &models)
+	assert.NoError(t, err, "models should unmarshal without problem")
+	assert.Equal(t, OutputPageSize/3, len(models.Results))
+	firstResult := models.Results[0].Traintuple.Key
+
+	// 2nd query (with bookmark) should return 1 result
+	inp := inputBookmark{Bookmark: models.Bookmark}
+	args = append([][]byte{[]byte("queryModels")}, assetToJSON(inp))
+	resp = mockStub.MockInvoke(args)
+	assert.EqualValues(t, 200, resp.Status, "It should find the models without error ", resp.Message)
+	err = json.Unmarshal(resp.Payload, &models)
+	assert.NoError(t, err, "models should unmarshal without problem")
+	assert.Equal(t, 1, len(models.Results))
+
+	// 2nd query should return different results from 1st query
+	newFirstResult := models.Results[0].Traintuple.Key
+	assert.NotEqual(t, newFirstResult, firstResult, "query results should be different")
+}

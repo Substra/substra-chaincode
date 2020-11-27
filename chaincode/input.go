@@ -123,7 +123,7 @@ type inputKey struct {
 }
 
 type inputBookmark struct {
-	Bookmark string `validate:"required" json:"bookmark"`
+	Bookmark string `json:"bookmark"`
 }
 
 type inputLogSuccessTrain struct {

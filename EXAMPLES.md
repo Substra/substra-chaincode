@@ -1176,7 +1176,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
 ##### Command output:
 ```json
 {
- "bookmark": "",
+ "bookmark": "{\"traintuple\":\"\",\"composite_traintuple\":\"\",\"aggregatetuple\":\"\"}",
  "results": [
   {
    "traintuple": {
