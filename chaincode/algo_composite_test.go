@@ -22,7 +22,7 @@ import (
 )
 
 type CompositeAlgoResponse struct {
-	Result  []outputCompositeAlgo `json:"result"`
+	Result  []outputCompositeAlgo `json:"results"`
 	Author map[string]string `json:"bookmarks"`
 }
 

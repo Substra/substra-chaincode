@@ -202,7 +202,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	if len(bookmarks) != 0 {
 		// Marshal to json the smartcontract result + bookmarks
 		resp, err = json.Marshal(map[string]interface{}{
-			"result": result,
+			"results": result,
 			"bookmarks": bookmarks})
 	} else {
 		// Marshal to json the smartcontract result

@@ -26,7 +26,7 @@ import (
 
 
 type TraintupleResponse struct {
-	Result []outputTraintuple  `json:"result"`
+	Result []outputTraintuple  `json:"results"`
 	Author map[string]string `json:"bookmarks"`
 }
 

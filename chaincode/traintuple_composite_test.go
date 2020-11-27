@@ -34,7 +34,7 @@ import (
 /////////////////////////////////////////////////////////////
 
 type CompositeTraintupleResponse struct {
-	Result []outputCompositeTraintuple  `json:"result"`
+	Result []outputCompositeTraintuple  `json:"results"`
 	Author map[string]string `json:"bookmarks"`
 }
 

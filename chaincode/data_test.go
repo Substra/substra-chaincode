@@ -35,7 +35,7 @@ func TestJsonInputsDataManager(t *testing.T) {
 }
 
 type DataManagerResponse struct {
-	Result  []outputDataManager `json:"result"`
+	Result  []outputDataManager `json:"results"`
 	Author map[string]string `json:"bookmarks"`
 }
 

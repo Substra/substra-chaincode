@@ -208,7 +208,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataManagers"]}' -C myc
  "bookmarks": {
   "dataManager~owner~key": ""
  },
- "result": [
+ "results": [
   {
    "description": {
     "checksum": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
@@ -245,7 +245,7 @@ peer chaincode query -n mycc -c '{"Args":["queryDataSamples"]}' -C myc
  "bookmarks": {
   "dataSample~dataManager~key": ""
  },
- "result": [
+ "results": [
   {
    "data_manager_keys": [
     "da1bb7c3-1f62-244c-0f3a-761cc1688042"
@@ -288,7 +288,7 @@ peer chaincode query -n mycc -c '{"Args":["queryObjectives"]}' -C myc
  "bookmarks": {
   "objective~owner~key": ""
  },
- "result": [
+ "results": [
   {
    "description": {
     "checksum": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
@@ -934,7 +934,7 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
  "bookmarks": {
   "testtuple~traintuple~certified~key": ""
  },
- "result": [
+ "results": [
   {
    "algo": {
     "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
@@ -1189,7 +1189,7 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
   "compositeTraintuple~algo~key": "",
   "traintuple~algo~key": ""
  },
- "result": [
+ "results": [
   {
    "traintuple": {
     "algo": {
@@ -1699,7 +1699,7 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
  "bookmarks": {
   "computePlan~key": ""
  },
- "result": [
+ "results": [
   {
    "aggregatetuple_keys": null,
    "clean_models": false,

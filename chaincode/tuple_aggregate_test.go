@@ -31,7 +31,7 @@ import (
 //
 /////////////////////////////////////////////////////////////
 type AggregatetupleResponse struct {
-	Result  []outputAggregatetuple `json:"result"`
+	Result  []outputAggregatetuple `json:"results"`
 	Author map[string]string `json:"bookmarks"`
 }
 

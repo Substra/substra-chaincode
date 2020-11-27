@@ -23,7 +23,7 @@ import (
 )
 
 type ObjectiveResponse struct {
-	Result  []outputObjective `json:"result"`
+	Result  []outputObjective `json:"results"`
 	Author map[string]string `json:"bookmarks"`
 }
 

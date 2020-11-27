@@ -24,7 +24,7 @@ import (
 )
 
 type TesttupleResponse struct {
-	Result []outputTesttuple `json:"result"`
+	Result []outputTesttuple `json:"results"`
 	Author map[string]string `json:"bookmarks"`
 }
 

@@ -23,7 +23,7 @@ import (
 
 
 type AlgoResponse struct {
-	Result  []outputAlgo `json:"result"`
+	Result  []outputAlgo `json:"results"`
 	Author map[string]string `json:"bookmarks"`
 }
 
