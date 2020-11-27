@@ -181,10 +181,12 @@ func (db *LedgerDB) GetIndexKeys(index string, attributes []string) ([]string, e
 func (db *LedgerDB) GetIndexKeysWithPagination(index string, attributes []string, pageSize int32, bookmark string) ([]string, string, error) {
 	keys := make([]string, 0)
 
-	// replace composite key substra delimiters "/" by couchDB delimiters
-	bookmark = strings.Replace(bookmark, "/", "\x00", -1)
-	bookmark = strings.Replace(bookmark, "#", "\\u0000", -1)
-	bookmark = strings.Replace(bookmark, "END", "\U0010ffff", -1)
+	if bookmark != "" {
+		// replace composite key substra delimiters "/" by couchDB delimiters
+		bookmark = strings.Replace(bookmark, "/", "\x00", -1)
+		bookmark = strings.Replace(bookmark, "#", "\\u0000", -1)
+		bookmark = strings.Replace(bookmark, "END", "\U0010ffff", -1)
+	}
 
 	iterator, metadata, err := db.cc.GetStateByPartialCompositeKeyWithPagination(index, attributes, pageSize, bookmark)
 	if err != nil {
@@ -203,10 +205,12 @@ func (db *LedgerDB) GetIndexKeysWithPagination(index string, attributes []string
 		keys = append(keys, keyParts[len(keyParts)-1])
 	}
 
-	// replace composite key couchDB delimiters by substra delimiters
-	bookmark = strings.Replace(metadata.Bookmark, "\x00", "/", -1)
-	bookmark = strings.Replace(bookmark, "\\u0000", "#", -1)
-	bookmark = strings.Replace(bookmark, "\U0010ffff", "END", -1)
+	if metadata != nil {
+		// replace composite key couchDB delimiters by substra delimiters
+		bookmark = strings.Replace(metadata.Bookmark, "\x00", "/", -1)
+		bookmark = strings.Replace(bookmark, "\\u0000", "#", -1)
+		bookmark = strings.Replace(bookmark, "\U0010ffff", "END", -1)
+	}
 
 	return keys, bookmark, nil
 }

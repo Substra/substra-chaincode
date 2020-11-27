@@ -337,7 +337,11 @@ func (stub *MockStub) GetStateByRangeWithPagination(startKey, endKey string, pag
 
 func (stub *MockStub) GetStateByPartialCompositeKeyWithPagination(objectType string, keys []string,
 	pageSize int32, bookmark string) (shim.StateQueryIteratorInterface, *pb.QueryResponseMetadata, error) {
-	return nil, nil, nil
+	partialCompositeKey, err := stub.CreateCompositeKey(objectType, keys)
+	if err != nil {
+		return nil, nil, err
+	}
+	return NewMockStateRangeQueryIterator(stub, partialCompositeKey, partialCompositeKey+string(maxUnicodeRuneValue)), nil, nil
 }
 
 func (stub *MockStub) GetQueryResultWithPagination(query string, pageSize int32,

@@ -33,6 +33,12 @@ import (
 //
 /////////////////////////////////////////////////////////////
 
+type CompositeTraintupleResponse struct {
+	Result []outputCompositeTraintuple  `json:"result"`
+	Author map[string]string `json:"bookmarks"`
+}
+
+
 func TestTraintupleWithNoTestDatasetComposite(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
@@ -324,11 +330,11 @@ func TestTraintupleComposite(t *testing.T) {
 	// TODO add traintuple key to output struct
 	// For now we test it as cleanly as its added to the query response
 	assert.Contains(t, string(resp.Payload), "key\":\""+compositeTraintupleKey)
-	var queryTraintuples []outputCompositeTraintuple
+	var queryTraintuples CompositeTraintupleResponse
 	err = json.Unmarshal(resp.Payload, &queryTraintuples)
 	assert.NoError(t, err, "composite traintuples should unmarshal without problem")
 	require.NotZero(t, queryTraintuples)
-	assert.Exactly(t, out, queryTraintuples[0])
+	assert.Exactly(t, out, queryTraintuples.Result[0])
 
 	// Add traintuple with inmodel from the above-submitted traintuple
 	inpWaitingTraintuple := inputCompositeTraintuple{
@@ -347,9 +353,10 @@ func TestTraintupleComposite(t *testing.T) {
 	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying composite traintuple of worker with todo status - status %d and message %s", resp.Status, resp.Message)
-	err = json.Unmarshal(resp.Payload, &queryTraintuples)
+	var queryTraintuplesF []outputCompositeTraintuple
+	err = json.Unmarshal(resp.Payload, &queryTraintuplesF)
 	assert.NoError(t, err, "composite traintuples should unmarshal without problem")
-	assert.Exactly(t, out, queryTraintuples[0])
+	assert.Exactly(t, out, queryTraintuplesF[0])
 
 	// Update status and check consistency
 	success := inputLogSuccessCompositeTrain{}

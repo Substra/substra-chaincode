@@ -149,12 +149,12 @@ func TestTagTuple(t *testing.T) {
 	args = [][]byte{[]byte("queryTraintuples")}
 	resp = mockStub.MockInvoke(args)
 
-	traintuples := []outputTraintuple{}
+	var traintuples TraintupleResponse
 	err := json.Unmarshal(resp.Payload, &traintuples)
 
 	assert.NoError(t, err, "should be unmarshaled")
-	assert.Len(t, traintuples, 1, "there should be one traintuple")
-	assert.EqualValues(t, tag, traintuples[0].Tag)
+	assert.Len(t, traintuples.Result, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, traintuples.Result[0].Tag)
 
 	inpTesttuple := inputTesttuple{Tag: tag}
 	args = inpTesttuple.createDefault()
@@ -163,11 +163,11 @@ func TestTagTuple(t *testing.T) {
 
 	args = [][]byte{[]byte("queryTesttuples")}
 	resp = mockStub.MockInvoke(args)
-	testtuples := []outputTesttuple{}
+	var testtuples TesttupleResponse
 	err = json.Unmarshal(resp.Payload, &testtuples)
 	assert.NoError(t, err, "should be unmarshaled")
-	assert.Len(t, testtuples, 1, "there should be one traintuple")
-	assert.EqualValues(t, tag, testtuples[0].Tag)
+	assert.Len(t, testtuples.Result, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, testtuples.Result[0].Tag)
 
 	filter := inputQueryFilter{
 		IndexName:  "testtuple~tag",
@@ -179,8 +179,8 @@ func TestTagTuple(t *testing.T) {
 	filtertuples := []outputTesttuple{}
 	err = json.Unmarshal(resp.Payload, &filtertuples)
 	assert.NoError(t, err, "should be unmarshaled")
-	assert.Len(t, testtuples, 1, "there should be one traintuple")
-	assert.EqualValues(t, tag, testtuples[0].Tag)
+	assert.Len(t, testtuples.Result, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, testtuples.Result[0].Tag)
 
 }
 

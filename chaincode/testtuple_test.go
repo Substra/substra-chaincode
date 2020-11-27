@@ -23,6 +23,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type TesttupleResponse struct {
+	Result []outputTesttuple `json:"result"`
+	Author map[string]string `json:"bookmarks"`
+}
+
 func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
@@ -68,11 +73,11 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 
 	args = [][]byte{[]byte("queryTesttuples")}
 	resp = mockStub.MockInvoke(args)
-	testtuples := [](map[string]interface{}){}
+	var testtuples TesttupleResponse
 	err := json.Unmarshal(resp.Payload, &testtuples)
 	assert.NoError(t, err, "should be unmarshaled")
-	assert.Len(t, testtuples, 1, "there should be only one testtuple...")
-	assert.True(t, testtuples[0]["certified"].(bool), "... and it should be certified")
+	assert.Len(t, testtuples.Result, 1, "there should be only one testtuple...")
+	assert.True(t, testtuples.Result[0].Certified, "... and it should be certified")
 
 }
 

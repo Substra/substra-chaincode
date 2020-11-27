@@ -342,8 +342,10 @@ func TestQueryEmptyResponse(t *testing.T) {
 			args := [][]byte{[]byte(contractName)}
 			resp := mockStub.MockInvoke(args)
 
-			expectedPayload, _ := json.Marshal(make([]string, 0))
-			assert.Equal(t, expectedPayload, resp.Payload, "payload is not an empty list")
+			expectedResult := map[string]interface{}{
+				"result":   make([]string, 0),
+				"bookmark": ""}
+			assert.Equal(t, expectedResult, resp.Payload, "payload is not an empty list")
 		})
 	}
 }

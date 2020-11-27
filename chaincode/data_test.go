@@ -33,6 +33,13 @@ func TestJsonInputsDataManager(t *testing.T) {
 	resp := mockStub.MockInvoke(args)
 	assert.EqualValues(t, 200, resp.Status)
 }
+
+type DataManagerResponse struct {
+	Result  []outputDataManager `json:"result"`
+	Author map[string]string `json:"bookmarks"`
+}
+
+
 func TestDataManager(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
@@ -90,11 +97,11 @@ func TestDataManager(t *testing.T) {
 	args = [][]byte{[]byte("queryDataManagers")}
 	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying dataManagers - status %d and message %s", resp.Status, resp.Message)
-	var dataManagers []outputDataManager
+	var dataManagers DataManagerResponse
 	err = json.Unmarshal(resp.Payload, &dataManagers)
 	assert.NoError(t, err, "while unmarshalling dataManagers")
-	assert.Len(t, dataManagers, 1)
-	assert.Exactly(t, expectedDataManager, dataManagers[0], "return objective different from registered one")
+	assert.Len(t, dataManagers.Result, 1)
+	assert.Exactly(t, expectedDataManager, dataManagers.Result[0], "return objective different from registered one")
 
 	args = [][]byte{[]byte("queryDataset"), keyToJSON(inpDataManager.Key)}
 	resp = mockStub.MockInvoke(args)
