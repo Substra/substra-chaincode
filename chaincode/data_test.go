@@ -30,7 +30,7 @@ func TestJsonInputsDataManager(t *testing.T) {
 	payload, err := json.Marshal(inpDataManager)
 	assert.NoError(t, err)
 	args := [][]byte{[]byte("registerDataManager"), payload}
-	resp := mockStub.MockInvoke(mockTxID, args)
+	resp := mockStub.MockInvoke(args)
 	assert.EqualValues(t, 200, resp.Status)
 }
 func TestDataManager(t *testing.T) {
@@ -42,7 +42,7 @@ func TestDataManager(t *testing.T) {
 		OpenerChecksum: "aaa",
 	}
 	args := inpDataManager.createDefault()
-	resp := mockStub.MockInvoke(mockTxID, args)
+	resp := mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 400, resp.Status, "when adding dataManager with invalid opener checksum, status %d and message %s", resp.Status, resp.Message)
 	// Properly add dataManager
 	resp, tt := registerItem(t, *mockStub, "dataManager")
@@ -56,11 +56,11 @@ func TestDataManager(t *testing.T) {
 	// Add dataManager which already exist
 	inpDataManager = inputDataManager{}
 	args = inpDataManager.createDefault()
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 409, resp.Status, "when adding dataManager which already exists, status %d and message %s", resp.Status, resp.Message)
 	// Query dataManager and check fields match expectations
 	args = [][]byte{[]byte("queryDataManager"), keyToJSON(dataManagerKey)}
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying the dataManager, status %d and message %s", resp.Status, resp.Message)
 	dataManager := outputDataManager{}
 	err = json.Unmarshal(resp.Payload, &dataManager)
@@ -88,7 +88,7 @@ func TestDataManager(t *testing.T) {
 
 	// Query all dataManagers and check fields match expectations
 	args = [][]byte{[]byte("queryDataManagers")}
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying dataManagers - status %d and message %s", resp.Status, resp.Message)
 	var dataManagers []outputDataManager
 	err = json.Unmarshal(resp.Payload, &dataManagers)
@@ -97,7 +97,7 @@ func TestDataManager(t *testing.T) {
 	assert.Exactly(t, expectedDataManager, dataManagers[0], "return objective different from registered one")
 
 	args = [][]byte{[]byte("queryDataset"), keyToJSON(inpDataManager.Key)}
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying Dataset, status %d and message %s", resp.Status, resp.Message)
 	out := outputDataset{}
 	err = json.Unmarshal(resp.Payload, &out)
@@ -113,20 +113,20 @@ func TestGetTestDatasetKeys(t *testing.T) {
 	// Input DataManager
 	inpDataManager := inputDataManager{}
 	args := inpDataManager.createDefault()
-	mockStub.MockInvoke(mockTxID, args)
+	mockStub.MockInvoke(args)
 
 	// Add both train and test dataSample
 	inpDataSample := inputDataSample{Keys: []string{testDataSampleKey1}}
 	args = inpDataSample.createDefault()
-	mockStub.MockInvoke(mockTxID, args)
+	mockStub.MockInvoke(args)
 	inpDataSample.Keys = []string{testDataSampleKey2}
 	inpDataSample.TestOnly = "true"
 	args = inpDataSample.createDefault()
-	mockStub.MockInvoke(mockTxID, args)
+	mockStub.MockInvoke(args)
 
 	// Query the DataManager
 	args = [][]byte{[]byte("queryDataset"), keyToJSON(inpDataManager.Key)}
-	resp := mockStub.MockInvoke(mockTxID, args)
+	resp := mockStub.MockInvoke(args)
 	assert.EqualValues(t, 200, resp.Status, "querying the dataManager should return an ok status")
 	payload := map[string]interface{}{}
 	err := json.Unmarshal(resp.Payload, &payload)
@@ -146,13 +146,13 @@ func TestDataset(t *testing.T) {
 		Keys: []string{"aaa"},
 	}
 	args := inpDataSample.createDefault()
-	resp := mockStub.MockInvoke(mockTxID, args)
+	resp := mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 400, resp.Status, "when adding dataSample with invalid key, status %d and message %s", resp.Status, resp.Message)
 
 	// Add dataSample with unexiting dataManager
 	inpDataSample = inputDataSample{}
 	args = inpDataSample.createDefault()
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 400, resp.Status, "when adding dataSample with unexisting dataManager, status %d and message %s", resp.Status, resp.Message)
 	// TODO Would be nice to check failure when adding dataSample to a dataManager owned by a different people
 
@@ -160,11 +160,11 @@ func TestDataset(t *testing.T) {
 	// 1. add associated dataManager
 	inpDataManager := inputDataManager{}
 	args = inpDataManager.createDefault()
-	mockStub.MockInvoke(mockTxID, args)
+	mockStub.MockInvoke(args)
 	// 2. add dataSample
 	inpDataSample = inputDataSample{}
 	args = inpDataSample.createDefault()
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding dataSample, status %d and message %s", resp.Status, resp.Message)
 	// check payload correspond to input dataSample keys
 	res := map[string]interface{}{}
@@ -176,12 +176,12 @@ func TestDataset(t *testing.T) {
 	assert.ElementsMatch(t, expectedResp, dataSampleKeys, "when adding dataSample: dataSample keys does not correspond to dataSample keys")
 
 	// Add dataSample which already exist
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 409, resp.Status, "when adding dataSample which already exist, status %d and message %s", resp.Status, resp.Message)
 
 	// Query dataSample and check it corresponds to what was input
 	args = [][]byte{[]byte("queryDataset"), keyToJSON(inpDataManager.Key)}
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying dataManager dataSample with status %d and message %s", resp.Status, resp.Message)
 	out := outputDataset{}
 	err = json.Unmarshal(resp.Payload, &out)

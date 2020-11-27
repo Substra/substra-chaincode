@@ -51,7 +51,7 @@ func TestPipeline(t *testing.T) {
 			args = methodToByte(smartContract)
 		}
 		printArgs(&out, args, peerCmd)
-		resp := mockStub.MockInvoke(mockTxID, args)
+		resp := mockStub.MockInvoke(args)
 		require.EqualValuesf(t, 200, resp.Status, "problem when calling %s, return status %d and message %s", smartContract, resp.Status, resp.Message)
 		printResp(&out, resp.Payload)
 		return resp
@@ -115,11 +115,11 @@ func TestPipeline(t *testing.T) {
 	assert.NoError(t, err, "should unmarshal without problem")
 	traintupleKey := res.Key
 	// check not possible to create same traintuple
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 409, resp.Status, "when adding same traintuple with status %d and message %s", resp.Status, resp.Message)
 	// Get owner of the traintuple
 	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
 	traintuple := outputTraintuple{}
 	respTraintuple := resp.Payload
@@ -176,11 +176,11 @@ func TestPipeline(t *testing.T) {
 	assert.NoError(t, err, "should unmarshal without problem")
 	testtupleKey := res.Key
 	// check not possible to create same testtuple
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 409, resp.Status, "when adding same testtuple with status %d and message %s", resp.Status, resp.Message)
 	// Get owner of the testtuple
 	args = [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	respTesttuple := resp.Payload
 	testtuple := outputTesttuple{}
 	if err := json.Unmarshal(respTesttuple, &testtuple); err != nil {
@@ -236,7 +236,7 @@ func TestPipeline(t *testing.T) {
 	newDataManagerKey := "38a320b2-a67c-8003-cc74-8d6666534f2b"
 	inpDataManager = inputDataManager{Key: newDataManagerKey}
 	args = inpDataManager.createDefault()
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when adding dataManager with status %d and message %s", resp.Status, resp.Message)
 	// associate a data sample with the old data manager with the updateDataSample
 	updateData := inputUpdateDataSample{

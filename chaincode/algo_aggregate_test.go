@@ -32,7 +32,7 @@ func TestAggregateAlgo(t *testing.T) {
 		},
 	}
 	args := inpAlgo.createDefault()
-	resp := mockStub.MockInvoke(mockTxID, args)
+	resp := mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 400, resp.Status, "when adding algo with invalid checksum, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add algo
@@ -46,7 +46,7 @@ func TestAggregateAlgo(t *testing.T) {
 
 	// Query algo from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryAggregateAlgo"), keyToJSON(algoKey)}
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying an aggregate algo with status %d and message %s", resp.Status, resp.Message)
 	algo := outputAggregateAlgo{}
 	err = json.Unmarshal(resp.Payload, &algo)
@@ -74,7 +74,7 @@ func TestAggregateAlgo(t *testing.T) {
 
 	// Query all algo and check consistency
 	args = [][]byte{[]byte("queryAggregateAlgos")}
-	resp = mockStub.MockInvoke(mockTxID, args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying aggregate algos - status %d and message %s", resp.Status, resp.Message)
 	var algos []outputAggregateAlgo
 	err = json.Unmarshal(resp.Payload, &algos)
