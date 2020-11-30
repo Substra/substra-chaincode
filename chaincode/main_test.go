@@ -29,6 +29,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const mockTxID = "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 const objectiveKey = "5c1d9cd1-c2c1-082d-de09-21b56d11030c"
 const objectiveDescriptionChecksum = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 const objectiveMetricsChecksum = "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
@@ -125,10 +126,11 @@ func keyToJSON(key string) []byte {
 }
 
 func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Response, interface{}) {
+
 	// 1. add dataManager
 	inpDataManager := inputDataManager{}
 	args := inpDataManager.createDefault()
-	resp := mockStub.MockInvoke("42", args)
+	resp := mockStub.MockInvoke(args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding dataManager with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "dataManager" {
 		return resp, inpDataManager
@@ -140,7 +142,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 		TestOnly:        "true",
 	}
 	args = inpDataSample.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding test dataSample with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "testDataset" {
 		return resp, inpDataSample
@@ -148,7 +150,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	// 3. add objective
 	inpObjective := inputObjective{}
 	args = inpObjective.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding objective with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "objective" {
 		return resp, inpObjective
@@ -156,7 +158,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	// 4. Add train dataSample
 	inpDataSample = inputDataSample{}
 	args = inpDataSample.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding train dataSample with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "trainDataset" {
 		return resp, inpDataSample
@@ -164,7 +166,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	// 5. Add algo
 	inpAlgo := inputAlgo{}
 	args = inpAlgo.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding algo with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "algo" {
 		return resp, inpAlgo
@@ -172,7 +174,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	// 6. Add composite algo
 	inpCompositeAlgo := inputCompositeAlgo{}
 	args = inpCompositeAlgo.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding composite algo with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "compositeAlgo" {
 		return resp, inpCompositeAlgo
@@ -180,7 +182,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	// 7. Add aggregate algo
 	inpAggregateAlgo := inputAggregateAlgo{}
 	args = inpAggregateAlgo.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding aggregate algo with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "aggregateAlgo" {
 		return resp, inpAggregateAlgo
@@ -188,7 +190,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	// 8. Add traintuple
 	inpTraintuple := inputTraintuple{}
 	args = inpTraintuple.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
 
 	if itemType == "traintuple" {
@@ -197,7 +199,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	// 9. Add composite traintuple
 	inpCompositeTraintuple := inputCompositeTraintuple{}
 	args = inpCompositeTraintuple.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding composite traintuple with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "compositeTraintuple" {
 		return resp, inpCompositeTraintuple
@@ -205,7 +207,7 @@ func registerItem(t *testing.T, mockStub MockStub, itemType string) (peer.Respon
 	// 10. Add aggregate tuple
 	inpAggregatetuple := inputAggregatetuple{}
 	args = inpAggregatetuple.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	require.EqualValuesf(t, 200, resp.Status, "when adding aggregate tuple with status %d and message %s", resp.Status, resp.Message)
 	if itemType == "aggregatetuple" {
 		return resp, inpAggregatetuple
@@ -218,7 +220,7 @@ func registerRandomCompositeAlgo(t *testing.T, mockStub *MockStub) (key string, 
 	key = RandomUUID()
 	inpAlgo := inputCompositeAlgo{inputAlgo{Key: key}}
 	args := inpAlgo.createDefault()
-	resp := mockStub.MockInvoke("42", args)
+	resp := mockStub.MockInvoke(args)
 	if resp.Status != 200 {
 		err = fmt.Errorf("failed to register random algo: %s", resp.Message)
 		return
@@ -243,7 +245,7 @@ func registerTraintuple(t *testing.T, mockStub *MockStub, assetType AssetType) (
 		inpTraintuple := inputCompositeTraintuple{Key: randomTraintupleKey, AlgoKey: randomAlgoKey}
 		inpTraintuple.fillDefaults()
 		args := inpTraintuple.getArgs()
-		resp := mockStub.MockInvoke("42", args)
+		resp := mockStub.MockInvoke(args)
 		if resp.Status != 200 {
 			err = fmt.Errorf("failed to register traintuple: %s", resp.Message)
 			return
@@ -254,14 +256,14 @@ func registerTraintuple(t *testing.T, mockStub *MockStub, assetType AssetType) (
 	case TraintupleType:
 		inpAlgo := inputAlgo{Key: randomAlgoKey}
 		args := inpAlgo.createDefault()
-		resp := mockStub.MockInvoke("42", args)
+		resp := mockStub.MockInvoke(args)
 		if resp.Status != 200 {
 			err = fmt.Errorf("failed to register random algo: %s", resp.Message)
 			return
 		}
 		inpTraintuple := inputTraintuple{Key: randomTraintupleKey, AlgoKey: randomAlgoKey}
 		args = inpTraintuple.createDefault()
-		resp = mockStub.MockInvoke("42", args)
+		resp = mockStub.MockInvoke(args)
 		if resp.Status != 200 {
 			err = fmt.Errorf("failed to register traintuple: %s", resp.Message)
 			return
@@ -272,14 +274,14 @@ func registerTraintuple(t *testing.T, mockStub *MockStub, assetType AssetType) (
 	case AggregatetupleType:
 		inpAlgo := inputAggregateAlgo{inputAlgo{Key: randomAlgoKey}}
 		args := inpAlgo.createDefault()
-		resp := mockStub.MockInvoke("42", args)
+		resp := mockStub.MockInvoke(args)
 		if resp.Status != 200 {
 			err = fmt.Errorf("failed to register random algo: %s", resp.Message)
 			return
 		}
 		inpTraintuple := inputAggregatetuple{Key: randomTraintupleKey, AlgoKey: randomAlgoKey}
 		args = inpTraintuple.createDefault()
-		resp = mockStub.MockInvoke("42", args)
+		resp = mockStub.MockInvoke(args)
 		if resp.Status != 200 {
 			err = fmt.Errorf("failed to register traintuple: %s", resp.Message)
 			return
@@ -316,7 +318,7 @@ func TestMain(m *testing.M) {
 }
 
 func initializeMockStateDB(t *testing.T, stub *MockStub) {
-	stub.MockTransactionStart("42")
+	stub.MockTransactionStart(mockTxID)
 	stub.PutState("key", []byte("value"))
 }
 
@@ -338,7 +340,7 @@ func TestQueryEmptyResponse(t *testing.T) {
 	for _, contractName := range smartContracts {
 		t.Run(contractName, func(t *testing.T) {
 			args := [][]byte{[]byte(contractName)}
-			resp := mockStub.MockInvoke("42", args)
+			resp := mockStub.MockInvoke(args)
 
 			expectedPayload, _ := json.Marshal(make([]string, 0))
 			assert.Equal(t, expectedPayload, resp.Payload, "payload is not an empty list")

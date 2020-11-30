@@ -39,13 +39,13 @@ func TestTesttupleOnFailedTraintuple(t *testing.T) {
 	fail := inputLogFailTrain{}
 	fail.Key = traintupleKey
 	args := fail.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValues(t, 200, resp.Status, "should be able to log traintuple as failed")
 
 	// Fail to add a testtuple to this failed traintuple
 	inpTesttuple := inputTesttuple{}
 	args = inpTesttuple.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValues(t, 400, resp.Status, "status should show an error since the traintuple is failed")
 	assert.Contains(t, resp.Message, "could not register this testtuple")
 }
@@ -63,11 +63,11 @@ func TestCertifiedExplicitTesttuple(t *testing.T) {
 		DataSampleKeys: []string{testDataSampleKey2, testDataSampleKey1},
 		DataManagerKey: dataManagerKey}
 	args := inpTesttuple.createDefault()
-	resp := mockStub.MockInvoke("42", args)
+	resp := mockStub.MockInvoke(args)
 	assert.EqualValues(t, 200, resp.Status)
 
 	args = [][]byte{[]byte("queryTesttuples")}
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	testtuples := [](map[string]interface{}){}
 	err := json.Unmarshal(resp.Payload, &testtuples)
 	assert.NoError(t, err, "should be unmarshaled")
@@ -86,13 +86,13 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 	// Add a certified testtuple
 	inpTesttuple1 := inputTesttuple{}
 	args := inpTesttuple1.createDefault()
-	resp := mockStub.MockInvoke("42", args)
+	resp := mockStub.MockInvoke(args)
 	assert.EqualValues(t, 200, resp.Status)
 
 	// Fail to add an incomplete uncertified testtuple
 	inpTesttuple2 := inputTesttuple{DataSampleKeys: []string{trainDataSampleKey1}}
 	args = inpTesttuple2.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValues(t, 400, resp.Status)
 	assert.Contains(t, resp.Message, "invalid input: dataManagerKey and dataSampleKey should be provided together")
 
@@ -102,13 +102,13 @@ func TestConflictCertifiedNonCertifiedTesttuple(t *testing.T) {
 		DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
 		DataManagerKey: dataManagerKey}
 	args = inpTesttuple3.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValues(t, 200, resp.Status)
 
 	// Fail to add the same testtuple with the same key
 	inpTesttuple4 := inputTesttuple{}
 	args = inpTesttuple4.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValues(t, 409, resp.Status)
 	assert.Contains(t, resp.Message, "already exists")
 }
@@ -157,14 +157,14 @@ func TestQueryTesttuple(t *testing.T) {
 				DataSampleKeys: dataSampleKeys,
 			}
 			inpTesttuple.fillDefaults()
-			resp := mockStub.MockInvoke("42", inpTesttuple.getArgs())
+			resp := mockStub.MockInvoke(inpTesttuple.getArgs())
 			res := map[string]string{}
 			json.Unmarshal(resp.Payload, &res)
 			testtupleKey := res["key"]
 
 			// query testtuple
 			args := [][]byte{[]byte("queryTesttuple"), keyToJSON(testtupleKey)}
-			resp = mockStub.MockInvoke("42", args)
+			resp = mockStub.MockInvoke(args)
 			respTesttuple := resp.Payload
 			testtuple := outputTesttuple{}
 			json.Unmarshal(respTesttuple, &testtuple)
@@ -208,7 +208,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 			}
 			// Create a testtuple before training
 			args := inp.createDefault()
-			resp := mockStub.MockInvoke("42", args)
+			resp := mockStub.MockInvoke(args)
 			assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
 			values := map[string]string{}
 			json.Unmarshal(resp.Payload, &values)
@@ -250,7 +250,7 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 			inp.DataManagerKey = dataManagerKey
 			inp.DataSampleKeys = []string{trainDataSampleKey1}
 			args = inp.createDefault()
-			resp = mockStub.MockInvoke("42", args)
+			resp = mockStub.MockInvoke(args)
 
 			switch status {
 			case StatusDone:

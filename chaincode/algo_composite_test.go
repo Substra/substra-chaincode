@@ -32,7 +32,7 @@ func TestCompositeAlgo(t *testing.T) {
 		},
 	}
 	args := inpAlgo.createDefault()
-	resp := mockStub.MockInvoke("42", args)
+	resp := mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 400, resp.Status, "when adding algo with invalid checksum, status %d and message %s", resp.Status, resp.Message)
 
 	// Properly add algo
@@ -46,7 +46,7 @@ func TestCompositeAlgo(t *testing.T) {
 
 	// Query algo from key and check the consistency of returned arguments
 	args = [][]byte{[]byte("queryCompositeAlgo"), keyToJSON(algoKey)}
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying a composite algo with status %d and message %s", resp.Status, resp.Message)
 	algo := outputCompositeAlgo{}
 	err = json.Unmarshal(resp.Payload, &algo)
@@ -74,7 +74,7 @@ func TestCompositeAlgo(t *testing.T) {
 
 	// Query all algo and check consistency
 	args = [][]byte{[]byte("queryCompositeAlgos")}
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying composite algos - status %d and message %s", resp.Status, resp.Message)
 	var algos []outputCompositeAlgo
 	err = json.Unmarshal(resp.Payload, &algos)

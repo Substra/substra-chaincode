@@ -26,11 +26,11 @@ func TestNode(t *testing.T) {
 
 	args := append([][]byte{[]byte("registerNode")}, []byte{})
 
-	resp := mockStub.MockInvoke("42", args)
+	resp := mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "Node created")
 	assert.Contains(t, string(resp.Payload), "\"id\":\"SampleOrg\"", "Node created")
 
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "Node registered twice")
 	assert.Contains(t, string(resp.Payload), "\"id\":\"SampleOrg\"", "Node registered twice")
 }
@@ -38,7 +38,8 @@ func TestNode(t *testing.T) {
 func TestQueryNodes(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	response := mockStub.MockInvoke("43", [][]byte{[]byte("queryNodes")})
+
+	response := mockStub.MockInvoke([][]byte{[]byte("queryNodes")})
 
 	assert.EqualValuesf(t, 200, response.Status, "Node Created")
 	assert.Contains(t, string(response.Payload), "\"id\":\"SampleOrg\"", "Query nodes")

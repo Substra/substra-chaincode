@@ -21,11 +21,11 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/hyperledger/fabric/common/util"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-protos-go/ledger/queryresult"
 	"github.com/hyperledger/fabric-protos-go/msp"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
+	"github.com/hyperledger/fabric/common/util"
 	"github.com/pkg/errors"
 )
 
@@ -149,12 +149,17 @@ func (stub *MockStub) MockInit(uuid string, args [][]byte) pb.Response {
 	return res
 }
 
-// Invoke this chaincode, also starts and ends a transaction.
-func (stub *MockStub) MockInvoke(uuid string, args [][]byte) pb.Response {
+// Invoke this chaincode using the default transction ID. Also starts and ends a transaction.
+func (stub *MockStub) MockInvoke(args [][]byte) pb.Response {
+	return stub.MockInvokeTxID(mockTxID, args)
+}
+
+// Invoke this chaincode using the specified transction ID. Also starts and ends a transaction.
+func (stub *MockStub) MockInvokeTxID(txid string, args [][]byte) pb.Response {
 	stub.args = args
-	stub.MockTransactionStart(uuid)
+	stub.MockTransactionStart(txid)
 	res := stub.cc.Invoke(stub)
-	stub.MockTransactionEnd(uuid)
+	stub.MockTransactionEnd(txid)
 	return res
 }
 
@@ -352,7 +357,7 @@ func (stub *MockStub) InvokeChaincode(chaincodeName string, args [][]byte, chann
 	// TODO "args" here should possibly be a serialized pb.ChaincodeInput
 	otherStub := stub.Invokables[chaincodeName]
 	//	function, strings := getFuncArgs(args)
-	res := otherStub.MockInvoke(stub.TxID, args)
+	res := otherStub.MockInvokeTxID(stub.TxID, args)
 	return res
 }
 
@@ -490,7 +495,7 @@ func NewMockStub(name string, cc shim.Chaincode) *MockStub {
 
 func NewMockStubWithRegisterNode(name string, cc shim.Chaincode) *MockStub {
 	s := NewMockStub(name, cc)
-	s.MockInvoke("42", [][]byte{[]byte("registerNode")})
+	s.MockInvoke([][]byte{[]byte("registerNode")})
 
 	return s
 }

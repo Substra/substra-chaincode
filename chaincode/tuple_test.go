@@ -121,7 +121,7 @@ func TestSpecifiqArgSeq(t *testing.T) {
 		for _, arg := range argList {
 			args = append(args, []byte(arg))
 		}
-		resp := mockStub.MockInvoke("42", args)
+		resp := mockStub.MockInvoke(args)
 		assert.EqualValues(t, 200, resp.Status, resp.Message, argList[0])
 	}
 }
@@ -136,18 +136,18 @@ func TestTagTuple(t *testing.T) {
 
 	inpTraintuple := inputTraintuple{Tag: noTag}
 	args := inpTraintuple.createDefault()
-	resp := mockStub.MockInvoke("42", args)
+	resp := mockStub.MockInvoke(args)
 	assert.EqualValues(t, 400, resp.Status, resp.Message)
 
 	tag := "This is a tag"
 
 	inpTraintuple = inputTraintuple{Tag: tag}
 	args = inpTraintuple.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message)
 
 	args = [][]byte{[]byte("queryTraintuples")}
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 
 	traintuples := []outputTraintuple{}
 	err := json.Unmarshal(resp.Payload, &traintuples)
@@ -158,11 +158,11 @@ func TestTagTuple(t *testing.T) {
 
 	inpTesttuple := inputTesttuple{Tag: tag}
 	args = inpTesttuple.createDefault()
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message)
 
 	args = [][]byte{[]byte("queryTesttuples")}
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	testtuples := []outputTesttuple{}
 	err = json.Unmarshal(resp.Payload, &testtuples)
 	assert.NoError(t, err, "should be unmarshaled")
@@ -174,7 +174,7 @@ func TestTagTuple(t *testing.T) {
 		Attributes: tag,
 	}
 	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
-	resp = mockStub.MockInvoke("42", args)
+	resp = mockStub.MockInvoke(args)
 	assert.EqualValues(t, 200, resp.Status, resp.Message)
 	filtertuples := []outputTesttuple{}
 	err = json.Unmarshal(resp.Payload, &filtertuples)
