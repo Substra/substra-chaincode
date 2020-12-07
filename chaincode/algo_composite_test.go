@@ -21,6 +21,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type CompositeAlgoResponse struct {
+	Results []outputCompositeAlgo `json:"results"`
+	Author  map[string]string     `json:"bookmarks"`
+}
+
 func TestCompositeAlgo(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
@@ -76,9 +81,9 @@ func TestCompositeAlgo(t *testing.T) {
 	args = [][]byte{[]byte("queryCompositeAlgos")}
 	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying composite algos - status %d and message %s", resp.Status, resp.Message)
-	var algos []outputCompositeAlgo
+	var algos CompositeAlgoResponse
 	err = json.Unmarshal(resp.Payload, &algos)
 	assert.NoError(t, err, "while unmarshalling composite algos")
-	assert.Len(t, algos, 1)
-	assert.Exactly(t, expectedAlgo, algos[0], "return composite algo different from registered one")
+	assert.Len(t, algos.Results, 1)
+	assert.Exactly(t, expectedAlgo, algos.Results[0], "return composite algo different from registered one")
 }

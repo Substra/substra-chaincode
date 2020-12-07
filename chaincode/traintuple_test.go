@@ -24,6 +24,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type TraintupleResponse struct {
+	Results  []outputTraintuple `json:"results"`
+	Bookmark string             `json:"bookmark"`
+}
+
 func TestTraintupleWithNoTestDataset(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
@@ -49,6 +54,53 @@ func TestTraintupleWithNoTestDataset(t *testing.T) {
 	args = [][]byte{[]byte("queryTraintuple"), keyToJSON(traintupleKey)}
 	resp = mockStub.MockInvoke(args)
 	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
+}
+
+func TestPagination(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	registerItem(t, *mockStub, "trainDataset")
+
+	key := strings.Replace(objectiveKey, "1", "2", 1)
+	inpObjective := inputObjective{Key: key}
+	inpObjective.createDefault()
+	inpObjective.TestDataset = inputDataset{}
+	resp := mockStub.MockInvoke(methodAndAssetToByte("registerObjective", inpObjective))
+	assert.EqualValues(t, 200, resp.Status, "when adding objective without dataset it should work: ", resp.Message)
+
+	inpAlgo := inputAlgo{}
+	args := inpAlgo.createDefault()
+	resp = mockStub.MockInvoke(args)
+	assert.EqualValues(t, 200, resp.Status, "when adding algo it should work: ", resp.Message)
+
+	// Add N + 1 testtuples
+	for i := 0; i < OutputPageSize+1; i++ {
+		uuid, err := GetNewUUID()
+		assert.NoError(t, err)
+		inpTraintuple := inputTraintuple{Key: uuid}
+		args = inpTraintuple.createDefault()
+		resp = mockStub.MockInvoke(args)
+		assert.EqualValues(t, 200, resp.Status, "when adding traintuple without test dataset it should work: ", resp.Message)
+	}
+
+	var queryTraintuples TraintupleResponse
+
+	// 1st query (no bookmark) should return OutputPageSize results
+	args = [][]byte{[]byte("queryTraintuples")}
+	resp = mockStub.MockInvoke(args)
+	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
+	err := json.Unmarshal(resp.Payload, &queryTraintuples)
+	assert.NoError(t, err, "traintuples should unmarshal without problem")
+	assert.Equal(t, OutputPageSize, len(queryTraintuples.Results))
+
+	// 2nd query (with bookmark) should return 1 result
+	inp := inputBookmark{Bookmark: queryTraintuples.Bookmark}
+	args = append([][]byte{[]byte("queryTraintuples")}, assetToJSON(inp))
+	resp = mockStub.MockInvoke(args)
+	assert.EqualValues(t, 200, resp.Status, "It should find the traintuple without error ", resp.Message)
+	err = json.Unmarshal(resp.Payload, &queryTraintuples)
+	assert.NoError(t, err, "traintuples should unmarshal without problem")
+	assert.Equal(t, 1, len(queryTraintuples.Results))
 }
 
 func TestTraintupleWithSingleDatasample(t *testing.T) {
@@ -318,10 +370,10 @@ func TestTraintuple(t *testing.T) {
 	// TODO add traintuple key to output struct
 	// For now we test it as cleanly as its added to the query response
 	assert.Contains(t, string(resp.Payload), "key\":\""+traintupleKey)
-	var queryTraintuples []outputTraintuple
+	var queryTraintuples TraintupleResponse
 	err = json.Unmarshal(resp.Payload, &queryTraintuples)
 	assert.NoError(t, err, "traintuples should unmarshal without problem")
-	assert.Exactly(t, out, queryTraintuples[0])
+	assert.Exactly(t, out, queryTraintuples.Results[0])
 
 	// Add traintuple with inmodel from the above-submitted traintuple
 	inpWaitingTraintuple := inputTraintuple{
@@ -341,9 +393,10 @@ func TestTraintuple(t *testing.T) {
 	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying traintuple of worker with todo status - status %d and message %s", resp.Status, resp.Message)
-	err = json.Unmarshal(resp.Payload, &queryTraintuples)
+	var queryTraintuplesF []outputTraintuple
+	err = json.Unmarshal(resp.Payload, &queryTraintuplesF)
 	assert.NoError(t, err, "traintuples should unmarshal without problem")
-	assert.Exactly(t, out, queryTraintuples[0])
+	assert.Exactly(t, out, queryTraintuplesF[0])
 
 	// Update status and check consistency
 	success := inputLogSuccessTrain{}

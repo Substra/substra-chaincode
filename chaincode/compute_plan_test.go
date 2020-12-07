@@ -309,14 +309,14 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Check the composite traintuples
-	traintuples, err := queryCompositeTraintuples(db, []string{})
+	traintuples, _, err := queryCompositeTraintuples(db, []string{})
 	assert.NoError(t, err)
 	require.Len(t, traintuples, 2)
 	require.Contains(t, outCP.CompositeTraintupleKeys, traintuples[0].Key)
 	require.Contains(t, outCP.CompositeTraintupleKeys, traintuples[1].Key)
 
 	// Check the aggregate traintuples
-	aggtuples, err := queryAggregatetuples(db, []string{})
+	aggtuples, _, err := queryAggregatetuples(db, []string{})
 	assert.NoError(t, err)
 	require.Len(t, aggtuples, 2)
 	require.Contains(t, outCP.AggregatetupleKeys, aggtuples[0].Key)
@@ -330,7 +330,7 @@ func TestCreateComputePlanCompositeAggregate(t *testing.T) {
 	assert.Equal(t, 2, len(cp.AggregatetupleKeys))
 
 	// Query compute plans
-	cps, err := queryComputePlans(db, []string{})
+	cps, _, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Len(t, cps, 1, "queryComputePlans should return one compute plan")
 	assert.Equal(t, 2, len(cps[0].CompositeTraintupleKeys))
@@ -352,7 +352,7 @@ func TestCreateComputePlan(t *testing.T) {
 	validateDefaultComputePlan(t, outCP)
 
 	// Check the traintuples
-	traintuples, err := queryTraintuples(db, []string{})
+	traintuples, _, err := queryTraintuples(db, []string{})
 	assert.NoError(t, err)
 	assert.Len(t, traintuples, 2)
 	require.Contains(t, outCP.TraintupleKeys, traintuples[0].Key)
@@ -387,7 +387,7 @@ func TestCreateComputePlan(t *testing.T) {
 	assert.Equal(t, StatusWaiting, second.Status)
 
 	// Check the testtuples
-	testtuples, err := queryTesttuples(db, []string{})
+	testtuples, _, err := queryTesttuples(db, []string{})
 	assert.NoError(t, err)
 	require.Len(t, testtuples, 1)
 	testtuple := testtuples[0]
@@ -430,7 +430,7 @@ func TestQueryComputePlans(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, outCP)
 
-	cps, err := queryComputePlans(db, []string{})
+	cps, _, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Len(t, cps, 1, "queryComputePlans should return one compute plan")
 	validateDefaultComputePlan(t, cps[0])
@@ -487,7 +487,7 @@ func TestComputePlanEmptyTesttuples(t *testing.T) {
 	assert.NotNil(t, cp)
 	assert.Len(t, outCP.TesttupleKeys, 0)
 
-	cps, err := queryComputePlans(db, []string{})
+	cps, _, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Len(t, cps, 1, "queryComputePlans should return one compute plan")
 	assert.Len(t, cps[0].TesttupleKeys, 0)
@@ -501,7 +501,7 @@ func TestQueryComputePlanEmpty(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	cps, err := queryComputePlans(db, []string{})
+	cps, _, err := queryComputePlans(db, []string{})
 	assert.NoError(t, err, "calling queryComputePlans should succeed")
 	assert.Equal(t, []outputComputePlan{}, cps)
 }
@@ -525,7 +525,7 @@ func TestCancelComputePlan(t *testing.T) {
 	computePlan, err := getOutComputePlan(db, out.Key)
 	assert.Equal(t, StatusCanceled, computePlan.Status)
 
-	tuples, err := queryCompositeTraintuples(db, []string{})
+	tuples, _, err := queryCompositeTraintuples(db, []string{})
 	assert.NoError(t, err)
 
 	nbAborted, nbTodo := 0, 0
@@ -541,7 +541,7 @@ func TestCancelComputePlan(t *testing.T) {
 	assert.Equal(t, nbAborted, 2)
 	assert.Equal(t, nbTodo, 2)
 
-	tests, err := queryTesttuples(db, []string{})
+	tests, _, err := queryTesttuples(db, []string{})
 	assert.NoError(t, err)
 	for _, test := range tests {
 		assert.Equal(t, StatusAborted, test.Status)
@@ -569,7 +569,7 @@ func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
 	computePlan, err := getOutComputePlan(db, out.Key)
 	assert.Equal(t, StatusCanceled, computePlan.Status)
 
-	tuples, err := queryCompositeTraintuples(db, []string{})
+	tuples, _, err := queryCompositeTraintuples(db, []string{})
 	assert.NoError(t, err)
 	for _, tuple := range tuples {
 		if tuple.Rank == 0 {

@@ -260,28 +260,38 @@ func queryDataManager(db *LedgerDB, args []string) (out outputDataManager, err e
 }
 
 // queryDataManagers returns all DataManagers of the ledger
-func queryDataManagers(db *LedgerDB, args []string) ([]outputDataManager, error) {
-	var err error
-	outDataManagers := []outputDataManager{}
-	if len(args) != 0 {
-		err = errors.BadRequest("incorrect number of arguments, expecting 0")
-		return outDataManagers, err
+func queryDataManagers(db *LedgerDB, args []string) (outDataManagers []outputDataManager, bookmark string, err error) {
+	inp := inputBookmark{}
+	outDataManagers = []outputDataManager{}
+
+	if len(args) > 1 {
+		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
+		return
 	}
-	var indexName = "dataManager~owner~key"
-	elementsKeys, err := db.GetIndexKeys(indexName, []string{"dataManager"})
+
+	if len(args) == 1 && args[0] != "" {
+		err = AssetFromJSON(args, &inp)
+		if err != nil {
+			return
+		}
+	}
+
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("dataManager~owner~key", []string{"dataManager"}, OutputPageSize, inp.Bookmark)
+
 	if err != nil {
-		return outDataManagers, err
+		return
 	}
+
 	for _, key := range elementsKeys {
 		dataManager, err := db.GetDataManager(key)
 		if err != nil {
-			return outDataManagers, err
+			return outDataManagers, bookmark, err
 		}
 		var out outputDataManager
 		out.Fill(dataManager)
 		outDataManagers = append(outDataManagers, out)
 	}
-	return outDataManagers, nil
+	return
 }
 
 // queryDataset returns info about a dataManager and all related dataSample
@@ -314,27 +324,38 @@ func queryDataset(db *LedgerDB, args []string) (outputDataset, error) {
 	return out, nil
 }
 
-func queryDataSamples(db *LedgerDB, args []string) ([]outputDataSample, error) {
-	outDataSamples := []outputDataSample{}
-	if len(args) != 0 {
-		err := errors.BadRequest("incorrect number of arguments, expecting nothing")
-		return outDataSamples, err
+func queryDataSamples(db *LedgerDB, args []string) (outDataSamples []outputDataSample, bookmark string, err error) {
+	inp := inputBookmark{}
+	outDataSamples = []outputDataSample{}
+
+	if len(args) > 1 {
+		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
+		return
 	}
-	elementsKeys, err := db.GetIndexKeys("dataSample~dataManager~key", []string{"dataSample"})
-	if err != nil {
-		return outDataSamples, err
-	}
-	for _, key := range elementsKeys {
-		var dataSample DataSample
-		dataSample, err = db.GetDataSample(key)
+
+	if len(args) == 1 && args[0] != "" {
+		err = AssetFromJSON(args, &inp)
 		if err != nil {
-			return outDataSamples, err
+			return
+		}
+	}
+
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("dataSample~dataManager~key", []string{"dataSample"}, OutputPageSize, inp.Bookmark)
+
+	if err != nil {
+		return
+	}
+
+	for _, key := range elementsKeys {
+		dataSample, err := db.GetDataSample(key)
+		if err != nil {
+			return outDataSamples, bookmark, err
 		}
 		var out outputDataSample
 		out.Fill(key, dataSample)
 		outDataSamples = append(outDataSamples, out)
 	}
-	return outDataSamples, nil
+	return
 }
 
 // -----------------------------------------------------------------

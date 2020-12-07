@@ -21,6 +21,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type AggregateAlgoResponse struct {
+	Results  []outputAggregateAlgo `json:"results"`
+	Bookmark string                `json:"bookmark"`
+}
+
 func TestAggregateAlgo(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
@@ -76,9 +81,9 @@ func TestAggregateAlgo(t *testing.T) {
 	args = [][]byte{[]byte("queryAggregateAlgos")}
 	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying aggregate algos - status %d and message %s", resp.Status, resp.Message)
-	var algos []outputAggregateAlgo
+	var algos AggregateAlgoResponse
 	err = json.Unmarshal(resp.Payload, &algos)
 	assert.NoError(t, err, "while unmarshalling aggregate algos")
-	assert.Len(t, algos, 1)
-	assert.Exactly(t, expectedAlgo, algos[0], "return aggregate algo different from registered one")
+	assert.Len(t, algos.Results, 1)
+	assert.Exactly(t, expectedAlgo, algos.Results[0], "return aggregate algo different from registered one")
 }

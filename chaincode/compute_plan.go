@@ -261,21 +261,37 @@ func queryComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err 
 	return getOutComputePlan(db, inp.Key)
 }
 
-func queryComputePlans(db *LedgerDB, args []string) (resp []outputComputePlan, err error) {
-	resp = []outputComputePlan{}
-	computePlanKeys, err := db.GetIndexKeys("computePlan~key", []string{"computePlan"})
+func queryComputePlans(db *LedgerDB, args []string) (outComputePlans []outputComputePlan, bookmark string, err error) {
+	inp := inputBookmark{}
+	outComputePlans = []outputComputePlan{}
+
+	if len(args) > 1 {
+		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
+		return
+	}
+
+	if len(args) == 1 && args[0] != "" {
+		err = AssetFromJSON(args, &inp)
+		if err != nil {
+			return
+		}
+	}
+
+	computePlanKeys, bookmark, err := db.GetIndexKeysWithPagination("computePlan~key", []string{"computePlan"}, OutputPageSize, inp.Bookmark)
+
 	if err != nil {
 		return
 	}
+
 	for _, key := range computePlanKeys {
 		var computePlan outputComputePlan
 		computePlan, err = getOutComputePlan(db, key)
 		if err != nil {
 			return
 		}
-		resp = append(resp, computePlan)
+		outComputePlans = append(outComputePlans, computePlan)
 	}
-	return resp, err
+	return
 }
 
 // getComputePlan returns details for a compute plan key.

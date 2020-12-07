@@ -149,12 +149,12 @@ func TestTagTuple(t *testing.T) {
 	args = [][]byte{[]byte("queryTraintuples")}
 	resp = mockStub.MockInvoke(args)
 
-	traintuples := []outputTraintuple{}
+	var traintuples TraintupleResponse
 	err := json.Unmarshal(resp.Payload, &traintuples)
 
 	assert.NoError(t, err, "should be unmarshaled")
-	assert.Len(t, traintuples, 1, "there should be one traintuple")
-	assert.EqualValues(t, tag, traintuples[0].Tag)
+	assert.Len(t, traintuples.Results, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, traintuples.Results[0].Tag)
 
 	inpTesttuple := inputTesttuple{Tag: tag}
 	args = inpTesttuple.createDefault()
@@ -163,11 +163,11 @@ func TestTagTuple(t *testing.T) {
 
 	args = [][]byte{[]byte("queryTesttuples")}
 	resp = mockStub.MockInvoke(args)
-	testtuples := []outputTesttuple{}
+	var testtuples TesttupleResponse
 	err = json.Unmarshal(resp.Payload, &testtuples)
 	assert.NoError(t, err, "should be unmarshaled")
-	assert.Len(t, testtuples, 1, "there should be one traintuple")
-	assert.EqualValues(t, tag, testtuples[0].Tag)
+	assert.Len(t, testtuples.Results, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, testtuples.Results[0].Tag)
 
 	filter := inputQueryFilter{
 		IndexName:  "testtuple~tag",
@@ -179,8 +179,8 @@ func TestTagTuple(t *testing.T) {
 	filtertuples := []outputTesttuple{}
 	err = json.Unmarshal(resp.Payload, &filtertuples)
 	assert.NoError(t, err, "should be unmarshaled")
-	assert.Len(t, testtuples, 1, "there should be one traintuple")
-	assert.EqualValues(t, tag, testtuples[0].Tag)
+	assert.Len(t, testtuples.Results, 1, "there should be one traintuple")
+	assert.EqualValues(t, tag, testtuples.Results[0].Tag)
 
 }
 
@@ -221,4 +221,58 @@ func TestQueryHeadModelPermissions(t *testing.T) {
 	assert.False(t, outPerm.Process.Public)
 	assert.Len(t, outPerm.Process.AuthorizedIDs, 1)
 	assert.Contains(t, outPerm.Process.AuthorizedIDs, worker)
+}
+
+type ModelsResponse struct {
+	Results  []outputModel `json:"results"`
+	Bookmark string        `json:"bookmark"`
+}
+
+func TestQueryModelsPagination(t *testing.T) {
+	scc := new(SubstraChaincode)
+	mockStub := NewMockStubWithRegisterNode("substra", scc)
+
+	resp, _ := registerItem(t, *mockStub, "algo")
+
+	// Add N + 1 traintuples
+	for i := 0; i < OutputPageSize/3+1; i++ {
+		uuid, _ := GetNewUUID()
+		inpTraintuple := inputTraintuple{Key: uuid}
+		args := inpTraintuple.createDefault()
+		resp = mockStub.MockInvoke(args)
+		assert.EqualValues(t, 200, resp.Status, resp.Message)
+
+		args = [][]byte{[]byte("logStartTrain"), keyToJSON(inpTraintuple.Key)}
+		resp = mockStub.MockInvoke(args)
+
+		success := inputLogSuccessTrain{}
+		success.Key = traintupleKey
+		success.OutModel.Key, _ = GetNewUUID()
+		args = append([][]byte{[]byte("logSuccessTrain")}, assetToJSON(success))
+		resp = mockStub.MockInvoke(args)
+	}
+
+	var models ModelsResponse
+
+	// 1st query (no bookmark) should return OutputPageSize/3 results
+	args := [][]byte{[]byte("queryModels")}
+	resp = mockStub.MockInvoke(args)
+	assert.EqualValues(t, 200, resp.Status, "It should find the models without error ", resp.Message)
+	err := json.Unmarshal(resp.Payload, &models)
+	assert.NoError(t, err, "models should unmarshal without problem")
+	assert.Equal(t, OutputPageSize/3, len(models.Results))
+	firstResult := models.Results[0].Traintuple.Key
+
+	// 2nd query (with bookmark) should return 1 result
+	inp := inputBookmark{Bookmark: models.Bookmark}
+	args = append([][]byte{[]byte("queryModels")}, assetToJSON(inp))
+	resp = mockStub.MockInvoke(args)
+	assert.EqualValues(t, 200, resp.Status, "It should find the models without error ", resp.Message)
+	err = json.Unmarshal(resp.Payload, &models)
+	assert.NoError(t, err, "models should unmarshal without problem")
+	assert.Equal(t, 1, len(models.Results))
+
+	// 2nd query should return different results from 1st query
+	newFirstResult := models.Results[0].Traintuple.Key
+	assert.NotEqual(t, newFirstResult, firstResult, "query results should be different")
 }

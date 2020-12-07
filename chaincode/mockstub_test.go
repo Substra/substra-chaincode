@@ -283,7 +283,7 @@ func (stub *MockStub) GetStateByRange(startKey, endKey string) (shim.StateQueryI
 	if err := validateSimpleKeys(startKey, endKey); err != nil {
 		return nil, err
 	}
-	return NewMockStateRangeQueryIterator(stub, startKey, endKey), nil
+	return NewMockStateRangeQueryIterator(stub, startKey, endKey, false, OutputPageSize), nil
 }
 
 // GetQueryResult function can be invoked by a chaincode to perform a
@@ -315,7 +315,7 @@ func (stub *MockStub) GetStateByPartialCompositeKey(objectType string, attribute
 	if err != nil {
 		return nil, err
 	}
-	return NewMockStateRangeQueryIterator(stub, partialCompositeKey, partialCompositeKey+string(maxUnicodeRuneValue)), nil
+	return NewMockStateRangeQueryIterator(stub, partialCompositeKey, partialCompositeKey+string(maxUnicodeRuneValue), false, OutputPageSize), nil
 }
 
 // CreateCompositeKey combines the list of attributes
@@ -337,7 +337,16 @@ func (stub *MockStub) GetStateByRangeWithPagination(startKey, endKey string, pag
 
 func (stub *MockStub) GetStateByPartialCompositeKeyWithPagination(objectType string, keys []string,
 	pageSize int32, bookmark string) (shim.StateQueryIteratorInterface, *pb.QueryResponseMetadata, error) {
-	return nil, nil, nil
+	partialCompositeKey, err := stub.CreateCompositeKey(objectType, keys)
+	if err != nil {
+		return nil, nil, err
+	}
+	startKey := partialCompositeKey
+	if bookmark != "" {
+		startKey = bookmark
+	}
+	iterator := NewMockStateRangeQueryIterator(stub, startKey, partialCompositeKey+string(maxUnicodeRuneValue), true, pageSize)
+	return iterator, iterator.Metadata, nil
 }
 
 func (stub *MockStub) GetQueryResultWithPagination(query string, pageSize int32,
@@ -486,7 +495,7 @@ func NewMockStub(name string, cc shim.Chaincode) *MockStub {
 	s.EndorsementPolicies = make(map[string]map[string][]byte)
 	s.Invokables = make(map[string]*MockStub)
 	s.Keys = list.New()
-	s.ChaincodeEventsChannel = make(chan *pb.ChaincodeEvent, 100) //define large capacity for non-blocking setEvent calls.
+	s.ChaincodeEventsChannel = make(chan *pb.ChaincodeEvent, OutputPageSize+1) //define large capacity for non-blocking setEvent calls.
 	s.Decorations = make(map[string][]byte)
 	s.TxTimestamp = &timestamp.Timestamp{}
 
@@ -505,11 +514,14 @@ func NewMockStubWithRegisterNode(name string, cc shim.Chaincode) *MockStub {
 *****************************/
 
 type MockStateRangeQueryIterator struct {
-	Closed   bool
-	Stub     *MockStub
-	StartKey string
-	EndKey   string
-	Current  *list.Element
+	Closed      bool
+	Stub        *MockStub
+	StartKey    string
+	EndKey      string
+	Current     *list.Element
+	IsPaginated bool
+	PageSize    int32
+	Metadata    *pb.QueryResponseMetadata
 }
 
 // HasNext returns true if the range query iterator contains additional keys
@@ -530,12 +542,17 @@ func (iter *MockStateRangeQueryIterator) HasNext() bool {
 		if iter.StartKey == "" && iter.EndKey == "" {
 			return true
 		}
+		// iterator has already yielded enough results
+		if iter.IsPaginated && iter.Metadata.FetchedRecordsCount == iter.PageSize {
+			return false
+		}
 		comp1 := strings.Compare(current.Value.(string), iter.StartKey)
 		comp2 := strings.Compare(current.Value.(string), iter.EndKey)
 		if comp1 >= 0 {
 			if comp2 < 0 {
 				return true
 			}
+			iter.Metadata.Bookmark = ""
 			return false
 		}
 		current = current.Next()
@@ -557,6 +574,10 @@ func (iter *MockStateRangeQueryIterator) Next() (*queryresult.KV, error) {
 		return nil, err
 	}
 
+	if iter.Current != nil && iter.IsPaginated && iter.Metadata.FetchedRecordsCount >= iter.PageSize {
+		return nil, errors.New("Paginated MockStateRangeQueryIterator.Next() went past end of range")
+	}
+
 	for iter.Current != nil {
 		comp1 := strings.Compare(iter.Current.Value.(string), iter.StartKey)
 		comp2 := strings.Compare(iter.Current.Value.(string), iter.EndKey)
@@ -566,6 +587,12 @@ func (iter *MockStateRangeQueryIterator) Next() (*queryresult.KV, error) {
 			key := iter.Current.Value.(string)
 			value, err := iter.Stub.GetState(key)
 			iter.Current = iter.Current.Next()
+			if iter.Current != nil {
+				iter.Metadata.Bookmark = iter.Current.Value.(string)
+			} else {
+				iter.Metadata.Bookmark = ""
+			}
+			iter.Metadata.FetchedRecordsCount++
 			return &queryresult.KV{Key: key, Value: value}, err
 		}
 		iter.Current = iter.Current.Next()
@@ -589,13 +616,16 @@ func (iter *MockStateRangeQueryIterator) Close() error {
 func (iter *MockStateRangeQueryIterator) Print() {
 }
 
-func NewMockStateRangeQueryIterator(stub *MockStub, startKey string, endKey string) *MockStateRangeQueryIterator {
+func NewMockStateRangeQueryIterator(stub *MockStub, startKey string, endKey string, isPaginated bool, pageSize int32) *MockStateRangeQueryIterator {
 	iter := new(MockStateRangeQueryIterator)
 	iter.Closed = false
 	iter.Stub = stub
 	iter.StartKey = startKey
 	iter.EndKey = endKey
 	iter.Current = stub.Keys.Front()
+	iter.IsPaginated = isPaginated
+	iter.PageSize = pageSize
+	iter.Metadata = &pb.QueryResponseMetadata{}
 
 	iter.Print()
 

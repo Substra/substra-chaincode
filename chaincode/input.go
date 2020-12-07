@@ -122,6 +122,10 @@ type inputKey struct {
 	Key string `validate:"required,len=36" json:"key"`
 }
 
+type inputBookmark struct {
+	Bookmark string `json:"bookmark"`
+}
+
 type inputLogSuccessTrain struct {
 	inputLog
 	OutModel inputKeyChecksumAddress `validate:"required" json:"out_model"`

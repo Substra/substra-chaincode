@@ -22,6 +22,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type ObjectiveResponse struct {
+	Results  []outputObjective `json:"results"`
+	Bookmark string            `json:"bookmark"`
+}
+
 func TestLeaderBoard(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
@@ -180,9 +185,9 @@ func TestObjective(t *testing.T) {
 	args = [][]byte{[]byte("queryObjectives")}
 	resp = mockStub.MockInvoke(args)
 	assert.EqualValuesf(t, 200, resp.Status, "when querying objectives - status %d and message %s", resp.Status, resp.Message)
-	var objectives []outputObjective
+	var objectives ObjectiveResponse
 	err = json.Unmarshal(resp.Payload, &objectives)
 	assert.NoError(t, err, "while unmarshalling objectives")
-	assert.Len(t, objectives, 1)
-	assert.Exactly(t, expectedObjective, objectives[0], "return objective different from registered one")
+	assert.Len(t, objectives.Results, 1)
+	assert.Exactly(t, expectedObjective, objectives.Results[0], "return objective different from registered one")
 }

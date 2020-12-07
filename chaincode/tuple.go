@@ -16,6 +16,7 @@ package main
 
 import (
 	"chaincode/errors"
+	"encoding/json"
 )
 
 // List of the possible tuple's status
@@ -94,20 +95,48 @@ func queryModelDetails(db *LedgerDB, args []string) (outModelDetails outputModel
 	return
 }
 
-// queryModels returns all traintuples and associated testuples
-func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err error) {
-	outModels = []outputModel{}
+type queryModelsBookmarks struct {
+	Traintuple          string `json:"traintuple"`
+	CompositeTraintuple string `json:"composite_traintuple"`
+	Aggregatetuple      string `json:"aggregatetuple"`
+}
 
-	if len(args) != 0 {
-		err = errors.BadRequest("incorrect number of arguments, expecting nothing")
+type inputQueryModelsBookmarks struct {
+	Bookmark string `json:"bookmark"`
+}
+
+// queryModels returns all traintuples and associated testuples
+func queryModels(db *LedgerDB, args []string) (outModels []outputModel, bookmark string, err error) {
+	outModels = []outputModel{}
+	bookmarks := queryModelsBookmarks{}
+
+	if len(args) > 1 {
+		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
 		return
+	}
+
+	if len(args) == 1 && args[0] != "" {
+		inp := inputQueryModelsBookmarks{}
+		err = json.Unmarshal([]byte(args[0]), &inp)
+		if err != nil {
+			return
+		}
+		if inp.Bookmark != "" {
+			err = json.Unmarshal([]byte(inp.Bookmark), &bookmarks)
+			if err != nil {
+				return
+			}
+		}
 	}
 
 	// populate from regular traintuples
-	traintupleKeys, err := db.GetIndexKeys("traintuple~algo~key", []string{"traintuple"})
+	traintupleKeys, traintupleBookmark, err := db.GetIndexKeysWithPagination("traintuple~algo~key", []string{"traintuple"}, OutputPageSize/3, bookmarks.Traintuple)
+	bookmarks.Traintuple = traintupleBookmark
+
 	if err != nil {
 		return
 	}
+
 	for _, traintupleKey := range traintupleKeys {
 		var outputModel outputModel
 		var out outputTraintuple
@@ -121,7 +150,9 @@ func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err erro
 	}
 
 	// populate from composite traintuples
-	compositeTraintupleKeys, err := db.GetIndexKeys("compositeTraintuple~algo~key", []string{"compositeTraintuple"})
+	compositeTraintupleKeys, compositeTraintupleBookmark, err := db.GetIndexKeysWithPagination("compositeTraintuple~algo~key", []string{"compositeTraintuple"}, OutputPageSize/3, bookmarks.CompositeTraintuple)
+	bookmarks.CompositeTraintuple = compositeTraintupleBookmark
+
 	if err != nil {
 		return
 	}
@@ -138,7 +169,9 @@ func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err erro
 	}
 
 	// populate from composite traintuples
-	aggregatetupleKeys, err := db.GetIndexKeys("aggregatetuple~algo~key", []string{"aggregatetuple"})
+	aggregatetupleKeys, aggregatetupleBookmark, err := db.GetIndexKeysWithPagination("aggregatetuple~algo~key", []string{"aggregatetuple"}, OutputPageSize/3, bookmarks.Aggregatetuple)
+	bookmarks.Aggregatetuple = aggregatetupleBookmark
+
 	if err != nil {
 		return
 	}
@@ -154,6 +187,8 @@ func queryModels(db *LedgerDB, args []string) (outModels []outputModel, err erro
 		outModels = append(outModels, outputModel)
 	}
 
+	bookmarkBytes, err := json.Marshal(bookmarks)
+	bookmark = string(bookmarkBytes)
 	return
 }
 

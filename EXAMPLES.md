@@ -204,30 +204,33 @@ peer chaincode query -n mycc -c '{"Args":["queryDataManagers"]}' -C myc
 ```
 ##### Command output:
 ```json
-[
- {
-  "description": {
-   "checksum": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
-   "storage_address": "https://toto/dataManager/42234/description"
-  },
-  "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-  "metadata": {},
-  "name": "liver slide",
-  "objective_key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
-  "opener": {
-   "checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-   "storage_address": "https://toto/dataManager/42234/opener"
-  },
-  "owner": "SampleOrg",
-  "permissions": {
-   "process": {
-    "authorized_ids": [],
-    "public": true
-   }
-  },
-  "type": "images"
- }
-]
+{
+ "bookmark": "",
+ "results": [
+  {
+   "description": {
+    "checksum": "8d4bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eee",
+    "storage_address": "https://toto/dataManager/42234/description"
+   },
+   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
+   "metadata": {},
+   "name": "liver slide",
+   "objective_key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+   "opener": {
+    "checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "storage_address": "https://toto/dataManager/42234/opener"
+   },
+   "owner": "SampleOrg",
+   "permissions": {
+    "process": {
+     "authorized_ids": [],
+     "public": true
+    }
+   },
+   "type": "images"
+  }
+ ]
+}
 ```
 #### ------------ Query DataSamples ------------
 ##### Command peer example:
@@ -236,36 +239,39 @@ peer chaincode query -n mycc -c '{"Args":["queryDataSamples"]}' -C myc
 ```
 ##### Command output:
 ```json
-[
- {
-  "data_manager_keys": [
-   "da1bb7c3-1f62-244c-0f3a-761cc1688042"
-  ],
-  "key": "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
-  "owner": "SampleOrg"
- },
- {
-  "data_manager_keys": [
-   "da1bb7c3-1f62-244c-0f3a-761cc1688042"
-  ],
-  "key": "aa2bb7c3-1f62-244c-0f3a-761cc1688042",
-  "owner": "SampleOrg"
- },
- {
-  "data_manager_keys": [
-   "da1bb7c3-1f62-244c-0f3a-761cc1688042"
-  ],
-  "key": "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
-  "owner": "SampleOrg"
- },
- {
-  "data_manager_keys": [
-   "da1bb7c3-1f62-244c-0f3a-761cc1688042"
-  ],
-  "key": "bb2bb7c3-1f62-244c-0f3a-761cc1688042",
-  "owner": "SampleOrg"
- }
-]
+{
+ "bookmark": "",
+ "results": [
+  {
+   "data_manager_keys": [
+    "da1bb7c3-1f62-244c-0f3a-761cc1688042"
+   ],
+   "key": "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
+   "owner": "SampleOrg"
+  },
+  {
+   "data_manager_keys": [
+    "da1bb7c3-1f62-244c-0f3a-761cc1688042"
+   ],
+   "key": "aa2bb7c3-1f62-244c-0f3a-761cc1688042",
+   "owner": "SampleOrg"
+  },
+  {
+   "data_manager_keys": [
+    "da1bb7c3-1f62-244c-0f3a-761cc1688042"
+   ],
+   "key": "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
+   "owner": "SampleOrg"
+  },
+  {
+   "data_manager_keys": [
+    "da1bb7c3-1f62-244c-0f3a-761cc1688042"
+   ],
+   "key": "bb2bb7c3-1f62-244c-0f3a-761cc1688042",
+   "owner": "SampleOrg"
+  }
+ ]
+}
 ```
 #### ------------ Query Objectives ------------
 ##### Command peer example:
@@ -274,38 +280,41 @@ peer chaincode query -n mycc -c '{"Args":["queryObjectives"]}' -C myc
 ```
 ##### Command output:
 ```json
-[
- {
-  "description": {
-   "checksum": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-   "storage_address": "https://toto/objective/222/description"
-  },
-  "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
-  "metadata": {},
-  "metrics": {
-   "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-   "name": "accuracy",
-   "storage_address": "https://toto/objective/222/metrics"
-  },
-  "name": "MSI classification",
-  "owner": "SampleOrg",
-  "permissions": {
-   "process": {
-    "authorized_ids": [],
-    "public": true
-   }
-  },
-  "test_dataset": {
-   "data_manager_key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "data_sample_keys": [
-    "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
-    "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
-   ],
+{
+ "bookmark": "",
+ "results": [
+  {
+   "description": {
+    "checksum": "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "storage_address": "https://toto/objective/222/description"
+   },
+   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
    "metadata": {},
-   "worker": ""
+   "metrics": {
+    "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+    "name": "accuracy",
+    "storage_address": "https://toto/objective/222/metrics"
+   },
+   "name": "MSI classification",
+   "owner": "SampleOrg",
+   "permissions": {
+    "process": {
+     "authorized_ids": [],
+     "public": true
+    }
+   },
+   "test_dataset": {
+    "data_manager_key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
+    "data_sample_keys": [
+     "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
+     "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
+    ],
+    "metadata": {},
+    "worker": ""
+   }
   }
- }
-]
+ ]
+}
 ```
 #### ------------ Add Traintuple ------------
 Smart contract: `createTraintuple`
@@ -915,116 +924,119 @@ peer chaincode query -n mycc -c '{"Args":["queryTesttuples"]}' -C myc
 ```
 ##### Command output:
 ```json
-[
- {
-  "algo": {
-   "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "name": "hog + svm",
-   "storage_address": "https://toto/algo/222/algo"
+{
+ "bookmark": "",
+ "results": [
+  {
+   "algo": {
+    "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
+    "name": "hog + svm",
+    "storage_address": "https://toto/algo/222/algo"
+   },
+   "certified": false,
+   "compute_plan_key": "",
+   "creator": "SampleOrg",
+   "dataset": {
+    "data_sample_keys": [
+     "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
+     "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
+    ],
+    "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
+    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "perf": 0,
+    "worker": "SampleOrg"
+   },
+   "key": "dadada11-50f6-26d3-fa86-1bf6387e3896",
+   "log": "",
+   "metadata": {},
+   "objective": {
+    "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+    "metrics": {
+     "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+     "storage_address": "https://toto/objective/222/metrics"
+    }
+   },
+   "rank": 0,
+   "status": "todo",
+   "tag": "",
+   "traintuple_key": "b0289ab8-3a71-f01e-2b72-0259a6452244",
+   "traintuple_type": "traintuple"
   },
-  "certified": false,
-  "compute_plan_key": "",
-  "creator": "SampleOrg",
-  "dataset": {
-   "data_sample_keys": [
-    "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
-    "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
-   ],
-   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-   "perf": 0,
-   "worker": "SampleOrg"
+  {
+   "algo": {
+    "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
+    "name": "hog + svm",
+    "storage_address": "https://toto/algo/222/algo"
+   },
+   "certified": true,
+   "compute_plan_key": "",
+   "creator": "SampleOrg",
+   "dataset": {
+    "data_sample_keys": [
+     "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
+     "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
+    ],
+    "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
+    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "perf": 0.9,
+    "worker": "SampleOrg"
+   },
+   "key": "bbbada11-50f6-26d3-fa86-1bf6387e3896",
+   "log": "no error, ah ah ah",
+   "metadata": {},
+   "objective": {
+    "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+    "metrics": {
+     "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+     "storage_address": "https://toto/objective/222/metrics"
+    }
+   },
+   "rank": 0,
+   "status": "done",
+   "tag": "",
+   "traintuple_key": "b0289ab8-3a71-f01e-2b72-0259a6452244",
+   "traintuple_type": "traintuple"
   },
-  "key": "dadada11-50f6-26d3-fa86-1bf6387e3896",
-  "log": "",
-  "metadata": {},
-  "objective": {
-   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
-   "metrics": {
-    "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-    "storage_address": "https://toto/objective/222/metrics"
-   }
-  },
-  "rank": 0,
-  "status": "todo",
-  "tag": "",
-  "traintuple_key": "b0289ab8-3a71-f01e-2b72-0259a6452244",
-  "traintuple_type": "traintuple"
- },
- {
-  "algo": {
-   "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "name": "hog + svm",
-   "storage_address": "https://toto/algo/222/algo"
-  },
-  "certified": true,
-  "compute_plan_key": "",
-  "creator": "SampleOrg",
-  "dataset": {
-   "data_sample_keys": [
-    "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
-    "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
-   ],
-   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-   "perf": 0.9,
-   "worker": "SampleOrg"
-  },
-  "key": "bbbada11-50f6-26d3-fa86-1bf6387e3896",
-  "log": "no error, ah ah ah",
-  "metadata": {},
-  "objective": {
-   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
-   "metrics": {
-    "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-    "storage_address": "https://toto/objective/222/metrics"
-   }
-  },
-  "rank": 0,
-  "status": "done",
-  "tag": "",
-  "traintuple_key": "b0289ab8-3a71-f01e-2b72-0259a6452244",
-  "traintuple_type": "traintuple"
- },
- {
-  "algo": {
-   "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-   "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "name": "hog + svm",
-   "storage_address": "https://toto/algo/222/algo"
-  },
-  "certified": true,
-  "compute_plan_key": "",
-  "creator": "SampleOrg",
-  "dataset": {
-   "data_sample_keys": [
-    "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
-    "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
-   ],
-   "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-   "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-   "perf": 0,
-   "worker": "SampleOrg"
-  },
-  "key": "cccada11-50f6-26d3-fa86-1bf6387e3896",
-  "log": "",
-  "metadata": {},
-  "objective": {
-   "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
-   "metrics": {
-    "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
-    "storage_address": "https://toto/objective/222/metrics"
-   }
-  },
-  "rank": 0,
-  "status": "waiting",
-  "tag": "",
-  "traintuple_key": "bbb89ab8-3a71-f01e-2b72-0259a6452244",
-  "traintuple_type": "traintuple"
- }
-]
+  {
+   "algo": {
+    "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
+    "name": "hog + svm",
+    "storage_address": "https://toto/algo/222/algo"
+   },
+   "certified": true,
+   "compute_plan_key": "",
+   "creator": "SampleOrg",
+   "dataset": {
+    "data_sample_keys": [
+     "bb1bb7c3-1f62-244c-0f3a-761cc1688042",
+     "bb2bb7c3-1f62-244c-0f3a-761cc1688042"
+    ],
+    "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
+    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+    "perf": 0,
+    "worker": "SampleOrg"
+   },
+   "key": "cccada11-50f6-26d3-fa86-1bf6387e3896",
+   "log": "",
+   "metadata": {},
+   "objective": {
+    "key": "5c1d9cd1-c2c1-082d-de09-21b56d11030c",
+    "metrics": {
+     "checksum": "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379",
+     "storage_address": "https://toto/objective/222/metrics"
+    }
+   },
+   "rank": 0,
+   "status": "waiting",
+   "tag": "",
+   "traintuple_key": "bbb89ab8-3a71-f01e-2b72-0259a6452244",
+   "traintuple_type": "traintuple"
+  }
+ ]
+}
 ```
 #### ------------ Query details about a model ------------
 Smart contract: `queryModelDetails`
@@ -1163,91 +1175,94 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
 ```
 ##### Command output:
 ```json
-[
- {
-  "traintuple": {
-   "algo": {
-    "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
-    "name": "hog + svm",
-    "storage_address": "https://toto/algo/222/algo"
-   },
-   "compute_plan_key": "",
-   "creator": "SampleOrg",
-   "dataset": {
-    "data_sample_keys": [
-     "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
-     "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
-    ],
-    "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
+{
+ "bookmark": "{\"traintuple\":\"\",\"composite_traintuple\":\"\",\"aggregatetuple\":\"\"}",
+ "results": [
+  {
+   "traintuple": {
+    "algo": {
+     "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+     "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
+     "name": "hog + svm",
+     "storage_address": "https://toto/algo/222/algo"
+    },
+    "compute_plan_key": "",
+    "creator": "SampleOrg",
+    "dataset": {
+     "data_sample_keys": [
+      "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
+      "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
+     ],
+     "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
+     "metadata": {},
+     "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+     "worker": "SampleOrg"
+    },
+    "in_models": null,
+    "key": "b0289ab8-3a71-f01e-2b72-0259a6452244",
+    "log": "no error, ah ah ah",
     "metadata": {},
-    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "worker": "SampleOrg"
-   },
-   "in_models": null,
-   "key": "b0289ab8-3a71-f01e-2b72-0259a6452244",
-   "log": "no error, ah ah ah",
-   "metadata": {},
-   "out_model": {
-    "checksum": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-    "key": "eedbb7c3-1f62-244c-0f3a-761cc1688042",
-    "storage_address": "https://substrabac/model/toto"
-   },
-   "permissions": {
-    "process": {
-     "authorized_ids": [],
-     "public": true
-    }
-   },
-   "rank": 0,
-   "status": "done",
-   "tag": ""
-  }
- },
- {
-  "traintuple": {
-   "algo": {
-    "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
-    "name": "hog + svm",
-    "storage_address": "https://toto/algo/222/algo"
-   },
-   "compute_plan_key": "",
-   "creator": "SampleOrg",
-   "dataset": {
-    "data_sample_keys": [
-     "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
-     "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
-    ],
-    "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
-    "metadata": {},
-    "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
-    "worker": "SampleOrg"
-   },
-   "in_models": [
-    {
+    "out_model": {
      "checksum": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
-     "key": "b0289ab8-3a71-f01e-2b72-0259a6452244",
-     "storage_address": "https://substrabac/model/toto",
-     "traintuple_key": "b0289ab8-3a71-f01e-2b72-0259a6452244"
-    }
-   ],
-   "key": "bbb89ab8-3a71-f01e-2b72-0259a6452244",
-   "log": "",
-   "metadata": {},
-   "out_model": null,
-   "permissions": {
-    "process": {
-     "authorized_ids": [],
-     "public": true
-    }
-   },
-   "rank": 0,
-   "status": "todo",
-   "tag": ""
+     "key": "eedbb7c3-1f62-244c-0f3a-761cc1688042",
+     "storage_address": "https://substrabac/model/toto"
+    },
+    "permissions": {
+     "process": {
+      "authorized_ids": [],
+      "public": true
+     }
+    },
+    "rank": 0,
+    "status": "done",
+    "tag": ""
+   }
+  },
+  {
+   "traintuple": {
+    "algo": {
+     "checksum": "fd1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+     "key": "fd1bb7c3-1f62-244c-0f3a-761cc1688042",
+     "name": "hog + svm",
+     "storage_address": "https://toto/algo/222/algo"
+    },
+    "compute_plan_key": "",
+    "creator": "SampleOrg",
+    "dataset": {
+     "data_sample_keys": [
+      "aa1bb7c3-1f62-244c-0f3a-761cc1688042",
+      "aa2bb7c3-1f62-244c-0f3a-761cc1688042"
+     ],
+     "key": "da1bb7c3-1f62-244c-0f3a-761cc1688042",
+     "metadata": {},
+     "opener_checksum": "da1bb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482dcc",
+     "worker": "SampleOrg"
+    },
+    "in_models": [
+     {
+      "checksum": "eedbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482eed",
+      "key": "b0289ab8-3a71-f01e-2b72-0259a6452244",
+      "storage_address": "https://substrabac/model/toto",
+      "traintuple_key": "b0289ab8-3a71-f01e-2b72-0259a6452244"
+     }
+    ],
+    "key": "bbb89ab8-3a71-f01e-2b72-0259a6452244",
+    "log": "",
+    "metadata": {},
+    "out_model": null,
+    "permissions": {
+     "process": {
+      "authorized_ids": [],
+      "public": true
+     }
+    },
+    "rank": 0,
+    "status": "todo",
+    "tag": ""
+   }
   }
- }
-]
+ ]
+}
 ```
 #### ------------ Query model permissions ------------
 Smart contract: `queryModelPermissions`
@@ -1668,29 +1683,32 @@ peer chaincode invoke -n mycc -c '{"Args":["queryComputePlans"]}' -C myc
 ```
 ##### Command output:
 ```json
-[
- {
-  "aggregatetuple_keys": null,
-  "clean_models": false,
-  "composite_traintuple_keys": null,
-  "done_count": 0,
-  "id_to_key": {},
-  "key": "00000000-50f6-26d3-fa86-1bf6387e3896",
-  "metadata": {},
-  "status": "todo",
-  "tag": "a tag is simply a string",
-  "testtuple_keys": [
-   "11000033-50f6-26d3-fa86-1bf6387e3896",
-   "22000033-50f6-26d3-fa86-1bf6387e3896"
-  ],
-  "traintuple_keys": [
-   "11000000-50f6-26d3-fa86-1bf6387e3896",
-   "22000000-50f6-26d3-fa86-1bf6387e3896",
-   "33000000-50f6-26d3-fa86-1bf6387e3896"
-  ],
-  "tuple_count": 5
- }
-]
+{
+ "bookmark": "",
+ "results": [
+  {
+   "aggregatetuple_keys": null,
+   "clean_models": false,
+   "composite_traintuple_keys": null,
+   "done_count": 0,
+   "id_to_key": {},
+   "key": "00000000-50f6-26d3-fa86-1bf6387e3896",
+   "metadata": {},
+   "status": "todo",
+   "tag": "a tag is simply a string",
+   "testtuple_keys": [
+    "11000033-50f6-26d3-fa86-1bf6387e3896",
+    "22000033-50f6-26d3-fa86-1bf6387e3896"
+   ],
+   "traintuple_keys": [
+    "11000000-50f6-26d3-fa86-1bf6387e3896",
+    "22000000-50f6-26d3-fa86-1bf6387e3896",
+    "33000000-50f6-26d3-fa86-1bf6387e3896"
+   ],
+   "tuple_count": 5
+  }
+ ]
+}
 ```
 #### ------------ Cancel a ComputePlan ------------
 Smart contract: `cancelComputePlan`

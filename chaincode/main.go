@@ -17,10 +17,10 @@ package main
 import (
 	"chaincode/errors"
 	"encoding/json"
-	"math/rand"
-	"time"
-	"os"
 	"io/ioutil"
+	"math/rand"
+	"os"
+	"time"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-protos-go/peer"
@@ -70,6 +70,9 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	db := NewLedgerDB(stub)
 
 	var result interface{}
+	hasBookmark := false
+	var bookmark string
+
 	switch fn {
 	case "createComputePlan":
 		result, err = createComputePlan(db, args)
@@ -110,21 +113,26 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	case "queryAlgo":
 		result, err = queryAlgo(db, args)
 	case "queryAlgos":
-		result, err = queryAlgos(db, args)
+		result, bookmark, err = queryAlgos(db, args)
+		hasBookmark = true
 	case "queryCompositeAlgo":
 		result, err = queryCompositeAlgo(db, args)
 	case "queryCompositeAlgos":
-		result, err = queryCompositeAlgos(db, args)
+		result, bookmark, err = queryCompositeAlgos(db, args)
+		hasBookmark = true
 	case "queryAggregateAlgo":
 		result, err = queryAggregateAlgo(db, args)
 	case "queryAggregateAlgos":
-		result, err = queryAggregateAlgos(db, args)
+		result, bookmark, err = queryAggregateAlgos(db, args)
+		hasBookmark = true
 	case "queryDataManager":
 		result, err = queryDataManager(db, args)
 	case "queryDataManagers":
-		result, err = queryDataManagers(db, args)
+		result, bookmark, err = queryDataManagers(db, args)
+		hasBookmark = true
 	case "queryDataSamples":
-		result, err = queryDataSamples(db, args)
+		result, bookmark, err = queryDataSamples(db, args)
+		hasBookmark = true
 	case "queryDataset":
 		result, err = queryDataset(db, args)
 	case "queryFilter":
@@ -134,17 +142,20 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	case "queryModelPermissions":
 		result, err = queryModelPermissions(db, args)
 	case "queryModels":
-		result, err = queryModels(db, args)
+		result, bookmark, err = queryModels(db, args)
+		hasBookmark = true
 	case "queryObjective":
 		result, err = queryObjective(db, args)
 	case "queryObjectiveLeaderboard":
 		result, err = queryObjectiveLeaderboard(db, args)
 	case "queryObjectives":
-		result, err = queryObjectives(db, args)
+		result, bookmark, err = queryObjectives(db, args)
+		hasBookmark = true
 	case "queryTesttuple":
 		result, err = queryTesttuple(db, args)
 	case "queryTesttuples":
-		result, err = queryTesttuples(db, args)
+		result, bookmark, err = queryTesttuples(db, args)
+		hasBookmark = true
 	case "queryTraintuple":
 		result, err = queryTraintuple(db, args)
 	case "queryCompositeTraintuple":
@@ -152,15 +163,19 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	case "queryAggregatetuple":
 		result, err = queryAggregatetuple(db, args)
 	case "queryTraintuples":
-		result, err = queryTraintuples(db, args)
+		result, bookmark, err = queryTraintuples(db, args)
+		hasBookmark = true
 	case "queryCompositeTraintuples":
-		result, err = queryCompositeTraintuples(db, args)
+		result, bookmark, err = queryCompositeTraintuples(db, args)
+		hasBookmark = true
 	case "queryAggregatetuples":
-		result, err = queryAggregatetuples(db, args)
+		result, bookmark, err = queryAggregatetuples(db, args)
+		hasBookmark = true
 	case "queryComputePlan":
 		result, err = queryComputePlan(db, args)
 	case "queryComputePlans":
-		result, err = queryComputePlans(db, args)
+		result, bookmark, err = queryComputePlans(db, args)
+		hasBookmark = true
 	case "registerAlgo":
 		result, err = registerAlgo(db, args)
 	case "registerCompositeAlgo":
@@ -189,17 +204,25 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 
 	// Invoke duration
 	duration := int(time.Since(start).Nanoseconds()) / 1e6
-
 	// Return the result as success payload
 	if err != nil {
-		logger.Errorf("[%s][%s] Response (%dms): '%#v' - Error: '%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, err)
+		logger.Errorf("[%s][%s] Response (%dms): '%#v','%s' - Error: '%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, bookmark, err)
 		return formatErrorResponse(err)
+	}
+
+	// Add bookmark (if any) to response
+	if hasBookmark {
+		result = map[string]interface{}{
+			"results":  result,
+			"bookmark": bookmark,
+		}
 	}
 
 	// Marshal to json the smartcontract result
 	resp, err := json.Marshal(result)
+
 	if err != nil {
-		logger.Infof("[%s][%s] Response (%dms): '%#v'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result)
+		logger.Infof("[%s][%s] Response (%dms): '%#v','%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, bookmark)
 		return formatErrorResponse(errors.Internal("could not format response: %s", err.Error()))
 	}
 
@@ -212,7 +235,6 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	if err != nil {
 		return formatErrorResponse(errors.Internal("could not send event: %s", err.Error()))
 	}
-
 
 	return shim.Success(resp)
 }
@@ -241,7 +263,7 @@ func formatErrorResponse(err error) peer.Response {
 
 func main() {
 	logger.SetFormatter(&logrus.TextFormatter{
-		ForceColors: true,
+		ForceColors:   true,
 		FullTimestamp: true,
 	})
 
@@ -269,10 +291,10 @@ func main() {
 		Address: os.Getenv("CHAINCODE_ADDRESS"),
 		CC:      new(SubstraChaincode),
 		TLSProps: shim.TLSProperties{
-				Disabled: false,
-				Key: key,
-				Cert: cert,
-				ClientCACerts: ca,
+			Disabled:      false,
+			Key:           key,
+			Cert:          cert,
+			ClientCACerts: ca,
 		},
 	}
 
@@ -284,4 +306,3 @@ func main() {
 		logger.Errorf("Error starting SubstraChaincode chaincode: %s", err)
 	}
 }
-

@@ -17,6 +17,7 @@ package main
 import (
 	"chaincode/errors"
 	"encoding/json"
+	"strings"
 	"sync"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
@@ -174,6 +175,44 @@ func (db *LedgerDB) GetIndexKeys(index string, attributes []string) ([]string, e
 		keys = append(keys, keyParts[len(keyParts)-1])
 	}
 	return keys, nil
+}
+
+// GetIndexKeysWithPagination returns keys matching composite key values from the chaincode db
+func (db *LedgerDB) GetIndexKeysWithPagination(index string, attributes []string, pageSize int32, bookmark string) ([]string, string, error) {
+	keys := make([]string, 0)
+
+	if bookmark != "" {
+		// Transform bookmark from JSON-friendly format to CouchDB format
+		bookmark = strings.Replace(bookmark, "/", "\x00", -1)
+		bookmark = strings.Replace(bookmark, "#", "\\u0000", -1)
+		bookmark = strings.Replace(bookmark, "END", "\U0010ffff", -1)
+	}
+
+	iterator, metadata, err := db.cc.GetStateByPartialCompositeKeyWithPagination(index, attributes, pageSize, bookmark)
+	if err != nil {
+		return nil, "", errors.Internal("get index %s failed: %s", index, err.Error())
+	}
+	defer iterator.Close()
+	for iterator.HasNext() {
+		compositeKey, err := iterator.Next()
+		if err != nil {
+			return nil, "", err
+		}
+		_, keyParts, err := db.cc.SplitCompositeKey(compositeKey.Key)
+		if err != nil {
+			return nil, "", errors.Internal("get index %s failed: cannot split key %s: %s", index, compositeKey.Key, err.Error())
+		}
+		keys = append(keys, keyParts[len(keyParts)-1])
+	}
+
+	if metadata != nil {
+		// Transform bookmark from CouchDB format to JSON-friendly format
+		bookmark = strings.Replace(metadata.Bookmark, "\x00", "/", -1)
+		bookmark = strings.Replace(bookmark, "\\u0000", "#", -1)
+		bookmark = strings.Replace(bookmark, "\U0010ffff", "END", -1)
+	}
+
+	return keys, bookmark, nil
 }
 
 // ----------------------------------------------
