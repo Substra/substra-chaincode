@@ -29,7 +29,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const mockTxID = "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
 const objectiveKey = "5c1d9cd1-c2c1-082d-de09-21b56d11030c"
 const objectiveDescriptionChecksum = "5c1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
 const objectiveMetricsChecksum = "4a1d9cd1c2c1082dde0921b56d11030c81f62fbb51932758b58ac2569dd0b379"
@@ -61,7 +60,6 @@ const headModelChecksum = modelChecksum
 const trunkModelKey = "ccdbb7c3-1f62-244c-0f3a-761cc1688042"
 const trunkModelChecksum = "ccdbb7c31f62244c0f3a761cc168804227115793d01c270021fe3f7935482ecc"
 const trunkModelAddress = "https://substrabac/model/titi"
-const worker = "SampleOrg"
 const traintupleKey = "b0289ab8-3a71-f01e-2b72-0259a6452244"
 const traintupleKey2 = "bbb89ab8-3a71-f01e-2b72-0259a6452244"
 const compositeTraintupleKey = "0c0d3956-26b4-878e-76d7-ba8bb6fb152e"

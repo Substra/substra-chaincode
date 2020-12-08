@@ -17,9 +17,12 @@ package main
 import (
 	"chaincode/errors"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"math/rand"
+	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
@@ -49,7 +52,15 @@ func (t *SubstraChaincode) Init(stub shim.ChaincodeStubInterface) peer.Response 
 
 // Invoke is called per transaction on the chaincode.
 func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Response {
+	resp, _, err := t._Invoke(stub)
 
+	if err != nil {
+		return formatErrorResponse(err)
+	}
+	return shim.Success(resp)
+}
+
+func (t *SubstraChaincode) _Invoke(stub shim.ChaincodeStubInterface) ([]byte, *Event, error) {
 	start := time.Now()
 	// Log all input for potential debug later on.
 	logger.Infof("[%s][%s] Args received: '%s'", stub.GetChannelID(), stub.GetTxID()[:10], stub.GetStringArgs())
@@ -59,7 +70,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	// will compare their own output to the proposal.
 	timestamp, err := stub.GetTxTimestamp()
 	if err != nil {
-		return formatErrorResponse(err)
+		return nil, nil, err
 	}
 	seedTime := time.Unix(timestamp.GetSeconds(), int64(timestamp.GetNanos()))
 	rand.Seed(seedTime.UnixNano())
@@ -207,7 +218,6 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	// Return the result as success payload
 	if err != nil {
 		logger.Errorf("[%s][%s] Response (%dms): '%#v','%s' - Error: '%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, bookmark, err)
-		return formatErrorResponse(err)
 	}
 
 	// Add bookmark (if any) to response
@@ -223,7 +233,7 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 
 	if err != nil {
 		logger.Infof("[%s][%s] Response (%dms): '%#v','%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, bookmark)
-		return formatErrorResponse(errors.Internal("could not format response: %s", err.Error()))
+		return nil, nil, errors.Internal("could not format response: %s", err.Error())
 	}
 
 	// Log with no errors
@@ -233,10 +243,10 @@ func (t *SubstraChaincode) Invoke(stub shim.ChaincodeStubInterface) peer.Respons
 	// one event per call
 	err = db.SendEvent()
 	if err != nil {
-		return formatErrorResponse(errors.Internal("could not send event: %s", err.Error()))
+		return nil, nil, errors.Internal("could not send event: %s", err.Error())
 	}
 
-	return shim.Success(resp)
+	return resp, db.event, nil
 }
 
 func formatErrorResponse(err error) peer.Response {
@@ -261,6 +271,91 @@ func formatErrorResponse(err error) peer.Response {
 	}
 }
 
+var scc = new(SubstraChaincode)
+var cc = NewMockStub("standalone-chaincode", scc)
+
+func readiness(w http.ResponseWriter, req *http.Request) {
+	// logger.Infof("Readiness: %v", req.RequestURI)
+	fmt.Fprintf(w, "OK")
+}
+
+var eventIndex = 1
+var allEvents = make(map[int]*Event)
+
+func handle(w http.ResponseWriter, req *http.Request) {
+	cc.Creator = "MyOrg1MSP"
+
+	logger.Infof("Request: %v", req.RequestURI)
+
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Fprintf(w, "Error: %v\n", err)
+	}
+	args := make([][]byte, 2)
+
+	arr := make([]string, 2)
+	json.Unmarshal(body, &arr)
+
+	function := arr[0]
+	arguments := arr[1]
+
+	args[0] = []byte(function)
+	args[1] = []byte(arguments)
+
+	logger.Infof("Function: %v", function)
+	logger.Infof("Arguments: %v", arguments)
+
+	cc.args = args
+	cc.MockTransactionStart(mockTxID)
+	resp, events, err := scc._Invoke(cc)
+
+	if events != nil {
+		allEvents[eventIndex] = events
+		eventIndex += 1
+	}
+	cc.MockTransactionEnd(mockTxID)
+
+	if err != nil {
+		fmt.Fprintf(w, "%s", err)
+		return
+	}
+
+	fmt.Fprintf(w, "%s", resp)
+}
+
+func events(w http.ResponseWriter, req *http.Request) {
+	cc.Creator = "MyOrg1MSP"
+
+	logger.Infof("Events request: %v", req.RequestURI)
+
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		fmt.Fprintf(w, "Error: %v\n", err)
+	}
+	fmt.Printf("body: %v\n", body)
+
+	requestedEvent, err := strconv.Atoi(string(body))
+
+	fmt.Printf("requestedEvent: %v\n", requestedEvent)
+	if err != nil {
+		fmt.Fprintf(w, "%s", err)
+	}
+
+	event, ok := allEvents[requestedEvent]
+
+	if !ok {
+		fmt.Printf("Event not found: %d\n", requestedEvent)
+		w.WriteHeader(404)
+		return
+	}
+	fmt.Printf("%v\n", event)
+	evt, err := json.Marshal(event)
+	if err != nil {
+		fmt.Fprintf(w, "%s", err)
+	}
+	fmt.Fprintf(w, "%s", evt)
+}
+
 func main() {
 	logger.SetFormatter(&logrus.TextFormatter{
 		ForceColors:   true,
@@ -269,38 +364,47 @@ func main() {
 
 	logger.SetOutput(os.Stdout)
 	logger.SetLevel(logrus.DebugLevel)
-	logger.Infof("Load TLS certificates")
+	// logger.Infof("Load TLS certificates")
 
-	key, err := ioutil.ReadFile(os.Getenv("TLS_KEY_FILE"))
-	if err != nil {
-		logger.Errorf("Cannot read key file: %s", err)
-	}
+	// key, err := ioutil.ReadFile(os.Getenv("TLS_KEY_FILE"))
+	// if err != nil {
+	// 	logger.Errorf("Cannot read key file: %s", err)
+	// }
 
-	cert, err := ioutil.ReadFile(os.Getenv("TLS_CERT_FILE"))
-	if err != nil {
-		logger.Errorf("Cannot read cert file: %s", err)
-	}
+	// cert, err := ioutil.ReadFile(os.Getenv("TLS_CERT_FILE"))
+	// if err != nil {
+	// 	logger.Errorf("Cannot read cert file: %s", err)
+	// }
 
-	ca, err := ioutil.ReadFile(os.Getenv("TLS_ROOTCERT_FILE"))
-	if err != nil {
-		logger.Errorf("Cannot read ca cert file: %s", err)
-	}
+	// ca, err := ioutil.ReadFile(os.Getenv("TLS_ROOTCERT_FILE"))
+	// if err != nil {
+	// 	logger.Errorf("Cannot read ca cert file: %s", err)
+	// }
 
-	server := &shim.ChaincodeServer{
-		CCID:    os.Getenv("CHAINCODE_CCID"),
-		Address: os.Getenv("CHAINCODE_ADDRESS"),
-		CC:      new(SubstraChaincode),
-		TLSProps: shim.TLSProperties{
-			Disabled:      false,
-			Key:           key,
-			Cert:          cert,
-			ClientCACerts: ca,
-		},
-	}
+	// server := &shim.ChaincodeServer{
+	// 	CCID:    os.Getenv("CHAINCODE_CCID"),
+	// 	Address: os.Getenv("CHAINCODE_ADDRESS"),
+	// 	CC:      new(SubstraChaincode),
+	// 	TLSProps: shim.TLSProperties{
+	// 		Disabled:      true,
+	// 		// Key:           key,
+	// 		// Cert:          cert,
+	// 		// ClientCACerts: ca,
+	// 	},
+	// }
 
 	// Start the chaincode external server
-	logger.Infof("Start Substra ChaincodeServer")
-	err = server.Start()
+
+	port := 8080
+
+	logger.Infof("Start  Substra ChaincodeServer on port %v", port)
+
+	http.HandleFunc("/readiness", readiness)
+	http.HandleFunc("/liveness", readiness)
+	http.HandleFunc("/events", events)
+	http.HandleFunc("/", handle)
+
+	err := http.ListenAndServe(":"+strconv.Itoa(port), nil)
 
 	if err != nil {
 		logger.Errorf("Error starting SubstraChaincode chaincode: %s", err)

@@ -1,9 +1,12 @@
 FROM golang:1.13.8-alpine AS build
 
-COPY ./chaincode /go/src/github.com/chaincode
 WORKDIR /go/src/github.com/chaincode
 
 # Build application
+COPY ./chaincode/go.mod ./chaincode/go.sum /go/src/github.com/chaincode/
+RUN go mod download
+
+COPY ./chaincode /go/src/github.com/chaincode
 RUN go build -o chaincode -v .
 
 # Production ready image

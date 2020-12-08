@@ -1,0 +1,19 @@
+apiVersion: skaffold/v1beta13
+kind: Config
+build:
+  artifacts:
+    - image: substrafoundation/substra-chaincode
+      context: .
+      docker:
+        dockerfile: Dockerfile
+
+deploy:
+  helm:
+    releases:
+      - name: substra-chaincode
+        chartPath: charts/substra-chaincode
+        namespace: default
+        imageStrategy:
+          helm: {}
+        values:
+          image: substrafoundation/substra-chaincode

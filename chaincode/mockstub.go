@@ -31,6 +31,8 @@ import (
 
 // Logger for the shim package.
 
+const mockTxID = "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
+const worker = "SampleOrg"
 const (
 	minUnicodeRuneValue   = 0            //U+0000
 	maxUnicodeRuneValue   = utf8.MaxRune //U+10FFFF - maximum (and unallocated) code point
