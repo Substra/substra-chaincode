@@ -296,8 +296,9 @@ func handleHealth(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "OK")
 }
 
+var cc = NewMockStub("standalone-chaincode", scc)
+
 func handleInvoke(w http.ResponseWriter, req *http.Request) {
-	cc := NewMockStub("standalone-chaincode", scc)
 
 	logger.Infof("Request: %v", req.RequestURI)
 
@@ -346,7 +347,6 @@ func handleInvoke(w http.ResponseWriter, req *http.Request) {
 }
 
 func handleEvents(w http.ResponseWriter, req *http.Request) {
-	cc := NewMockStub("standalone-chaincode", scc)
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
