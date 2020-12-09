@@ -272,46 +272,68 @@ func formatErrorResponse(err error) peer.Response {
 }
 
 var scc = new(SubstraChaincode)
-var cc = NewMockStub("standalone-chaincode", scc)
+var eventIndex = 1
+var allEvents = make(map[int]*Event)
 
-func readiness(w http.ResponseWriter, req *http.Request) {
+type eventsRequest struct {
+	Identity string `json:"identity"`
+	EventID  int    `json:"event_id"`
+}
+
+type invokeRequest struct {
+	Identity string `json:"identity"`
+	Function string `json:"function"`
+	Args     string `json:"args"`
+}
+
+func handleError(w http.ResponseWriter, returnCode int, err error) {
+	w.WriteHeader(returnCode)
+	fmt.Fprintf(w, "%v\n", err)
+}
+
+func handleHealth(w http.ResponseWriter, req *http.Request) {
 	// logger.Infof("Readiness: %v", req.RequestURI)
 	fmt.Fprintf(w, "OK")
 }
 
-var eventIndex = 1
-var allEvents = make(map[int]*Event)
-
-func handle(w http.ResponseWriter, req *http.Request) {
-	cc.Creator = "MyOrg1MSP"
+func handleInvoke(w http.ResponseWriter, req *http.Request) {
+	cc := NewMockStub("standalone-chaincode", scc)
 
 	logger.Infof("Request: %v", req.RequestURI)
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		fmt.Fprintf(w, "Error: %v\n", err)
+		handleError(w, 500, err)
+		return
 	}
+
+	invokeReq := invokeRequest{}
+	err = json.Unmarshal(body, &invokeReq)
+
+	if err != nil {
+		handleError(w, 500, err)
+		return
+	}
+
 	args := make([][]byte, 2)
 
 	arr := make([]string, 2)
 	json.Unmarshal(body, &arr)
 
-	function := arr[0]
-	arguments := arr[1]
+	logger.Infof("Function: %v", invokeReq.Function)
+	logger.Infof("Arguments: %v", invokeReq.Args)
 
-	args[0] = []byte(function)
-	args[1] = []byte(arguments)
+	args[0] = []byte(invokeReq.Function)
+	args[1] = []byte(invokeReq.Args)
 
-	logger.Infof("Function: %v", function)
-	logger.Infof("Arguments: %v", arguments)
-
+	cc.Creator = invokeReq.Identity
 	cc.args = args
 	cc.MockTransactionStart(mockTxID)
 	resp, events, err := scc._Invoke(cc)
 
 	if events != nil {
 		allEvents[eventIndex] = events
-		eventIndex += 1
+		eventIndex++
 	}
 	cc.MockTransactionEnd(mockTxID)
 
@@ -323,36 +345,45 @@ func handle(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "%s", resp)
 }
 
-func events(w http.ResponseWriter, req *http.Request) {
-	cc.Creator = "MyOrg1MSP"
-
-	logger.Infof("Events request: %v", req.RequestURI)
+func handleEvents(w http.ResponseWriter, req *http.Request) {
+	cc := NewMockStub("standalone-chaincode", scc)
 
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		fmt.Fprintf(w, "Error: %v\n", err)
-	}
-	fmt.Printf("body: %v\n", body)
-
-	requestedEvent, err := strconv.Atoi(string(body))
-
-	fmt.Printf("requestedEvent: %v\n", requestedEvent)
-	if err != nil {
-		fmt.Fprintf(w, "%s", err)
-	}
-
-	event, ok := allEvents[requestedEvent]
-
-	if !ok {
-		fmt.Printf("Event not found: %d\n", requestedEvent)
-		w.WriteHeader(404)
+		handleError(w, 500, err)
 		return
 	}
-	fmt.Printf("%v\n", event)
-	evt, err := json.Marshal(event)
+
+	eventsReq := eventsRequest{}
+	err = json.Unmarshal(body, &eventsReq)
+
+	if err != nil {
+		handleError(w, 500, err)
+		return
+	}
+
+	fmt.Printf("Identity: %v\n", eventsReq.Identity)
+	fmt.Printf("requestedEvent: %v\n", eventsReq.EventID)
+	cc.Creator = eventsReq.Identity
+
 	if err != nil {
 		fmt.Fprintf(w, "%s", err)
 	}
+
+	event, ok := allEvents[eventsReq.EventID]
+
+	if !ok {
+		handleError(w, 404, fmt.Errorf("event not found: %d", eventsReq.EventID))
+		return
+	}
+
+	evt, err := json.Marshal(event)
+
+	if err != nil {
+		handleError(w, 500, err)
+		return
+	}
+
 	fmt.Fprintf(w, "%s", evt)
 }
 
@@ -399,10 +430,9 @@ func main() {
 
 	logger.Infof("Start  Substra ChaincodeServer on port %v", port)
 
-	http.HandleFunc("/readiness", readiness)
-	http.HandleFunc("/liveness", readiness)
-	http.HandleFunc("/events", events)
-	http.HandleFunc("/", handle)
+	http.HandleFunc("/health", handleHealth)
+	http.HandleFunc("/invoke", handleInvoke)
+	http.HandleFunc("/events", handleEvents)
 
 	err := http.ListenAndServe(":"+strconv.Itoa(port), nil)
 

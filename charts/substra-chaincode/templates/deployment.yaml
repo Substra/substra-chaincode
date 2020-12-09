@@ -36,11 +36,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /liveness
+              path: /health
               port: http
           readinessProbe:
             httpGet:
-              path: /readiness
+              path: /health
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
