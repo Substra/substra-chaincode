@@ -218,6 +218,7 @@ func (t *SubstraChaincode) _Invoke(stub shim.ChaincodeStubInterface) ([]byte, *E
 	// Return the result as success payload
 	if err != nil {
 		logger.Errorf("[%s][%s] Response (%dms): '%#v','%s' - Error: '%s'", stub.GetChannelID(), stub.GetTxID()[:10], duration, result, bookmark, err)
+		return nil, nil, err
 	}
 
 	// Add bookmark (if any) to response
