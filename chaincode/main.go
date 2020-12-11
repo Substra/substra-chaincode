@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
@@ -251,6 +252,15 @@ func (t *SubstraChaincode) _Invoke(stub shim.ChaincodeStubInterface) ([]byte, *E
 }
 
 func formatErrorResponse(err error) peer.Response {
+	payload, status := _formatErrorResponse(err)
+	return peer.Response{
+		Message: string(payload),
+		Payload: payload,
+		Status:  int32(status),
+	}
+}
+
+func _formatErrorResponse(err error) ([]byte, int) {
 	e := errors.Wrap(err)
 	status := e.HTTPStatusCode()
 
@@ -265,16 +275,13 @@ func formatErrorResponse(err error) peer.Response {
 	}
 
 	payload, _ := json.Marshal(errStruct)
-	return peer.Response{
-		Message: string(payload),
-		Payload: payload,
-		Status:  int32(status),
-	}
+	return payload, status
 }
 
 var scc = new(SubstraChaincode)
 var eventIndex = 1
 var allEvents = make(map[int]*Event)
+var invokeMutex sync.Mutex
 
 type eventsRequest struct {
 	Identity string `json:"identity"`
@@ -328,23 +335,35 @@ func handleInvoke(w http.ResponseWriter, req *http.Request) {
 	args[0] = []byte(invokeReq.Function)
 	args[1] = []byte(invokeReq.Args)
 
-	cc.Creator = invokeReq.Identity
-	cc.args = args
-	cc.MockTransactionStart(mockTxID)
-	resp, events, err := scc._Invoke(cc)
-
-	if events != nil {
-		allEvents[eventIndex] = events
-		eventIndex++
-	}
-	cc.MockTransactionEnd(mockTxID)
+	resp, err := doInvoke(invokeReq.Identity, args)
 
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
+		resp, status := _formatErrorResponse(err)
+		w.WriteHeader(status)
+		fmt.Fprintf(w, "%s", resp)
 		return
 	}
 
 	fmt.Fprintf(w, "%s", resp)
+}
+
+func doInvoke(identity string, args [][]byte) ([]byte, error) {
+	invokeMutex.Lock()
+
+	cc.Creator = identity
+	cc.args = args
+	cc.MockTransactionStart(mockTxID)
+
+	resp, events, err := scc._Invoke(cc)
+	if events != nil {
+		allEvents[eventIndex] = events
+		eventIndex++
+	}
+
+	cc.MockTransactionEnd(mockTxID)
+	invokeMutex.Unlock()
+
+	return resp, err
 }
 
 func handleEvents(w http.ResponseWriter, req *http.Request) {
