@@ -26,16 +26,6 @@ type invokeRequest struct {
 	Args     string `json:"args"`
 }
 
-func handleError(w http.ResponseWriter, returnCode int, err error) {
-	w.WriteHeader(returnCode)
-	fmt.Fprintf(w, "%v\n", err)
-}
-
-func handleHealth(w http.ResponseWriter, req *http.Request) {
-	// logger.Infof("Readiness: %v", req.RequestURI)
-	fmt.Fprintf(w, "OK")
-}
-
 func startStandaloneServer(port int) {
 	logger.Infof("Start  Substra ChaincodeServer on port %v", port)
 
@@ -47,6 +37,15 @@ func startStandaloneServer(port int) {
 	if err != nil {
 		logger.Errorf("Error starting standalone chaincode server: %s", err)
 	}
+}
+
+func handleError(w http.ResponseWriter, returnCode int, err error) {
+	w.WriteHeader(returnCode)
+	fmt.Fprintf(w, "%v\n", err)
+}
+
+func handleHealth(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(w, "OK")
 }
 
 func handleInvoke(w http.ResponseWriter, req *http.Request) {
