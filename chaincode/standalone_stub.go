@@ -377,8 +377,8 @@ func (stub *Stub) InvokeChaincode(chaincodeName string, args [][]byte, channel s
 	return res
 }
 
-// This a default fake certificate used as TX Creator for all tests.
-const fakeCertificate = `
+// TODO: delete when proper identity verification is implemented
+const standaloneFakeCertificate = `
 -----BEGIN CERTIFICATE-----
 MIIEBDCCAuygAwIBAgIDAjppMA0GCSqGSIb3DQEBBQUAMEIxCzAJBgNVBAYTAlVT
 MRYwFAYDVQQKEw1HZW9UcnVzdCBJbmMuMRswGQYDVQQDExJHZW9UcnVzdCBHbG9i
@@ -409,7 +409,7 @@ yuGnBXj8ytqU0CwIPX4WecigUCAkVDNx
 func (stub *Stub) GetCreator() ([]byte, error) {
 	sid := &msp.SerializedIdentity{
 		Mspid:   stub.Creator,
-		IdBytes: []byte(fakeCertificate),
+		IdBytes: []byte(standaloneFakeCertificate),
 	}
 
 	return proto.Marshal(sid)

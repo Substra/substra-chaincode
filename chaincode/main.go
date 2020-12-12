@@ -324,6 +324,7 @@ func startFabricServer() {
 	// Start the chaincode external server
 	logger.Infof("Start Substra ChaincodeServer")
 	err = server.Start()
+
 	if err != nil {
 		logger.Errorf("Error starting SubstraChaincode chaincode: %s", err)
 	}

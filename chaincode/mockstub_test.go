@@ -31,9 +31,6 @@ import (
 
 // Logger for the shim package.
 
-const mockTxID = "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
-const worker = "SampleOrg"
-
 // MockStub is an implementation of ChaincodeStubInterface for unit testing chaincode.
 // Use this instead of ChaincodeStub in your chaincode's unit test calls to Init or Invoke.
 type MockStub struct {
@@ -366,8 +363,8 @@ func (stub *MockStub) InvokeChaincode(chaincodeName string, args [][]byte, chann
 	return res
 }
 
-// TODO: delete when proper identity verification is implemented
-const standaloneFakeCertificate = `
+// This a default fake certificate used as TX Creator for all tests.
+const fakeCertificate = `
 -----BEGIN CERTIFICATE-----
 MIIEBDCCAuygAwIBAgIDAjppMA0GCSqGSIb3DQEBBQUAMEIxCzAJBgNVBAYTAlVT
 MRYwFAYDVQQKEw1HZW9UcnVzdCBJbmMuMRswGQYDVQQDExJHZW9UcnVzdCBHbG9i
@@ -397,7 +394,7 @@ yuGnBXj8ytqU0CwIPX4WecigUCAkVDNx
 func (stub *MockStub) GetCreator() ([]byte, error) {
 	sid := &msp.SerializedIdentity{
 		Mspid:   stub.Creator,
-		IdBytes: []byte(standaloneFakeCertificate),
+		IdBytes: []byte(fakeCertificate),
 	}
 
 	return proto.Marshal(sid)
