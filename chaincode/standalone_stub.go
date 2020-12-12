@@ -29,20 +29,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Logger for the shim package.
+const standaloneMockTxID = "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
+const standaloneWorker = "SampleOrg"
 
-const mockTxID = "fa0f757bc278fdf6a32d00975602eb853e23a86a156781588d99ddef5b80720f"
-const worker = "SampleOrg"
-const (
-	minUnicodeRuneValue   = 0            //U+0000
-	maxUnicodeRuneValue   = utf8.MaxRune //U+10FFFF - maximum (and unallocated) code point
-	compositeKeyNamespace = "\x00"
-	emptyKeySubstitute    = "\x01"
-)
+type substraChaincode interface {
+	shim.Chaincode
+	_Invoke() ([]byte, *Event, error)
+}
 
-// MockStub is an implementation of ChaincodeStubInterface for unit testing chaincode.
-// Use this instead of ChaincodeStub in your chaincode's unit test calls to Init or Invoke.
-type MockStub struct {
+// Stub is an implementation of ChaincodeStubInterface for the standalone chaincode.
+type Stub struct {
 	// The transaction creator
 	Creator string
 
@@ -62,8 +58,8 @@ type MockStub struct {
 	// Keys stores the list of mapped values in lexical order
 	Keys *list.List
 
-	// registered list of other MockStub chaincodes that can be called from this MockStub
-	Invokables map[string]*MockStub
+	// registered list of other StandaloneStub chaincodes that can be called from this StandaloneStub
+	Invokables map[string]*Stub
 
 	// stores a transaction uuid while being Invoked / Deployed
 	// TODO if a chaincode uses recursion this may need to be a stack of TxIDs or possibly a reference counting map
@@ -88,19 +84,23 @@ type MockStub struct {
 	Decorations map[string][]byte
 }
 
-func (stub *MockStub) GetTxID() string {
+// GetTxID ...
+func (stub *Stub) GetTxID() string {
 	return stub.TxID
 }
 
-func (stub *MockStub) GetChannelID() string {
+// GetChannelID ...
+func (stub *Stub) GetChannelID() string {
 	return stub.ChannelID
 }
 
-func (stub *MockStub) GetArgs() [][]byte {
+// GetArgs ...
+func (stub *Stub) GetArgs() [][]byte {
 	return stub.args
 }
 
-func (stub *MockStub) GetStringArgs() []string {
+// GetStringArgs ...
+func (stub *Stub) GetStringArgs() []string {
 	args := stub.GetArgs()
 	strargs := make([]string, 0, len(args))
 	for _, barg := range args {
@@ -109,7 +109,8 @@ func (stub *MockStub) GetStringArgs() []string {
 	return strargs
 }
 
-func (stub *MockStub) GetFunctionAndParameters() (function string, params []string) {
+// GetFunctionAndParameters ...
+func (stub *Stub) GetFunctionAndParameters() (function string, params []string) {
 	allargs := stub.GetStringArgs()
 	function = ""
 	params = []string{}
@@ -120,30 +121,26 @@ func (stub *MockStub) GetFunctionAndParameters() (function string, params []stri
 	return
 }
 
-// Used to indicate to a chaincode that it is part of a transaction.
-// This is important when chaincodes invoke each other.
-// MockStub doesn't support concurrent transactions at present.
-func (stub *MockStub) MockTransactionStart(txid string) {
+// MockTransactionStart ...
+func (stub *Stub) MockTransactionStart(txid string) {
 	stub.TxID = txid
 	stub.setSignedProposal(&pb.SignedProposal{})
 	stub.setTxTimestamp(util.CreateUtcTimestamp())
 }
 
-// End a mocked transaction, clearing the UUID.
-func (stub *MockStub) MockTransactionEnd(uuid string) {
+// MockTransactionEnd ...
+func (stub *Stub) MockTransactionEnd(uuid string) {
 	stub.signedProposal = nil
 	stub.TxID = ""
 }
 
-// Register a peer chaincode with this MockStub
-// invokableChaincodeName is the name or hash of the peer
-// otherStub is a MockStub of the peer, already intialised
-func (stub *MockStub) MockPeerChaincode(invokableChaincodeName string, otherStub *MockStub) {
+// MockPeerChaincode ...
+func (stub *Stub) MockPeerChaincode(invokableChaincodeName string, otherStub *Stub) {
 	stub.Invokables[invokableChaincodeName] = otherStub
 }
 
-// Initialise this chaincode,  also starts and ends a transaction.
-func (stub *MockStub) MockInit(uuid string, args [][]byte) pb.Response {
+// MockInit ...
+func (stub *Stub) MockInit(uuid string, args [][]byte) pb.Response {
 	stub.args = args
 	stub.MockTransactionStart(uuid)
 	res := stub.cc.Init(stub)
@@ -151,13 +148,13 @@ func (stub *MockStub) MockInit(uuid string, args [][]byte) pb.Response {
 	return res
 }
 
-// Invoke this chaincode using the default transction ID. Also starts and ends a transaction.
-func (stub *MockStub) MockInvoke(args [][]byte) pb.Response {
-	return stub.MockInvokeTxID(mockTxID, args)
+// MockInvoke ...
+func (stub *Stub) MockInvoke(args [][]byte) pb.Response {
+	return stub.MockInvokeTxID(standaloneMockTxID, args)
 }
 
-// Invoke this chaincode using the specified transction ID. Also starts and ends a transaction.
-func (stub *MockStub) MockInvokeTxID(txid string, args [][]byte) pb.Response {
+// MockInvokeTxID ...
+func (stub *Stub) MockInvokeTxID(txid string, args [][]byte) pb.Response {
 	stub.args = args
 	stub.MockTransactionStart(txid)
 	res := stub.cc.Invoke(stub)
@@ -165,12 +162,13 @@ func (stub *MockStub) MockInvokeTxID(txid string, args [][]byte) pb.Response {
 	return res
 }
 
-func (stub *MockStub) GetDecorations() map[string][]byte {
+// GetDecorations ...
+func (stub *Stub) GetDecorations() map[string][]byte {
 	return stub.Decorations
 }
 
-// Invoke this chaincode, also starts and ends a transaction.
-func (stub *MockStub) MockInvokeWithSignedProposal(uuid string, args [][]byte, sp *pb.SignedProposal) pb.Response {
+// MockInvokeWithSignedProposal ...
+func (stub *Stub) MockInvokeWithSignedProposal(uuid string, args [][]byte, sp *pb.SignedProposal) pb.Response {
 	stub.args = args
 	stub.MockTransactionStart(uuid)
 	stub.signedProposal = sp
@@ -179,7 +177,8 @@ func (stub *MockStub) MockInvokeWithSignedProposal(uuid string, args [][]byte, s
 	return res
 }
 
-func (stub *MockStub) GetPrivateData(collection string, key string) ([]byte, error) {
+// GetPrivateData ...
+func (stub *Stub) GetPrivateData(collection string, key string) ([]byte, error) {
 	m, in := stub.PvtState[collection]
 
 	if !in {
@@ -189,7 +188,8 @@ func (stub *MockStub) GetPrivateData(collection string, key string) ([]byte, err
 	return m[key], nil
 }
 
-func (stub *MockStub) PutPrivateData(collection string, key string, value []byte) error {
+// PutPrivateData ...
+func (stub *Stub) PutPrivateData(collection string, key string, value []byte) error {
 	m, in := stub.PvtState[collection]
 	if !in {
 		stub.PvtState[collection] = make(map[string][]byte)
@@ -201,33 +201,34 @@ func (stub *MockStub) PutPrivateData(collection string, key string, value []byte
 	return nil
 }
 
-func (stub *MockStub) DelPrivateData(collection string, key string) error {
+// DelPrivateData ...
+func (stub *Stub) DelPrivateData(collection string, key string) error {
 	return errors.New("Not Implemented")
 }
 
-func (stub *MockStub) GetPrivateDataByRange(collection, startKey, endKey string) (shim.StateQueryIteratorInterface, error) {
+// GetPrivateDataByRange ...
+func (stub *Stub) GetPrivateDataByRange(collection, startKey, endKey string) (shim.StateQueryIteratorInterface, error) {
 	return nil, errors.New("Not Implemented")
 }
 
-func (stub *MockStub) GetPrivateDataByPartialCompositeKey(collection, objectType string, attributes []string) (shim.StateQueryIteratorInterface, error) {
+// GetPrivateDataByPartialCompositeKey ...
+func (stub *Stub) GetPrivateDataByPartialCompositeKey(collection, objectType string, attributes []string) (shim.StateQueryIteratorInterface, error) {
 	return nil, errors.New("Not Implemented")
 }
 
-func (stub *MockStub) GetPrivateDataQueryResult(collection, query string) (shim.StateQueryIteratorInterface, error) {
-	// Not implemented since the mock engine does not have a query engine.
-	// However, a very simple query engine that supports string matching
-	// could be implemented to test that the framework supports queries
+// GetPrivateDataQueryResult ...
+func (stub *Stub) GetPrivateDataQueryResult(collection, query string) (shim.StateQueryIteratorInterface, error) {
 	return nil, errors.New("Not Implemented")
 }
 
-// GetState retrieves the value for a given key from the ledger
-func (stub *MockStub) GetState(key string) ([]byte, error) {
+// GetState ...
+func (stub *Stub) GetState(key string) ([]byte, error) {
 	value := stub.State[key]
 	return value, nil
 }
 
-// PutState writes the specified `value` and `key` into the ledger.
-func (stub *MockStub) PutState(key string, value []byte) error {
+// PutState ...
+func (stub *Stub) PutState(key string, value []byte) error {
 	if stub.TxID == "" {
 		err := errors.New("cannot PutState without a transactions - call stub.MockTransactionStart()?")
 		return err
@@ -269,7 +270,7 @@ func (stub *MockStub) PutState(key string, value []byte) error {
 }
 
 // DelState removes the specified `key` and its value from the ledger.
-func (stub *MockStub) DelState(key string) error {
+func (stub *Stub) DelState(key string) error {
 	delete(stub.State, key)
 
 	for elem := stub.Keys.Front(); elem != nil; elem = elem.Next() {
@@ -281,11 +282,12 @@ func (stub *MockStub) DelState(key string) error {
 	return nil
 }
 
-func (stub *MockStub) GetStateByRange(startKey, endKey string) (shim.StateQueryIteratorInterface, error) {
+// GetStateByRange ...
+func (stub *Stub) GetStateByRange(startKey, endKey string) (shim.StateQueryIteratorInterface, error) {
 	if err := validateSimpleKeys(startKey, endKey); err != nil {
 		return nil, err
 	}
-	return NewMockStateRangeQueryIterator(stub, startKey, endKey, false, OutputPageSize), nil
+	return NewStandaloneStateRange(stub, startKey, endKey, false, OutputPageSize), nil
 }
 
 // GetQueryResult function can be invoked by a chaincode to perform a
@@ -293,7 +295,7 @@ func (stub *MockStub) GetStateByRange(startKey, endKey string) (shim.StateQueryI
 // that support rich query.  The query string is in the syntax of the underlying
 // state database. An iterator is returned which can be used to iterate (next) over
 // the query result set
-func (stub *MockStub) GetQueryResult(query string) (shim.StateQueryIteratorInterface, error) {
+func (stub *Stub) GetQueryResult(query string) (shim.StateQueryIteratorInterface, error) {
 	// Not implemented since the mock engine does not have a query engine.
 	// However, a very simple query engine that supports string matching
 	// could be implemented to test that the framework supports queries
@@ -302,7 +304,7 @@ func (stub *MockStub) GetQueryResult(query string) (shim.StateQueryIteratorInter
 
 // GetHistoryForKey function can be invoked by a chaincode to return a history of
 // key values across time. GetHistoryForKey is intended to be used for read-only queries.
-func (stub *MockStub) GetHistoryForKey(key string) (shim.HistoryQueryIteratorInterface, error) {
+func (stub *Stub) GetHistoryForKey(key string) (shim.HistoryQueryIteratorInterface, error) {
 	return nil, errors.New("not implemented")
 }
 
@@ -312,32 +314,34 @@ func (stub *MockStub) GetHistoryForKey(key string) (shim.HistoryQueryIteratorInt
 //matches the given partial composite key. This function should be used only for
 //a partial composite key. For a full composite key, an iter with empty response
 //would be returned.
-func (stub *MockStub) GetStateByPartialCompositeKey(objectType string, attributes []string) (shim.StateQueryIteratorInterface, error) {
+func (stub *Stub) GetStateByPartialCompositeKey(objectType string, attributes []string) (shim.StateQueryIteratorInterface, error) {
 	partialCompositeKey, err := stub.CreateCompositeKey(objectType, attributes)
 	if err != nil {
 		return nil, err
 	}
-	return NewMockStateRangeQueryIterator(stub, partialCompositeKey, partialCompositeKey+string(maxUnicodeRuneValue), false, OutputPageSize), nil
+	return NewStandaloneStateRange(stub, partialCompositeKey, partialCompositeKey+string(utf8.MaxRune), false, OutputPageSize), nil
 }
 
 // CreateCompositeKey combines the list of attributes
 //to form a composite key.
-func (stub *MockStub) CreateCompositeKey(objectType string, attributes []string) (string, error) {
+func (stub *Stub) CreateCompositeKey(objectType string, attributes []string) (string, error) {
 	return newCompositeKey(objectType, attributes)
 }
 
 // SplitCompositeKey splits the composite key into attributes
 // on which the composite key was formed.
-func (stub *MockStub) SplitCompositeKey(compositeKey string) (string, []string, error) {
+func (stub *Stub) SplitCompositeKey(compositeKey string) (string, []string, error) {
 	return splitCompositeKey(compositeKey)
 }
 
-func (stub *MockStub) GetStateByRangeWithPagination(startKey, endKey string, pageSize int32,
+// GetStateByRangeWithPagination ...
+func (stub *Stub) GetStateByRangeWithPagination(startKey, endKey string, pageSize int32,
 	bookmark string) (shim.StateQueryIteratorInterface, *pb.QueryResponseMetadata, error) {
 	return nil, nil, nil
 }
 
-func (stub *MockStub) GetStateByPartialCompositeKeyWithPagination(objectType string, keys []string,
+// GetStateByPartialCompositeKeyWithPagination ...
+func (stub *Stub) GetStateByPartialCompositeKeyWithPagination(objectType string, keys []string,
 	pageSize int32, bookmark string) (shim.StateQueryIteratorInterface, *pb.QueryResponseMetadata, error) {
 	partialCompositeKey, err := stub.CreateCompositeKey(objectType, keys)
 	if err != nil {
@@ -347,20 +351,21 @@ func (stub *MockStub) GetStateByPartialCompositeKeyWithPagination(objectType str
 	if bookmark != "" {
 		startKey = bookmark
 	}
-	iterator := NewMockStateRangeQueryIterator(stub, startKey, partialCompositeKey+string(maxUnicodeRuneValue), true, pageSize)
+	iterator := NewStandaloneStateRange(stub, startKey, partialCompositeKey+string(utf8.MaxRune), true, pageSize)
 	return iterator, iterator.Metadata, nil
 }
 
-func (stub *MockStub) GetQueryResultWithPagination(query string, pageSize int32,
+// GetQueryResultWithPagination ...
+func (stub *Stub) GetQueryResultWithPagination(query string, pageSize int32,
 	bookmark string) (shim.StateQueryIteratorInterface, *pb.QueryResponseMetadata, error) {
 	return nil, nil, nil
 }
 
 // InvokeChaincode calls a peered chaincode.
 // E.g. stub1.InvokeChaincode("stub2Hash", funcArgs, channel)
-// Before calling this make sure to create another MockStub stub2, call stub2.MockInit(uuid, func, args)
+// Before calling this make sure to create another StandaloneStub stub2, call stub2.MockInit(uuid, func, args)
 // and register it with stub1 by calling stub1.MockPeerChaincode("stub2Hash", stub2)
-func (stub *MockStub) InvokeChaincode(chaincodeName string, args [][]byte, channel string) pb.Response {
+func (stub *Stub) InvokeChaincode(chaincodeName string, args [][]byte, channel string) pb.Response {
 	// Internally we use chaincode name as a composite name
 	if channel != "" {
 		chaincodeName = chaincodeName + "/" + channel
@@ -400,7 +405,8 @@ yuGnBXj8ytqU0CwIPX4WecigUCAkVDNx
 -----END CERTIFICATE-----
 `
 
-func (stub *MockStub) GetCreator() ([]byte, error) {
+// GetCreator ...
+func (stub *Stub) GetCreator() ([]byte, error) {
 	sid := &msp.SerializedIdentity{
 		Mspid:   stub.Creator,
 		IdBytes: []byte(fakeCertificate),
@@ -409,63 +415,68 @@ func (stub *MockStub) GetCreator() ([]byte, error) {
 	return proto.Marshal(sid)
 }
 
-// Not implemented
-func (stub *MockStub) GetTransient() (map[string][]byte, error) {
+// GetTransient ...
+func (stub *Stub) GetTransient() (map[string][]byte, error) {
 	return nil, nil
 }
 
-// Not implemented
-func (stub *MockStub) GetBinding() ([]byte, error) {
+// GetBinding ...
+func (stub *Stub) GetBinding() ([]byte, error) {
 	return nil, nil
 }
 
-// Not implemented
-func (stub *MockStub) GetSignedProposal() (*pb.SignedProposal, error) {
+// GetSignedProposal ...
+func (stub *Stub) GetSignedProposal() (*pb.SignedProposal, error) {
 	return stub.signedProposal, nil
 }
 
-func (stub *MockStub) setSignedProposal(sp *pb.SignedProposal) {
+func (stub *Stub) setSignedProposal(sp *pb.SignedProposal) {
 	stub.signedProposal = sp
 }
 
-// Not implemented
-func (stub *MockStub) GetArgsSlice() ([]byte, error) {
+// GetArgsSlice ...
+func (stub *Stub) GetArgsSlice() ([]byte, error) {
 	return nil, nil
 }
 
-// Not implemented
-func (stub *MockStub) GetPrivateDataHash(collection, key string) ([]byte, error) {
+// GetPrivateDataHash ...
+func (stub *Stub) GetPrivateDataHash(collection, key string) ([]byte, error) {
 	return nil, nil
 }
 
-func (stub *MockStub) setTxTimestamp(time *timestamp.Timestamp) {
+func (stub *Stub) setTxTimestamp(time *timestamp.Timestamp) {
 	// Using a sequential timestamp make the tests' output determinist.
 	// We're using a sequence and not a fix value so the seed won't reset at each Invoke.
 	stub.TxTimestamp.Seconds = stub.TxTimestamp.Seconds + 1
 	stub.TxTimestamp.Nanos = stub.TxTimestamp.Nanos + 1
 }
 
-func (stub *MockStub) GetTxTimestamp() (*timestamp.Timestamp, error) {
+// GetTxTimestamp ...
+func (stub *Stub) GetTxTimestamp() (*timestamp.Timestamp, error) {
 	if stub.TxTimestamp == nil {
 		return nil, errors.New("stub.TxTimestamp not set")
 	}
 	return stub.TxTimestamp, nil
 }
 
-func (stub *MockStub) SetEvent(name string, payload []byte) error {
+// SetEvent ...
+func (stub *Stub) SetEvent(name string, payload []byte) error {
 	stub.ChaincodeEventsChannel <- &pb.ChaincodeEvent{EventName: name, Payload: payload}
 	return nil
 }
 
-func (stub *MockStub) SetStateValidationParameter(key string, ep []byte) error {
+// SetStateValidationParameter ...
+func (stub *Stub) SetStateValidationParameter(key string, ep []byte) error {
 	return stub.SetPrivateDataValidationParameter("", key, ep)
 }
 
-func (stub *MockStub) GetStateValidationParameter(key string) ([]byte, error) {
+// GetStateValidationParameter ...
+func (stub *Stub) GetStateValidationParameter(key string) ([]byte, error) {
 	return stub.GetPrivateDataValidationParameter("", key)
 }
 
-func (stub *MockStub) SetPrivateDataValidationParameter(collection, key string, ep []byte) error {
+// SetPrivateDataValidationParameter ...
+func (stub *Stub) SetPrivateDataValidationParameter(collection, key string, ep []byte) error {
 	m, in := stub.EndorsementPolicies[collection]
 	if !in {
 		stub.EndorsementPolicies[collection] = make(map[string][]byte)
@@ -476,7 +487,8 @@ func (stub *MockStub) SetPrivateDataValidationParameter(collection, key string, 
 	return nil
 }
 
-func (stub *MockStub) GetPrivateDataValidationParameter(collection, key string) ([]byte, error) {
+// GetPrivateDataValidationParameter ...
+func (stub *Stub) GetPrivateDataValidationParameter(collection, key string) ([]byte, error) {
 	m, in := stub.EndorsementPolicies[collection]
 
 	if !in {
@@ -486,16 +498,16 @@ func (stub *MockStub) GetPrivateDataValidationParameter(collection, key string) 
 	return m[key], nil
 }
 
-// Constructor to initialise the internal State map
-func NewMockStub(name string, cc shim.Chaincode) *MockStub {
-	s := new(MockStub)
-	s.Creator = worker
+// NewStandaloneStub initialises the internal State map
+func NewStandaloneStub(name string, cc shim.Chaincode) *Stub {
+	s := new(Stub)
+	s.Creator = standaloneWorker
 	s.Name = name
 	s.cc = cc
 	s.State = make(map[string][]byte)
 	s.PvtState = make(map[string]map[string][]byte)
 	s.EndorsementPolicies = make(map[string]map[string][]byte)
-	s.Invokables = make(map[string]*MockStub)
+	s.Invokables = make(map[string]*Stub)
 	s.Keys = list.New()
 	s.ChaincodeEventsChannel = make(chan *pb.ChaincodeEvent, OutputPageSize+1) //define large capacity for non-blocking setEvent calls.
 	s.Decorations = make(map[string][]byte)
@@ -504,20 +516,18 @@ func NewMockStub(name string, cc shim.Chaincode) *MockStub {
 	return s
 }
 
-func NewMockStubWithRegisterNode(name string, cc shim.Chaincode) *MockStub {
-	s := NewMockStub(name, cc)
+// NewStandaloneStubWithRegisterNode ...
+func NewStandaloneStubWithRegisterNode(name string, cc shim.Chaincode) *Stub {
+	s := NewStandaloneStub(name, cc)
 	s.MockInvoke([][]byte{[]byte("registerNode")})
 
 	return s
 }
 
-/*****************************
- Range Query Iterator
-*****************************/
-
-type MockStateRangeQueryIterator struct {
+// StateRange ...
+type StateRange struct {
 	Closed      bool
-	Stub        *MockStub
+	Stub        *Stub
 	StartKey    string
 	EndKey      string
 	Current     *list.Element
@@ -528,7 +538,7 @@ type MockStateRangeQueryIterator struct {
 
 // HasNext returns true if the range query iterator contains additional keys
 // and values.
-func (iter *MockStateRangeQueryIterator) HasNext() bool {
+func (iter *StateRange) HasNext() bool {
 	if iter.Closed {
 		// previously called Close()
 		return false
@@ -565,19 +575,19 @@ func (iter *MockStateRangeQueryIterator) HasNext() bool {
 }
 
 // Next returns the next key and value in the range query iterator.
-func (iter *MockStateRangeQueryIterator) Next() (*queryresult.KV, error) {
+func (iter *StateRange) Next() (*queryresult.KV, error) {
 	if iter.Closed == true {
-		err := errors.New("MockStateRangeQueryIterator.Next() called after Close()")
+		err := errors.New("StandaloneStateRange.Next() called after Close()")
 		return nil, err
 	}
 
 	if iter.HasNext() == false {
-		err := errors.New("MockStateRangeQueryIterator.Next() called when it does not HaveNext()")
+		err := errors.New("StandaloneStateRange.Next() called when it does not HaveNext()")
 		return nil, err
 	}
 
 	if iter.Current != nil && iter.IsPaginated && iter.Metadata.FetchedRecordsCount >= iter.PageSize {
-		return nil, errors.New("Paginated MockStateRangeQueryIterator.Next() went past end of range")
+		return nil, errors.New("Paginated StandaloneStateRange.Next() went past end of range")
 	}
 
 	for iter.Current != nil {
@@ -599,15 +609,15 @@ func (iter *MockStateRangeQueryIterator) Next() (*queryresult.KV, error) {
 		}
 		iter.Current = iter.Current.Next()
 	}
-	err := errors.New("MockStateRangeQueryIterator.Next() went past end of range")
+	err := errors.New("StandaloneStateRange.Next() went past end of range")
 	return nil, err
 }
 
 // Close closes the range query iterator. This should be called when done
 // reading from the iterator to free up resources.
-func (iter *MockStateRangeQueryIterator) Close() error {
+func (iter *StateRange) Close() error {
 	if iter.Closed == true {
-		err := errors.New("MockStateRangeQueryIterator.Close() called after Close()")
+		err := errors.New("StandaloneStateRange.Close() called after Close()")
 		return err
 	}
 
@@ -615,11 +625,13 @@ func (iter *MockStateRangeQueryIterator) Close() error {
 	return nil
 }
 
-func (iter *MockStateRangeQueryIterator) Print() {
+// Print ...
+func (iter *StateRange) Print() {
 }
 
-func NewMockStateRangeQueryIterator(stub *MockStub, startKey string, endKey string, isPaginated bool, pageSize int32) *MockStateRangeQueryIterator {
-	iter := new(MockStateRangeQueryIterator)
+// NewStandaloneStateRange ...
+func NewStandaloneStateRange(stub *Stub, startKey string, endKey string, isPaginated bool, pageSize int32) *StateRange {
+	iter := new(StateRange)
 	iter.Closed = false
 	iter.Stub = stub
 	iter.StartKey = startKey
@@ -632,74 +644,4 @@ func NewMockStateRangeQueryIterator(stub *MockStub, startKey string, endKey stri
 	iter.Print()
 
 	return iter
-}
-
-func getBytes(function string, args []string) [][]byte {
-	bytes := make([][]byte, 0, len(args)+1)
-	bytes = append(bytes, []byte(function))
-	for _, s := range args {
-		bytes = append(bytes, []byte(s))
-	}
-	return bytes
-}
-
-func getFuncArgs(bytes [][]byte) (string, []string) {
-	function := string(bytes[0])
-	args := make([]string, len(bytes)-1)
-	for i := 1; i < len(bytes); i++ {
-		args[i-1] = string(bytes[i])
-	}
-	return function, args
-}
-
-func newCompositeKey(objectType string, attributes []string) (string, error) {
-	if err := validateCompositeKeyAttribute(objectType); err != nil {
-		return "", err
-	}
-	ck := compositeKeyNamespace + objectType + string(rune(minUnicodeRuneValue))
-	for _, att := range attributes {
-		if err := validateCompositeKeyAttribute(att); err != nil {
-			return "", err
-		}
-		ck += att + string(rune(minUnicodeRuneValue))
-	}
-	return ck, nil
-}
-
-func splitCompositeKey(compositeKey string) (string, []string, error) {
-	componentIndex := 1
-	components := []string{}
-	for i := 1; i < len(compositeKey); i++ {
-		if compositeKey[i] == minUnicodeRuneValue {
-			components = append(components, compositeKey[componentIndex:i])
-			componentIndex = i + 1
-		}
-	}
-	return components[0], components[1:], nil
-}
-
-func validateCompositeKeyAttribute(str string) error {
-	if !utf8.ValidString(str) {
-		return errors.Errorf("not a valid utf8 string: [%x]", str)
-	}
-	for index, runeValue := range str {
-		if runeValue == minUnicodeRuneValue || runeValue == maxUnicodeRuneValue {
-			return errors.Errorf(`input contain unicode %#U starting at position [%d]. %#U and %#U are not allowed in the input attribute of a composite key`,
-				runeValue, index, minUnicodeRuneValue, maxUnicodeRuneValue)
-		}
-	}
-	return nil
-}
-
-//To ensure that simple keys do not go into composite key namespace,
-//we validate simplekey to check whether the key starts with 0x00 (which
-//is the namespace for compositeKey). This helps in avoding simple/composite
-//key collisions.
-func validateSimpleKeys(simpleKeys ...string) error {
-	for _, key := range simpleKeys {
-		if len(key) > 0 && key[0] == compositeKeyNamespace[0] {
-			return errors.Errorf(`first character of the key [%s] contains a null character which is not allowed`, key)
-		}
-	}
-	return nil
 }
