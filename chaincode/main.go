@@ -324,16 +324,21 @@ func handleInvoke(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	args := make([][]byte, 2)
-
-	arr := make([]string, 2)
-	json.Unmarshal(body, &arr)
-
 	logger.Infof("Function: %v", invokeReq.Function)
 	logger.Infof("Arguments: %v", invokeReq.Args)
 
-	args[0] = []byte(invokeReq.Function)
-	args[1] = []byte(invokeReq.Args)
+	var args [][]byte
+
+	if invokeReq.Args == "" {
+		args = [][]byte{
+			[]byte(invokeReq.Function),
+		}
+	} else {
+		args = [][]byte{
+			[]byte(invokeReq.Function),
+			[]byte(invokeReq.Args),
+		}
+	}
 
 	resp, err := doInvoke(invokeReq.Identity, args)
 
