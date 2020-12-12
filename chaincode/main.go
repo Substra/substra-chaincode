@@ -285,19 +285,13 @@ func main() {
 
 	standalone := true // TODO: parametrize
 	if standalone {
-		err := startStandaloneServer(8080)
-		if err != nil {
-			logger.Errorf("Error starting standalone chaincode server: %s", err)
-		}
+		startStandaloneServer(8080)
 	} else {
-		err := startFabricServer()
-		if err != nil {
-			logger.Errorf("Error starting SubstraChaincode chaincode: %s", err)
-		}
+		startFabricServer()
 	}
 }
 
-func startFabricServer() error {
+func startFabricServer() {
 	logger.Infof("Load TLS certificates")
 
 	key, err := ioutil.ReadFile(os.Getenv("TLS_KEY_FILE"))
@@ -327,6 +321,10 @@ func startFabricServer() error {
 		},
 	}
 
+	// Start the chaincode external server
 	logger.Infof("Start Substra ChaincodeServer")
-	return server.Start()
+	err = server.Start()
+	if err != nil {
+		logger.Errorf("Error starting SubstraChaincode chaincode: %s", err)
+	}
 }

@@ -36,14 +36,17 @@ func handleHealth(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "OK")
 }
 
-func startStandaloneServer(port int) error {
+func startStandaloneServer(port int) {
 	logger.Infof("Start  Substra ChaincodeServer on port %v", port)
 
 	http.HandleFunc("/health", handleHealth)
 	http.HandleFunc("/invoke", handleInvoke)
 	http.HandleFunc("/events", handleEvents)
 
-	return http.ListenAndServe(":"+strconv.Itoa(port), nil)
+	err := http.ListenAndServe(":"+strconv.Itoa(port), nil)
+	if err != nil {
+		logger.Errorf("Error starting standalone chaincode server: %s", err)
+	}
 }
 
 func handleInvoke(w http.ResponseWriter, req *http.Request) {
