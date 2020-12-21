@@ -12,17 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package algo
 
 import (
 	"chaincode/errors"
-	"chaincode/io"
-	"chaincode/ledger"
 )
 
-// Set is a method of the receiver Aggregate. It uses inputAggregateAlgo fields to set the AggregateAlgo
-// Returns the aggregateAlgoKey
-func (algo *AggregateAlgo) Set(db *ledger.LedgerDB, inp io.InputAggregateAlgo) (err error) {
+// Set is a method of the receiver Algo. It uses inputAlgo fields to set the Algo
+// Returns the algoKey
+func (algo *Algo) Set(db *LedgerDB, inp inputAlgo) (err error) {
 	// find associated owner
 	owner, err := GetTxCreator(db.cc)
 	if err != nil {
@@ -35,7 +33,7 @@ func (algo *AggregateAlgo) Set(db *ledger.LedgerDB, inp io.InputAggregateAlgo) (
 	}
 
 	algo.Key = inp.Key
-	algo.AssetType = AggregateAlgoType
+	algo.AssetType = AlgoType
 	algo.Name = inp.Name
 	algo.Checksum = inp.Checksum
 	algo.StorageAddress = inp.StorageAddress
@@ -52,41 +50,41 @@ func (algo *AggregateAlgo) Set(db *ledger.LedgerDB, inp io.InputAggregateAlgo) (
 // -------------------------------------------------------------------------------------------
 // Smart contracts related to an algo
 // -------------------------------------------------------------------------------------------
-// registerAggregateAlgo stores a new algo in the ledger.
+// registerAlgo stores a new algo in the ledger.
 // If the key exists, it will override the value with the new one
-func registerAggregateAlgo(db *LedgerDB, args []string) (resp outputKey, err error) {
-	inp := inputAggregateAlgo{}
+func registerAlgo(db *LedgerDB, args []string) (resp outputKey, err error) {
+	inp := inputAlgo{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
-	// check validity of input args and convert it to CompositeAlgo
-	algo := AggregateAlgo{}
+	// check validity of input args and convert it to Algo
+	algo := Algo{}
 	err = algo.Set(db, inp)
 	if err != nil {
 		return
 	}
 	// submit to ledger
-	err = db.Add(inp.Key, algo)
+	err = db.Add(algo.Key, algo)
 	if err != nil {
 		return
 	}
-	// create aggregate key
-	err = db.CreateIndex("aggregateAlgo~owner~key", []string{"aggregateAlgo", algo.Owner, inp.Key})
+	// create composite key
+	err = db.CreateIndex("algo~owner~key", []string{"algo", algo.Owner, algo.Key})
 	if err != nil {
 		return
 	}
-	return outputKey{Key: inp.Key}, nil
+	return outputKey{Key: algo.Key}, nil
 }
 
-// queryAggregateAlgo returns an algo of the ledger given its key
-func queryAggregateAlgo(db *LedgerDB, args []string) (out outputAggregateAlgo, err error) {
+// queryAlgo returns an algo of the ledger given its key
+func queryAlgo(db *LedgerDB, args []string) (out outputAlgo, err error) {
 	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
-	algo, err := db.GetAggregateAlgo(inp.Key)
+	algo, err := db.GetAlgo(inp.Key)
 	if err != nil {
 		return
 	}
@@ -94,10 +92,10 @@ func queryAggregateAlgo(db *LedgerDB, args []string) (out outputAggregateAlgo, e
 	return
 }
 
-// queryAggregateAlgos returns all algos of the ledger
-func queryAggregateAlgos(db *LedgerDB, args []string) (outAlgos []outputAggregateAlgo, bookmark string, err error) {
+// queryAlgos returns all algos of the ledger
+func queryAlgos(db *LedgerDB, args []string) (outAlgos []outputAlgo, bookmark string, err error) {
 	inp := inputBookmark{}
-	outAlgos = []outputAggregateAlgo{}
+	outAlgos = []outputAlgo{}
 
 	if len(args) > 1 {
 		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
@@ -111,18 +109,18 @@ func queryAggregateAlgos(db *LedgerDB, args []string) (outAlgos []outputAggregat
 		}
 	}
 
-	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("aggregateAlgo~owner~key", []string{"aggregateAlgo"}, OutputPageSize, inp.Bookmark)
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("algo~owner~key", []string{"algo"}, OutputPageSize, inp.Bookmark)
 
 	if err != nil {
 		return
 	}
 
 	for _, key := range elementsKeys {
-		algo, err := db.GetAggregateAlgo(key)
+		algo, err := db.GetAlgo(key)
 		if err != nil {
 			return outAlgos, bookmark, err
 		}
-		var out outputAggregateAlgo
+		var out outputAlgo
 		out.Fill(algo)
 		outAlgos = append(outAlgos, out)
 	}

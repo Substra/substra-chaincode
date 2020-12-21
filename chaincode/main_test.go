@@ -15,6 +15,7 @@
 package main
 
 import (
+	"chaincode/orchestrator/asset"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -228,7 +229,7 @@ func registerRandomCompositeAlgo(t *testing.T, mockStub *MockStub) (key string, 
 	return
 }
 
-func registerTraintuple(t *testing.T, mockStub *MockStub, assetType AssetType) (key string, err error) {
+func registerTraintuple(t *testing.T, mockStub *MockStub, assetType asset.AssetType) (key string, err error) {
 
 	// 1. Generate and register random algo
 	// 2. Generate and register traintuple using that algo

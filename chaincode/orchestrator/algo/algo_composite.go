@@ -12,17 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package algo
 
 import (
 	"chaincode/errors"
-	"chaincode/io"
-	"chaincode/ledger"
 )
 
-// Set is a method of the receiver Aggregate. It uses inputAggregateAlgo fields to set the AggregateAlgo
-// Returns the aggregateAlgoKey
-func (algo *AggregateAlgo) Set(db *ledger.LedgerDB, inp io.InputAggregateAlgo) (err error) {
+// Set is a method of the receiver CompositeAlgo. It uses inputCompositeAlgo fields to set the CompositeAlgo
+// Returns the compositeAlgoKey
+func (algo *CompositeAlgo) Set(db *LedgerDB, inp inputCompositeAlgo) (err error) {
 	// find associated owner
 	owner, err := GetTxCreator(db.cc)
 	if err != nil {
@@ -35,7 +33,7 @@ func (algo *AggregateAlgo) Set(db *ledger.LedgerDB, inp io.InputAggregateAlgo) (
 	}
 
 	algo.Key = inp.Key
-	algo.AssetType = AggregateAlgoType
+	algo.AssetType = CompositeAlgoType
 	algo.Name = inp.Name
 	algo.Checksum = inp.Checksum
 	algo.StorageAddress = inp.StorageAddress
@@ -52,41 +50,41 @@ func (algo *AggregateAlgo) Set(db *ledger.LedgerDB, inp io.InputAggregateAlgo) (
 // -------------------------------------------------------------------------------------------
 // Smart contracts related to an algo
 // -------------------------------------------------------------------------------------------
-// registerAggregateAlgo stores a new algo in the ledger.
+// registerCompositeAlgo stores a new algo in the ledger.
 // If the key exists, it will override the value with the new one
-func registerAggregateAlgo(db *LedgerDB, args []string) (resp outputKey, err error) {
-	inp := inputAggregateAlgo{}
+func registerCompositeAlgo(db *LedgerDB, args []string) (resp outputKey, err error) {
+	inp := inputCompositeAlgo{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
 	// check validity of input args and convert it to CompositeAlgo
-	algo := AggregateAlgo{}
+	algo := CompositeAlgo{}
 	err = algo.Set(db, inp)
 	if err != nil {
 		return
 	}
 	// submit to ledger
-	err = db.Add(inp.Key, algo)
+	err = db.Add(algo.Key, algo)
 	if err != nil {
 		return
 	}
-	// create aggregate key
-	err = db.CreateIndex("aggregateAlgo~owner~key", []string{"aggregateAlgo", algo.Owner, inp.Key})
+	// create composite key
+	err = db.CreateIndex("compositeAlgo~owner~key", []string{"compositeAlgo", algo.Owner, algo.Key})
 	if err != nil {
 		return
 	}
-	return outputKey{Key: inp.Key}, nil
+	return outputKey{Key: algo.Key}, nil
 }
 
-// queryAggregateAlgo returns an algo of the ledger given its key
-func queryAggregateAlgo(db *LedgerDB, args []string) (out outputAggregateAlgo, err error) {
+// queryCompositeAlgo returns an algo of the ledger given its key
+func queryCompositeAlgo(db *LedgerDB, args []string) (out outputCompositeAlgo, err error) {
 	inp := inputKey{}
 	err = AssetFromJSON(args, &inp)
 	if err != nil {
 		return
 	}
-	algo, err := db.GetAggregateAlgo(inp.Key)
+	algo, err := db.GetCompositeAlgo(inp.Key)
 	if err != nil {
 		return
 	}
@@ -94,10 +92,10 @@ func queryAggregateAlgo(db *LedgerDB, args []string) (out outputAggregateAlgo, e
 	return
 }
 
-// queryAggregateAlgos returns all algos of the ledger
-func queryAggregateAlgos(db *LedgerDB, args []string) (outAlgos []outputAggregateAlgo, bookmark string, err error) {
+// queryCompositeAlgos returns all algos of the ledger
+func queryCompositeAlgos(db *LedgerDB, args []string) (outAlgos []outputCompositeAlgo, bookmark string, err error) {
 	inp := inputBookmark{}
-	outAlgos = []outputAggregateAlgo{}
+	outAlgos = []outputCompositeAlgo{}
 
 	if len(args) > 1 {
 		err = errors.BadRequest("incorrect number of arguments, expecting at most one argument")
@@ -111,18 +109,18 @@ func queryAggregateAlgos(db *LedgerDB, args []string) (outAlgos []outputAggregat
 		}
 	}
 
-	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("aggregateAlgo~owner~key", []string{"aggregateAlgo"}, OutputPageSize, inp.Bookmark)
+	elementsKeys, bookmark, err := db.GetIndexKeysWithPagination("compositeAlgo~owner~key", []string{"compositeAlgo"}, OutputPageSize, inp.Bookmark)
 
 	if err != nil {
 		return
 	}
 
 	for _, key := range elementsKeys {
-		algo, err := db.GetAggregateAlgo(key)
+		algo, err := db.GetCompositeAlgo(key)
 		if err != nil {
 			return outAlgos, bookmark, err
 		}
-		var out outputAggregateAlgo
+		var out outputCompositeAlgo
 		out.Fill(algo)
 		outAlgos = append(outAlgos, out)
 	}

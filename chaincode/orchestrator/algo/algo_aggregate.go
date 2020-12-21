@@ -17,12 +17,11 @@ package main
 import (
 	"chaincode/errors"
 	"chaincode/io"
-	"chaincode/ledger"
 )
 
 // Set is a method of the receiver Aggregate. It uses inputAggregateAlgo fields to set the AggregateAlgo
 // Returns the aggregateAlgoKey
-func (algo *AggregateAlgo) Set(db *ledger.LedgerDB, inp io.InputAggregateAlgo) (err error) {
+func (algo *AggregateAlgo) Set(db *LedgerDB, inp io.InputAggregateAlgo) (err error) {
 	// find associated owner
 	owner, err := GetTxCreator(db.cc)
 	if err != nil {
