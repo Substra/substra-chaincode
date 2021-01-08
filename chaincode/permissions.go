@@ -53,25 +53,9 @@ func (perms Permissions) CanProcess(owner, node string) bool {
 
 // NewPermissions create the Permissions according to the arg received
 func NewPermissions(db *LedgerDB, in inputPermissions) (Permissions, error) {
-	nodes, err := queryNodes(db, []string{})
-	if err != nil {
-		return Permissions{}, err
-	}
-
-	nodesIDs := []string{}
-	for _, node := range nodes {
-		nodesIDs = append(nodesIDs, node.ID)
-	}
-
-	// Validate Process inputPermissions
-	// @TODO Validate Download inputPermissions when implemented
-	for _, authorizedID := range in.Process.AuthorizedIDs {
-		if in.Process.Public {
-			continue
-		}
-
-		if !stringInSlice(authorizedID, nodesIDs) {
-			return Permissions{}, errors.BadRequest("invalid permission input values")
+	if !in.Process.Public {
+		if err := validateAuthorizedIds(db, in.Process.AuthorizedIDs); err != nil {
+			return Permissions{}, err
 		}
 	}
 
@@ -146,4 +130,27 @@ func (priv Permission) getNodesIntersection(p Permission) []string {
 		}
 	}
 	return nodes
+}
+
+// validateAuthorizedIds will return an error if one of the provided IDs is not a valid node
+func validateAuthorizedIds(db *LedgerDB, IDs []string) error {
+	nodes, err := queryNodes(db, []string{})
+	if err != nil {
+		return err
+	}
+
+	nodesIDs := []string{}
+	for _, node := range nodes {
+		nodesIDs = append(nodesIDs, node.ID)
+	}
+
+	// Validate Process inputPermissions
+	// @TODO Validate Download inputPermissions when implemented
+	for _, authorizedID := range IDs {
+		if !stringInSlice(authorizedID, nodesIDs) {
+			return errors.BadRequest("invalid permission input values")
+		}
+	}
+
+	return nil
 }
