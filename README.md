@@ -1,6 +1,6 @@
 # substra-chaincode
 
-[![Build Status](https://travis-ci.org/SubstraFoundation/substra-chaincode.svg?branch=master)](https://travis-ci.org/SubstraFoundation/substra-chaincode)
+![Build and test Go](https://github.com/SubstraFoundation/substra-chaincode/workflows/Build%20and%20test%20Go/badge.svg)
 
 Chaincode for the Substra platform
 
