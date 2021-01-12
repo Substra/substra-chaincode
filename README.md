@@ -1,6 +1,6 @@
 # substra-chaincode
 
-![Build and test Go](https://github.com/SubstraFoundation/substra-chaincode/workflows/Build%20and%20test%20Go/badge.svg)
+[![Build and test Go](https://github.com/SubstraFoundation/substra-chaincode/workflows/Build%20and%20test%20Go/badge.svg)](https://github.com/SubstraFoundation/substra-chaincode/actions?query=workflow%3A%22Build+and+test+Go%22)
 
 Chaincode for the Substra platform
 
