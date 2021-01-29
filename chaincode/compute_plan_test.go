@@ -55,7 +55,7 @@ var (
 	// Model-composition compute plan:
 	//
 	//   ,========,                ,========,
-	//   | NODE A |                | NODE B |
+	//   | ORG A  |                | ORG B  |
 	//   *========*                *========*
 	//
 	//     ø     ø                  ø      ø
@@ -66,7 +66,7 @@ var (
 	//   -----------              -----------
 	//     hd    tr                 tr     hd
 	//     |      \   ,========,   /      |
-	//     |       \  | NODE C |  /       |
+	//     |       \  | ORG C  |  /       |
 	//     |        \ *========* /        |
 	//     |       ----------------       |
 	//     |      |    Aggregate   |      |         STEP 2
@@ -78,7 +78,13 @@ var (
 	//   -----------             -----------
 	//  | Composite |           | Composite |       STEP 3
 	//   -----------             -----------
-	//     hd    tr                tr     hd
+	//     hd    tr                 tr     hd
+	//            \                /
+	//             \              /
+	//              \            /
+	//             ----------------
+	//            |    Aggregate   |                STEP 4
+	//             ----------------
 	//
 	//
 	modelCompositionComputePlan = inputComputePlan{
@@ -94,8 +100,8 @@ var (
 			{
 				Key:            computePlanCompositeTraintupleKey2,
 				ID:             "step_1_composite_B",
-				DataManagerKey: dataManagerKey,
-				DataSampleKeys: []string{trainDataSampleKey2},
+				DataManagerKey: dataManagerKey2,
+				DataSampleKeys: []string{trainDataSampleKeyWorker2},
 				AlgoKey:        compositeAlgoKey,
 			},
 			{
@@ -110,8 +116,8 @@ var (
 			{
 				Key:            computePlanCompositeTraintupleKey4,
 				ID:             "step_3_composite_B",
-				DataManagerKey: dataManagerKey,
-				DataSampleKeys: []string{trainDataSampleKey2},
+				DataManagerKey: dataManagerKey2,
+				DataSampleKeys: []string{trainDataSampleKeyWorker2},
 				AlgoKey:        compositeAlgoKey,
 				InHeadModelID:  "step_1_composite_B",
 				InTrunkModelID: "step_2_aggregate",
@@ -126,58 +132,141 @@ var (
 					"step_1_composite_A",
 					"step_1_composite_B",
 				},
-				Worker: worker,
+				Worker: workerC,
+			}, {
+				Key:     computePlanAggregatetupleKey2,
+				ID:      "step_4_aggregate",
+				AlgoKey: aggregateAlgoKey,
+				InModelsIDs: []string{
+					"step_3_composite_A",
+					"step_3_composite_B",
+				},
+				Worker: workerC,
 			},
 		},
 		Testtuples: []inputComputePlanTesttuple{
-			inputComputePlanTesttuple{
+			{
 				Key:            computePlanTesttupleKey1,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_1_composite_A",
 			},
-			inputComputePlanTesttuple{
+			{
 				Key:            computePlanTesttupleKey2,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_1_composite_B",
 			},
-			inputComputePlanTesttuple{
+			{
 				Key:            computePlanTesttupleKey3,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_2_aggregate",
 			},
-			inputComputePlanTesttuple{
+			{
 				Key:            computePlanTesttupleKey4,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_3_composite_A",
 			},
-			inputComputePlanTesttuple{
+			{
 				Key:            computePlanTesttupleKey5,
 				DataManagerKey: dataManagerKey,
 				DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
 				ObjectiveKey:   objectiveKey,
 				TraintupleID:   "step_3_composite_B",
 			},
+			{
+				Key:            computePlanTesttupleKey6,
+				DataManagerKey: dataManagerKey,
+				DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},
+				ObjectiveKey:   objectiveKey,
+				TraintupleID:   "step_4_aggregate",
+			},
 		},
 	}
 )
 
+type TestModels struct {
+	composite    []TestCompositeModel
+	aggregateKey string
+}
+
+type TestCompositeModel struct {
+	Head  string
+	Trunk string
+}
+
+func registerTestDataManager(t *testing.T, mockStub *MockStub, key string, datasampleKeys ...string) {
+	inpDataManager := inputDataManager{Key: key}
+	args := inpDataManager.createDefault()
+	resp := mockStub.MockInvoke(args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding dataManager with status %d and message %s", resp.Status, resp.Message)
+
+	inpDataSample := inputDataSample{
+		Keys:            datasampleKeys,
+		DataManagerKeys: []string{key},
+		TestOnly:        "false",
+	}
+	args = inpDataSample.createDefault()
+	resp = mockStub.MockInvoke(args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding test dataSample with status %d and message %s", resp.Status, resp.Message)
+}
+
+type CompositeToDoneFunc func(*testing.T, *LedgerDB, string, string, string)
+type AggregateToDoneFunc func(*testing.T, *LedgerDB, string, string)
+
+// this is your decorator.
+func AsOrgB(mockStub *MockStub, m CompositeToDoneFunc) CompositeToDoneFunc {
+	return func(t *testing.T, db *LedgerDB, key string, headModelKey string, trunkModelKey string) {
+		savedCreator := mockStub.Creator
+		mockStub.Creator = workerB
+		m(t, db, key, headModelKey, trunkModelKey)
+		mockStub.Creator = savedCreator
+	}
+}
+
+// this is your decorator.
+func AsOrgC(mockStub *MockStub, m AggregateToDoneFunc) AggregateToDoneFunc {
+	return func(t *testing.T, db *LedgerDB, key string, modelKey string) {
+		savedCreator := mockStub.Creator
+		mockStub.Creator = workerC
+		m(t, db, key, modelKey)
+		mockStub.Creator = savedCreator
+	}
+}
+
+func registerWorker(mockStub *MockStub, worker string) {
+	savedCreator := mockStub.Creator
+	mockStub.Creator = worker
+	mockStub.MockInvoke([][]byte{[]byte("registerNode")})
+	mockStub.Creator = savedCreator
+}
+
 func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStubWithRegisterNode("substra", scc)
+	mockStub := NewMockStub("substra", scc)
+	registerWorker(mockStub, worker)
+	registerWorker(mockStub, workerB)
+	registerWorker(mockStub, workerC)
 	registerItem(t, *mockStub, "aggregateAlgo")
 
+	// Add data manager and data samples for node B
+	savedCreator := mockStub.Creator
+	mockStub.Creator = workerB
+	registerTestDataManager(t, mockStub, dataManagerKey2, trainDataSampleKeyWorker2)
+	mockStub.Creator = savedCreator
+
+	// hack to be able to access internal functions directly
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, map[string]string{}, false)
+	// Create CP
+	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, map[string]string{}, true)
 	assert.NoError(t, err)
 	assert.NotNil(t, db.event)
 	assert.Len(t, db.event.CompositeTraintuples, 2)
@@ -189,55 +278,73 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	validateTupleRank(t, db, 2, out.CompositeTraintupleKeys[2], CompositeTraintupleType)
 	validateTupleRank(t, db, 2, out.CompositeTraintupleKeys[3], CompositeTraintupleType)
 
-	_, err = logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[0]}))
-	assert.NoError(t, err)
-	_, err = logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[1]}))
-	assert.NoError(t, err)
-
-	db.event = &Event{}
-	inpLogCompo := inputLogSuccessCompositeTrain{}
-	inpLogCompo.fillDefaults()
-	inpLogCompo.Key = out.CompositeTraintupleKeys[0]
-	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
-	assert.NoError(t, err)
-
-	inpLogCompo.Key = out.CompositeTraintupleKeys[1]
-	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
-	assert.NoError(t, err)
-	assert.Len(t, db.event.Testtuples, 2)
-	for _, test := range db.event.Testtuples {
-		assert.Equalf(t, StatusTodo, test.Status, "blame it on %+v", test)
+	// Generate some random out-model hashes
+	step := map[int]TestModels{
+		1: {composite: []TestCompositeModel{
+			{Head: RandomUUID(), Trunk: RandomUUID()},
+			{Head: RandomUUID(), Trunk: RandomUUID()}}},
+		2: {aggregateKey: RandomUUID()},
+		3: {composite: []TestCompositeModel{
+			{Head: RandomUUID(), Trunk: RandomUUID()},
+			{Head: RandomUUID(), Trunk: RandomUUID()}}},
+		4: {aggregateKey: RandomUUID()},
 	}
-	require.Len(t, db.event.Aggregatetuples, 1)
+
+	// Step 1
+	compositeToDone(t, db, out.CompositeTraintupleKeys[0], step[1].composite[0].Head, step[1].composite[0].Trunk)
+	assert.Len(t, db.event.Testtuples, 1)
+	assert.Equal(t, StatusTodo, db.event.Testtuples[0].Status)
+
+	AsOrgB(mockStub, compositeToDone)(t, db, out.CompositeTraintupleKeys[1], step[1].composite[1].Head, step[1].composite[1].Trunk)
+	assert.Len(t, db.event.Testtuples, 1)
+	assert.Len(t, db.event.Aggregatetuples, 1)
+	assert.Equal(t, StatusTodo, db.event.Testtuples[0].Status)
 	assert.Equal(t, StatusTodo, db.event.Aggregatetuples[0].Status)
 
-	_, err = logStartAggregate(db, assetToArgs(inputKey{out.AggregatetupleKeys[0]}))
-	assert.NoError(t, err)
+	assert.Len(t, db.event.ComputePlans, 0)
 
-	inpLogAgg := inputLogSuccessTrain{}
-	inpLogAgg.fillDefaults()
-	inpLogAgg.Key = out.AggregatetupleKeys[0]
-	agg, err := logSuccessAggregate(db, assetToArgs(inpLogAgg))
-	assert.NoError(t, err)
-	assert.Equal(t, StatusDone, agg.Status)
+	testtupleToDone(t, db, out.TesttupleKeys[0])
+	testtupleToDone(t, db, out.TesttupleKeys[1])
 
-	_, err = logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[2]}))
-	assert.NoError(t, err)
-	_, err = logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[3]}))
-	assert.NoError(t, err)
+	// Step 2
+	AsOrgC(mockStub, aggregateToDone)(t, db, out.AggregatetupleKeys[0], step[2].aggregateKey)
+	testtupleToDone(t, db, out.TesttupleKeys[2])
+	assert.Len(t, db.event.ComputePlans, 0)
 
-	db.event = &Event{}
-	inpLogCompo.Key = out.CompositeTraintupleKeys[2]
-	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
-	assert.NoError(t, err)
+	// Step 3
+	compositeToDone(t, db, out.CompositeTraintupleKeys[2], step[3].composite[0].Head, step[3].composite[0].Trunk)
+	assert.Len(t, db.event.Testtuples, 1)
+	assert.Equal(t, StatusTodo, db.event.Testtuples[0].Status)
+	assert.Len(t, db.event.ComputePlans, 1)
+	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 2)
+	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[1].composite[0].Head)
+	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[1].composite[0].Trunk)
 
-	inpLogCompo.Key = out.CompositeTraintupleKeys[3]
-	_, err = logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
-	assert.NoError(t, err)
-	assert.Len(t, db.event.Testtuples, 2)
-	for _, test := range db.event.Testtuples {
-		assert.Equalf(t, StatusTodo, test.Status, "blame it on %+v", test)
-	}
+	AsOrgB(mockStub, compositeToDone)(t, db, out.CompositeTraintupleKeys[3], step[3].composite[1].Head, step[3].composite[1].Trunk)
+	assert.Len(t, db.event.Testtuples, 1)
+	assert.Equal(t, StatusTodo, db.event.Testtuples[0].Status)
+	assert.Len(t, db.event.ComputePlans, 1)
+	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 2)
+	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[1].composite[1].Head)
+	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[1].composite[1].Trunk)
+
+	testtupleToDone(t, db, out.TesttupleKeys[3])
+	testtupleToDone(t, db, out.TesttupleKeys[4])
+
+	// Step 4
+	AsOrgC(mockStub, aggregateToDone)(t, db, out.AggregatetupleKeys[1], step[4].aggregateKey)
+	assert.Len(t, db.event.ComputePlans, 1)
+	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 1)
+	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[2].aggregateKey)
+
+	testtupleToDone(t, db, out.TesttupleKeys[5])
+	assert.Len(t, db.event.ComputePlans, 1)
+	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 5)
+	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[3].composite[0].Head)
+	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[3].composite[0].Trunk)
+	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[3].composite[1].Head)
+	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[3].composite[1].Trunk)
+	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[4].aggregateKey)
 }
 
 func validateTupleRank(t *testing.T, db *LedgerDB, expectedRank int, key string, assetType AssetType) {
@@ -651,6 +758,35 @@ func TestComputePlanMetrics(t *testing.T) {
 	checkComputePlanMetrics(t, db, out.Key, 3, 3)
 }
 
+func compositeToDone(t *testing.T, db *LedgerDB, key string, headModelKey string, trunkModelKey string) {
+	_, err := logStartCompositeTrain(db, assetToArgs(inputKey{key}))
+	assert.NoError(t, err)
+	clearEvent(db)
+
+	inpLogCompo := inputLogSuccessCompositeTrain{}
+	inpLogCompo.fillDefaults()
+	inpLogCompo.OutHeadModel.Key = headModelKey
+	inpLogCompo.OutTrunkModel.Key = trunkModelKey
+	inpLogCompo.Key = key
+	comp, err := logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
+	assert.NoError(t, err)
+	assert.Equal(t, StatusDone, comp.Status)
+}
+
+func aggregateToDone(t *testing.T, db *LedgerDB, key string, modelKey string) {
+	_, err := logStartAggregate(db, assetToArgs(inputKey{key}))
+	assert.NoError(t, err)
+	clearEvent(db)
+
+	inpLogAgg := inputLogSuccessTrain{}
+	inpLogAgg.fillDefaults()
+	inpLogAgg.OutModel.Key = modelKey
+	inpLogAgg.Key = key
+	agg, err := logSuccessAggregate(db, assetToArgs(inpLogAgg))
+	assert.NoError(t, err)
+	assert.Equal(t, StatusDone, agg.Status)
+}
+
 func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
 	_, err := logStartTrain(db, assetToArgs(inputKey{Key: key}))
 	assert.NoError(t, err)
@@ -658,11 +794,13 @@ func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
 
 	success := inputLogSuccessTrain{}
 	success.Key = key
+	success.OutModel.Key = RandomUUID()
 	success.OutModel.Checksum = GetRandomHash()
 	success.fillDefaults()
 	_, err = logSuccessTrain(db, assetToArgs(success))
 	assert.NoError(t, err)
 }
+
 func testtupleToDone(t *testing.T, db *LedgerDB, key string) {
 	_, err := logStartTest(db, assetToArgs(inputKey{Key: key}))
 	assert.NoError(t, err)
@@ -749,11 +887,9 @@ func TestCleanModels(t *testing.T) {
 	assert.Len(t, db.event.ComputePlans, 0)
 	clearEvent(db)
 
+	// No change in state or intermediary models to remove => no event
 	traintupleToDone(t, db, out.TraintupleKeys[0])
-	// Present in the event but without any model to remove
-	assert.Len(t, db.event.ComputePlans, 1)
-	assert.Equal(t, db.event.ComputePlans[0].Status, StatusDoing)
-	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 0)
+	assert.Len(t, db.event.ComputePlans, 0)
 	clearEvent(db)
 
 	traintupleToDone(t, db, out.TraintupleKeys[1])

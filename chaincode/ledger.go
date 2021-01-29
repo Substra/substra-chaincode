@@ -204,6 +204,7 @@ type Testtuple struct {
 
 // ComputePlan is the ledger's representation of a compute plan.
 type ComputePlan struct {
+	Key                     string               `json:"key"`
 	AggregatetupleKeys      []string             `json:"aggregatetuple_keys"`
 	AssetType               AssetType            `json:"asset_type"`
 	CleanModels             bool                 `json:"clean_models"` // whether or not to delete intermediary models
@@ -215,16 +216,22 @@ type ComputePlan struct {
 	Tag                     string               `json:"tag"`
 	TesttupleKeys           []string             `json:"testtuple_keys"`
 	TraintupleKeys          []string             `json:"traintuple_keys"`
+	Workers                 []string             `json:"workers"`
 }
 
 // ComputePlanState is the ledger's representation of the compute plan state.
 // To minimize the size of every compute plan, update its state record under another
 // key in the ledger. It will reduce the growing rate of the blockchain size.
 type ComputePlanState struct {
-	DoneCount               int      `json:"done_count"`
+	Status string `json:"status"`
+}
+
+// ComputePlanWorkerState contains state information for a given
+// compute plan and worker
+type ComputePlanWorkerState struct {
 	IntermediaryModelsInUse []string `json:"intermediary_models_in_use"`
-	Status                  string   `json:"status"`
-	TupleCount              int      `json:"tuple_count"`
+	DoneCount               int
+	TupleCount              int
 }
 
 // TrainTask is represent the information for one tuple in a Compute Plan

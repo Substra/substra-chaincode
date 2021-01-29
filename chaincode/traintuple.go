@@ -129,7 +129,10 @@ func (traintuple *Traintuple) AddToComputePlan(db *LedgerDB, inp inputTraintuple
 	if err != nil {
 		return err
 	}
-	computePlan.AddTuple(TraintupleType, traintupleKey, traintuple.Status)
+	err = computePlan.AddTuple(db, TraintupleType, traintupleKey, traintuple.Status, traintuple.Dataset.Worker)
+	if err != nil {
+		return err
+	}
 	err = computePlan.Save(db, traintuple.ComputePlanKey)
 	if err != nil {
 		return err
@@ -296,15 +299,17 @@ func logSuccessTrain(db *LedgerDB, args []string) (o outputTraintuple, err error
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, traintuple.ComputePlanKey, traintupleKey, traintuple.OutModel.Key)
-	if err != nil {
-		return
-	}
 
 	if err = validateTupleOwner(db, traintuple.Dataset.Worker); err != nil {
 		return
 	}
+
 	if err = traintuple.commitStatusUpdate(db, traintupleKey, status); err != nil {
+		return
+	}
+
+	err = TryAddIntermediaryModel(db, traintuple.ComputePlanKey, traintuple.Dataset.Worker, traintupleKey, traintuple.OutModel.Key)
+	if err != nil {
 		return
 	}
 
@@ -607,7 +612,7 @@ func (traintuple *Traintuple) commitStatusUpdate(db *LedgerDB, traintupleKey str
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
-	if err := UpdateComputePlanState(db, traintuple.ComputePlanKey, newStatus, traintupleKey); err != nil {
+	if err := UpdateComputePlanState(db, traintuple.ComputePlanKey, newStatus, traintupleKey, traintuple.Dataset.Worker); err != nil {
 		return err
 	}
 	logger.Infof("traintuple %s status updated: %s (from=%s)", traintupleKey, newStatus, oldStatus)

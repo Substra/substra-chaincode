@@ -227,7 +227,7 @@ func (stub *MockStub) GetState(key string) ([]byte, error) {
 // PutState writes the specified `value` and `key` into the ledger.
 func (stub *MockStub) PutState(key string, value []byte) error {
 	if stub.TxID == "" {
-		err := errors.New("cannot PutState without a transactions - call stub.MockTransactionStart()?")
+		err := errors.New("cannot PutState without a transaction - call stub.MockTransactionStart()?")
 		return err
 	}
 

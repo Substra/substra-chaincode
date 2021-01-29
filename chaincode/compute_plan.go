@@ -148,7 +148,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string, m
 		len(inp.CompositeTraintuples) +
 		len(inp.Testtuples)
 	if count == 0 {
-		resp.Fill(inp.Key, computePlan, []string{})
+		resp.Fill(inp.Key, computePlan, []string{}, ComputePlanWorkerState{})
 		return resp, nil
 	}
 	return updateComputePlanInternal(db, inp)
@@ -248,7 +248,12 @@ func updateComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 	if err != nil {
 		return resp, err
 	}
-	resp.Fill(inp.Key, computePlan, NewIDs)
+	count, err := computePlan.getTotalCount(db)
+	if err != nil {
+		return resp, err
+	}
+
+	resp.Fill(inp.Key, computePlan, NewIDs, count)
 	return resp, err
 }
 
@@ -303,7 +308,12 @@ func getOutComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err er
 		return resp, err
 	}
 
-	resp.Fill(key, computePlan, []string{})
+	count, err := computePlan.getTotalCount(db)
+	if err != nil {
+		return resp, err
+	}
+
+	resp.Fill(key, computePlan, []string{}, count)
 	return resp, err
 }
 
@@ -324,18 +334,25 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 		return outputComputePlan{}, err
 	}
 
-	err = db.AddComputePlanEvent(inp.Key, computeplan.State.Status, computeplan.State.IntermediaryModelsInUse)
+	err = db.AddComputePlanEvent(inp.Key, computeplan.State.Status, []string{}) // TODO
 	if err != nil {
 		return outputComputePlan{}, err
 	}
-	resp.Fill(inp.Key, computeplan, []string{})
+
+	count, err := computeplan.getTotalCount(db)
+	if err != nil {
+		return resp, err
+	}
+	resp.Fill(inp.Key, computeplan, []string{}, count)
 	return resp, nil
 }
 
 // Create adds a Compute Plan to the ledger and registers it in the compute plan index
 func (cp *ComputePlan) Create(db *LedgerDB, key string) error {
+	cp.Key = key
 	cp.StateKey = GetRandomHash()
 	cp.AssetType = ComputePlanType
+	cp.Workers = []string{}
 	err := db.Add(key, cp)
 	if err != nil {
 		return err
@@ -367,46 +384,61 @@ func (cp *ComputePlan) SaveState(db *LedgerDB) error {
 // UpdateState check the tuple status (from an updated tuple or a new one)
 // and, if required, it updates the compute plan' status and/or its doneCount.
 // It returns true if there is any change to the compute plan, false otherwise.
-func (cp *ComputePlan) UpdateState(tupleStatus string) bool {
+func (cp *ComputePlan) UpdateState(db *LedgerDB, tupleStatus string, tupleWorker string) (bool, []string, error) {
 	switch cp.State.Status {
 	case StatusFailed, StatusCanceled:
 	case StatusDone:
 		// We might add tuples to a done compute plan
 		if stringInSlice(tupleStatus, []string{StatusWaiting, StatusTodo}) {
 			cp.State.Status = tupleStatus
-			return true
+			return true, []string{}, nil
 		}
 	case StatusDoing:
 		switch tupleStatus {
 		case StatusFailed:
 			cp.State.Status = tupleStatus
-			return true
+			return true, []string{}, nil
 		case StatusDone:
-			cp.State.DoneCount++
-			if cp.State.DoneCount == cp.State.TupleCount {
-				cp.State.Status = tupleStatus
+			cp.incrementDoneCount(db, tupleWorker)
+			counts, err := cp.getWorkerCount(db, tupleWorker)
+			if err != nil {
+				return false, []string{}, err
 			}
-			return true
+			if counts.DoneCount == counts.TupleCount {
+				count, err := cp.getTotalCount(db)
+				if err != nil {
+					return false, []string{}, err
+				}
+				if count.TupleCount == count.DoneCount {
+					cp.State.Status = StatusDone
+					modelsToDelete, err := removeAllIntermediaryModels(db, cp)
+					if err != nil {
+						return false, []string{}, err
+					}
+					return true, modelsToDelete, nil
+				}
+			}
+			return false, []string{}, nil
 		}
 	case StatusTodo:
 		if tupleStatus == StatusDoing {
 			cp.State.Status = tupleStatus
-			return true
+			return true, []string{}, nil
 		}
 	case StatusWaiting:
 		if tupleStatus == StatusTodo {
 			cp.State.Status = tupleStatus
-			return true
+			return true, []string{}, nil
 		}
 	case "":
 		cp.State.Status = tupleStatus
-		return true
+		return true, []string{}, nil
 	}
-	return false
+	return false, []string{}, nil
 }
 
 // AddTuple add the tuple key to the compute plan and update it accordingly
-func (cp *ComputePlan) AddTuple(tupleType AssetType, key, status string) {
+func (cp *ComputePlan) AddTuple(db *LedgerDB, tupleType AssetType, key, status string, worker string) error {
 	switch tupleType {
 	case TraintupleType:
 		cp.TraintupleKeys = append(cp.TraintupleKeys, key)
@@ -417,13 +449,14 @@ func (cp *ComputePlan) AddTuple(tupleType AssetType, key, status string) {
 	case TesttupleType:
 		cp.TesttupleKeys = append(cp.TesttupleKeys, key)
 	}
-	cp.State.TupleCount++
-	cp.UpdateState(status)
+	cp.incrementTupleCount(db, worker)
+	_, _, err := cp.UpdateState(db, status, worker)
+	return err
 }
 
 // UpdateComputePlanState retreive the compute plan if the ID is not empty,
 // check if the updated status change anything and save it if it's the case
-func UpdateComputePlanState(db *LedgerDB, ComputePlanKey, tupleStatus, tupleKey string) error {
+func UpdateComputePlanState(db *LedgerDB, ComputePlanKey, tupleStatus, tupleKey string, tupleWorker string) error {
 	if ComputePlanKey == "" {
 		return nil
 	}
@@ -431,17 +464,16 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanKey, tupleStatus, tupleKey 
 	if err != nil {
 		return err
 	}
-	stateUpdated := cp.UpdateState(tupleStatus)
-	doneModels := []string{}
-	if tupleStatus == StatusDone && cp.CleanModels {
-		doneModels, err = cp.UpdateIntermediaryModelsInuse(db)
+	stateUpdated, modelsToDelete, err := cp.UpdateState(db, tupleStatus, tupleWorker)
+	if err != nil {
+		return err
 	}
 
 	if err != nil {
 		return err
 	}
-	if stateUpdated || len(doneModels) != 0 {
-		err = db.AddComputePlanEvent(ComputePlanKey, cp.State.Status, doneModels)
+	if stateUpdated || len(modelsToDelete) > 0 {
+		err = db.AddComputePlanEvent(ComputePlanKey, cp.State.Status, modelsToDelete)
 		if err != nil {
 			return err
 		}
@@ -450,79 +482,14 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanKey, tupleStatus, tupleKey 
 	return nil
 }
 
-// TryAddIntermediaryModel will reference the model key if the compute plan key
-// is not empty and if it's an intermediary model meaning without any children
-func TryAddIntermediaryModel(db *LedgerDB, ComputePlanKey, tupleKey, modelKey string) error {
-	if ComputePlanKey == "" {
-		return nil
-	}
-	cp, err := db.GetComputePlan(ComputePlanKey)
+func getTupleChildren(db *LedgerDB, tupleKey string) ([]string, error) {
+	tupleChildrenKeys, err := db.GetIndexKeys("tuple~inModel~key", []string{"tuple", tupleKey})
 	if err != nil {
-		return err
+		return []string{}, err
 	}
-	if !cp.CleanModels {
-		return nil
-	}
-	allChildKeys, err := db.GetIndexKeys("tuple~inModel~key", []string{"tuple", tupleKey})
+	testtupleChildrenKeys, err := db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", tupleKey})
 	if err != nil {
-		return err
+		return []string{}, err
 	}
-	if len(allChildKeys) == 0 {
-		// If a tuple has no children it's considered final and should not be
-		// listed in the index
-		return nil
-	}
-	cp.State.IntermediaryModelsInUse = append(cp.State.IntermediaryModelsInUse, modelKey)
-
-	return cp.SaveState(db)
-}
-
-// UpdateIntermediaryModelsInuse check all models listed as intermediary. If any of
-// them are 'done', meaning that there is no train like tuples or testtuples
-// planned to use this model. If that the case its key will be added to the
-// returned slice and remove from the compute plan's one.
-func (cp *ComputePlan) UpdateIntermediaryModelsInuse(db *LedgerDB) ([]string, error) {
-	if !cp.CleanModels {
-		return []string{}, nil
-	}
-	var doneModels, inUseModels []string
-	for _, modelKey := range cp.State.IntermediaryModelsInUse {
-		done := true
-		keys, err := db.GetIndexKeys("tuple~modelKey~key", []string{"tuple", modelKey})
-		if err != nil {
-			return []string{}, err
-		}
-		if len(keys) == 0 {
-			// This occurs for the keys added during the same transaction. But
-			// thoses models can just be added to the in use ones
-			inUseModels = append(inUseModels, modelKey)
-			continue
-		}
-		tupleKey := keys[0]
-		tupleChildKeys, err := db.GetIndexKeys("tuple~inModel~key", []string{"tuple", tupleKey})
-		if err != nil {
-			return []string{}, err
-		}
-		testtupleKeys, err := db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", tupleKey})
-		if err != nil {
-			return []string{}, err
-		}
-		allKeys := append(tupleChildKeys, testtupleKeys...)
-		for _, key := range allKeys {
-			tuple, err := db.GetGenericTuple(key)
-			if err != nil {
-				return []string{}, err
-			}
-			if tuple.Status != StatusDone {
-				inUseModels = append(inUseModels, modelKey)
-				done = false
-				break
-			}
-		}
-		if done {
-			doneModels = append(doneModels, modelKey)
-		}
-	}
-	cp.State.IntermediaryModelsInUse = inUseModels
-	return doneModels, nil
+	return append(tupleChildrenKeys, testtupleChildrenKeys...), nil
 }
