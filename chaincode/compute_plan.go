@@ -148,7 +148,7 @@ func createComputePlanInternal(db *LedgerDB, inp inputComputePlan, tag string, m
 		len(inp.CompositeTraintuples) +
 		len(inp.Testtuples)
 	if count == 0 {
-		resp.Fill(inp.Key, computePlan, []string{}, ComputePlanWorkerState{})
+		resp.Fill(inp.Key, computePlan, []string{}, 0, 0)
 		return resp, nil
 	}
 	return updateComputePlanInternal(db, inp)
@@ -248,12 +248,12 @@ func updateComputePlanInternal(db *LedgerDB, inp inputComputePlan) (resp outputC
 	if err != nil {
 		return resp, err
 	}
-	count, err := computePlan.getTotalCount(db)
+	doneCount, tupleCount, err := computePlan.getTotalCount(db)
 	if err != nil {
 		return resp, err
 	}
 
-	resp.Fill(inp.Key, computePlan, NewIDs, count)
+	resp.Fill(inp.Key, computePlan, NewIDs, doneCount, tupleCount)
 	return resp, err
 }
 
@@ -308,12 +308,12 @@ func getOutComputePlan(db *LedgerDB, key string) (resp outputComputePlan, err er
 		return resp, err
 	}
 
-	count, err := computePlan.getTotalCount(db)
+	doneCount, tupleCount, err := computePlan.getTotalCount(db)
 	if err != nil {
 		return resp, err
 	}
 
-	resp.Fill(key, computePlan, []string{}, count)
+	resp.Fill(key, computePlan, []string{}, doneCount, tupleCount)
 	return resp, err
 }
 
@@ -339,11 +339,11 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 		return outputComputePlan{}, err
 	}
 
-	count, err := computeplan.getTotalCount(db)
+	doneCount, tupleCount, err := computeplan.getTotalCount(db)
 	if err != nil {
 		return resp, err
 	}
-	resp.Fill(inp.Key, computeplan, []string{}, count)
+	resp.Fill(inp.Key, computeplan, []string{}, doneCount, tupleCount)
 	return resp, nil
 }
 
@@ -384,7 +384,7 @@ func (cp *ComputePlan) SaveState(db *LedgerDB) error {
 // UpdateState check the tuple status (from an updated tuple or a new one)
 // and, if required, it updates the compute plan' status and/or its doneCount.
 // It returns true if there is any change to the compute plan, false otherwise.
-func (cp *ComputePlan) UpdateState(db *LedgerDB, tupleStatus string, tupleWorker string) (bool, []string, error) {
+func (cp *ComputePlan) UpdateState(db *LedgerDB, tupleStatus string, worker string) (bool, []string, error) {
 	switch cp.State.Status {
 	case StatusFailed, StatusCanceled:
 	case StatusDone:
@@ -399,17 +399,18 @@ func (cp *ComputePlan) UpdateState(db *LedgerDB, tupleStatus string, tupleWorker
 			cp.State.Status = tupleStatus
 			return true, []string{}, nil
 		case StatusDone:
-			cp.incrementDoneCount(db, tupleWorker)
-			counts, err := cp.getWorkerCount(db, tupleWorker)
+			cp.incrementDoneCount(db, worker)
+			wStateKey := cp.getCPWorkerStateKey(worker)
+			wState, err := getCPWorkerState(db, wStateKey, worker)
 			if err != nil {
 				return false, []string{}, err
 			}
-			if counts.DoneCount == counts.TupleCount {
-				count, err := cp.getTotalCount(db)
+			if wState.DoneCount == wState.TupleCount {
+				doneCount, tupleCount, err := cp.getTotalCount(db)
 				if err != nil {
 					return false, []string{}, err
 				}
-				if count.TupleCount == count.DoneCount {
+				if doneCount == tupleCount {
 					cp.State.Status = StatusDone
 					modelsToDelete, err := removeAllIntermediaryModels(db, cp)
 					if err != nil {
@@ -482,10 +483,13 @@ func UpdateComputePlanState(db *LedgerDB, ComputePlanKey, tupleStatus, tupleKey 
 	return nil
 }
 
-func getTupleChildren(db *LedgerDB, tupleKey string) ([]string, error) {
+func getTupleChildren(db *LedgerDB, tupleKey string, includeTesttuples bool) ([]string, error) {
 	tupleChildrenKeys, err := db.GetIndexKeys("tuple~inModel~key", []string{"tuple", tupleKey})
 	if err != nil {
 		return []string{}, err
+	}
+	if !includeTesttuples {
+		return tupleChildrenKeys, nil
 	}
 	testtupleChildrenKeys, err := db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", tupleKey})
 	if err != nil {

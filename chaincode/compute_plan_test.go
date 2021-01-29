@@ -191,75 +191,9 @@ var (
 	}
 )
 
-type TestModels struct {
-	composite    []TestCompositeModel
-	aggregateKey string
-}
-
-type TestCompositeModel struct {
-	Head  string
-	Trunk string
-}
-
-func registerTestDataManager(t *testing.T, mockStub *MockStub, key string, datasampleKeys ...string) {
-	inpDataManager := inputDataManager{Key: key}
-	args := inpDataManager.createDefault()
-	resp := mockStub.MockInvoke(args)
-	require.EqualValuesf(t, 200, resp.Status, "when adding dataManager with status %d and message %s", resp.Status, resp.Message)
-
-	inpDataSample := inputDataSample{
-		Keys:            datasampleKeys,
-		DataManagerKeys: []string{key},
-		TestOnly:        "false",
-	}
-	args = inpDataSample.createDefault()
-	resp = mockStub.MockInvoke(args)
-	require.EqualValuesf(t, 200, resp.Status, "when adding test dataSample with status %d and message %s", resp.Status, resp.Message)
-}
-
-type CompositeToDoneFunc func(*testing.T, *LedgerDB, string, string, string)
-type AggregateToDoneFunc func(*testing.T, *LedgerDB, string, string)
-
-// this is your decorator.
-func AsOrgB(mockStub *MockStub, m CompositeToDoneFunc) CompositeToDoneFunc {
-	return func(t *testing.T, db *LedgerDB, key string, headModelKey string, trunkModelKey string) {
-		savedCreator := mockStub.Creator
-		mockStub.Creator = workerB
-		m(t, db, key, headModelKey, trunkModelKey)
-		mockStub.Creator = savedCreator
-	}
-}
-
-// this is your decorator.
-func AsOrgC(mockStub *MockStub, m AggregateToDoneFunc) AggregateToDoneFunc {
-	return func(t *testing.T, db *LedgerDB, key string, modelKey string) {
-		savedCreator := mockStub.Creator
-		mockStub.Creator = workerC
-		m(t, db, key, modelKey)
-		mockStub.Creator = savedCreator
-	}
-}
-
-func registerWorker(mockStub *MockStub, worker string) {
-	savedCreator := mockStub.Creator
-	mockStub.Creator = worker
-	mockStub.MockInvoke([][]byte{[]byte("registerNode")})
-	mockStub.Creator = savedCreator
-}
-
 func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStub("substra", scc)
-	registerWorker(mockStub, worker)
-	registerWorker(mockStub, workerB)
-	registerWorker(mockStub, workerC)
-	registerItem(t, *mockStub, "aggregateAlgo")
-
-	// Add data manager and data samples for node B
-	savedCreator := mockStub.Creator
-	mockStub.Creator = workerB
-	registerTestDataManager(t, mockStub, dataManagerKey2, trainDataSampleKeyWorker2)
-	mockStub.Creator = savedCreator
+	mockStub := getMockStubForModelComposition(t, scc)
 
 	// hack to be able to access internal functions directly
 	mockStub.MockTransactionStart("42")
@@ -339,30 +273,11 @@ func TestModelCompositionComputePlanWorkflow(t *testing.T) {
 
 	testtupleToDone(t, db, out.TesttupleKeys[5])
 	assert.Len(t, db.event.ComputePlans, 1)
-	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 5)
+	assert.Len(t, db.event.ComputePlans[0].ModelsToDelete, 4)
 	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[3].composite[0].Head)
 	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[3].composite[0].Trunk)
 	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[3].composite[1].Head)
 	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[3].composite[1].Trunk)
-	assert.Contains(t, db.event.ComputePlans[0].ModelsToDelete, step[4].aggregateKey)
-}
-
-func validateTupleRank(t *testing.T, db *LedgerDB, expectedRank int, key string, assetType AssetType) {
-	inp := inputKey{Key: key}
-	rank := -42
-	switch assetType {
-	case CompositeTraintupleType:
-		tuple, err := queryCompositeTraintuple(db, assetToArgs(inp))
-		assert.NoError(t, err)
-		rank = tuple.Rank
-	case AggregatetupleType:
-		tuple, err := queryAggregatetuple(db, assetToArgs(inp))
-		assert.NoError(t, err)
-		rank = tuple.Rank
-	default:
-		t.Errorf("not implemented: %s", assetType)
-	}
-	assert.Equal(t, expectedRank, rank, "Rank for tuple of type %v with key \"%s\" should be %d", assetType, key, expectedRank)
 }
 
 func TestCreateComputePlanCompositeAggregate(t *testing.T) {
@@ -543,17 +458,6 @@ func TestQueryComputePlans(t *testing.T) {
 	validateDefaultComputePlan(t, cps[0])
 }
 
-func validateDefaultComputePlan(t *testing.T, cp outputComputePlan) {
-	assert.Equal(t, tag, cp.Tag)
-	assert.Len(t, cp.TraintupleKeys, 2)
-
-	assert.NotEmpty(t, cp.TraintupleKeys[0])
-	assert.NotEmpty(t, cp.TraintupleKeys[1])
-
-	require.Len(t, cp.TesttupleKeys, 1)
-	assert.NotEmpty(t, cp.TesttupleKeys[0])
-}
-
 func TestComputePlanEmptyTesttuples(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
@@ -621,10 +525,8 @@ func TestCancelComputePlan(t *testing.T) {
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 
-	out, err := createComputePlanInternal(db, modelCompositionComputePlan, tag, map[string]string{}, false)
+	out, err := createComputePlanInternal(db, defaultComputePlan, tag, map[string]string{}, false)
 	assert.NoError(t, err)
-	assert.NotNil(t, db.event)
-	assert.Len(t, db.event.CompositeTraintuples, 2)
 
 	_, err = cancelComputePlan(db, assetToArgs(inputKey{Key: out.Key}))
 	assert.NoError(t, err)
@@ -632,7 +534,7 @@ func TestCancelComputePlan(t *testing.T) {
 	computePlan, err := getOutComputePlan(db, out.Key)
 	assert.Equal(t, StatusCanceled, computePlan.Status)
 
-	tuples, _, err := queryCompositeTraintuples(db, []string{})
+	tuples, _, err := queryTraintuples(db, []string{})
 	assert.NoError(t, err)
 
 	nbAborted, nbTodo := 0, 0
@@ -645,8 +547,8 @@ func TestCancelComputePlan(t *testing.T) {
 		}
 	}
 
-	assert.Equal(t, nbAborted, 2)
-	assert.Equal(t, nbTodo, 2)
+	assert.Equal(t, nbAborted, 1)
+	assert.Equal(t, nbTodo, 1)
 
 	tests, _, err := queryTesttuples(db, []string{})
 	assert.NoError(t, err)
@@ -657,8 +559,7 @@ func TestCancelComputePlan(t *testing.T) {
 
 func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	registerItem(t, *mockStub, "aggregateAlgo")
+	mockStub := getMockStubForModelComposition(t, scc)
 
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
@@ -689,8 +590,7 @@ func TestStartedTuplesOfCanceledComputePlan(t *testing.T) {
 
 func TestLogSuccessAfterCancel(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	registerItem(t, *mockStub, "aggregateAlgo")
+	mockStub := getMockStubForModelComposition(t, scc)
 
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
@@ -699,7 +599,10 @@ func TestLogSuccessAfterCancel(t *testing.T) {
 	assert.NoError(t, err)
 
 	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[0]}))
+
+	mockStub.Creator = workerB // log start as org B
 	logStartCompositeTrain(db, assetToArgs(inputKey{out.CompositeTraintupleKeys[1]}))
+	mockStub.Creator = worker
 
 	_, err = cancelComputePlan(db, assetToArgs(inputKey{Key: out.Key}))
 	assert.NoError(t, err)
@@ -707,7 +610,11 @@ func TestLogSuccessAfterCancel(t *testing.T) {
 	inp := inputLogSuccessCompositeTrain{}
 	inp.fillDefaults()
 	inp.Key = out.CompositeTraintupleKeys[1]
+
+	mockStub.Creator = workerB // log success as org B
 	_, err = logSuccessCompositeTrain(db, assetToArgs(inp))
+	mockStub.Creator = worker
+
 	assert.NoError(t, err)
 
 	computePlan, err := getOutComputePlan(db, out.Key)
@@ -758,68 +665,6 @@ func TestComputePlanMetrics(t *testing.T) {
 	checkComputePlanMetrics(t, db, out.Key, 3, 3)
 }
 
-func compositeToDone(t *testing.T, db *LedgerDB, key string, headModelKey string, trunkModelKey string) {
-	_, err := logStartCompositeTrain(db, assetToArgs(inputKey{key}))
-	assert.NoError(t, err)
-	clearEvent(db)
-
-	inpLogCompo := inputLogSuccessCompositeTrain{}
-	inpLogCompo.fillDefaults()
-	inpLogCompo.OutHeadModel.Key = headModelKey
-	inpLogCompo.OutTrunkModel.Key = trunkModelKey
-	inpLogCompo.Key = key
-	comp, err := logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
-	assert.NoError(t, err)
-	assert.Equal(t, StatusDone, comp.Status)
-}
-
-func aggregateToDone(t *testing.T, db *LedgerDB, key string, modelKey string) {
-	_, err := logStartAggregate(db, assetToArgs(inputKey{key}))
-	assert.NoError(t, err)
-	clearEvent(db)
-
-	inpLogAgg := inputLogSuccessTrain{}
-	inpLogAgg.fillDefaults()
-	inpLogAgg.OutModel.Key = modelKey
-	inpLogAgg.Key = key
-	agg, err := logSuccessAggregate(db, assetToArgs(inpLogAgg))
-	assert.NoError(t, err)
-	assert.Equal(t, StatusDone, agg.Status)
-}
-
-func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
-	_, err := logStartTrain(db, assetToArgs(inputKey{Key: key}))
-	assert.NoError(t, err)
-	clearEvent(db)
-
-	success := inputLogSuccessTrain{}
-	success.Key = key
-	success.OutModel.Key = RandomUUID()
-	success.OutModel.Checksum = GetRandomHash()
-	success.fillDefaults()
-	_, err = logSuccessTrain(db, assetToArgs(success))
-	assert.NoError(t, err)
-}
-
-func testtupleToDone(t *testing.T, db *LedgerDB, key string) {
-	_, err := logStartTest(db, assetToArgs(inputKey{Key: key}))
-	assert.NoError(t, err)
-	clearEvent(db)
-
-	success := inputLogSuccessTest{}
-	success.Key = key
-	success.createDefault()
-	_, err = logSuccessTest(db, assetToArgs(success))
-	assert.NoError(t, err)
-}
-
-func checkComputePlanMetrics(t *testing.T, db *LedgerDB, cpKey string, doneCount, tupleCount int) {
-	out, err := getOutComputePlan(db, cpKey)
-	assert.NoError(t, err)
-	assert.Equal(t, doneCount, out.DoneCount)
-	assert.Equal(t, tupleCount, out.TupleCount)
-}
-
 func TestUpdateComputePlan(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStubWithRegisterNode("substra", scc)
@@ -863,15 +708,6 @@ func TestUpdateComputePlan(t *testing.T) {
 		1,
 		"IDToKey should match the newly created tuple keys to its ID")
 	assert.Equal(t, 4, out.TupleCount)
-}
-
-// When the smart contracts are called directly the event object is never reset
-// so we need to empty it by hand after each transaction when testing the event content
-func clearEvent(db *LedgerDB) {
-	if db.event == nil {
-		return
-	}
-	*(db.event) = Event{}
 }
 
 func TestCleanModels(t *testing.T) {
@@ -968,4 +804,181 @@ func TestCreateSameComputePlanTwice(t *testing.T) {
 	inp.Key = out.Key
 	out, err = updateComputePlanInternal(db, inp)
 	assert.NoError(t, err)
+}
+
+/////////////////////////////////
+//                             //
+// Helper types and functions  //
+//                             //
+/////////////////////////////////
+
+type TestModels struct {
+	composite    []TestCompositeModel
+	aggregateKey string
+}
+
+type TestCompositeModel struct {
+	Head  string
+	Trunk string
+}
+
+type CompositeToDoneFunc func(*testing.T, *LedgerDB, string, string, string)
+type AggregateToDoneFunc func(*testing.T, *LedgerDB, string, string)
+
+func getMockStubForModelComposition(t *testing.T, scc *SubstraChaincode) *MockStub {
+	mockStub := NewMockStub("substra", scc)
+	registerWorker(mockStub, worker)
+	registerWorker(mockStub, workerB)
+	registerWorker(mockStub, workerC)
+	registerItem(t, *mockStub, "aggregateAlgo")
+
+	// Add data manager and data samples for node B
+	savedCreator := mockStub.Creator
+	mockStub.Creator = workerB
+	registerTestDataManager(t, mockStub, dataManagerKey2, trainDataSampleKeyWorker2)
+	mockStub.Creator = savedCreator
+	return mockStub
+}
+
+func registerTestDataManager(t *testing.T, mockStub *MockStub, key string, datasampleKeys ...string) {
+	inpDataManager := inputDataManager{Key: key}
+	args := inpDataManager.createDefault()
+	resp := mockStub.MockInvoke(args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding dataManager with status %d and message %s", resp.Status, resp.Message)
+
+	inpDataSample := inputDataSample{
+		Keys:            datasampleKeys,
+		DataManagerKeys: []string{key},
+		TestOnly:        "false",
+	}
+	args = inpDataSample.createDefault()
+	resp = mockStub.MockInvoke(args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding test dataSample with status %d and message %s", resp.Status, resp.Message)
+}
+
+// this is your decorator.
+func AsOrgB(mockStub *MockStub, m CompositeToDoneFunc) CompositeToDoneFunc {
+	return func(t *testing.T, db *LedgerDB, key string, headModelKey string, trunkModelKey string) {
+		savedCreator := mockStub.Creator
+		mockStub.Creator = workerB
+		m(t, db, key, headModelKey, trunkModelKey)
+		mockStub.Creator = savedCreator
+	}
+}
+
+// this is your decorator.
+func AsOrgC(mockStub *MockStub, m AggregateToDoneFunc) AggregateToDoneFunc {
+	return func(t *testing.T, db *LedgerDB, key string, modelKey string) {
+		savedCreator := mockStub.Creator
+		mockStub.Creator = workerC
+		m(t, db, key, modelKey)
+		mockStub.Creator = savedCreator
+	}
+}
+
+func registerWorker(mockStub *MockStub, worker string) {
+	savedCreator := mockStub.Creator
+	mockStub.Creator = worker
+	mockStub.MockInvoke([][]byte{[]byte("registerNode")})
+	mockStub.Creator = savedCreator
+}
+
+func validateTupleRank(t *testing.T, db *LedgerDB, expectedRank int, key string, assetType AssetType) {
+	inp := inputKey{Key: key}
+	rank := -42
+	switch assetType {
+	case CompositeTraintupleType:
+		tuple, err := queryCompositeTraintuple(db, assetToArgs(inp))
+		assert.NoError(t, err)
+		rank = tuple.Rank
+	case AggregatetupleType:
+		tuple, err := queryAggregatetuple(db, assetToArgs(inp))
+		assert.NoError(t, err)
+		rank = tuple.Rank
+	default:
+		t.Errorf("not implemented: %s", assetType)
+	}
+	assert.Equal(t, expectedRank, rank, "Rank for tuple of type %v with key \"%s\" should be %d", assetType, key, expectedRank)
+}
+
+func validateDefaultComputePlan(t *testing.T, cp outputComputePlan) {
+	assert.Equal(t, tag, cp.Tag)
+	assert.Len(t, cp.TraintupleKeys, 2)
+
+	assert.NotEmpty(t, cp.TraintupleKeys[0])
+	assert.NotEmpty(t, cp.TraintupleKeys[1])
+
+	require.Len(t, cp.TesttupleKeys, 1)
+	assert.NotEmpty(t, cp.TesttupleKeys[0])
+}
+
+// When the smart contracts are called directly the event object is never reset
+// so we need to empty it by hand after each transaction when testing the event content
+func clearEvent(db *LedgerDB) {
+	if db.event == nil {
+		return
+	}
+	*(db.event) = Event{}
+}
+
+func compositeToDone(t *testing.T, db *LedgerDB, key string, headModelKey string, trunkModelKey string) {
+	_, err := logStartCompositeTrain(db, assetToArgs(inputKey{key}))
+	assert.NoError(t, err)
+	clearEvent(db)
+
+	inpLogCompo := inputLogSuccessCompositeTrain{}
+	inpLogCompo.fillDefaults()
+	inpLogCompo.OutHeadModel.Key = headModelKey
+	inpLogCompo.OutTrunkModel.Key = trunkModelKey
+	inpLogCompo.Key = key
+	comp, err := logSuccessCompositeTrain(db, assetToArgs(inpLogCompo))
+	assert.NoError(t, err)
+	assert.Equal(t, StatusDone, comp.Status)
+}
+
+func aggregateToDone(t *testing.T, db *LedgerDB, key string, modelKey string) {
+	_, err := logStartAggregate(db, assetToArgs(inputKey{key}))
+	assert.NoError(t, err)
+	clearEvent(db)
+
+	inpLogAgg := inputLogSuccessTrain{}
+	inpLogAgg.fillDefaults()
+	inpLogAgg.OutModel.Key = modelKey
+	inpLogAgg.Key = key
+	agg, err := logSuccessAggregate(db, assetToArgs(inpLogAgg))
+	assert.NoError(t, err)
+	assert.Equal(t, StatusDone, agg.Status)
+}
+
+func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
+	_, err := logStartTrain(db, assetToArgs(inputKey{Key: key}))
+	assert.NoError(t, err)
+	clearEvent(db)
+
+	success := inputLogSuccessTrain{}
+	success.Key = key
+	success.OutModel.Key = RandomUUID()
+	success.OutModel.Checksum = GetRandomHash()
+	success.fillDefaults()
+	_, err = logSuccessTrain(db, assetToArgs(success))
+	assert.NoError(t, err)
+}
+
+func testtupleToDone(t *testing.T, db *LedgerDB, key string) {
+	_, err := logStartTest(db, assetToArgs(inputKey{Key: key}))
+	assert.NoError(t, err)
+	clearEvent(db)
+
+	success := inputLogSuccessTest{}
+	success.Key = key
+	success.createDefault()
+	_, err = logSuccessTest(db, assetToArgs(success))
+	assert.NoError(t, err)
+}
+
+func checkComputePlanMetrics(t *testing.T, db *LedgerDB, cpKey string, doneCount, tupleCount int) {
+	out, err := getOutComputePlan(db, cpKey)
+	assert.NoError(t, err)
+	assert.Equal(t, doneCount, out.DoneCount)
+	assert.Equal(t, tupleCount, out.TupleCount)
 }

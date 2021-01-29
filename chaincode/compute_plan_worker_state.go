@@ -37,10 +37,10 @@ func TryAddIntermediaryModel(db *LedgerDB, ComputePlanKey, worker, tupleKey, mod
 	wState.IntermediaryModelsInUse = modelsUsed
 
 	if len(modelsUnused) != 0 {
-		db.AddComputePlanEvent(ComputePlanKey, cp.State.Status, modelsUnused)
+		db.AddComputePlanEvent(cp.Key, cp.State.Status, modelsUnused)
 	}
 
-	children, err := getTupleChildren(db, tupleKey)
+	children, err := getTupleChildren(db, tupleKey, false)
 	if err != nil {
 		return err
 	}
@@ -56,66 +56,54 @@ func TryAddIntermediaryModel(db *LedgerDB, ComputePlanKey, worker, tupleKey, mod
 
 // incrementDoneCount increases the count of tuples in the "done" state for
 // a given compute plan and worker
-func (cp *ComputePlan) incrementDoneCount(db *LedgerDB, tupleWorker string) error {
-	key := cp.getCPWorkerStateKey(tupleWorker)
-	count := ComputePlanWorkerState{}
-	err := db.Get(key, &count)
+func (cp *ComputePlan) incrementDoneCount(db *LedgerDB, worker string) error {
+	wStateKey := cp.getCPWorkerStateKey(worker)
+	wState, err := getCPWorkerState(db, wStateKey, worker)
 	if err != nil {
-		return err
+		return nil
 	}
-	count.DoneCount++
-	return db.Put(key, count)
+	wState.DoneCount++
+	return db.Put(wStateKey, wState)
 }
 
 // incrementTupleCount increases the total number of tuples for
 // a given compute plan and worker
-func (cp *ComputePlan) incrementTupleCount(db *LedgerDB, tupleWorker string) error {
+func (cp *ComputePlan) incrementTupleCount(db *LedgerDB, worker string) error {
 
 	// Add the worker to the list of workers, if missing
 	found := false
-	for _, worker := range cp.Workers {
-		if worker == tupleWorker {
+	for _, w := range cp.Workers {
+		if w == worker {
 			found = true
 			break
 		}
 	}
 	if !found {
-		cp.Workers = append(cp.Workers, tupleWorker)
+		cp.Workers = append(cp.Workers, worker)
 	}
 
 	// Create or update the done count
-	key := cp.getCPWorkerStateKey(tupleWorker)
-	count := ComputePlanWorkerState{}
-	err := db.Get(key, &count)
-
+	wStateKey := cp.getCPWorkerStateKey(worker)
+	wState, err := getCPWorkerState(db, wStateKey, worker)
 	if err != nil {
-		return db.Add(key, ComputePlanWorkerState{TupleCount: 1})
+		return db.Add(wStateKey, ComputePlanWorkerState{TupleCount: 1})
 	}
 
-	count.TupleCount++
-	return db.Put(key, count)
+	wState.TupleCount++
+	return db.Put(wStateKey, wState)
 }
 
-// getWorkerCount returns the count of tuples in the "done" state for a given
-// compute plan and worker
-func (cp *ComputePlan) getWorkerCount(db *LedgerDB, tupleWorker string) (ComputePlanWorkerState, error) {
-	key := cp.getCPWorkerStateKey(tupleWorker)
-	doneCount := ComputePlanWorkerState{}
-
-	err := db.Get(key, &doneCount)
-	return doneCount, err
-}
-
-func (cp *ComputePlan) getTotalCount(db *LedgerDB) (count ComputePlanWorkerState, err error) {
+func (cp *ComputePlan) getTotalCount(db *LedgerDB) (doneCount int, tupleCount int, err error) {
 	for _, worker := range cp.Workers {
-		wCount, err := cp.getWorkerCount(db, worker)
+		wStateKey := cp.getCPWorkerStateKey(worker)
+		wState, err := getCPWorkerState(db, wStateKey, worker)
 		if err != nil {
-			return count, err
+			return doneCount, tupleCount, nil
 		}
-		count.TupleCount += wCount.TupleCount
-		count.DoneCount += wCount.DoneCount
+		doneCount += wState.DoneCount
+		tupleCount += wState.TupleCount
 	}
-	return count, nil
+	return doneCount, tupleCount, nil
 }
 
 func (cp *ComputePlan) getCPWorkerStateKey(tupleWorker string) string {
@@ -132,7 +120,7 @@ func modelIsInUse(db *LedgerDB, modelKey string) (bool, error) {
 		// thoses models can just be considered in use
 		return true, nil
 	}
-	children, err := getTupleChildren(db, keys[0])
+	children, err := getTupleChildren(db, keys[0], true)
 	if err != nil {
 		return false, nil
 	}
