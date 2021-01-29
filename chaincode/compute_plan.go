@@ -334,7 +334,12 @@ func cancelComputePlan(db *LedgerDB, args []string) (resp outputComputePlan, err
 		return outputComputePlan{}, err
 	}
 
-	err = db.AddComputePlanEvent(inp.Key, computeplan.State.Status, []string{}) // TODO
+	models, err := removeAllIntermediaryModels(db, &computeplan)
+	if err != nil {
+		return outputComputePlan{}, err
+	}
+
+	err = db.AddComputePlanEvent(inp.Key, computeplan.State.Status, models)
 	if err != nil {
 		return outputComputePlan{}, err
 	}
@@ -488,9 +493,11 @@ func getTupleChildren(db *LedgerDB, tupleKey string, includeTesttuples bool) ([]
 	if err != nil {
 		return []string{}, err
 	}
+
 	if !includeTesttuples {
 		return tupleChildrenKeys, nil
 	}
+
 	testtupleChildrenKeys, err := db.GetIndexKeys("testtuple~traintuple~certified~key", []string{"testtuple", tupleKey})
 	if err != nil {
 		return []string{}, err
