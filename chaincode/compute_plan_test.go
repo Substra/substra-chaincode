@@ -898,8 +898,8 @@ func registerWorker(mockStub *MockStub, worker string) {
 	mockStub.Creator = savedCreator
 }
 
-func compositeToDone(t *testing.T, mockStub *MockStub, myworker string, db *LedgerDB, key string, headModelKey string, trunkModelKey string) {
-	mockStub.Creator = myworker
+func compositeToDone(t *testing.T, mockStub *MockStub, worker string, db *LedgerDB, key string, headModelKey string, trunkModelKey string) {
+	mockStub.Creator = worker
 
 	_, err := logStartCompositeTrain(db, assetToArgs(inputKey{key}))
 	assert.NoError(t, err)
@@ -917,8 +917,8 @@ func compositeToDone(t *testing.T, mockStub *MockStub, myworker string, db *Ledg
 	mockStub.Creator = workerA // reset worker to default
 }
 
-func aggregateToDone(t *testing.T, mockStub *MockStub, myworker string, db *LedgerDB, key string, modelKey string) {
-	mockStub.Creator = myworker
+func aggregateToDone(t *testing.T, mockStub *MockStub, worker string, db *LedgerDB, key string, modelKey string) {
+	mockStub.Creator = worker
 
 	_, err := logStartAggregate(db, assetToArgs(inputKey{key}))
 	assert.NoError(t, err)
