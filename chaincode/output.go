@@ -341,7 +341,7 @@ type outputComputePlan struct {
 	IDToKey                 map[string]string `json:"id_to_key"`
 }
 
-func (out *outputComputePlan) Fill(key string, in ComputePlan, newIDs []string) {
+func (out *outputComputePlan) Fill(key string, in ComputePlan, newIDs []string, doneCount int, tupleCount int) {
 	out.Key = key
 	nb := getLimitedNbSliceElements(in.TraintupleKeys)
 	out.TraintupleKeys = in.TraintupleKeys[:nb]
@@ -353,8 +353,8 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan, newIDs []string) 
 	out.Status = in.State.Status
 	out.Tag = in.Tag
 	out.Metadata = initMapOutput(in.Metadata)
-	out.TupleCount = in.State.TupleCount
-	out.DoneCount = in.State.DoneCount
+	out.TupleCount = tupleCount
+	out.DoneCount = doneCount
 	IDToKey := map[string]string{}
 	for _, ID := range newIDs {
 		IDToKey[ID] = in.IDToTrainTask[ID].Key

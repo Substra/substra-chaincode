@@ -158,7 +158,7 @@ func TestObjective(t *testing.T) {
 	assert.NoError(t, err, "when unmarshalling queried objective")
 	expectedObjective := outputObjective{
 		Key:   objectiveKey,
-		Owner: worker,
+		Owner: workerA,
 		TestDataset: &Dataset{
 			DataManagerKey: dataManagerKey,
 			DataSampleKeys: []string{testDataSampleKey1, testDataSampleKey2},

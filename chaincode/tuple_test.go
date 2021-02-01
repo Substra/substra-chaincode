@@ -220,7 +220,7 @@ func TestQueryHeadModelPermissions(t *testing.T) {
 	assert.NotZero(t, outPerm)
 	assert.False(t, outPerm.Process.Public)
 	assert.Len(t, outPerm.Process.AuthorizedIDs, 1)
-	assert.Contains(t, outPerm.Process.AuthorizedIDs, worker)
+	assert.Contains(t, outPerm.Process.AuthorizedIDs, workerA)
 }
 
 type ModelsResponse struct {

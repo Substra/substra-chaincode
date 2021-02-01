@@ -74,7 +74,7 @@ func TestDataManager(t *testing.T) {
 	expectedDataManager := outputDataManager{
 		ObjectiveKey: inpDataManager.ObjectiveKey,
 		Key:          dataManagerKey,
-		Owner:        worker,
+		Owner:        workerA,
 		Name:         inpDataManager.Name,
 		Description: &ChecksumAddress{
 			StorageAddress: inpDataManager.DescriptionStorageAddress,

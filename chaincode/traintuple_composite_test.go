@@ -299,17 +299,17 @@ func TestTraintupleComposite(t *testing.T) {
 			Name:           compositeAlgoName,
 			StorageAddress: compositeAlgoStorageAddress,
 		},
-		Creator: worker,
+		Creator: workerA,
 		Dataset: &outputTtDataset{
 			Key:            dataManagerKey,
 			DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
 			OpenerChecksum: dataManagerOpenerChecksum,
-			Worker:         worker,
+			Worker:         workerA,
 			Metadata:       map[string]string{},
 		},
 		OutHeadModel: outHeadModelComposite{
 			Permissions: outputPermissions{
-				Process: Permission{Public: false, AuthorizedIDs: []string{worker}},
+				Process: Permission{Public: false, AuthorizedIDs: []string{workerA}},
 			},
 		},
 		OutTrunkModel: outModelComposite{
@@ -347,7 +347,7 @@ func TestTraintupleComposite(t *testing.T) {
 	// Query traintuple with status todo and worker as trainworker and check consistency
 	filter := inputQueryFilter{
 		IndexName:  "compositeTraintuple~worker~status",
-		Attributes: worker + ", todo",
+		Attributes: workerA + ", todo",
 	}
 	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 	resp = mockStub.MockInvoke(args)
@@ -371,7 +371,7 @@ func TestTraintupleComposite(t *testing.T) {
 		require.EqualValuesf(t, 200, resp.Status, "when logging start %s with message %s", traintupleStatus[i], resp.Message)
 		filter := inputQueryFilter{
 			IndexName:  "compositeTraintuple~worker~status",
-			Attributes: worker + ", " + traintupleStatus[i],
+			Attributes: workerA + ", " + traintupleStatus[i],
 		}
 		args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 		resp = mockStub.MockInvoke(args)
@@ -695,11 +695,11 @@ func TestCompositeTraintuplePermissions(t *testing.T) {
 
 	assert.EqualValues(t, false, traintuple.OutHeadModel.Permissions.Process.Public,
 		"the head model should not be public")
-	assert.EqualValues(t, []string{worker}, traintuple.OutHeadModel.Permissions.Process.AuthorizedIDs,
+	assert.EqualValues(t, []string{workerA}, traintuple.OutHeadModel.Permissions.Process.AuthorizedIDs,
 		"the head model should only be processable by creator")
 	assert.EqualValues(t, false, traintuple.OutTrunkModel.Permissions.Process.Public,
 		"the trunk model should not be public")
-	assert.EqualValues(t, []string{worker}, traintuple.OutHeadModel.Permissions.Process.AuthorizedIDs,
+	assert.EqualValues(t, []string{workerA}, traintuple.OutHeadModel.Permissions.Process.AuthorizedIDs,
 		"if input trunk model permissions are set to 'nobody', this should effectively grant permission to the creator only")
 }
 

@@ -175,8 +175,8 @@ func TestQueryTesttuple(t *testing.T) {
 			json.Unmarshal(respTesttuple, &testtuple)
 
 			// assert
-			assert.Equal(t, worker, testtuple.Creator)
-			assert.Equal(t, worker, testtuple.Dataset.Worker)
+			assert.Equal(t, workerA, testtuple.Creator)
+			assert.Equal(t, workerA, testtuple.Dataset.Worker)
 			assert.Equal(t, inpTesttuple.TraintupleKey, testtuple.TraintupleKey)
 			assert.Equal(t, tt.expectedTypeString, testtuple.TraintupleType)
 			assert.Equal(t, tt.expectedAlgoName, testtuple.Algo.Name)

@@ -268,8 +268,8 @@ func TestTraintupleAggregate(t *testing.T) {
 			Name:           aggregateAlgoName,
 			StorageAddress: aggregateAlgoStorageAddress,
 		},
-		Creator: worker,
-		Worker:  worker,
+		Creator: workerA,
+		Worker:  workerA,
 		Status:  StatusTodo,
 		Permissions: outputPermissions{
 			Process: Permission{
@@ -306,7 +306,7 @@ func TestTraintupleAggregate(t *testing.T) {
 	// Query traintuple with status todo and worker as trainworker and check consistency
 	filter := inputQueryFilter{
 		IndexName:  "aggregatetuple~worker~status",
-		Attributes: worker + ", todo",
+		Attributes: workerA + ", todo",
 	}
 	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 	resp = mockStub.MockInvoke(args)
@@ -331,7 +331,7 @@ func TestTraintupleAggregate(t *testing.T) {
 		require.EqualValuesf(t, 200, resp.Status, "when logging start %s with message %s", traintupleStatus[i], resp.Message)
 		filter := inputQueryFilter{
 			IndexName:  "aggregatetuple~worker~status",
-			Attributes: worker + ", " + traintupleStatus[i],
+			Attributes: workerA + ", " + traintupleStatus[i],
 		}
 		args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 		resp = mockStub.MockInvoke(args)
@@ -507,7 +507,7 @@ func TestAggregatetuplePermissions(t *testing.T) {
 	// verify permissions
 	assert.EqualValues(t, false, aggr.Permissions.Process.Public,
 		"the aggregate tuple should not be public")
-	assert.EqualValues(t, []string{worker, "nodeC"}, aggr.Permissions.Process.AuthorizedIDs,
+	assert.EqualValues(t, []string{workerA, "nodeC"}, aggr.Permissions.Process.AuthorizedIDs,
 		"the aggregate tuple permissions should be the intersect of the in-model permissions")
 }
 
@@ -577,7 +577,7 @@ func TestQueryAggregatetuple(t *testing.T) {
 
 	assert.NotEmpty(t, out.Key)
 	assert.Equal(t, in.Worker, out.Worker)
-	assert.Equal(t, worker, out.Creator)
+	assert.Equal(t, workerA, out.Creator)
 	assert.Equal(t, in.Tag, out.Tag)
 	assert.Len(t, out.InModels, 2)
 	assert.Equal(t, traintupleKey, out.InModels[0].TraintupleKey)
