@@ -23,7 +23,7 @@ func TryAddIntermediaryModel(db *LedgerDB, ComputePlanKey, worker, tupleKey, mod
 		return err
 	}
 
-	modelsUsed, modelsUnused, err := getModelsInuse(db, wState.IntermediaryModelsInUse)
+	modelsUsed, modelsUnused, err := getModelsInUse(db, wState.IntermediaryModelsInUse)
 
 	wState.IntermediaryModelsInUse = modelsUsed
 
@@ -127,9 +127,9 @@ func (cp *ComputePlan) removeAllIntermediaryModels(db *LedgerDB) ([]string, erro
 	return res, nil
 }
 
-// getModelsInuse takes a list of model keys and checks whether these models are still in use or not.
+// getModelsInUse takes a list of model keys and checks whether these models are still in use or not.
 // It returns the initial list split into two sublists: the models in use, and the models unused.
-func getModelsInuse(db *LedgerDB, modelKeys []string) (usedModels []string, unusedModels []string, err error) {
+func getModelsInUse(db *LedgerDB, modelKeys []string) (usedModels []string, unusedModels []string, err error) {
 	usedModels = []string{}
 	unusedModels = []string{}
 	for _, modelKey := range modelKeys {
@@ -146,7 +146,7 @@ func getModelsInuse(db *LedgerDB, modelKeys []string) (usedModels []string, unus
 	return usedModels, unusedModels, nil
 }
 
-// isModelInuse returns true if the model with the supplied key is the
+// isModelInUse returns true if the model with the supplied key is the
 // in-model of another training task that isn't in the "done" state.
 func isModelInUse(db *LedgerDB, modelKey string) (bool, error) {
 	keys, err := db.GetIndexKeys("tuple~modelKey~key", []string{"tuple", modelKey})
