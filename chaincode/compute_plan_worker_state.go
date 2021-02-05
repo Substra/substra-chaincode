@@ -175,7 +175,7 @@ func isModelInUse(db *LedgerDB, modelKey string) (bool, error) {
 }
 
 // getTupleChildren returns the keys of all the tuple which have the supplied tuple as an in-model
-// If includeTesttuples is True, return the testtuple children, else omit them,
+// If includeTesttuples is True, also include the testtuple children, else omit them.
 func getTupleChildren(db *LedgerDB, tupleKey string, includeTesttuples bool) ([]string, error) {
 	tupleChildrenKeys, err := db.GetIndexKeys("tuple~inModel~key", []string{"tuple", tupleKey})
 	if err != nil {
