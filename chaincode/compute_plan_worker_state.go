@@ -162,12 +162,12 @@ func isModelInUse(db *LedgerDB, modelKey string) (bool, error) {
 	}
 	children, err := getTupleChildren(db, keys[0], true)
 	if err != nil {
-		return false, nil
+		return false, err
 	}
 	for _, tupleKey := range children {
 		tuple, err := db.GetGenericTuple(tupleKey)
 		if err != nil {
-			return false, nil
+			return false, err
 		}
 		if tuple.Status != StatusDone {
 			return true, nil
