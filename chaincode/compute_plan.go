@@ -388,7 +388,7 @@ func (cp *ComputePlan) SaveState(db *LedgerDB) error {
 
 // UpdateState check the tuple status (from an updated tuple or a new one)
 // and, if required, it updates the compute plan' status and/or its doneCount.
-// It returns true if there is any change to the compute plan, false otherwise.
+// It returns true and the list of models to delete if there is any change to the compute plan, false and empty list otherwise.
 func (cp *ComputePlan) UpdateState(db *LedgerDB, tupleStatus string, worker string) (bool, []string, error) {
 	switch cp.State.Status {
 	case StatusFailed, StatusCanceled:
