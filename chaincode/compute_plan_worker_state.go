@@ -2,8 +2,10 @@ package main
 
 import "fmt"
 
-// TryAddIntermediaryModel will reference the model key if the compute plan key
-// is not empty and if it's an intermediary model meaning without any children
+// TryAddIntermediaryModel updates the list of intermediary models in use for this worker.
+// 1. It adds the provided modelKey to the list (only if the corresponding tuple has children).
+// 2. It checks the list for previously added and now unused intermediary models. If any unused models are found,
+//    they are removed from the list, and a chaincode event is created to indicate that these models can now be deleted.
 func TryAddIntermediaryModel(db *LedgerDB, ComputePlanKey, worker, tupleKey, modelKey string) error {
 	if ComputePlanKey == "" {
 		return nil
