@@ -347,12 +347,12 @@ func TestTraintuple(t *testing.T) {
 			Name:           algoName,
 			StorageAddress: algoStorageAddress,
 		},
-		Creator: worker,
+		Creator: workerA,
 		Dataset: &outputTtDataset{
 			Key:            dataManagerKey,
 			DataSampleKeys: []string{trainDataSampleKey1, trainDataSampleKey2},
 			OpenerChecksum: dataManagerOpenerChecksum,
-			Worker:         worker,
+			Worker:         workerA,
 			Metadata:       map[string]string{},
 		},
 		Permissions: outputPermissions{
@@ -388,7 +388,7 @@ func TestTraintuple(t *testing.T) {
 	// Query traintuple with status todo and worker as trainworker and check consistency
 	filter := inputQueryFilter{
 		IndexName:  "traintuple~worker~status",
-		Attributes: worker + ", todo",
+		Attributes: workerA + ", todo",
 	}
 	args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 	resp = mockStub.MockInvoke(args)
@@ -412,7 +412,7 @@ func TestTraintuple(t *testing.T) {
 		require.EqualValuesf(t, 200, resp.Status, "when logging start %s with message %s", traintupleStatus[i], resp.Message)
 		filter := inputQueryFilter{
 			IndexName:  "traintuple~worker~status",
-			Attributes: worker + ", " + traintupleStatus[i],
+			Attributes: workerA + ", " + traintupleStatus[i],
 		}
 		args = [][]byte{[]byte("queryFilter"), assetToJSON(filter)}
 		resp = mockStub.MockInvoke(args)

@@ -180,7 +180,10 @@ func (testtuple *Testtuple) AddToComputePlan(db *LedgerDB, testtupleKey string) 
 	if err != nil {
 		return err
 	}
-	computePlan.AddTuple(TesttupleType, testtupleKey, testtuple.Status)
+	err = computePlan.AddTuple(db, TesttupleType, testtupleKey, testtuple.Status, testtuple.Dataset.Worker)
+	if err != nil {
+		return err
+	}
 	err = computePlan.Save(db, testtuple.ComputePlanKey)
 	if err != nil {
 		return err
@@ -459,7 +462,7 @@ func (testtuple *Testtuple) commitStatusUpdate(db *LedgerDB, testtupleKey string
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
-	if err := UpdateComputePlanState(db, testtuple.ComputePlanKey, newStatus, testtupleKey); err != nil {
+	if err := UpdateComputePlanState(db, testtuple.ComputePlanKey, newStatus, testtupleKey, testtuple.Dataset.Worker); err != nil {
 		return err
 	}
 	logger.Infof("testtuple %s status updated: %s (from=%s)", testtupleKey, newStatus, oldStatus)

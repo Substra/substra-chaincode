@@ -227,7 +227,7 @@ func (stub *MockStub) GetState(key string) ([]byte, error) {
 // PutState writes the specified `value` and `key` into the ledger.
 func (stub *MockStub) PutState(key string, value []byte) error {
 	if stub.TxID == "" {
-		err := errors.New("cannot PutState without a transactions - call stub.MockTransactionStart()?")
+		err := errors.New("cannot PutState without a transaction - call stub.MockTransactionStart()?")
 		return err
 	}
 
@@ -487,7 +487,7 @@ func (stub *MockStub) GetPrivateDataValidationParameter(collection, key string) 
 // Constructor to initialise the internal State map
 func NewMockStub(name string, cc shim.Chaincode) *MockStub {
 	s := new(MockStub)
-	s.Creator = worker
+	s.Creator = workerA
 	s.Name = name
 	s.cc = cc
 	s.State = make(map[string][]byte)

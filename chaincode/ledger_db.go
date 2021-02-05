@@ -409,6 +409,16 @@ func (db *LedgerDB) GetComputePlan(key string) (ComputePlan, error) {
 	return computePlan, nil
 }
 
+// GetCPWorkerState returns the state for a given compute plan and worker
+func (db *LedgerDB) GetCPWorkerState(wStateKey string) (*ComputePlanWorkerState, error) {
+	wState := ComputePlanWorkerState{}
+	err := db.Get(wStateKey, &wState)
+	if err != nil {
+		return nil, err
+	}
+	return &wState, nil
+}
+
 // GetOutModelKeyChecksumAddress retrieves an out-Model from a tuple key.
 // In case of CompositeTraintuple it return its trunk model
 // Return an error if the tupleKey was not found.

@@ -232,7 +232,7 @@ func (aggregatetuple *inputAggregatetuple) fillDefaults() {
 		aggregatetuple.AlgoKey = aggregateAlgoKey
 	}
 	if aggregatetuple.Worker == "" {
-		aggregatetuple.Worker = worker
+		aggregatetuple.Worker = workerA
 	}
 }
 

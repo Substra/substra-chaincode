@@ -140,7 +140,10 @@ func (tuple *Aggregatetuple) AddToComputePlan(db *LedgerDB, inp inputAggregatetu
 	if err != nil {
 		return err
 	}
-	computePlan.AddTuple(AggregatetupleType, traintupleKey, tuple.Status)
+	err = computePlan.AddTuple(db, AggregatetupleType, traintupleKey, tuple.Status, tuple.Worker)
+	if err != nil {
+		return err
+	}
 	err = computePlan.Save(db, tuple.ComputePlanKey)
 	if err != nil {
 		return err
@@ -347,15 +350,17 @@ func logSuccessAggregate(db *LedgerDB, args []string) (o outputAggregatetuple, e
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, aggregatetuple.ComputePlanKey, aggregatetupleKey, aggregatetuple.OutModel.Key)
-	if err != nil {
-		return
-	}
 
 	if err = validateTupleOwner(db, aggregatetuple.Worker); err != nil {
 		return
 	}
+
 	if err = aggregatetuple.commitStatusUpdate(db, aggregatetupleKey, status); err != nil {
+		return
+	}
+
+	err = TryAddIntermediaryModel(db, aggregatetuple.ComputePlanKey, aggregatetuple.Worker, aggregatetupleKey, aggregatetuple.OutModel.Key)
+	if err != nil {
 		return
 	}
 
@@ -523,7 +528,7 @@ func (tuple *Aggregatetuple) commitStatusUpdate(db *LedgerDB, aggregatetupleKey 
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
-	if err := UpdateComputePlanState(db, tuple.ComputePlanKey, newStatus, aggregatetupleKey); err != nil {
+	if err := UpdateComputePlanState(db, tuple.ComputePlanKey, newStatus, aggregatetupleKey, tuple.Worker); err != nil {
 		return err
 	}
 	logger.Infof("aggregatetuple %s status updated: %s (from=%s)", aggregatetupleKey, newStatus, oldStatus)

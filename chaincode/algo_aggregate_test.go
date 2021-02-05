@@ -68,7 +68,7 @@ func TestAggregateAlgo(t *testing.T) {
 				Checksum:       inpAlgo.DescriptionChecksum,
 				StorageAddress: inpAlgo.DescriptionStorageAddress,
 			},
-			Owner: worker,
+			Owner: workerA,
 			Permissions: outputPermissions{
 				Process: Permission{Public: true, AuthorizedIDs: []string{}},
 			},

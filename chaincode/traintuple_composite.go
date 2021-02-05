@@ -170,7 +170,10 @@ func (traintuple *CompositeTraintuple) AddToComputePlan(db *LedgerDB, inp inputC
 	if err != nil {
 		return err
 	}
-	computePlan.AddTuple(CompositeTraintupleType, traintupleKey, traintuple.Status)
+	err = computePlan.AddTuple(db, CompositeTraintupleType, traintupleKey, traintuple.Status, traintuple.Dataset.Worker)
+	if err != nil {
+		return err
+	}
 	err = computePlan.Save(db, traintuple.ComputePlanKey)
 	if err != nil {
 		return err
@@ -344,22 +347,25 @@ func logSuccessCompositeTrain(db *LedgerDB, args []string) (o outputCompositeTra
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanKey, compositeTraintupleKey, inp.OutHeadModel.Key)
-	if err != nil {
-		return
-	}
 	err = createModelIndex(db, inp.OutTrunkModel.Key, compositeTraintupleKey)
 	if err != nil {
 		return
 	}
-	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanKey, compositeTraintupleKey, inp.OutTrunkModel.Key)
-	if err != nil {
-		return
-	}
+
 	if err = validateTupleOwner(db, compositeTraintuple.Dataset.Worker); err != nil {
 		return
 	}
+
 	if err = compositeTraintuple.commitStatusUpdate(db, compositeTraintupleKey, status); err != nil {
+		return
+	}
+
+	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanKey, compositeTraintuple.Dataset.Worker, compositeTraintupleKey, inp.OutHeadModel.Key)
+	if err != nil {
+		return
+	}
+	err = TryAddIntermediaryModel(db, compositeTraintuple.ComputePlanKey, compositeTraintuple.Dataset.Worker, compositeTraintupleKey, inp.OutTrunkModel.Key)
+	if err != nil {
 		return
 	}
 
@@ -579,7 +585,7 @@ func (traintuple *CompositeTraintuple) commitStatusUpdate(db *LedgerDB, traintup
 	if err := db.UpdateIndex(indexName, oldAttributes, newAttributes); err != nil {
 		return err
 	}
-	if err := UpdateComputePlanState(db, traintuple.ComputePlanKey, newStatus, traintupleKey); err != nil {
+	if err := UpdateComputePlanState(db, traintuple.ComputePlanKey, newStatus, traintupleKey, traintuple.Dataset.Worker); err != nil {
 		return err
 	}
 	logger.Infof("compositetraintuple %s status updated: %s (from=%s)", traintupleKey, newStatus, oldStatus)
