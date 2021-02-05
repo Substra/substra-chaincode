@@ -93,7 +93,7 @@ func (cp *ComputePlan) getTupleCounts(db *LedgerDB) (doneCount int, tupleCount i
 		wStateKey := cp.getCPWorkerStateKey(worker)
 		wState, err := db.GetCPWorkerState(wStateKey)
 		if err != nil {
-			return doneCount, tupleCount, nil
+			return doneCount, tupleCount, err
 		}
 		doneCount += wState.DoneCount
 		tupleCount += wState.TupleCount
@@ -103,7 +103,7 @@ func (cp *ComputePlan) getTupleCounts(db *LedgerDB) (doneCount int, tupleCount i
 
 // getCPWorkerStateKey returns the worker state key for a given compute plan and worker
 func (cp *ComputePlan) getCPWorkerStateKey(worker string) string {
-	return fmt.Sprintf("computePlan~%v~doneCountByWorker~%v", cp.Key, worker)
+	return fmt.Sprintf("computePlan~%v~stateByWorker~%v", cp.Key, worker)
 }
 
 // removeAllIntermediaryModels iterates through all the worker states, and clears the lists of
