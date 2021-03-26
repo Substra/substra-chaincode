@@ -21,6 +21,23 @@ import (
 	"strconv"
 )
 
+func isEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	aCopy := make([]string, len(a))
+	bCopy := make([]string, len(b))
+
+	copy(aCopy, a)
+	copy(bCopy, b)
+
+	sort.Strings(aCopy)
+	sort.Strings(bCopy)
+
+	return reflect.DeepEqual(aCopy, bCopy)
+}
+
 // -------------------------------------------------------------------------------------------
 // Methods on receivers testtuple
 // -------------------------------------------------------------------------------------------
@@ -56,9 +73,6 @@ func (testtuple *Testtuple) SetFromInput(db *LedgerDB, inp inputTesttuple) error
 		objectiveDataManagerKey = objective.TestDataset.DataManagerKey
 		objectiveDataSampleKeys = objective.TestDataset.DataSampleKeys
 	}
-	// For now we need to sort it but in fine it should be save sorted
-	// TODO
-	sort.Strings(objectiveDataSampleKeys)
 
 	var dataManagerKey string
 	var dataSampleKeys []string
@@ -72,8 +86,7 @@ func (testtuple *Testtuple) SetFromInput(db *LedgerDB, inp inputTesttuple) error
 			return err
 		}
 		dataManagerKey = inp.DataManagerKey
-		sort.Strings(dataSampleKeys)
-		testtuple.Certified = objectiveDataManagerKey == dataManagerKey && reflect.DeepEqual(objectiveDataSampleKeys, dataSampleKeys)
+		testtuple.Certified = objectiveDataManagerKey == dataManagerKey && isEqual(objectiveDataSampleKeys, dataSampleKeys)
 	case len(inp.DataManagerKey) > 0 || len(inp.DataSampleKeys) > 0:
 		return errors.BadRequest("invalid input: dataManagerKey and dataSampleKey should be provided together")
 	case objective.TestDataset != nil:
