@@ -21,6 +21,16 @@ var (
 )
 
 func (dataManager *inputDataManager) createDefault() [][]byte {
+	dataManager.fillDefaults()
+	return dataManager.getArgs()
+}
+
+func (dataManager *inputDataManager) getArgs() [][]byte {
+	args := append([][]byte{[]byte("registerDataManager")}, assetToJSON(dataManager))
+	return args
+}
+
+func (dataManager *inputDataManager) fillDefaults() {
 	if dataManager.Key == "" {
 		dataManager.Key = dataManagerKey
 	}
@@ -43,10 +53,8 @@ func (dataManager *inputDataManager) createDefault() [][]byte {
 		dataManager.DescriptionStorageAddress = "https://toto/dataManager/42234/description"
 	}
 	dataManager.Permissions = OpenPermissions
-	args := append([][]byte{[]byte("registerDataManager")}, assetToJSON(dataManager))
-
-	return args
 }
+
 func (dataSample *inputDataSample) createDefault() [][]byte {
 	if dataSample.Keys == nil || len(dataSample.Keys) == 0 {
 		dataSample.Keys = []string{trainDataSampleKey1, trainDataSampleKey2}
@@ -95,6 +103,16 @@ func (objective *inputObjective) createDefault() [][]byte {
 }
 
 func (algo *inputAlgo) createDefault() [][]byte {
+	algo.fillDefaults()
+	return algo.getArgs()
+}
+
+func (algo *inputAlgo) getArgs() [][]byte {
+	args := append([][]byte{[]byte("registerAlgo")}, assetToJSON(algo))
+	return args
+}
+
+func (algo *inputAlgo) fillDefaults() {
 	if algo.Key == "" {
 		algo.Key = algoKey
 	}
@@ -114,8 +132,6 @@ func (algo *inputAlgo) createDefault() [][]byte {
 		algo.DescriptionStorageAddress = "https://toto/algo/222/description"
 	}
 	algo.Permissions = OpenPermissions
-	args := append([][]byte{[]byte("registerAlgo")}, assetToJSON(algo))
-	return args
 }
 
 func (algo *inputCompositeAlgo) createDefault() [][]byte {

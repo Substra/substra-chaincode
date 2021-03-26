@@ -213,23 +213,12 @@ func queryModelPermissions(db *LedgerDB, args []string) (outputPermissions, erro
 		return out, errors.Internal(err, "queryModelPermissions: could not retrieve model type with tupleKey %s", tupleKey)
 	}
 
-	// By default model is public processable
-	modelPermissions := Permissions{}
-	modelPermissions.Process.Public = true
-
-	// get out-model and permissions from parent for head model in composite traintuple
-	if tupleType == CompositeTraintupleType {
-		tuple, err := db.GetCompositeTraintuple(tupleKey)
-		if err != nil {
-			return out, errors.Internal(err, "queryModelPermissions:")
-		}
-		// if `modelKey` refers to the head out-model, return the head out-model permissions
-		// if `modelKey` refers to the trunk out-model, do nothing (default to "public processable")
-		if tuple.OutHeadModel.OutModel.Key == modelKey {
-			modelPermissions = tuple.OutHeadModel.Permissions
-		}
+	modelDetails, err := getModelDetails(db, modelKey, tupleKey, tupleType)
+	if err != nil {
+		return out, err
 	}
-	out.Fill(modelPermissions)
+	out.Fill(modelDetails.Permissions)
+
 	return out, nil
 }
 
@@ -297,4 +286,48 @@ func determineTupleStatus(db *LedgerDB, tupleStatus, computePlanKey string) (str
 
 func createModelIndex(db *LedgerDB, modelKey, tupleKey string) error {
 	return db.CreateIndex("tuple~modelKey~key", []string{"tuple", modelKey, tupleKey})
+}
+
+type modelDetails struct {
+	Permissions Permissions
+	Owner       string
+}
+
+func getModelDetails(db *LedgerDB, modelKey string, tupleKey string, tupleType AssetType) (modelDetails, error) {
+	// By default model is public processable
+	model := modelDetails{}
+
+	if tupleType == TraintupleType {
+		tuple, err := db.GetTraintuple(tupleKey)
+		if err != nil {
+			return model, errors.Internal(err, "getModelDetails: cannot get traintuple")
+		}
+		model.Permissions = tuple.Permissions
+		model.Owner = tuple.Dataset.Worker
+	}
+
+	if tupleType == AggregatetupleType {
+		tuple, err := db.GetAggregatetuple(tupleKey)
+		if err != nil {
+			return model, errors.Internal(err, "getModelDetails: cannot get aggregatetuple")
+		}
+		model.Permissions = tuple.Permissions
+		model.Owner = tuple.Worker
+	}
+
+	if tupleType == CompositeTraintupleType {
+		tuple, err := db.GetCompositeTraintuple(tupleKey)
+		if err != nil {
+			return model, errors.Internal(err, "getModelDetails: cannot get composite traintuple")
+		}
+		// if `modelKey` refers to the head out-model, return the head out-model permissions
+		// if `modelKey` refers to the trunk out-model, default to "public processable")
+		if tuple.OutHeadModel.OutModel.Key == modelKey {
+			model.Permissions = tuple.OutHeadModel.Permissions
+		} else {
+			model.Permissions = tuple.OutTrunkModel.Permissions
+		}
+		model.Owner = tuple.Dataset.Worker
+	}
+	return model, nil
 }

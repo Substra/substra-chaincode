@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRecursiveLogFailed(t *testing.T) {
@@ -181,13 +182,70 @@ func TestTagTuple(t *testing.T) {
 	assert.NoError(t, err, "should be unmarshaled")
 	assert.Len(t, testtuples.Results, 1, "there should be one traintuple")
 	assert.EqualValues(t, tag, testtuples.Results[0].Tag)
-
 }
 
 func TestQueryModelPermissions(t *testing.T) {
 	scc := new(SubstraChaincode)
-	mockStub := NewMockStubWithRegisterNode("substra", scc)
-	registerItem(t, *mockStub, "traintuple")
+	mockStub := NewMockStub("substra", scc)
+	registerWorker(mockStub, workerA)
+	registerWorker(mockStub, workerB)
+	registerWorker(mockStub, workerC)
+
+	// Set up permissions
+	datasetPermissions := inputPermission{
+		Public:        false,
+		AuthorizedIDs: []string{workerA, workerB},
+	}
+	algoPermissions := inputPermission{
+		Public:        false,
+		AuthorizedIDs: []string{workerA, workerC},
+	}
+
+	// add dataManager
+	inpDataManager := inputDataManager{}
+	inpDataManager.fillDefaults()
+	inpDataManager.Permissions.Process = datasetPermissions
+	args := inpDataManager.getArgs()
+	resp := mockStub.MockInvoke(args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding dataManager with status %d and message %s", resp.Status, resp.Message)
+
+	// add test dataSample
+	inpDataSample := inputDataSample{
+		Keys:            []string{testDataSampleKey1, testDataSampleKey2},
+		DataManagerKeys: []string{dataManagerKey},
+		TestOnly:        "true",
+	}
+	args = inpDataSample.createDefault()
+	resp = mockStub.MockInvoke(args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding test dataSample with status %d and message %s", resp.Status, resp.Message)
+
+	// add objective
+	inpObjective := inputObjective{}
+	args = inpObjective.createDefault()
+	resp = mockStub.MockInvoke(args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding objective with status %d and message %s", resp.Status, resp.Message)
+
+	// Add train dataSample
+	inpDataSample = inputDataSample{}
+	args = inpDataSample.createDefault()
+	resp = mockStub.MockInvoke(args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding train dataSample with status %d and message %s", resp.Status, resp.Message)
+
+	// Add algo
+	inpAlgo := inputAlgo{}
+	inpAlgo.fillDefaults()
+	inpAlgo.Permissions.Process = algoPermissions
+	args = inpAlgo.getArgs()
+	resp = mockStub.MockInvoke(args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding algo with status %d and message %s", resp.Status, resp.Message)
+
+	// Add traintuple
+	inpTraintuple := inputTraintuple{}
+	args = inpTraintuple.createDefault()
+	resp = mockStub.MockInvoke(args)
+	require.EqualValuesf(t, 200, resp.Status, "when adding traintuple with status %d and message %s", resp.Status, resp.Message)
+
+	// Pass the traintuple to "done"
 	mockStub.MockTransactionStart("42")
 	db := NewLedgerDB(mockStub)
 	traintupleToDone(t, db, traintupleKey)
@@ -196,6 +254,10 @@ func TestQueryModelPermissions(t *testing.T) {
 	outPerm, err := queryModelPermissions(db, keyToArgs(outTrain.OutModel.Key))
 	assert.NoError(t, err)
 	assert.NotZero(t, outPerm)
+
+	// Verify that the model has the expected permissions
+	assert.Equal(t, false, outPerm.Process.Public, "the out-model should not have public process permissions")
+	assert.Equal(t, []string{workerA}, outPerm.Process.AuthorizedIDs, "the out-model should only have process permissions for worker A")
 }
 
 func TestQueryHeadModelPermissions(t *testing.T) {
