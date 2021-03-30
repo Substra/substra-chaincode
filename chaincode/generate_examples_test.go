@@ -222,8 +222,8 @@ func TestPipeline(t *testing.T) {
 	fmt.Fprintln(&out, "#### ------------ Query all models ------------")
 	callAssertAndPrint("query", "queryModels", nil)
 
-	fmt.Fprintln(&out, "#### ------------ Query model permissions ------------")
-	callAssertAndPrint("query", "queryModelPermissions", inputKey{modelKey})
+	fmt.Fprintln(&out, "#### ------------ Query model ------------")
+	callAssertAndPrint("query", "queryModel", inputKey{modelKey})
 
 	fmt.Fprintln(&out, "#### ------------ Query Dataset ------------")
 	callAssertAndPrint("query", "queryDataset", inputKey{dataManagerKey})
