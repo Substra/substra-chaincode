@@ -711,7 +711,7 @@ func traintupleToDone(t *testing.T, db *LedgerDB, key string) {
 
 	success := inputLogSuccessTrain{}
 	success.Key = key
-	success.OutModel.Key = RandomUUID()
+	success.OutModel.Key = modelKey
 	success.OutModel.Checksum = GetRandomHash()
 	success.fillDefaults()
 	_, err = logSuccessTrain(db, assetToArgs(success))

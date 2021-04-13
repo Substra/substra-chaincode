@@ -184,7 +184,7 @@ func TestTagTuple(t *testing.T) {
 	assert.EqualValues(t, tag, testtuples.Results[0].Tag)
 }
 
-func TestQueryModelPermissions(t *testing.T) {
+func TestQueryModel(t *testing.T) {
 	scc := new(SubstraChaincode)
 	mockStub := NewMockStub("substra", scc)
 	registerWorker(mockStub, workerA)
@@ -251,13 +251,17 @@ func TestQueryModelPermissions(t *testing.T) {
 	traintupleToDone(t, db, traintupleKey)
 	outTrain, err := queryTraintuple(db, keyToArgs(traintupleKey))
 	assert.NoError(t, err)
-	outPerm, err := queryModelPermissions(db, keyToArgs(outTrain.OutModel.Key))
+	model, err := queryModel(db, keyToArgs(outTrain.OutModel.Key))
 	assert.NoError(t, err)
-	assert.NotZero(t, outPerm)
+	assert.NotZero(t, model)
 
-	// Verify that the model has the expected permissions
-	assert.Equal(t, false, outPerm.Process.Public, "the out-model should not have public process permissions")
-	assert.Equal(t, []string{workerA}, outPerm.Process.AuthorizedIDs, "the out-model should only have process permissions for worker A")
+	assert.Equal(t, modelKey, model.Key)
+	assert.Equal(t, workerA, model.Owner)
+	assert.Equal(t, modelAddress, model.StorageAddress)
+	assert.Equal(t, false, model.Permissions.Download.Public, "the out-model should not have public Download permissions")
+	assert.Equal(t, []string{workerA}, model.Permissions.Download.AuthorizedIDs, "the out-model should only have Download permissions for worker A")
+	assert.Equal(t, false, model.Permissions.Process.Public, "the out-model should not have public process permissions")
+	assert.Equal(t, []string{workerA}, model.Permissions.Process.AuthorizedIDs, "the out-model should only have process permissions for worker A")
 }
 
 func TestQueryHeadModelPermissions(t *testing.T) {
@@ -277,17 +281,17 @@ func TestQueryHeadModelPermissions(t *testing.T) {
 
 	outTrain, err := queryCompositeTraintuple(db, keyToArgs(compositeTraintupleKey))
 	assert.NoError(t, err)
-	outPerm, err := queryModelPermissions(db, keyToArgs(outTrain.OutHeadModel.OutModel.Key))
+	model, err := queryModel(db, keyToArgs(outTrain.OutHeadModel.OutModel.Key))
 	assert.NoError(t, err)
-	assert.NotZero(t, outPerm)
-	assert.False(t, outPerm.Process.Public)
-	assert.Len(t, outPerm.Process.AuthorizedIDs, 1)
-	assert.Contains(t, outPerm.Process.AuthorizedIDs, workerA)
+	assert.NotZero(t, model)
+	assert.False(t, model.Permissions.Process.Public)
+	assert.Len(t, model.Permissions.Process.AuthorizedIDs, 1)
+	assert.Contains(t, model.Permissions.Process.AuthorizedIDs, workerA)
 }
 
 type ModelsResponse struct {
-	Results  []outputModel `json:"results"`
-	Bookmark string        `json:"bookmark"`
+	Results  []outputModelListItem `json:"results"`
+	Bookmark string                `json:"bookmark"`
 }
 
 func TestQueryModelsPagination(t *testing.T) {

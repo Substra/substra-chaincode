@@ -1264,8 +1264,8 @@ peer chaincode query -n mycc -c '{"Args":["queryModels"]}' -C myc
  ]
 }
 ```
-#### ------------ Query model permissions ------------
-Smart contract: `queryModelPermissions`
+#### ------------ Query model ------------
+Smart contract: `queryModel`
 
 ##### JSON Inputs:
 ```go
@@ -1275,15 +1275,24 @@ Smart contract: `queryModelPermissions`
 ```
 ##### Command peer example:
 ```bash
-peer chaincode query -n mycc -c '{"Args":["queryModelPermissions","{\"key\":\"eedbb7c3-1f62-244c-0f3a-761cc1688042\"}"]}' -C myc
+peer chaincode query -n mycc -c '{"Args":["queryModel","{\"key\":\"eedbb7c3-1f62-244c-0f3a-761cc1688042\"}"]}' -C myc
 ```
 ##### Command output:
 ```json
 {
- "process": {
-  "authorized_ids": [],
-  "public": true
- }
+ "key": "eedbb7c3-1f62-244c-0f3a-761cc1688042",
+ "owner": "SampleOrg",
+ "permissions": {
+  "download": {
+   "authorized_ids": [],
+   "public": true
+  },
+  "process": {
+   "authorized_ids": [],
+   "public": true
+  }
+ },
+ "storage_address": "https://substrabac/model/toto"
 }
 ```
 #### ------------ Query Dataset ------------

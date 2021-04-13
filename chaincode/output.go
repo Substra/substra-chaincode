@@ -304,10 +304,17 @@ type outputModelDetails struct {
 	NonCertifiedTesttuples []outputTesttuple          `json:"non_certified_testtuples"`
 }
 
-type outputModel struct {
+type outputModelListItem struct {
 	Aggregatetuple      *outputAggregatetuple      `json:"aggregatetuple,omitempty"`
 	CompositeTraintuple *outputCompositeTraintuple `json:"composite_traintuple,omitempty"`
 	Traintuple          *outputTraintuple          `json:"traintuple,omitempty"`
+}
+
+type outputModel struct {
+	Key            string                `json:"key"`
+	StorageAddress string                `json:"storage_address"`
+	Permissions    outputPermissionsFull `json:"permissions"`
+	Owner          string                `json:"owner"`
 }
 
 // Event is the collection of tuples sent in an event
@@ -363,6 +370,8 @@ func (out *outputComputePlan) Fill(key string, in ComputePlan, newIDs []string, 
 	out.CleanModels = in.CleanModels
 }
 
+// This is the "historical" output permissions, not
+// implementing "Download" permissions.
 type outputPermissions struct {
 	Process Permission `json:"process"`
 }
@@ -372,6 +381,20 @@ func (out *outputPermissions) Fill(in Permissions) {
 	out.Process.AuthorizedIDs = []string{}
 	if !in.Process.Public {
 		out.Process.AuthorizedIDs = in.Process.AuthorizedIDs
+	}
+}
+
+type outputPermissionsFull struct {
+	outputPermissions
+	Download Permission `json:"download"`
+}
+
+func (out *outputPermissionsFull) Fill(in Permissions) {
+	out.outputPermissions.Fill(in)
+	out.Download.Public = in.Download.Public
+	out.Download.AuthorizedIDs = []string{}
+	if !in.Download.Public {
+		out.Download.AuthorizedIDs = in.Download.AuthorizedIDs
 	}
 }
 
