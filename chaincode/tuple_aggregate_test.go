@@ -273,8 +273,8 @@ func TestTraintupleAggregate(t *testing.T) {
 		Status:  StatusTodo,
 		Permissions: outputPermissions{
 			Process: Permission{
-				Public:        true,
-				AuthorizedIDs: []string{},
+				Public:        false,
+				AuthorizedIDs: []string{workerA},
 			},
 		},
 		Metadata: map[string]string{},
@@ -507,8 +507,8 @@ func TestAggregatetuplePermissions(t *testing.T) {
 	// verify permissions
 	assert.EqualValues(t, false, aggr.Permissions.Process.Public,
 		"the aggregate tuple should not be public")
-	assert.EqualValues(t, []string{workerA, "nodeC"}, aggr.Permissions.Process.AuthorizedIDs,
-		"the aggregate tuple permissions should be the intersect of the in-model permissions")
+	assert.EqualValues(t, []string{workerA}, aggr.Permissions.Process.AuthorizedIDs,
+		"the aggregate tuple permissions should be union of the aggregate worker and the in-model workers")
 }
 
 func TestAggregatetupleLogSuccessFail(t *testing.T) {

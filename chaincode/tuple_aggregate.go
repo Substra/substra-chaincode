@@ -64,7 +64,15 @@ func (tuple *Aggregatetuple) SetFromInput(db *LedgerDB, inp inputAggregatetuple)
 func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) error {
 	var parentStatuses []string
 	inModelKeys := tuple.InModelKeys
-	permissions, err := NewPermissions(db, OpenPermissions)
+	owner, err := GetTxCreator(db.cc)
+	if err != nil {
+		return errors.BadRequest(err, "could not transaction creator")
+	}
+
+	authorizedIdsMap := map[string]bool{
+		owner: true,
+	}
+
 	if err != nil {
 		return errors.BadRequest(err, "could not generate open permissions")
 	}
@@ -75,27 +83,26 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 			return errors.Internal("could not retrieve traintuple type with key %s - %s", parentTraintupleKey, err.Error())
 		}
 
-		parentPermissions := Permissions{}
+		parentIdentity := ""
 
 		// get out-model and permissions from parent
 		switch parentType {
 		case CompositeTraintupleType:
 			tuple, err := db.GetCompositeTraintuple(parentTraintupleKey)
 			if err == nil {
-				// if the parent is composite, always take the "trunk" out-model
-				parentPermissions = tuple.OutTrunkModel.Permissions
+				parentIdentity = tuple.Dataset.Worker
 				parentStatuses = append(parentStatuses, tuple.Status)
 			}
 		case TraintupleType:
 			tuple, err := db.GetTraintuple(parentTraintupleKey)
 			if err == nil {
-				parentPermissions = tuple.Permissions
+				parentIdentity = tuple.Dataset.Worker
 				parentStatuses = append(parentStatuses, tuple.Status)
 			}
 		case AggregatetupleType:
 			tuple, err := db.GetAggregatetuple(parentTraintupleKey)
 			if err == nil {
-				parentPermissions = tuple.Permissions
+				parentIdentity = tuple.Worker
 				parentStatuses = append(parentStatuses, tuple.Status)
 			}
 		default:
@@ -107,11 +114,24 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 		}
 
 		inModelKeys = append(inModelKeys, parentTraintupleKey)
-		permissions = MergePermissions(permissions, parentPermissions)
+		authorizedIdsMap[parentIdentity] = true
 	}
+
+	authorizedIds := make([]string, 0, len(authorizedIdsMap))
+	for k := range authorizedIdsMap {
+		authorizedIds = append(authorizedIds, k)
+	}
+	permission := Permission{
+		Public:        false,
+		AuthorizedIDs: authorizedIds,
+	}
+
 	tuple.Status = determineStatusFromInModels(parentStatuses)
 	tuple.InModelKeys = inModelKeys
-	tuple.Permissions = permissions
+	tuple.Permissions = Permissions{
+		Process:  permission,
+		Download: permission,
+	}
 	return nil
 }
 
