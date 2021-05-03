@@ -66,7 +66,7 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 	inModelKeys := tuple.InModelKeys
 	owner, err := GetTxCreator(db.cc)
 	if err != nil {
-		return errors.BadRequest(err, "could not transaction creator")
+		return errors.BadRequest(err, "could not get transaction creator")
 	}
 
 	authorizedIdsMap := map[string]bool{
