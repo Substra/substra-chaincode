@@ -16,6 +16,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -507,8 +508,33 @@ func TestAggregatetuplePermissions(t *testing.T) {
 	// verify permissions
 	assert.EqualValues(t, false, aggr.Permissions.Process.Public,
 		"the aggregate tuple should not be public")
-	assert.EqualValues(t, []string{workerA}, aggr.Permissions.Process.AuthorizedIDs,
-		"the aggregate tuple permissions should be union of the aggregate worker and the in-model workers")
+	fmt.Println(aggr.Permissions.Process.AuthorizedIDs)
+	assert.True(t, sameStringSlice([]string{workerA, "nodeA", "nodeB", "nodeC", "nodeD"}, aggr.Permissions.Process.AuthorizedIDs),
+		"the aggregate tuple permissions should be union of the in-model permissions")
+}
+
+// return true if slices contain the same elements, regardless of order
+func sameStringSlice(x, y []string) bool {
+	if len(x) != len(y) {
+		return false
+	}
+	// create a map of string -> int
+	diff := make(map[string]int, len(x))
+	for _, _x := range x {
+		// 0 value for int is 0, so just increment a counter for the string
+		diff[_x]++
+	}
+	for _, _y := range y {
+		// If the string _y is not in diff bail out early
+		if _, ok := diff[_y]; !ok {
+			return false
+		}
+		diff[_y] -= 1
+		if diff[_y] == 0 {
+			delete(diff, _y)
+		}
+	}
+	return len(diff) == 0
 }
 
 func TestAggregatetupleLogSuccessFail(t *testing.T) {
