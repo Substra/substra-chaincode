@@ -64,7 +64,6 @@ func (tuple *Aggregatetuple) SetFromInput(db *LedgerDB, inp inputAggregatetuple)
 func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) error {
 	var parentStatuses []string
 	inModelKeys := tuple.InModelKeys
-
 	permissions, err := NewPermissions(db, inputPermissions{})
 	if err != nil {
 		return errors.BadRequest(err, "could not generate open permissions")
@@ -109,7 +108,6 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 		inModelKeys = append(inModelKeys, parentTraintupleKey)
 		permissions = UnionPermissions(permissions, parentPermissions)
 	}
-
 	tuple.Status = determineStatusFromInModels(parentStatuses)
 	tuple.InModelKeys = inModelKeys
 	tuple.Permissions = permissions

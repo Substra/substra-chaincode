@@ -16,7 +16,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -508,7 +507,6 @@ func TestAggregatetuplePermissions(t *testing.T) {
 	// verify permissions
 	assert.EqualValues(t, false, aggr.Permissions.Process.Public,
 		"the aggregate tuple should not be public")
-	fmt.Println(aggr.Permissions.Process.AuthorizedIDs)
 	assert.True(t, sameStringSlice([]string{workerA, "nodeA", "nodeB", "nodeC", "nodeD"}, aggr.Permissions.Process.AuthorizedIDs),
 		"the aggregate tuple permissions should be union of the in-model permissions")
 }
