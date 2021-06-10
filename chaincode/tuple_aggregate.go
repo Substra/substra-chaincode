@@ -64,7 +64,7 @@ func (tuple *Aggregatetuple) SetFromInput(db *LedgerDB, inp inputAggregatetuple)
 func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) error {
 	var parentStatuses []string
 	inModelKeys := tuple.InModelKeys
-	permissions, err := NewPermissions(db, OpenPermissions)
+	permissions, err := NewPermissions(db, inputPermissions{})
 	if err != nil {
 		return errors.BadRequest(err, "could not generate open permissions")
 	}
@@ -82,7 +82,6 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 		case CompositeTraintupleType:
 			tuple, err := db.GetCompositeTraintuple(parentTraintupleKey)
 			if err == nil {
-				// if the parent is composite, always take the "trunk" out-model
 				parentPermissions = tuple.OutTrunkModel.Permissions
 				parentStatuses = append(parentStatuses, tuple.Status)
 			}
@@ -107,7 +106,7 @@ func (tuple *Aggregatetuple) SetFromParents(db *LedgerDB, inModels []string) err
 		}
 
 		inModelKeys = append(inModelKeys, parentTraintupleKey)
-		permissions = MergePermissions(permissions, parentPermissions)
+		permissions = UnionPermissions(permissions, parentPermissions)
 	}
 	tuple.Status = determineStatusFromInModels(parentStatuses)
 	tuple.InModelKeys = inModelKeys

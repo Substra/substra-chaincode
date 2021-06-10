@@ -119,6 +119,39 @@ func mergePermissions(x, y Permission) Permission {
 	return priv
 }
 
+// UnionPermissions returns the union between two sets of permissions
+func UnionPermissions(x, y Permissions) Permissions {
+	perm := Permissions{}
+	perm.Process = unionPermissions(x.Process, y.Process)
+	perm.Download = unionPermissions(x.Download, y.Download)
+	return perm
+}
+
+func unionPermissions(x, y Permission) Permission {
+	res := Permission{
+		Public: x.Public || y.Public,
+	}
+	if !res.Public {
+		res.AuthorizedIDs = x.getNodesUnion(y)
+	}
+	return res
+}
+
+func (priv Permission) getNodesUnion(p Permission) []string {
+	authorizedIds := map[string]bool{}
+	for _, i := range priv.AuthorizedIDs {
+		authorizedIds[i] = true
+	}
+	for _, i := range p.AuthorizedIDs {
+		authorizedIds[i] = true
+	}
+	res := make([]string, 0, len(authorizedIds))
+	for k := range authorizedIds {
+		res = append(res, k)
+	}
+	return res
+}
+
 func (priv Permission) getNodesIntersection(p Permission) []string {
 	nodes := []string{}
 	for _, i := range priv.AuthorizedIDs {
