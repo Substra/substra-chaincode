@@ -1,3 +1,9 @@
+**This repository is inactive.**
+
+The Substra project is under active development as a closed-source solution. There are ongoing strategic discussions regarding the possibility of open-sourcing newer versions, but no conclusion has been reached yet.
+
+---
+
 # substra-chaincode
 
 [![Build and test Go](https://github.com/SubstraFoundation/substra-chaincode/workflows/Build%20and%20test%20Go/badge.svg)](https://github.com/SubstraFoundation/substra-chaincode/actions?query=workflow%3A%22Build+and+test+Go%22)
