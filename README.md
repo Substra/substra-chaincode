@@ -1,6 +1,6 @@
-**This repository is inactive.**
+**This repository is deprecated.**
 
-The Substra project is under active development as a closed-source solution. There are ongoing strategic discussions regarding the possibility of open-sourcing newer versions, but no conclusion has been reached yet.
+The chaincode component is now part of [substra/orchestrator](https://github.com/Substra/orchestrator).
 
 ---
 
